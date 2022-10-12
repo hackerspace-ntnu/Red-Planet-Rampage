@@ -23,39 +23,41 @@ public class InputManager : MonoBehaviour
     /// </summary>
     public Vector2 moveInput { get; private set; } = Vector2.zero;
 
-    // Start is called before the first frame update
     void Start()
     {
         playerInput = GetComponent<PlayerInput>();
         AddListeners();
-        AddExtraListeners();
     }
 
     void OnDestroy()
     {
         RemoveListeners();
-        RemoveExtraListeners();
     }
 
     private void AddListeners()
     {
-        playerInput.actions["Select"].performed += onSelect.Invoke;
-        playerInput.actions["Cancel"].performed += onCancel.Invoke;
-        playerInput.actions["Move"].performed += onMovePerformed.Invoke;
-        playerInput.actions["Move"].canceled += onMoveCanceled.Invoke;
+        playerInput.actions["Select"].performed += ctx => onSelect(ctx);
+        playerInput.actions["Cancel"].performed += ctx => onCancel(ctx);
+        playerInput.actions["Move"].performed += ctx => onMovePerformed(ctx);
+        playerInput.actions["Move"].canceled += ctx => onMoveCanceled(ctx);
         // Update moveInput
         onMovePerformed += MoveInputPerformed;
         onMoveCanceled += MoveInputCanceled;
+
+        AddExtraListeners();
     }
 
     private void RemoveListeners()
     {
-        playerInput.actions["Select"].performed -= onSelect.Invoke;
-        playerInput.actions["Cancel"].performed -= onCancel.Invoke;
-        playerInput.actions["Move"].performed -= onMovePerformed.Invoke;
-        playerInput.actions["Move"].canceled -= onMoveCanceled.Invoke;
+        playerInput.actions["Select"].performed -= ctx => onSelect(ctx);
+        playerInput.actions["Cancel"].performed -= ctx => onCancel(ctx);
+        playerInput.actions["Move"].performed -= ctx => onMovePerformed(ctx);
+        playerInput.actions["Move"].canceled -= ctx => onMoveCanceled(ctx);
+        // Update moveInput
         onMovePerformed -= MoveInputPerformed;
         onMoveCanceled -= MoveInputCanceled;
+
+        RemoveExtraListeners();
     }
 
     /// <summary>
@@ -77,6 +79,7 @@ public class InputManager : MonoBehaviour
     private void MoveInputPerformed(InputAction.CallbackContext ctx)
     {
         moveInput = ctx.ReadValue<Vector2>();
+        Debug.Log(moveInput);
     }
 
     private void MoveInputCanceled(InputAction.CallbackContext ctx)
