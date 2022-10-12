@@ -79,7 +79,6 @@ public class InputManager : MonoBehaviour
     private void MoveInputPerformed(InputAction.CallbackContext ctx)
     {
         moveInput = ctx.ReadValue<Vector2>();
-        Debug.Log(moveInput);
     }
 
     private void MoveInputCanceled(InputAction.CallbackContext ctx)
