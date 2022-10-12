@@ -27,9 +27,9 @@ public class FPSInputManager : InputManager
 
     protected override void RemoveExtraListeners()
     {
-        playerInput.actions["Fire"].performed += ctx => onFire(ctx);
-        playerInput.actions["Look"].performed += ctx => onLookPerformed(ctx);
-        playerInput.actions["Look"].canceled += ctx => onLookCanceled(ctx);
+        playerInput.actions["Fire"].performed -= ctx => onFire(ctx);
+        playerInput.actions["Look"].performed -= ctx => onLookPerformed(ctx);
+        playerInput.actions["Look"].canceled -= ctx => onLookCanceled(ctx);
         // Update lookInput
         onLookPerformed -= LookInputPerformed;
         onLookCanceled -= LookInputCanceled;
