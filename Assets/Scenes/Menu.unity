@@ -963,9 +963,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b5c1573441f904429ca01beb1ebfdd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MainMenuWrapper: {fileID: 431723919}
-  CharacterMenuWrapper: {fileID: 1400458522}
-  CharacterView: {fileID: 1805594476}
+  mainMenuWrapper: {fileID: 431723919}
+  characterMenuWrapper: {fileID: 1400458522}
+  characterView: {fileID: 1805594477}
+  playerBackgroundPanel: {fileID: 1203995750185520681, guid: 3efd254c41231484a9cfdfb7bb050b97, type: 3}
 --- !u!1 &729571451
 GameObject:
   m_ObjectHideFlags: 0
@@ -1567,7 +1568,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 621567455fd1c4ceb811cc8a00b6a1a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_NotificationBehavior: 0
+  m_NotificationBehavior: 3
   m_MaxPlayerCount: -1
   m_AllowJoining: 1
   m_JoinBehavior: 1
@@ -1902,11 +1903,11 @@ RectTransform:
   m_Father: {fileID: 1400458523}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 0, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 37.5}
-  m_SizeDelta: {x: 0, y: -75}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_SizeDelta: {x: 800, y: 375}
+  m_Pivot: {x: 0, y: 0.5}
 --- !u!1 &2006170102
 GameObject:
   m_ObjectHideFlags: 0
