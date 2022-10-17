@@ -17,9 +17,9 @@ public class FPSInputManager : InputManager
 
     protected override void AddExtraListeners()
     {
-        playerInput.actions["Fire"].performed += ctx => onFire(ctx);
-        playerInput.actions["Look"].performed += ctx => onLookPerformed(ctx);
-        playerInput.actions["Look"].canceled += ctx => onLookCanceled(ctx);
+        cleanupCalls.Add(FixListeners("Fire", true, onFire));
+        cleanupCalls.Add(FixListeners("Look", true, onFire));
+        cleanupCalls.Add(FixListeners("Look", false, onFire));
         // Update lookInput
         onLookPerformed += LookInputPerformed;
         onLookCanceled += LookInputCanceled;
@@ -27,9 +27,6 @@ public class FPSInputManager : InputManager
 
     protected override void RemoveExtraListeners()
     {
-        playerInput.actions["Fire"].performed -= ctx => onFire(ctx);
-        playerInput.actions["Look"].performed -= ctx => onLookPerformed(ctx);
-        playerInput.actions["Look"].canceled -= ctx => onLookCanceled(ctx);
         // Update lookInput
         onLookPerformed -= LookInputPerformed;
         onLookCanceled -= LookInputCanceled;

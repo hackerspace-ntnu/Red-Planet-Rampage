@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,6 +18,8 @@ public class InputManager : MonoBehaviour
     public InputEvent onMovePerformed;
     public InputEvent onMoveCanceled;
 
+    protected List<Action> cleanupCalls = new List<Action>();
+
     /// <summary>
     /// This vector is set to the current move input.
     /// Use this instead of onMovePerformed/Canceled if you just want access to a direction.
@@ -34,25 +37,36 @@ public class InputManager : MonoBehaviour
         RemoveListeners();
     }
 
+    protected Action FixListeners(string inputAction, bool performed, InputEvent inputEvent)
+    {
+        Action<InputAction.CallbackContext> function = ctx => inputEvent?.Invoke(ctx);
+        if (performed)
+        {
+           playerInput.actions[inputAction].performed += function;
+           return () => playerInput.actions[inputAction].performed -= function;
+        }
+        else
+        {
+            playerInput.actions[inputAction].canceled += function;
+            return () => playerInput.actions[inputAction].canceled -= function;
+        }
+    }
+
     private void AddListeners()
     {
-        playerInput.actions["Select"].performed += ctx => onSelect(ctx);
-        playerInput.actions["Cancel"].performed += ctx => onCancel(ctx);
-        playerInput.actions["Move"].performed += ctx => onMovePerformed(ctx);
-        playerInput.actions["Move"].canceled += ctx => onMoveCanceled(ctx);
+        cleanupCalls.Add(FixListeners("Select", true,  onSelect));
+        cleanupCalls.Add(FixListeners("Cancel", true, onCancel));
+        cleanupCalls.Add(FixListeners("Move", true, onMovePerformed));
+        cleanupCalls.Add(FixListeners("Move", false, onMoveCanceled));
         // Update moveInput
         onMovePerformed += MoveInputPerformed;
         onMoveCanceled += MoveInputCanceled;
-
         AddExtraListeners();
     }
 
     private void RemoveListeners()
     {
-        playerInput.actions["Select"].performed -= ctx => onSelect(ctx);
-        playerInput.actions["Cancel"].performed -= ctx => onCancel(ctx);
-        playerInput.actions["Move"].performed -= ctx => onMovePerformed(ctx);
-        playerInput.actions["Move"].canceled -= ctx => onMoveCanceled(ctx);
+        cleanupCalls.ForEach(callback => callback());
         // Update moveInput
         onMovePerformed -= MoveInputPerformed;
         onMoveCanceled -= MoveInputCanceled;
@@ -85,4 +99,5 @@ public class InputManager : MonoBehaviour
     {
         moveInput = Vector2.zero;
     }
+
 }
