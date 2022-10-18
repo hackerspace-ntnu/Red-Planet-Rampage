@@ -521,11 +521,11 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 600946927}
         m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
-        m_MethodName: ToggleMenu
-        m_Mode: 1
+        m_MethodName: SwitchToMenu
+        m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgument: {fileID: 1400458522}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -688,11 +688,11 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 600946927}
         m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
-        m_MethodName: ToggleMenu
-        m_Mode: 1
+        m_MethodName: SwitchToMenu
+        m_Mode: 2
         m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_ObjectArgument: {fileID: 431723919}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -999,8 +999,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b5c1573441f904429ca01beb1ebfdd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainMenuWrapper: {fileID: 431723919}
-  characterMenuWrapper: {fileID: 1400458522}
+  currentMenu: {fileID: 431723919}
   characterView: {fileID: 1805594477}
   playerBackgroundPanel: {fileID: 1203995750185520681, guid: 3efd254c41231484a9cfdfb7bb050b97, type: 3}
 --- !u!1 &729571451
