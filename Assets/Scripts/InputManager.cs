@@ -37,6 +37,16 @@ public class InputManager : MonoBehaviour
         RemoveListeners();
     }
 
+    /// <summary>
+    /// A helper function for subscribing a "InputEvent" delegate to a specific InputAction from an ActionMap
+    /// 
+    /// The delegate will be invoked by an anonymous internal function whenever specified inputAction is triggered.
+    /// Warning! InputEvent delegate will not be invoked if it has an empty body, so minimum 1 function has to be assigned before this function is called.
+    /// </summary>
+    /// <param name="inputAction">The name of an inputAction you want the delegate to be invoked by</param>
+    /// <param name="performed">Is the InputAction you want to add delegate to invoked when action is performed or canceled?</param>
+    /// <param name="inputEvent">The inputEvent delegate you want to be invoked</param>
+    /// <returns>Function to remove added listener, typically called within OnDestroy</returns>
     protected Action FixListeners(string inputAction, bool performed, InputEvent inputEvent)
     {
         Action<InputAction.CallbackContext> function = ctx => inputEvent?.Invoke(ctx);
@@ -52,15 +62,17 @@ public class InputManager : MonoBehaviour
         }
     }
 
-    private void AddListeners()
+    public void AddListeners()
     {
+        // Update moveInput
+        onMovePerformed += MoveInputPerformed;
+        onMoveCanceled += MoveInputCanceled;
+
         cleanupCalls.Add(FixListeners("Select", true,  onSelect));
         cleanupCalls.Add(FixListeners("Cancel", true, onCancel));
         cleanupCalls.Add(FixListeners("Move", true, onMovePerformed));
         cleanupCalls.Add(FixListeners("Move", false, onMoveCanceled));
-        // Update moveInput
-        onMovePerformed += MoveInputPerformed;
-        onMoveCanceled += MoveInputCanceled;
+
         AddExtraListeners();
     }
 

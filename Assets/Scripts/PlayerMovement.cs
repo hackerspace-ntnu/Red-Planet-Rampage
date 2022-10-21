@@ -13,7 +13,6 @@ enum PlayerState
 
 public class PlayerMovement : MonoBehaviour
 {
-    private PlayerInput playerInput;
     private FPSInputManager fpsInput;
     private Rigidbody body;
     private Collider hitbox;
@@ -38,13 +37,29 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
-        playerInput = FindObjectOfType<PlayerInput>();
-        fpsInput = playerInput.gameObject.GetComponent<FPSInputManager>();
-        fpsInput.onSelect += OnJump;
-        fpsInput.onMoveCanceled += OnMoveCanceled;
-
         body = GetComponent<Rigidbody>();
         hitbox = GetComponent<BoxCollider>();
+    }
+
+    private void OnDestroy()
+    {
+        //Remove listeners
+        if (fpsInput)
+        {
+            fpsInput.onSelect -= OnJump;
+            fpsInput.onMoveCanceled -= OnMoveCanceled;
+        }
+    }
+
+    /// <summary>
+    /// Function for setting a playerInput and adding movement related listeners to it.
+    /// </summary>
+    /// <param name="player"></param>
+    public void SetPlayerInput(FPSInputManager player)
+    {
+        fpsInput = player;
+        fpsInput.onSelect += OnJump;
+        fpsInput.onMoveCanceled += OnMoveCanceled;
     }
 
     void OnJump(InputAction.CallbackContext ctx)
@@ -73,16 +88,9 @@ public class PlayerMovement : MonoBehaviour
         return !Physics.BoxCast(hitbox.bounds.center, 0.5f * Vector3.one, Vector3.down, Quaternion.identity, 0.5f + airThreshold);
     }
 
-    void OnDrawGizmos()
+    private void UpdatePosition(Vector3 input)
     {
-        var extents = new Vector3(1, 1.5f + airThreshold, 1);
-        var center = hitbox.bounds.center + (0.25f + 0.5f * airThreshold) * Vector3.down;
-        Gizmos.DrawWireCube(center, extents);
-    }
-
-    void FixedUpdate()
-    {
-        var input = new Vector3(fpsInput.moveInput.x, 0, fpsInput.moveInput.y) * Time.deltaTime;
+        //TODO: Modify input to addforce with relation to current rotation.
         switch (state)
         {
             case PlayerState.IN_AIR:
@@ -105,5 +113,24 @@ public class PlayerMovement : MonoBehaviour
                     break;
                 }
         }
+    }
+
+    private void UpdateRotation(Vector3 input)
+    {
+        //TODO: Implement rotation 
+    }
+
+    void OnDrawGizmos()
+    {
+        var extents = new Vector3(1, 1.5f + airThreshold, 1);
+        var center = hitbox.bounds.center + (0.25f + 0.5f * airThreshold) * Vector3.down;
+        Gizmos.DrawWireCube(center, extents);
+    }
+
+    void FixedUpdate()
+    {
+        var positionInput = new Vector3(fpsInput.moveInput.x, 0, fpsInput.moveInput.y) * Time.deltaTime;
+        UpdatePosition(positionInput);
+        //UpdateRotation(rotationInput);
     }
 }
