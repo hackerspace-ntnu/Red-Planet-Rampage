@@ -27,6 +27,11 @@ public class PlayerMovement : MonoBehaviour
     private float jumpForce = 50;
 
     [SerializeField]
+    private float jumpTimeout = 0.5f;
+
+    private bool canJump = true;
+
+    [SerializeField]
     private float airThreshold = 0.4f;
 
     [SerializeField]
@@ -62,15 +67,24 @@ public class PlayerMovement : MonoBehaviour
         fpsInput.onMoveCanceled += OnMoveCanceled;
     }
 
-    void OnJump(InputAction.CallbackContext ctx)
+    private void OnJump(InputAction.CallbackContext ctx)
     {
-        if (state == PlayerState.GROUNDED)
+        if (canJump && state == PlayerState.GROUNDED)
         {
             body.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            StartCoroutine(JumpTimeout());
         }
     }
 
-    void OnMoveCanceled(InputAction.CallbackContext ctx)
+    private IEnumerator JumpTimeout()
+    {
+        canJump = false;
+        yield return new WaitForSeconds(jumpTimeout);
+        canJump = true;
+    }
+
+
+    private void OnMoveCanceled(InputAction.CallbackContext ctx)
     {
         Vector2 input = ctx.ReadValue<Vector2>();
         if (state == PlayerState.GROUNDED)
@@ -81,7 +95,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    bool IsInAir()
+    private bool IsInAir()
     {
         // Cast a box to detect (partial) ground. See OnDrawGizmos for what I think is the extent of the box cast.
         // No, this does not work if the cast start at the bottom.
