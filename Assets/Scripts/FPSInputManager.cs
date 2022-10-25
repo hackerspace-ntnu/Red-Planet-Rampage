@@ -22,8 +22,11 @@ public class FPSInputManager : InputManager
         onLookCanceled += LookInputCanceled;
 
         cleanupCalls.Add(FixListeners("Fire", true, onFire));
-        cleanupCalls.Add(FixListeners("Look", true, onFire));
-        cleanupCalls.Add(FixListeners("Look", false, onFire));
+        cleanupCalls.Add(FixListeners("Look", true, onLookPerformed));
+        cleanupCalls.Add(FixListeners("Look", false, onLookCanceled));
+
+        // Imprison mouse
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     protected override void RemoveExtraListeners()
@@ -31,6 +34,9 @@ public class FPSInputManager : InputManager
         // Update lookInput
         onLookPerformed -= LookInputPerformed;
         onLookCanceled -= LookInputCanceled;
+
+        // Free the mouse
+        Cursor.lockState = CursorLockMode.None;
     }
 
     private void LookInputPerformed(InputAction.CallbackContext ctx)
@@ -42,5 +48,10 @@ public class FPSInputManager : InputManager
     private void LookInputCanceled(InputAction.CallbackContext ctx)
     {
         lookInput = Vector2.zero;
+    }
+
+    void Update()
+    {
+        lookInput = playerInput.actions["Look"].ReadValue<Vector2>();
     }
 }

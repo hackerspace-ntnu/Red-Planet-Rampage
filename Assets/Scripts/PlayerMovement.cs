@@ -18,6 +18,9 @@ public class PlayerMovement : MonoBehaviour
     private Collider hitbox;
 
     [SerializeField]
+    private float lookSpeed = 300;
+
+    [SerializeField]
     private float strafeForce = 20;
 
     [SerializeField]
@@ -104,7 +107,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdatePosition(Vector3 input)
     {
-        //TODO: Modify input to addforce with relation to current rotation.
+        // Modify input to addforce with relation to current rotation.
+        input = transform.forward * input.z + transform.right * input.x;
         switch (state)
         {
             case PlayerState.IN_AIR:
@@ -131,7 +135,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateRotation(Vector3 input)
     {
-        //TODO: Implement rotation 
+        transform.rotation *= Quaternion.Euler(input * lookSpeed);
     }
 
     void OnDrawGizmos()
@@ -144,7 +148,8 @@ public class PlayerMovement : MonoBehaviour
     void FixedUpdate()
     {
         var positionInput = new Vector3(fpsInput.moveInput.x, 0, fpsInput.moveInput.y) * Time.deltaTime;
+        var rotationInput = new Vector3(0, fpsInput.lookInput.x, 0) * Time.deltaTime;
+        UpdateRotation(rotationInput);
         UpdatePosition(positionInput);
-        //UpdateRotation(rotationInput);
     }
 }

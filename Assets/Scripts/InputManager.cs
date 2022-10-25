@@ -52,8 +52,8 @@ public class InputManager : MonoBehaviour
         Action<InputAction.CallbackContext> function = ctx => inputEvent?.Invoke(ctx);
         if (performed)
         {
-           playerInput.actions[inputAction].performed += function;
-           return () => playerInput.actions[inputAction].performed -= function;
+            playerInput.actions[inputAction].performed += function;
+            return () => playerInput.actions[inputAction].performed -= function;
         }
         else
         {
@@ -68,7 +68,7 @@ public class InputManager : MonoBehaviour
         onMovePerformed += MoveInputPerformed;
         onMoveCanceled += MoveInputCanceled;
 
-        cleanupCalls.Add(FixListeners("Select", true,  onSelect));
+        cleanupCalls.Add(FixListeners("Select", true, onSelect));
         cleanupCalls.Add(FixListeners("Cancel", true, onCancel));
         cleanupCalls.Add(FixListeners("Move", true, onMovePerformed));
         cleanupCalls.Add(FixListeners("Move", false, onMoveCanceled));
