@@ -135,11 +135,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateRotation(Vector3 input)
     {
-        transform.rotation *= Quaternion.Euler(input * lookSpeed);
+        transform.rotation *= Quaternion.AngleAxis(input.y * lookSpeed, Vector3.up);
+        // Rotate look separately. Camera is attached to FPSInputManager.
+        fpsInput.transform.rotation *= Quaternion.AngleAxis(input.x * lookSpeed, Vector3.left);
     }
 
     void OnDrawGizmos()
     {
+        if (!hitbox) return;
         var extents = new Vector3(1, 1.5f + airThreshold, 1);
         var center = hitbox.bounds.center + (0.25f + 0.5f * airThreshold) * Vector3.down;
         Gizmos.DrawWireCube(center, extents);
@@ -148,7 +151,7 @@ public class PlayerMovement : MonoBehaviour
     void FixedUpdate()
     {
         var positionInput = new Vector3(fpsInput.moveInput.x, 0, fpsInput.moveInput.y) * Time.deltaTime;
-        var rotationInput = new Vector3(0, fpsInput.lookInput.x, 0) * Time.deltaTime;
+        var rotationInput = new Vector3(fpsInput.lookInput.y, fpsInput.lookInput.x, 0) * Time.smoothDeltaTime;
         UpdateRotation(rotationInput);
         UpdatePosition(positionInput);
     }

@@ -9,6 +9,8 @@ public class FPSInputManager : InputManager
     public InputEvent onLookPerformed;
     public InputEvent onLookCanceled;
 
+    private bool isMouseAndKeyboard = false;
+
     /// <summary>
     /// This vector is set to the current look input.
     /// Use this instead of onLookPerformed/Canceled if you just want access to a direction.
@@ -26,7 +28,11 @@ public class FPSInputManager : InputManager
         cleanupCalls.Add(FixListeners("Look", false, onLookCanceled));
 
         // Imprison mouse
-        Cursor.lockState = CursorLockMode.Locked;
+        if (playerInput.currentControlScheme == "MouseAndKeyboard")
+        {
+            isMouseAndKeyboard = true;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
     }
 
     protected override void RemoveExtraListeners()
@@ -36,13 +42,23 @@ public class FPSInputManager : InputManager
         onLookCanceled -= LookInputCanceled;
 
         // Free the mouse
-        Cursor.lockState = CursorLockMode.None;
+        if (isMouseAndKeyboard)
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
     }
 
     private void LookInputPerformed(InputAction.CallbackContext ctx)
     {
-        Debug.Log("Look performed");
-        lookInput = ctx.ReadValue<Vector2>();
+        if (isMouseAndKeyboard)
+        {
+            print(ctx.ReadValue<Vector2>());
+            lookInput = ctx.ReadValue<Vector2>();
+        }
+        else
+        {
+            lookInput = ctx.ReadValue<Vector2>();
+        }
     }
 
     private void LookInputCanceled(InputAction.CallbackContext ctx)

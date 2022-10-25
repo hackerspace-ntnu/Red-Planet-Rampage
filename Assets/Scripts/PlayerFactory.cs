@@ -25,14 +25,14 @@ public class PlayerFactory : MonoBehaviour
 
     private void InstantiatePlayer(PlayerInput playerInput)
     {
-        //Spawn player at spawnPoint's position with spawnPoint's rotation
+        // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
-        //Set recieved playerInput (and most importantly it's camera) at player's position with player's rotation
+        // Set recieved playerInput (and most importantly it's camera) at player's position with player's rotation
         playerInput.transform.position = player.transform.position;
         playerInput.transform.rotation = player.transform.rotation;
-        //Make playerInput child of player it's attached to
+        // Make playerInput child of player it's attached to
         playerInput.transform.parent = player.transform;
-        //Update player's movement script with which playerInput it should attach listeners to
+        // Update player's movement script with which playerInput it should attach listeners to
         player.GetComponent<PlayerMovement>().SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
     }
 }
