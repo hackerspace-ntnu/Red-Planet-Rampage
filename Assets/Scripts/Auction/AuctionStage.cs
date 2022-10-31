@@ -6,8 +6,10 @@ using System.Linq;
 [CreateAssetMenu(menuName = "Auction/Stage/Scripted")]
 public class AuctionStage : ScriptableObject
 {
-    [SerializeField] protected float stageDuration = 15;
-    [SerializeField] protected Item[] items;
+    [SerializeField] 
+    protected float stageDuration = 15;
+    [SerializeField] 
+    protected Item[] items;
 
     public virtual bool Promote(out BiddingRound round)
     {
@@ -24,9 +26,11 @@ public class AuctionStage : ScriptableObject
 [CreateAssetMenu(menuName = "Auction/Stage/Randomised")]
 public class RandomisedAuctionStage : AuctionStage
 {
-    [SerializeField] protected int numItems = 5;
+    [SerializeField] 
+    protected int numItems = 5;
 
-    [SerializeField] protected bool withReplacement = true;
+    [SerializeField] 
+    protected bool withReplacement = true;
 
 #if UNITY_EDITOR
     private void OnValidate()
@@ -73,7 +77,8 @@ public class RandomisedAuctionStage : AuctionStage
 public class WeightedRandomisedAuctionStage : RandomisedAuctionStage
 {
     // TODO: the count of rates must mach the count of items - can be solved in onvalidate/in editor script
-    [SerializeField] protected float[] rates;
+    [SerializeField] 
+    protected float[] rates;
     
 
 #if UNITY_EDITOR

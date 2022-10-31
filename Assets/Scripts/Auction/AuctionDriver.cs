@@ -5,14 +5,17 @@ using System.Linq;
 
 public class AuctionDriver : MonoBehaviour
 {
-    [SerializeField] private int numberOfItems;
-    [SerializeField] private AuctionSequence sequence;
+    [SerializeField] 
+    private int numberOfItems;
+    [SerializeField] 
+    private AuctionSequence sequence;
     private IEnumerator<BiddingRound> enumerator;
 
 #if UNITY_EDITOR
     // USING THIS PATTERN TO SHOW PROPERTIES IN EDITOR, UPON BUILD COMPILATION THIS OVERHEAD IS REMOVED
     // DO NOT USE _EDITORONLY_ prepended fields outside of an UNITY_EDITOR block!
-    [SerializeField, Uneditable] private BiddingRound _EDITORONLY_ActiveBiddingRound;
+    [SerializeField, Uneditable] 
+    private BiddingRound _EDITORONLY_ActiveBiddingRound;
     private BiddingRound ActiveBiddingRound
     {
         get
@@ -25,11 +28,13 @@ public class AuctionDriver : MonoBehaviour
     private BiddingRound ActiveBiddingRound => enumerator.Current;
 #endif
 
-    [SerializeField] private PlayerInventory[] playersInAuction;
+    [SerializeField] 
+    private PlayerInventory[] playersInAuction;
     private Dictionary<PlayerInventory, int> tokensInPlay = new Dictionary<PlayerInventory, int>();
 
 
-    [SerializeField] private CoroutineTimer auctionTimer;
+    [SerializeField] 
+    private CoroutineTimer auctionTimer;
     
 #if UNITY_EDITOR
     private void OnValidate()

@@ -3,5 +3,6 @@
 [CreateAssetMenu(menuName = "Auction/Item")]
 public class Item : ScriptableObject
 {
-    [SerializeField] private string displayName;
+    [SerializeField]
+    private string displayName;
 }

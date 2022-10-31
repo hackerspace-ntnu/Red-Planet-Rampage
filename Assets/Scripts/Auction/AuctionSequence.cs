@@ -6,7 +6,8 @@ using System.Linq;
 [System.Serializable]
 public class AuctionSequence : IEnumerable<BiddingRound>
 {
-    [SerializeField] private AuctionStage[] stages;
+    [SerializeField]
+    private AuctionStage[] stages;
     private static IEnumerable<BiddingRound> BiddingRounds(AuctionStage[] stages)
     {
         for (int i = 0; i < stages.Length; i++)
