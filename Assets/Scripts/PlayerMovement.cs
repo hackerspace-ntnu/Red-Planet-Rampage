@@ -18,7 +18,7 @@ public class PlayerMovement : MonoBehaviour
     private Collider hitbox;
 
     [SerializeField]
-    private float lookSpeed = 300;
+    private float lookSpeed = 30;
 
     [SerializeField]
     private float strafeForce = 20;
@@ -42,6 +42,8 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField, ReadOnly]
     private PlayerState state = PlayerState.GROUNDED;
+
+    private Vector2 aimAngle = Vector2.zero;
 
     void Start()
     {
@@ -133,11 +135,16 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void UpdateRotation(Vector3 input)
+    private void UpdateRotation()
     {
-        transform.rotation *= Quaternion.AngleAxis(input.y * lookSpeed, Vector3.up);
+        aimAngle += fpsInput.lookInput * lookSpeed * Time.deltaTime;
+        // Constrain aiming angle vertically and wrap horizontally.
+        aimAngle.y = Mathf.Clamp(aimAngle.y, -Mathf.PI / 2, Mathf.PI / 2);
+        aimAngle.x = (aimAngle.x + Mathf.PI) % (2 * Mathf.PI) - Mathf.PI;
+        // Rotate rigidbody.
+        body.MoveRotation(Quaternion.AngleAxis(aimAngle.x * Mathf.Rad2Deg, Vector3.up));
         // Rotate look separately. Camera is attached to FPSInputManager.
-        fpsInput.transform.rotation *= Quaternion.AngleAxis(input.x * lookSpeed, Vector3.left);
+        fpsInput.transform.localRotation = Quaternion.AngleAxis(aimAngle.y * Mathf.Rad2Deg, Vector3.left);
     }
 
     void OnDrawGizmos()
@@ -150,9 +157,12 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        var positionInput = new Vector3(fpsInput.moveInput.x, 0, fpsInput.moveInput.y) * Time.deltaTime;
-        var rotationInput = new Vector3(fpsInput.lookInput.y, fpsInput.lookInput.x, 0) * Time.smoothDeltaTime;
-        UpdateRotation(rotationInput);
-        UpdatePosition(positionInput);
+        var positionInput = new Vector3(fpsInput.moveInput.x, 0, fpsInput.moveInput.y);
+        UpdatePosition(positionInput * Time.deltaTime);
+    }
+
+    void Update()
+    {
+        UpdateRotation();
     }
 }

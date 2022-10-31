@@ -6,9 +6,13 @@ using UnityEngine.InputSystem;
 public class FPSInputManager : InputManager
 {
     public InputEvent onFire;
-    public InputEvent onLookPerformed;
-    public InputEvent onLookCanceled;
+    private InputEvent onLookPerformed;
+    private InputEvent onLookCanceled;
 
+    [SerializeField]
+    private float mouseLookScale = 0.0001f;
+
+    private int tester = 0;
     private bool isMouseAndKeyboard = false;
 
     /// <summary>
@@ -52,8 +56,7 @@ public class FPSInputManager : InputManager
     {
         if (isMouseAndKeyboard)
         {
-            print(ctx.ReadValue<Vector2>());
-            lookInput = ctx.ReadValue<Vector2>();
+            lookInput = ctx.ReadValue<Vector2>() * mouseLookScale;
         }
         else
         {
@@ -64,10 +67,5 @@ public class FPSInputManager : InputManager
     private void LookInputCanceled(InputAction.CallbackContext ctx)
     {
         lookInput = Vector2.zero;
-    }
-
-    void Update()
-    {
-        lookInput = playerInput.actions["Look"].ReadValue<Vector2>();
     }
 }
