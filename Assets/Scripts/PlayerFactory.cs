@@ -18,7 +18,7 @@ public class PlayerFactory : MonoBehaviour
         playerInputManagerController = PlayerInputManagerController.Singleton;
         TransferExistingInputs();
 
-        //Enable splitscreen
+        // Enable splitscreen
         playerInputManagerController.playerInputManager.DisableJoining();
         playerInputManagerController.playerInputManager.splitScreen = true;
     }
@@ -51,7 +51,7 @@ public class PlayerFactory : MonoBehaviour
         playerInput.transform.rotation = player.transform.rotation;
         // Make playerInput child of player it's attached to
         playerInput.transform.parent = player.transform;
-        //Enable Camera
+        // Enable Camera
         playerInput.GetComponent<Camera>().enabled = true;
         // Update player's movement script with which playerInput it should attach listeners to
         player.GetComponent<PlayerMovement>().SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
