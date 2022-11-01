@@ -21,6 +21,9 @@ public class PlayerMovement : MonoBehaviour
     private float lookSpeed = 3;
 
     [SerializeField]
+    private float maxVelocity = 10;
+
+    [SerializeField]
     private float strafeForce = 20;
 
     [SerializeField]
@@ -48,6 +51,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         body = GetComponent<Rigidbody>();
+        body.maxLinearVelocity = maxVelocity;
         hitbox = GetComponent<BoxCollider>();
     }
 
