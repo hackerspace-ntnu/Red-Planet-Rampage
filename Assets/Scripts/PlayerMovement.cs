@@ -18,7 +18,7 @@ public class PlayerMovement : MonoBehaviour
     private Collider hitbox;
 
     [SerializeField]
-    private float lookSpeed = 30;
+    private float lookSpeed = 3;
 
     [SerializeField]
     private float strafeForce = 20;

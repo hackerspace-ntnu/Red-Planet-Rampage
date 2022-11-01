@@ -10,7 +10,7 @@ public class FPSInputManager : InputManager
     private InputEvent onLookCanceled;
 
     [SerializeField]
-    private float mouseLookScale = 0.0001f;
+    private float mouseLookScale = 0.1f;
 
     private bool isMouseAndKeyboard = false;
 
