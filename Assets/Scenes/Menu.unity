@@ -380,7 +380,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 400584810}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 600946927}
+        m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
+        m_MethodName: ChangeScene
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: DemoArena
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &400584810
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1002,6 +1014,7 @@ MonoBehaviour:
   currentMenu: {fileID: 431723919}
   characterView: {fileID: 1805594477}
   playerBackgroundPanel: {fileID: 1203995750185520681, guid: 3efd254c41231484a9cfdfb7bb050b97, type: 3}
+  playerBackgroundPanelAppearTime: 0.25
 --- !u!1 &729571451
 GameObject:
   m_ObjectHideFlags: 0
@@ -1584,6 +1597,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1374044552}
   - component: {fileID: 1374044551}
+  - component: {fileID: 1374044553}
   m_Layer: 0
   m_Name: InputManager
   m_TagString: Untagged
@@ -1604,7 +1618,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_NotificationBehavior: 3
-  m_MaxPlayerCount: -1
+  m_MaxPlayerCount: 4
   m_AllowJoining: 1
   m_JoinBehavior: 1
   m_PlayerJoinedEvent:
@@ -1625,7 +1639,7 @@ MonoBehaviour:
       m_SingletonActionBindings: []
       m_Flags: 0
     m_Reference: {fileID: -1823476073958025427, guid: 243a37e9744e079e7a1be1b16e3abd19, type: 3}
-  m_PlayerPrefab: {fileID: 7784897701855831270, guid: 5a312b85db95630b69c32c22e768efd7, type: 3}
+  m_PlayerPrefab: {fileID: 3554710591539111231, guid: 467c63d586d33bf6597d0c8a709d2472, type: 3}
   m_SplitScreen: 0
   m_MaintainAspectRatioInSplitScreen: 0
   m_FixedNumberOfSplitScreens: -1
@@ -1650,6 +1664,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1374044553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1374044550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f8b6b6ea2a1c15469fd92c979465645, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerInputs: []
+  playerInputManager: {fileID: 0}
 --- !u!1 &1400458522
 GameObject:
   m_ObjectHideFlags: 0

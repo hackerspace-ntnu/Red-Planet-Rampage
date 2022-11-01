@@ -11,11 +11,10 @@ GameObject:
   - component: {fileID: 71015680234268071}
   - component: {fileID: 71015680234268070}
   - component: {fileID: 71015680234268065}
-  - component: {fileID: 71015680234268090}
+  - component: {fileID: 865509316470258782}
   - component: {fileID: 71015680234268068}
   - component: {fileID: 71015680234268069}
-  - component: {fileID: 6025608770767284315}
-  - component: {fileID: 777033672295938663}
+  - component: {fileID: 9672907109803670}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -88,7 +87,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &71015680234268090
+--- !u!65 &865509316470258782
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -115,7 +114,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
-  m_Constraints: 80
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!114 &71015680234268069
 MonoBehaviour:
@@ -129,50 +128,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe68c66043cf4fa30b1b60bfdcd38608, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lookSpeed: 3
+  maxVelocity: 10
   strafeForce: 20
   inAirStrafeForce: 10
   jumpForce: 50
+  jumpTimeout: 0.5
   airThreshold: 0.4
   dampening: 0.04
---- !u!114 &6025608770767284315
-MonoBehaviour:
+  state: 1
+--- !u!65 &9672907109803670
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 71015680234268067}
+  m_Material: {fileID: 13400000, guid: 4b984b83179f264bd9f5d2fb75bd1384, type: 2}
+  m_IsTrigger: 0
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Actions: {fileID: -944628639613478452, guid: 243a37e9744e079e7a1be1b16e3abd19, type: 3}
-  m_NotificationBehavior: 0
-  m_UIInputModule: {fileID: 0}
-  m_DeviceLostEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_DeviceRegainedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ControlsChangedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ActionEvents: []
-  m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
-  m_DefaultActionMap: FPS
-  m_SplitScreenIndex: -1
-  m_Camera: {fileID: 0}
---- !u!114 &777033672295938663
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 71015680234268067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c28a0a1103c252184847274abafe7268, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  serializedVersion: 2
+  m_Size: {x: 1.01, y: 2.01, z: 1.1}
+  m_Center: {x: 0, y: 0.02, z: 0}

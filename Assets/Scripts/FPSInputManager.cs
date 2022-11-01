@@ -6,8 +6,13 @@ using UnityEngine.InputSystem;
 public class FPSInputManager : InputManager
 {
     public InputEvent onFire;
-    public InputEvent onLookPerformed;
-    public InputEvent onLookCanceled;
+    private InputEvent onLookPerformed;
+    private InputEvent onLookCanceled;
+
+    [SerializeField]
+    private float mouseLookScale = 0.1f;
+
+    private bool isMouseAndKeyboard = false;
 
     /// <summary>
     /// This vector is set to the current look input.
@@ -17,12 +22,20 @@ public class FPSInputManager : InputManager
 
     protected override void AddExtraListeners()
     {
-        cleanupCalls.Add(FixListeners("Fire", true, onFire));
-        cleanupCalls.Add(FixListeners("Look", true, onFire));
-        cleanupCalls.Add(FixListeners("Look", false, onFire));
         // Update lookInput
         onLookPerformed += LookInputPerformed;
         onLookCanceled += LookInputCanceled;
+
+        cleanupCalls.Add(FixListeners("Fire", true, onFire));
+        cleanupCalls.Add(FixListeners("Look", true, onLookPerformed));
+        cleanupCalls.Add(FixListeners("Look", false, onLookCanceled));
+
+        // Imprison mouse
+        if (playerInput.currentControlScheme == "MouseAndKeyboard")
+        {
+            isMouseAndKeyboard = true;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
     }
 
     protected override void RemoveExtraListeners()
@@ -30,11 +43,24 @@ public class FPSInputManager : InputManager
         // Update lookInput
         onLookPerformed -= LookInputPerformed;
         onLookCanceled -= LookInputCanceled;
+
+        // Free the mouse
+        if (isMouseAndKeyboard)
+        {
+            Cursor.lockState = CursorLockMode.None;
+        }
     }
 
     private void LookInputPerformed(InputAction.CallbackContext ctx)
     {
-        lookInput = ctx.ReadValue<Vector2>();
+        if (isMouseAndKeyboard)
+        {
+            lookInput = ctx.ReadValue<Vector2>() * mouseLookScale;
+        }
+        else
+        {
+            lookInput = ctx.ReadValue<Vector2>();
+        }
     }
 
     private void LookInputCanceled(InputAction.CallbackContext ctx)
