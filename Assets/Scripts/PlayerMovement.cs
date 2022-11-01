@@ -91,7 +91,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnMoveCanceled(InputAction.CallbackContext ctx)
     {
-        Vector2 input = ctx.ReadValue<Vector2>();
         if (state == PlayerState.GROUNDED)
         {
             // Rapidly decelerate if movement stops when grounded.

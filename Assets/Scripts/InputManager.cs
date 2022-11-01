@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
-    protected PlayerInput playerInput;
+    public PlayerInput playerInput;
 
     public delegate void InputEvent(InputAction.CallbackContext ctx);
 
@@ -30,6 +30,7 @@ public class InputManager : MonoBehaviour
     {
         playerInput = GetComponent<PlayerInput>();
         AddListeners();
+        DontDestroyOnLoad(gameObject);
     }
 
     void OnDestroy()
@@ -76,7 +77,7 @@ public class InputManager : MonoBehaviour
         AddExtraListeners();
     }
 
-    private void RemoveListeners()
+    public void RemoveListeners()
     {
         cleanupCalls.ForEach(callback => callback());
         // Update moveInput

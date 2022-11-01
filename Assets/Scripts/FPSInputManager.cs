@@ -12,7 +12,6 @@ public class FPSInputManager : InputManager
     [SerializeField]
     private float mouseLookScale = 0.0001f;
 
-    private int tester = 0;
     private bool isMouseAndKeyboard = false;
 
     /// <summary>
