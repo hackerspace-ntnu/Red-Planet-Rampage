@@ -64,6 +64,7 @@ public class MatchController : MonoBehaviour
         });
 
         // TODO do something else funky wunky
+        onRoundEnd += () => Debug.Log("End of round " + rounds.Count());
         StartNextRound();
     }
 
@@ -76,7 +77,28 @@ public class MatchController : MonoBehaviour
     public void EndActiveRound()
     {
         onRoundEnd?.Invoke();
-        print("aaaaand the winner issssss" + rounds.Last().winner);
-        SceneManager.LoadScene("Menu");
+
+        // TODO assign chips
+
+        CheckWinCondition();
+    }
+
+    private void CheckWinCondition()
+    {
+        var lastWinner = rounds.Last().winner;
+        var wins = rounds.Where(round => round.winner == lastWinner).Count();
+        Debug.Log("Current winner (" + lastWinner.ToString() + ") has " + wins + " wins.");
+        if (wins >= 3)
+        {
+            // We have a winner!
+            // TODO go to announcer thingy
+            Debug.Log("Aaaaand the winner iiiiiiiis " + lastWinner.ToString());
+            SceneManager.LoadScene("Menu");
+        }
+        else
+        {
+            // TODO Go to bidding round first!
+            StartNextRound();
+        }
     }
 }

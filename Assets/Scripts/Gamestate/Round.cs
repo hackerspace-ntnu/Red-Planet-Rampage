@@ -7,23 +7,27 @@ public class Round
 {
     public PlayerStateController winner;
     public Dictionary<PlayerStateController, List<PlayerStateController>> kills = new Dictionary<PlayerStateController, List<PlayerStateController>>();
+    public List<PlayerStateController> players = new List<PlayerStateController>();
     public List<PlayerStateController> livingPlayers = new List<PlayerStateController>();
 
     public Round(List<PlayerStateController> players)
     {
-        livingPlayers = players;
+        this.players = players;
+        livingPlayers = players.ToList();
         foreach (var player in players)
         {
             player.onDeath += OnDeath;
         }
+        MatchController.Singleton.onRoundEnd += OnRoundEnd;
     }
 
     public void OnRoundEnd()
     {
-        foreach (var player in livingPlayers)
+        foreach (var player in players)
         {
             player.onDeath -= OnDeath;
         }
+        MatchController.Singleton.onRoundEnd -= OnRoundEnd;
     }
 
     //TODO: Create struct for damagecontext with info about who was killed as parameter instead
@@ -43,10 +47,10 @@ public class Round
 
         livingPlayers.Remove(victim);
 
-        CheckWinState(killer);
+        CheckWinCondition(killer);
     }
 
-    private void CheckWinState(PlayerStateController lastKiller)
+    private void CheckWinCondition(PlayerStateController lastKiller)
     {
         if (livingPlayers.Count < 2)
         {

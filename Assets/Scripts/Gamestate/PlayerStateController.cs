@@ -22,4 +22,9 @@ public class PlayerStateController : MonoBehaviour
         // TODO Don't commit sudoku.
         fpsInput.onFire += (ctx) => onDeath?.Invoke(this, this);
     }
+
+    new public string ToString()
+    {
+        return "Player " + fpsInput.playerInput.playerIndex;
+    }
 }
