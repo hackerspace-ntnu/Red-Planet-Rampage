@@ -55,5 +55,6 @@ public class PlayerFactory : MonoBehaviour
         playerInput.GetComponent<Camera>().enabled = true;
         // Update player's movement script with which playerInput it should attach listeners to
         player.GetComponent<PlayerMovement>().SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
+        player.GetComponent<PlayerStateController>().SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
     }
 }
