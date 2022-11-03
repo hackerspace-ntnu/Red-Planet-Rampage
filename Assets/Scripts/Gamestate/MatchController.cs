@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Wrapper struct for tying refference to Player class with the in-game player.
@@ -93,6 +94,19 @@ public class MatchController : MonoBehaviour
             // We have a winner!
             // TODO go to announcer thingy
             Debug.Log("Aaaaand the winner iiiiiiiis " + lastWinner.ToString());
+
+            // Update playerInputs in preperation for Menu scene
+            PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
+            foreach (PlayerInput inputs in PlayerInputManagerController.Singleton.playerInputs)
+            {
+                // Update listeners to new map
+                inputs.GetComponent<InputManager>().RemoveListeners();
+                inputs.GetComponent<InputManager>().AddListeners();
+                // Free the playerInputs from their mortail coils (Player prefab)
+                inputs.transform.parent = null;
+                DontDestroyOnLoad(inputs);
+            }
+
             SceneManager.LoadScene("Menu");
         }
         else

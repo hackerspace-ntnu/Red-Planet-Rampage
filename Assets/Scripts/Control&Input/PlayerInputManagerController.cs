@@ -35,7 +35,7 @@ public class PlayerInputManagerController : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    private void OnDestroy()
+    public void RemoveListeners()
     {
         playerInputManager.onPlayerJoined -= OnPlayerJoined;
     }
