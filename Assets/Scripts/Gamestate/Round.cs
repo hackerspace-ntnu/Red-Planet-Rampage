@@ -21,6 +21,18 @@ public class Round
         MatchController.Singleton.onRoundEnd += OnRoundEnd;
     }
 
+    public int KillCount(PlayerStateController player)
+    {
+        if (kills.TryGetValue(player, out var playerKills))
+            return playerKills.Count;
+        return 0;
+    }
+
+    public bool IsWinner(PlayerStateController player)
+    {
+        return player == winner;
+    }
+
     public void OnRoundEnd()
     {
         foreach (var player in players)

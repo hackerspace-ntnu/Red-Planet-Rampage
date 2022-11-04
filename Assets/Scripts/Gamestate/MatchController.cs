@@ -10,18 +10,16 @@ using UnityEngine.InputSystem;
 /// </summary>
 public struct MatchPlayer
 {
-    public MatchPlayer(Player player, PlayerStateController playerStateController)
+    public MatchPlayer(Player player, PlayerStateController playerStateController, int startAmount)
     {
         this.player = player;
+        playerStateController.chips = startAmount;
         this.playerStateController = playerStateController;
-        chips = 0;
     }
     // Reference to player identity class
     public Player player;
     // Reference to in-match player
     public PlayerStateController playerStateController;
-    // Currency
-    public int chips;
 }
 
 public class MatchController : MonoBehaviour
@@ -34,6 +32,16 @@ public class MatchController : MonoBehaviour
     public MatchEvent onRoundStart;
     public MatchEvent onBiddingStart;
     public MatchEvent onBiddingEnd;
+
+    [Header("Chip rewards")]
+    [SerializeField]
+    private int startAmount = 0;
+    [SerializeField]
+    private int rewardWin = 2;
+    [SerializeField]
+    private int rewardKill = 1;
+    [SerializeField]
+    private int rewardBase = 1;
 
     private List<MatchPlayer> matchPlayers = new List<MatchPlayer>();
     private List<Round> rounds = new List<Round>();
@@ -59,9 +67,9 @@ public class MatchController : MonoBehaviour
 
         PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput =>
         {
-            var player = playerInput.gameObject.GetComponent<Player>();
-            var playerStateController = playerInput.gameObject.transform.parent.GetComponent<PlayerStateController>();
-            matchPlayers.Add(new MatchPlayer(player, playerStateController));
+            var player = playerInput.GetComponent<Player>();
+            var playerStateController = playerInput.transform.parent.GetComponent<PlayerStateController>();
+            matchPlayers.Add(new MatchPlayer(player, playerStateController, startAmount));
         });
 
         // TODO do something else funky wunky
@@ -79,9 +87,25 @@ public class MatchController : MonoBehaviour
     {
         onRoundEnd?.Invoke();
 
-        // TODO assign chips
+        AssignRewards();
 
         CheckWinCondition();
+    }
+
+    private void AssignRewards()
+    {
+        var lastRound = rounds.Last();
+        foreach (MatchPlayer player in matchPlayers)
+        {
+            // Base reward and kill bonus
+            var reward = rewardBase + lastRound.KillCount(player.playerStateController) * rewardKill;
+            // Win bonus
+            if (lastRound.IsWinner(player.playerStateController))
+                reward += rewardWin;
+
+            player.playerStateController.chips += reward;
+            Debug.Log(player.playerStateController.ToString() + " was awarded " + reward + " chips.");
+        }
     }
 
     private void CheckWinCondition()
@@ -92,7 +116,7 @@ public class MatchController : MonoBehaviour
         if (wins >= 3)
         {
             // We have a winner!
-            // TODO go to announcer thingy
+            // TODO Go to victory scene
             Debug.Log("Aaaaand the winner iiiiiiiis " + lastWinner.ToString());
 
             // Update playerInputs in preperation for Menu scene

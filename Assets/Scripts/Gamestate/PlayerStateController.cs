@@ -10,6 +10,8 @@ public class PlayerStateController : MonoBehaviour
 
     public HitEvent onDeath;
 
+    public int chips;
+
     private FPSInputManager fpsInput;
 
     /// <summary>
