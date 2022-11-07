@@ -1,43 +1,93 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "GunBaseStats", menuName = "ScriptableObjects/GunBaseStats", order = 1)]
-public class GunBaseStats: ScriptableObject
+[CreateAssetMenu(fileName = "GunStats", menuName = "ScriptableObjects/GunStats", order = 1)]
+public class GunStats: ScriptableObject
 {
+
+    // -- IMPORTANT INFO --
+
+    // It is fine to add new properties to this file, but be carefull when REMOVING them
+    // If you remove, for example, magazineSize from these properties and then save, all object data of magazine size 
+    // will be removed in every instance of the sriptable object
     public enum FireModes
     {
         semiAuto,
         burst,
         fullAuto
     }
-    // Bullets per second
-    public float firerate = 5f;
-    
-    // Time to reload gun
-    public float reloadTime = 3;
+    // Projectiles per second
+    [SerializeField]
+    private ModifyableFloat firerate = new ModifyableFloat(5f);
+    public ModifyableFloat Firerate { get => firerate;}
 
-    //How many bullets in a clip
+    // Time to reload gun
+    [SerializeField]
+    private ModifyableFloat reloadTime = new ModifyableFloat(3f);
+    public ModifyableFloat ReloadTime { get => reloadTime; }
+
+    
+    //How many projectiles in a clip
     public int magazineSize = 20;
 
-    // Damage of each bullet
-    public float bulletDamage = 10f;
+    // Damage of each projectile
+    [SerializeField]
+    private ModifyableFloat projectileDamage = new ModifyableFloat(10f);
+    public ModifyableFloat ProjectileDamage { get => projectileDamage; }
 
-    // Bullet initial velocity in in-game units
-    public float bulletSpeed = 10f;
 
-    //How much the bullet is affected by gravity
-    public float bulletGravityModifier = 1f;
+    // Projectile initial velocity in in-game units
+    [SerializeField]
+    private ModifyableFloat projectileSpeed = new ModifyableFloat(1f);
+    public ModifyableFloat ProjectileSpeed { get => projectileSpeed; }
+
+
+    //How much the projectile is affected by gravity
+    [SerializeField]
+    private ModifyableFloat projectileGravityModifier = new ModifyableFloat(1f);
+    public ModifyableFloat ProjectileGravityModifier { get => projectileGravityModifier; }
+
 
     // Recoil in radian units
-    public float recoil = 0f;
+    [SerializeField]
+    private ModifyableFloat recoil = new ModifyableFloat(0f);
+    public ModifyableFloat Recoil { get => recoil; }
 
-    // Spread of bullets in radian units
-    public float bulletSpread = 0f;
 
-    // Number of bullets fired per input
+    // Spread of projectiles in radian units
+    [SerializeField]
+    private ModifyableFloat projectileSpread = new ModifyableFloat(0f);
+    public ModifyableFloat ProjectileSpread { get => projectileSpread; }
+
+
+    // Number of projectiles fired per input
     public FireModes fireMode = FireModes.semiAuto;
 
-    //Number of bullets fired in a single burst if firemode is BurstMode
+    //Number of projectiles fired in a single burst if firemode is BurstMode
     public int burstNum = 1;
 
-    public float projectileSize = 0;
+
+    // How large the projectile hitbox is, for 0 it will be a ray
+    [SerializeField]
+    private ModifyableFloat projectileSize = new ModifyableFloat(0f);
+    public ModifyableFloat ProjectileSize { get => projectileSize; }
+
+    
+    // How to scale the projectile model 
+    [SerializeField]
+    private ModifyableFloat projectileScale = new ModifyableFloat(1f);
+    public ModifyableFloat ProjectileScale { get => projectileScale; }
+
+
+    // How much extra damage a crit does, the standard is a crid does double damage
+    [SerializeField]
+    private ModifyableFloat criticalMultiplier = new ModifyableFloat(2f);
+    public ModifyableFloat CriticalMultiplier { get => criticalMultiplier; }
+
+
+    // TODO: make modifyableInteger
+    // Used for shotguns
+    [SerializeField]
+    private ModifyableFloat projectilesPerShot = new ModifyableFloat(1f);
+    public ModifyableFloat ProjectilesPerShot { get => projectilesPerShot; }
+
 }

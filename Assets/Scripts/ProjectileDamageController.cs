@@ -5,18 +5,18 @@ using UnityEngine;
 public class ProjectileDamageController : MonoBehaviour
 {
     private HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
-    void Start()
+    private void Start()
     {
-        GetComponent<ProjectileController>().OnColliderHit += DamageHitbox;
+        GetComponentInParent<ProjectileController>().OnHitboxCollision += DamageHitbox;
     }
 
-    private void DamageHitbox(ProjectileController projectile, Collider collider, GunBaseStats stats)
+    private void DamageHitbox(HitboxController controller, ref ProjectileState state, GunStats stats)
     {
-        var controller = collider.GetComponent<HitboxController>();
+        
         if( controller.health == null || !hitHealthControllers.Contains(controller.health))
         {
             hitHealthControllers.Add(controller.health);
-            collider.GetComponent<HitboxController>()?.damageCollider(stats, (int)stats.bulletDamage);
+            controller.damageCollider(stats, (int)stats.ProjectileDamage.value());
         }
     }
 }

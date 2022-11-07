@@ -1,111 +1,134 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
-public abstract class FireRateController
+public class GunController : MonoBehaviour
 {
-    public abstract bool shouldFire(bool triggerPressed, bool triggerHeld);
-}
-public class SemiAutoFirerateController: FireRateController
-{
-    private float fireDelay;
-    private float lastFired = 0f;
-
-    public SemiAutoFirerateController(float fireRate)
-    {
-        this.fireDelay = 1/fireRate;
-    }
-    public override bool shouldFire(bool triggerPressed, bool triggerHeld)
-    {
-        if (triggerPressed && lastFired + fireDelay < Time.fixedTime)
-        {
-            lastFired = Time.fixedTime;
-            return true;
-        }
-        return false;
-    }
-}
-public class FullAutoFirerateController : FireRateController
-{
-    private float fireDelay;
-    private float lastFired = 0f;
-
-    public FullAutoFirerateController(float fireRate)
-    {
-        this.fireDelay = 1 / fireRate;
-    }
-    public override bool shouldFire(bool triggerPressed, bool triggerHeld)
-    {
-        if (triggerHeld && lastFired + fireDelay < Time.fixedTime)
-        {
-            lastFired = Time.fixedTime;
-            return true;
-        }
-        return false;
-    }
-}
-public class BurstFirerateController : FireRateController
-{
-    private float fireDelay;
-    private float lastFired = 0f;
-    private int burst;
-
-    private int currentBurstNum = 0;
-    public BurstFirerateController(float fireRate, int burst)
-    {
-        this.fireDelay = 1 / fireRate;
-        this.burst = burst;
-    }
-    public override bool shouldFire(bool triggerPressed, bool triggerHeld)
-    {
-        if ((triggerPressed || (currentBurstNum > 0 && currentBurstNum < this.burst)) && lastFired + fireDelay < Time.fixedTime)
-        {
-            lastFired = Time.fixedTime;
-            currentBurstNum = (currentBurstNum + 1)%burst;
-            return true;
-        }
-        return false;
-    }
-}
-public abstract class GunController : MonoBehaviour
-{
+    // Prefabs of the different parts
     [SerializeField]
-    protected Transform output;
+    private GameObject bodyPrefab;
 
+    [SerializeField]
+    private GameObject barrelPrefab;
+
+    [SerializeField]
+    private GameObject extensionPrefab;
+
+    // Where the gun fires the bullets from
+    // Is automatically set by barrel or extension (if one i available)
+    [HideInInspector]
+    public Transform[] outputs;
+
+    // Keeps track of when gun should be fired
     protected FireRateController fireRateController;
 
-    public GunBaseStats stats;
+    // All the stats of the gun and projectile
+    public GunStats stats{ get; private set; }
+
+    // Inputs
     public bool triggerHeld, triggerPressed;
+
+
+    //Projectile to shoot
+    [HideInInspector]
+    public GameObject projectile { get; private set; }
 
 
     private void Start()
     {
-        if(stats == null){ stats = new GunBaseStats(); }
+        InitializeGun();
+    }
+
+    // Builds the gun from parts
+    public void InitializeGun()
+    {
+        // Destroys gun child before construction
+        for (int i = this.transform.childCount; i > 0; --i)
+            DestroyImmediate(this.transform.GetChild(0).gameObject);
+
+        // Instantiates the different parts
+        var gunBody = Instantiate(bodyPrefab, transform)
+            .GetComponent<GunBody>();
+
+        // Stats is retrieved from gun body
+        // NEVER REFERENCE THE GUNSTAT PREFAB DIRECTLY, BUNBODY AUTOMATICALLY INSTANTIATES IT
+        // Seriously, i have no moral qualms with making your skulls into decorative ornaments
+        stats = gunBody.Stats;
+
+        var gunBarrel = Instantiate(barrelPrefab, gunBody.attachmentSite.position, gunBody.attachmentSite.rotation, transform)
+            .GetComponent<GunBarrel>();
+
+        // Gets the projectile from the barrel
+        // It is stored as an inactive object in the gun, which allows for modifications without changing the prefab
+        projectile = gunBarrel.Projectile;
+        projectile.transform.SetParent(transform);
+        projectile.GetComponent<ProjectileController>().stats = stats;
+
+        if (extensionPrefab != null)
+        {
+            var extension = Instantiate(extensionPrefab, gunBarrel.attachmentPoints[0].position, gunBarrel.attachmentPoints[0].rotation, transform)
+                .GetComponent<GunExtension>();
+            extension.AttachToTransforms(gunBarrel.attachmentPoints);
+            outputs = extension.outputs;
+        }
+        else
+        {
+            outputs = gunBarrel.outPuts;
+        }
+
+        // Sets firemode
 
         switch (stats.fireMode)
         {
-            case GunBaseStats.FireModes.semiAuto:
-                fireRateController = new SemiAutoFirerateController(stats.firerate);
+            case GunStats.FireModes.semiAuto:
+                this.fireRateController = new SemiAutoFirerateController(stats.Firerate);
                 break;
-            case GunBaseStats.FireModes.burst:
-                fireRateController = new BurstFirerateController(stats.firerate, stats.burstNum);
+            case GunStats.FireModes.burst:
+                this.fireRateController = new BurstFirerateController(stats.Firerate, stats.burstNum);
                 break;
-            case GunBaseStats.FireModes.fullAuto:
-                fireRateController = new FullAutoFirerateController(stats.firerate);
+            case GunStats.FireModes.fullAuto:
+                this.fireRateController = new FullAutoFirerateController(stats.Firerate);
                 break;
             default:
+                this.fireRateController = new FullAutoFirerateController(stats.Firerate);
                 break;
         }
 
+        // Runs attach of all modifyers in ascending order
+
+        foreach (var modifyer in GetComponentsInChildren<GunModifyer>().OrderBy(x => x.priority))
+        {
+            modifyer.Attach(this);
+        }
     }
 
     private void FixedUpdate()
     {
         if (fireRateController.shouldFire(triggerPressed, triggerHeld))
         {
-            fireGun();
+            FireGun();
         }
     }
-    protected abstract void fireGun();
+    private void FireGun()
+    {
+        foreach(var output in outputs)
+        {
+            for(int i = 0; i < Mathf.Max((int) stats.ProjectilesPerShot.value(), 1); i++)
+            {
+                // Adds spread
+                Quaternion dir = output.rotation;
+                if(stats.ProjectileSpread > 0)
+                {
+                    Vector2 rand = Random.insideUnitCircle * stats.ProjectileSpread;
+                    dir = dir * Quaternion.Euler(rand.x, rand.y, 0f);
+                }
+                // Makes projectile 
+                // TODO: generalize this so that different methods of "Creating" bullets can be used to save performance
+                Instantiate(projectile, output.position, dir).SetActive(true);
+            }
+        }
+    }
+
 }
 

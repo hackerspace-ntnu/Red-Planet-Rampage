@@ -13,10 +13,10 @@ GameObject:
   - component: {fileID: 8018401301706087704}
   - component: {fileID: 5495101469979637663}
   - component: {fileID: 7304855438440402616}
-  - component: {fileID: 1124533518947843043}
-  - component: {fileID: 5044758323109842608}
+  - component: {fileID: 7069982767751095428}
+  - component: {fileID: 4626309481527381612}
   m_Layer: 0
-  m_Name: Bullet
+  m_Name: Slug
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31,7 +31,7 @@ Transform:
   m_GameObject: {fileID: 6450443625586930805}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.757, y: 0, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.1, z: 0.1}
+  m_LocalScale: {x: 0.01, y: 0.01, z: 0.02}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -49,8 +49,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67e1c2fae3becca4d88288bfa7bb3395, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stats: {fileID: 11400000, guid: ca4fdc9009cc4cd49b424f300ec3481c, type: 2}
-  stopped: 0
+  state:
+    oldPosition: {x: 0, y: 0, z: 0}
+    position: {x: 0, y: 0, z: 0}
+    direction: {x: 0, y: 0, z: 0}
+    speed: 0
+    rotation: {x: 0, y: 0, z: 0, w: 0}
+    gravity: 0
+    collisionActive: 0
+    lastUpdateTime: 0
+  stats: {fileID: 0}
 --- !u!114 &8018401301706087704
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -113,7 +121,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!2083052967 &1124533518947843043
+--- !u!2083052967 &7069982767751095428
 VisualEffect:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -121,7 +129,7 @@ VisualEffect:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6450443625586930805}
   m_Enabled: 1
-  m_Asset: {fileID: 0}
+  m_Asset: {fileID: 8926484042661614526, guid: 4badcdf2c70113345bd48d05cfd9bd92, type: 3}
   m_InitialEventName: OnPlay
   m_InitialEventNameOverriden: 0
   m_StartSeed: 0
@@ -150,7 +158,7 @@ VisualEffect:
       m_Array: []
     m_Bool:
       m_Array: []
---- !u!73398921 &5044758323109842608
+--- !u!73398921 &4626309481527381612
 VFXRenderer:
   serializedVersion: 1
   m_ObjectHideFlags: 0
