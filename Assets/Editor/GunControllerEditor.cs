@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEditor;
 
 [CustomEditor(typeof(GunController))]
-public class GuncControllerEditor : Editor
+public class GunControllerEditor : Editor
 {
     public override void OnInspectorGUI()
     {

@@ -31,7 +31,6 @@ public class GunController : MonoBehaviour
 
 
     //Projectile to shoot
-    [HideInInspector]
     public GameObject projectile { get; private set; }
 
 
