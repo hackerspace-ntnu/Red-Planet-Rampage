@@ -52,7 +52,7 @@ public class GunController : MonoBehaviour
             .GetComponent<GunBody>();
 
         // Stats is retrieved from gun body
-        // NEVER REFERENCE THE GUNSTAT PREFAB DIRECTLY, BUNBODY AUTOMATICALLY INSTANTIATES IT
+        // NEVER REFERENCE THE GUNSTAT PREFAB DIRECTLY, GUNBODY AUTOMATICALLY INSTANTIATES IT
         // Seriously, i have no moral qualms with making your skulls into decorative ornaments
         stats = gunBody.Stats;
 
@@ -97,7 +97,7 @@ public class GunController : MonoBehaviour
 
         // Runs attach of all modifyers in ascending order
 
-        foreach (var modifyer in GetComponentsInChildren<GunModifyer>().OrderBy(x => x.priority))
+        foreach (var modifyer in GetComponentsInChildren<GunModifier>().OrderBy(x => x.priority))
         {
             modifyer.Attach(this);
         }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class ModifyableFloat
+public class ModifiableFloat
 {
     [SerializeField]
     private float baseValue = 1f;
@@ -14,7 +14,7 @@ public class ModifyableFloat
 
     private float exponential = 1f;
 
-    public  ModifyableFloat(float value)
+    public  ModifiableFloat(float value)
     {
         baseValue = value;
     }
@@ -39,7 +39,7 @@ public class ModifyableFloat
         return (baseValue + addition) * multiplier * exponential;
     }
 
-    public static implicit operator float(ModifyableFloat a)
+    public static implicit operator float(ModifiableFloat a)
     {
         return a.value();
     }

@@ -17,13 +17,13 @@ public class GunStats: ScriptableObject
     }
     // Projectiles per second
     [SerializeField]
-    private ModifyableFloat firerate = new ModifyableFloat(5f);
-    public ModifyableFloat Firerate { get => firerate;}
+    private ModifiableFloat firerate = new ModifiableFloat(5f);
+    public ModifiableFloat Firerate { get => firerate;}
 
     // Time to reload gun
     [SerializeField]
-    private ModifyableFloat reloadTime = new ModifyableFloat(3f);
-    public ModifyableFloat ReloadTime { get => reloadTime; }
+    private ModifiableFloat reloadTime = new ModifiableFloat(3f);
+    public ModifiableFloat ReloadTime { get => reloadTime; }
 
     
     //How many projectiles in a clip
@@ -31,32 +31,32 @@ public class GunStats: ScriptableObject
 
     // Damage of each projectile
     [SerializeField]
-    private ModifyableFloat projectileDamage = new ModifyableFloat(10f);
-    public ModifyableFloat ProjectileDamage { get => projectileDamage; }
+    private ModifiableFloat projectileDamage = new ModifiableFloat(10f);
+    public ModifiableFloat ProjectileDamage { get => projectileDamage; }
 
 
     // Projectile initial velocity in in-game units
     [SerializeField]
-    private ModifyableFloat projectileSpeed = new ModifyableFloat(1f);
-    public ModifyableFloat ProjectileSpeed { get => projectileSpeed; }
+    private ModifiableFloat projectileSpeed = new ModifiableFloat(1f);
+    public ModifiableFloat ProjectileSpeed { get => projectileSpeed; }
 
 
     //How much the projectile is affected by gravity
     [SerializeField]
-    private ModifyableFloat projectileGravityModifier = new ModifyableFloat(1f);
-    public ModifyableFloat ProjectileGravityModifier { get => projectileGravityModifier; }
+    private ModifiableFloat projectileGravityModifier = new ModifiableFloat(1f);
+    public ModifiableFloat ProjectileGravityModifier { get => projectileGravityModifier; }
 
 
     // Recoil in radian units
     [SerializeField]
-    private ModifyableFloat recoil = new ModifyableFloat(0f);
-    public ModifyableFloat Recoil { get => recoil; }
+    private ModifiableFloat recoil = new ModifiableFloat(0f);
+    public ModifiableFloat Recoil { get => recoil; }
 
 
     // Spread of projectiles in radian units
     [SerializeField]
-    private ModifyableFloat projectileSpread = new ModifyableFloat(0f);
-    public ModifyableFloat ProjectileSpread { get => projectileSpread; }
+    private ModifiableFloat projectileSpread = new ModifiableFloat(0f);
+    public ModifiableFloat ProjectileSpread { get => projectileSpread; }
 
 
     // Number of projectiles fired per input
@@ -68,26 +68,26 @@ public class GunStats: ScriptableObject
 
     // How large the projectile hitbox is, for 0 it will be a ray
     [SerializeField]
-    private ModifyableFloat projectileSize = new ModifyableFloat(0f);
-    public ModifyableFloat ProjectileSize { get => projectileSize; }
+    private ModifiableFloat projectileSize = new ModifiableFloat(0f);
+    public ModifiableFloat ProjectileSize { get => projectileSize; }
 
     
     // How to scale the projectile model 
     [SerializeField]
-    private ModifyableFloat projectileScale = new ModifyableFloat(1f);
-    public ModifyableFloat ProjectileScale { get => projectileScale; }
+    private ModifiableFloat projectileScale = new ModifiableFloat(1f);
+    public ModifiableFloat ProjectileScale { get => projectileScale; }
 
 
     // How much extra damage a crit does, the standard is a crid does double damage
     [SerializeField]
-    private ModifyableFloat criticalMultiplier = new ModifyableFloat(2f);
-    public ModifyableFloat CriticalMultiplier { get => criticalMultiplier; }
+    private ModifiableFloat criticalMultiplier = new ModifiableFloat(2f);
+    public ModifiableFloat CriticalMultiplier { get => criticalMultiplier; }
 
 
     // TODO: make modifyableInteger
     // Used for shotguns
     [SerializeField]
-    private ModifyableFloat projectilesPerShot = new ModifyableFloat(1f);
-    public ModifyableFloat ProjectilesPerShot { get => projectilesPerShot; }
+    private ModifiableFloat projectilesPerShot = new ModifiableFloat(1f);
+    public ModifiableFloat ProjectilesPerShot { get => projectilesPerShot; }
 
 }

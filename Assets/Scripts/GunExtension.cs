@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GunExtension : GunModifyer
+public class GunExtension : GunModifier
 {
 
     public override int priority { get => 2; }
