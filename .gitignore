@@ -76,8 +76,18 @@ crashlytics-build.properties
 # Custom patterns
 #
 
+# Editor configs
 .idea/
 .vsconfig
+.vscode/
 
+# Blender backups
 *.blend1
 *.blend1.meta
+
+# OS/Graphic API specific files
+ProjectSettings/Packages/com.unity.testtools.codecoverage/Settings.json
+ProjectSettings/ShaderGraphSettings.asset
+
+# Mono crash dumps
+*.blob
