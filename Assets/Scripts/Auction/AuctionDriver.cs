@@ -1,12 +1,20 @@
 using CollectionExtensions;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 
+// TODO
+// Topic for discussion:
+// Using RequireComponent + GetComponent in Awake,
+// vs manually assigning component references
+//
+[RequireComponent(typeof(Timer))]
 public class AuctionDriver : MonoBehaviour
 {
     [SerializeField] 
     private int numberOfItems;
+    [SerializeField]
+    private float baseWaitTime;
     [SerializeField] 
     private AuctionSequence sequence;
     private IEnumerator<BiddingRound> enumerator;
@@ -28,13 +36,13 @@ public class AuctionDriver : MonoBehaviour
     private BiddingRound ActiveBiddingRound => enumerator.Current;
 #endif
 
-    [SerializeField] 
-    private PlayerInventory[] playersInAuction;
+    private HashSet<PlayerInventory> playersInAuction;
+    private HashSet<PlayerInventory> playersInAuctionRound;
     private Dictionary<PlayerInventory, int> tokensInPlay = new Dictionary<PlayerInventory, int>();
 
 
     [SerializeField] 
-    private CoroutineTimer auctionTimer;
+    private Timer auctionTimer;
     
 #if UNITY_EDITOR
     private void OnValidate()
@@ -46,15 +54,73 @@ public class AuctionDriver : MonoBehaviour
     // Stages
     // BiddingStage contains a list of items (scriptableobjects)
 
-    private void Awake()
+    private void OnEnable()
     {
-        auctionTimer.OnWaitStart += GoToNextAuctionRound;
-        auctionTimer.OnWaitCompleted += FinishAuctionRound;
+        auctionTimer.OnTimerRunStarted += GoToNextAuctionRound;
+        auctionTimer.OnTimerRunCompleted += FinishAuctionRound;
+    }
+
+    private void OnDisable()
+    {
+        auctionTimer.OnTimerRunStarted -= GoToNextAuctionRound;
+        auctionTimer.OnTimerRunCompleted -= FinishAuctionRound;
     }
 
     private void Start()
     {
-        playersInAuction = FindObjectsOfType<PlayerInventory>();
+        playersInAuction = new HashSet<PlayerInventory>(FindObjectsOfType<PlayerInventory>());
+        playersInAuctionRound = new HashSet<PlayerInventory>(playersInAuction);
+    }
+
+    private bool TryPlaceBid(PlayerInventory player, int slot)
+    {
+        if (!playersInAuctionRound.Contains(player))
+        {
+            Debug.Log($"Player '{player.name}' is not in current round!");
+            return false;
+        }
+
+        int cost = ActiveBiddingRound.tokens[slot] + 1;
+        if (tokensInPlay[player] + cost >= player.Tokens)
+        {
+            Debug.Log($"Player '{player.name}' tried to place a bid " +
+                $"on {ActiveBiddingRound.items[slot]} without having the tokens for it!");
+            // The player has no more tokens to spend!
+            return false;
+        }
+
+        // Has someone bid on this item before?
+        if (ActiveBiddingRound.players[slot] != null)
+        {
+            PlayerInventory outbid = ActiveBiddingRound.players[slot];
+            tokensInPlay[outbid] -= ActiveBiddingRound.tokens[slot];
+
+            Debug.Log($"Player '{player.name}' outbid Player '{outbid.name}'" +
+                $"for {ActiveBiddingRound.items[slot]} at a cost of {cost} tokens!");
+        }
+
+        // Actually Place the bid
+        tokensInPlay[player] += cost;
+        ActiveBiddingRound.tokens[slot] = cost;
+        ActiveBiddingRound.players[slot] = player;
+        return true;
+    }
+
+    private void YieldFromAuction(PlayerInventory player)
+    {
+        playersInAuction.Remove(player);
+        if (playersInAuction.Count == 0)
+        {
+            auctionTimer.StopTimer();
+        }
+    }
+    private void YieldFromRound(PlayerInventory player)
+    {
+        playersInAuctionRound.Remove(player);
+        if (playersInAuctionRound.Count == 0)
+        {
+            auctionTimer.EndTimerRun();
+        }
     }
 
 #if UNITY_EDITOR
@@ -66,7 +132,7 @@ public class AuctionDriver : MonoBehaviour
             tokensInPlay[player] = 0;
 
         enumerator = sequence.GetEnumerator();
-        //auctionTimer.Start(this);
+        auctionTimer.StartTimer(10f, repeating: true);
     }
 
 #if UNITY_EDITOR
@@ -74,11 +140,74 @@ public class AuctionDriver : MonoBehaviour
 #endif
     public void StopAuction()
     {
-        //auctionTimer.Stop(this);
+        auctionTimer.StopTimer();
     }
 
+#if UNITY_EDITOR
+    [ContextMenu("GoToNextAuctionRound")]
+#endif
+    private void GoToNextAuctionRound()
+    {
+        if (!enumerator.MoveNext())
+        {
+            Debug.Log($"Stopping auction!");
+            StopAuction();
+            return;
+        }
+        // Place all players who are still in the auction into the new round
+        playersInAuctionRound.UnionWith(playersInAuction);
+    }
 
 #if UNITY_EDITOR
+    [ContextMenu("FinishAuctionRound")]
+#endif
+    private void FinishAuctionRound()
+    {
+        Debug.Log($"Round {ActiveBiddingRound} Finished!");
+        for (int i = 0; i < ActiveBiddingRound.NumberOfItems; i++)
+        {
+            if (ActiveBiddingRound.players[i] != null)
+            {
+                ActiveBiddingRound.players[i].PerformTransaction(ActiveBiddingRound.items[i], ActiveBiddingRound.tokens[i]);
+            }
+        }
+    }
+
+#if UNITY_EDITOR
+    [ContextMenu("Yield All From Auction")]
+    private void YieldAllPlayersFromAuction()
+    {
+        PlayerInventory[] players = playersInAuction.ToArray();
+        for (int i = 0; i < players.Length; i++)
+        {
+            YieldFromAuction(players[i]);
+        }
+    }
+    [ContextMenu("Yield All From Round")]
+    private void YieldAllPlayersFromRound()
+    {
+        PlayerInventory[] players = playersInAuctionRound.ToArray();
+        for (int i = 0; i < players.Length; i++)
+        {
+            YieldFromRound(players[i]);
+        }
+    }
+
+    [ContextMenu("Yield Random Player From Auction")]
+    private void YieldRandomPlayerFromAuction()
+    {
+        PlayerInventory yielding = playersInAuction.RandomElement();
+        Debug.Log($"Player: {yielding} yielded from auction round");
+        YieldFromAuction(yielding);
+    }
+    [ContextMenu("Yield Random Player From Round")]
+    private void YieldRandomPlayerFromRound()
+    {
+        PlayerInventory yielding = playersInAuctionRound.RandomElement();
+        YieldFromRound(yielding);
+        Debug.Log($"Player: {yielding} yielded from auction round");
+    }
+
     [ContextMenu("Place Random Bids")]
     private void PlaceRandomBids()
     {
@@ -105,58 +234,4 @@ public class AuctionDriver : MonoBehaviour
         return newHolder;
     }
 #endif
-
-    private bool TryPlaceBid(PlayerInventory player, int slot)
-    {
-        int cost = ActiveBiddingRound.tokens[slot] + 1;
-        if (tokensInPlay[player] + cost >= player.Tokens)
-        {
-            Debug.Log($"Player {System.Array.FindIndex(playersInAuction, p => p == player):D2} tried to place a bid " +
-                $"on {ActiveBiddingRound.items[slot]} without having the tokens for it!");
-            // The player has no more tokens to spend!
-            return false;
-        }
-
-        // Has someone bid on this item before?
-        if (ActiveBiddingRound.players[slot] != null)
-        {
-            PlayerInventory outbid = ActiveBiddingRound.players[slot];
-            tokensInPlay[outbid] -= ActiveBiddingRound.tokens[slot];
-
-            Debug.Log($"Player {System.Array.FindIndex(playersInAuction, p => p == player):D2} outbid Player {System.Array.FindIndex(playersInAuction, p => p == outbid):D2}" +
-                $"for {ActiveBiddingRound.items[slot]} at a cost of {cost} tokens!");
-        }
-
-        // Actually Place the bid
-        tokensInPlay[player] += cost;
-        ActiveBiddingRound.tokens[slot] = cost;
-        ActiveBiddingRound.players[slot] = player;
-        return true;
-    }
-
-    [ContextMenu("GoToNextAuctionRound")]
-    private void GoToNextAuctionRound()
-    {
-        if (!enumerator.MoveNext())
-        {
-            StopAuction();
-            return;
-        }
-        foreach (var item in ActiveBiddingRound.items)
-        {
-            Debug.Log($"Item up for grabs: {item}");
-        }
-    }
-    [ContextMenu("FinishAuctionRound")]
-    private void FinishAuctionRound()
-    {
-        Debug.Log($"Round {ActiveBiddingRound} Finished!");
-        for (int i = 0; i < ActiveBiddingRound.NumberOfItems; i++)
-        {
-            if (ActiveBiddingRound.players[i] != null)
-            {
-                ActiveBiddingRound.players[i].PerformTransaction(ActiveBiddingRound.items[i], ActiveBiddingRound.tokens[i]);
-            }
-        }
-    }
 }

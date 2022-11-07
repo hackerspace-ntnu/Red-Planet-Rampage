@@ -9,7 +9,8 @@ namespace CollectionExtensions
     {
         public static T RandomElement<T>(this T[] arr) => arr[Random.Range(0, arr.Length)];
         public static T RandomElement<T>(this IList<T> list) => list[Random.Range(0, list.Count)];
-        public static IEnumerable<T> RandomDistinctElements<T>(this T[] arr, int n) => arr.OrderBy(_ => Random.value).Take(n);
+        public static T RandomElement<T>(this IEnumerable<T> values) => values.ElementAt(Random.Range(0, values.Count()));
+        public static IEnumerable<T> RandomDistinctElements<T>(this IEnumerable<T> values, int n) => values.OrderBy(_ => Random.value).Take(n);
         public static IEnumerable<T> RandomElements<T>(this T[] arr, int n)
         {
             for (int i = 0; i < n; i++)
