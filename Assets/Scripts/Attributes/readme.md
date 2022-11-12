@@ -56,3 +56,18 @@ Example:
 [LabelAs("Some Name That Makes Sense In Editor Context"), SerializeField]
 private string someVariableNameThatMakesSenseInScriptingContext;
 ```
+
+## MinMax
+Can be put on any int/float field, as well as IntRange and FloatRange (though only useful on serialized fields - as others aren't labelled in the editor anyways)
+
+The attribute constraints a value to be in between Min and Max in the unity editor. (like unity's builtin Range attribute, but covering more target types!)
+
+Example
+
+```cs
+[SerializeField, MinMax(0, 5)]
+private int someValueThatShouldBeBetweenZeroAndFive;
+
+[MinMax(5, 10)]
+public IntRange someRangeDefinedBetweenFiveAndTen;
+```
