@@ -76,7 +76,7 @@ public class ProjectileController : MonoBehaviour
 
     public virtual void Start()
     {
-        state = new ProjectileState(transform.position, transform.rotation, transform.forward, stats.projectileSpeed, stats.projectileGravityModifier);
+        state = new ProjectileState(transform.position, transform.rotation, transform.forward, stats.ProjectileSpeed, stats.ProjectileGravityModifier);
         Destroy(gameObject, lifeTime);
     }
 

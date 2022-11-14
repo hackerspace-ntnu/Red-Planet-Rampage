@@ -79,16 +79,16 @@ public class GunFactory : MonoBehaviour
         switch (gunController.stats.fireMode)
         {
             case GunStats.FireModes.semiAuto:
-                gunController.fireRateController = new SemiAutoFirerateController(gunController.stats.firerate);
+                gunController.fireRateController = new SemiAutoFirerateController(gunController.stats.Firerate);
                 break;
             case GunStats.FireModes.burst:
-                gunController.fireRateController = new BurstFirerateController(gunController.stats.firerate, gunController.stats.burstNum);
+                gunController.fireRateController = new BurstFirerateController(gunController.stats.Firerate, gunController.stats.burstNum);
                 break;
             case GunStats.FireModes.fullAuto:
-                gunController.fireRateController = new FullAutoFirerateController(gunController.stats.firerate);
+                gunController.fireRateController = new FullAutoFirerateController(gunController.stats.Firerate);
                 break;
             default:
-                gunController.fireRateController = new FullAutoFirerateController(gunController.stats.firerate);
+                gunController.fireRateController = new FullAutoFirerateController(gunController.stats.Firerate);
                 break;
         }
 

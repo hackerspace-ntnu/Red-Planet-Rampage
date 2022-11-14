@@ -33,13 +33,13 @@ public class GunController : MonoBehaviour
     {
         foreach (var output in outputs)
         {
-            for (int i = 0; i < Mathf.Max((int)stats.projectilesPerShot.Value(), 1); i++)
+            for (int i = 0; i < Mathf.Max((int)stats.ProjectilesPerShot.Value(), 1); i++)
             {
                 // Adds spread
                 Quaternion dir = output.rotation;
-                if (stats.projectileSpread > 0)
+                if (stats.ProjectileSpread > 0)
                 {
-                    Vector2 rand = Random.insideUnitCircle * stats.projectileSpread;
+                    Vector2 rand = Random.insideUnitCircle * stats.ProjectileSpread;
                     dir = dir * Quaternion.Euler(rand.x, rand.y, 0f);
                 }
                 // Makes projectile 

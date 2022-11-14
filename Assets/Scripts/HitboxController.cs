@@ -10,6 +10,6 @@ public class HitboxController : MonoBehaviour
 
     public void DamageCollider(GunStats stats, int damage)
     {
-        health?.dealDamage((int)(damage * (isCritical ? 1 : stats.criticalMultiplier.Value()))); 
+        health?.dealDamage((int)(damage * (isCritical ? 1 : stats.CriticalMultiplier.Value()))); 
     }
 }
