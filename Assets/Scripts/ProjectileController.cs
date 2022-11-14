@@ -86,7 +86,7 @@ public class ProjectileController : MonoBehaviour
         return Vector3.Lerp(state.oldPosition, state.position, diff);
     }
 
-    //public Vector3 LerpPos()
+    //public Vector3 QerpPos()
     //{
     //    var diff = (Time.time - state.lastUpdateTime) / Time.fixedDeltaTime;
     //
