@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerMovement))]
-public class PlayerStateController : MonoBehaviour
+public class PlayerManager : MonoBehaviour
 {
     // TODO add context when shooty system is done
-    public delegate void HitEvent(PlayerStateController killer, PlayerStateController victim);
+    public delegate void HitEvent(PlayerManager killer, PlayerManager victim);
 
     public HitEvent onDeath;
 

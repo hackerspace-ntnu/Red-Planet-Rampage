@@ -5,12 +5,12 @@ using UnityEngine;
 
 public class Round
 {
-    public PlayerStateController winner;
-    public Dictionary<PlayerStateController, List<PlayerStateController>> kills = new Dictionary<PlayerStateController, List<PlayerStateController>>();
-    public List<PlayerStateController> players = new List<PlayerStateController>();
-    public List<PlayerStateController> livingPlayers = new List<PlayerStateController>();
+    public PlayerManager winner;
+    public Dictionary<PlayerManager, List<PlayerManager>> kills = new Dictionary<PlayerManager, List<PlayerManager>>();
+    public List<PlayerManager> players = new List<PlayerManager>();
+    public List<PlayerManager> livingPlayers = new List<PlayerManager>();
 
-    public Round(List<PlayerStateController> players)
+    public Round(List<PlayerManager> players)
     {
         this.players = players;
         livingPlayers = players.ToList();
@@ -21,14 +21,14 @@ public class Round
         MatchController.Singleton.onRoundEnd += OnRoundEnd;
     }
 
-    public int KillCount(PlayerStateController player)
+    public int KillCount(PlayerManager player)
     {
         if (kills.TryGetValue(player, out var playerKills))
             return playerKills.Count;
         return 0;
     }
 
-    public bool IsWinner(PlayerStateController player)
+    public bool IsWinner(PlayerManager player)
     {
         return player == winner;
     }
@@ -44,7 +44,7 @@ public class Round
 
     //TODO: Create struct for damagecontext with info about who was killed as parameter instead
     // (Currently waiting for damage/basic gunplay)
-    private void OnDeath(PlayerStateController killer, PlayerStateController victim)
+    private void OnDeath(PlayerManager killer, PlayerManager victim)
     {
         if (kills.ContainsKey(killer))
         {
@@ -52,7 +52,7 @@ public class Round
         }
         else
         {
-            List<PlayerStateController> playerKills = new List<PlayerStateController>();
+            List<PlayerManager> playerKills = new List<PlayerManager>();
             playerKills.Add(victim);
             kills.Add(killer, playerKills);
         }
@@ -62,7 +62,7 @@ public class Round
         CheckWinCondition(killer);
     }
 
-    private void CheckWinCondition(PlayerStateController lastKiller)
+    private void CheckWinCondition(PlayerManager lastKiller)
     {
         if (livingPlayers.Count < 2)
         {

@@ -8,18 +8,18 @@ using UnityEngine.InputSystem;
 /// <summary>
 /// Wrapper struct for tying refference to Player class with the in-game player.
 /// </summary>
-public struct MatchPlayer
+public struct Player
 {
-    public MatchPlayer(Player player, PlayerStateController playerStateController, int startAmount)
+    public Player(PlayerIdentity playerIdentity, PlayerManager playerManager, int startAmount)
     {
-        this.player = player;
-        playerStateController.chips = startAmount;
-        this.playerStateController = playerStateController;
+        this.playerIdentity = playerIdentity;
+        playerManager.chips = startAmount;
+        this.playerManager = playerManager;
     }
     // Reference to player identity class
-    public Player player;
+    public PlayerIdentity playerIdentity;
     // Reference to in-match player
-    public PlayerStateController playerStateController;
+    public PlayerManager playerManager;
 }
 
 public class MatchController : MonoBehaviour
@@ -43,7 +43,7 @@ public class MatchController : MonoBehaviour
     [SerializeField]
     private int rewardBase = 1;
 
-    private List<MatchPlayer> matchPlayers = new List<MatchPlayer>();
+    private List<Player> players = new List<Player>();
     private List<Round> rounds = new List<Round>();
 
     void Start()
@@ -67,9 +67,9 @@ public class MatchController : MonoBehaviour
 
         PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput =>
         {
-            var player = playerInput.GetComponent<Player>();
-            var playerStateController = playerInput.transform.parent.GetComponent<PlayerStateController>();
-            matchPlayers.Add(new MatchPlayer(player, playerStateController, startAmount));
+            var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
+            var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
+            players.Add(new Player(playerIdentity, playerStateController, startAmount));
         });
 
         // TODO do something else funky wunky
@@ -80,7 +80,7 @@ public class MatchController : MonoBehaviour
     public void StartNextRound()
     {
         onRoundStart?.Invoke();
-        rounds.Add(new Round(matchPlayers.Select(player => player.playerStateController).ToList()));
+        rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
     }
 
     public void EndActiveRound()
@@ -95,16 +95,16 @@ public class MatchController : MonoBehaviour
     private void AssignRewards()
     {
         var lastRound = rounds.Last();
-        foreach (MatchPlayer player in matchPlayers)
+        foreach (Player player in players)
         {
             // Base reward and kill bonus
-            var reward = rewardBase + lastRound.KillCount(player.playerStateController) * rewardKill;
+            var reward = rewardBase + lastRound.KillCount(player.playerManager) * rewardKill;
             // Win bonus
-            if (lastRound.IsWinner(player.playerStateController))
+            if (lastRound.IsWinner(player.playerManager))
                 reward += rewardWin;
 
-            player.playerStateController.chips += reward;
-            Debug.Log(player.playerStateController.ToString() + " was awarded " + reward + " chips.");
+            player.playerManager.chips += reward;
+            Debug.Log(player.playerManager.ToString() + " was awarded " + reward + " chips.");
         }
     }
 
