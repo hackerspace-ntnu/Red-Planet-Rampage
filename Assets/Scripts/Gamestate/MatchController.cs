@@ -110,8 +110,8 @@ public class MatchController : MonoBehaviour
 
     private void CheckWinCondition()
     {
-        var lastWinner = rounds.Last().winner;
-        var wins = rounds.Where(round => round.winner == lastWinner).Count();
+        var lastWinner = rounds.Last().Winner;
+        var wins = rounds.Where(round => round.IsWinner(lastWinner)).Count();
         Debug.Log("Current winner (" + lastWinner.ToString() + ") has " + wins + " wins.");
         if (wins >= 3)
         {

@@ -1,14 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
 
 public class Round
 {
-    public PlayerManager winner;
-    public Dictionary<PlayerManager, List<PlayerManager>> kills = new Dictionary<PlayerManager, List<PlayerManager>>();
-    public List<PlayerManager> players = new List<PlayerManager>();
-    public List<PlayerManager> livingPlayers = new List<PlayerManager>();
+    private PlayerManager winner;
+    public PlayerManager Winner => winner;
+
+    private Dictionary<PlayerManager, List<PlayerManager>> kills = new Dictionary<PlayerManager, List<PlayerManager>>();
+    public ReadOnlyDictionary<PlayerManager, ReadOnlyCollection<PlayerManager>> Kills =>
+            new ReadOnlyDictionary<PlayerManager, ReadOnlyCollection<PlayerManager>>(
+                kills.ToDictionary(kill => kill.Key, kill => new ReadOnlyCollection<PlayerManager>(kill.Value))
+            );
+
+    private List<PlayerManager> players = new List<PlayerManager>();
+    public ReadOnlyCollection<PlayerManager> Players => new ReadOnlyCollection<PlayerManager>(players);
+
+    private List<PlayerManager> livingPlayers = new List<PlayerManager>();
+    public ReadOnlyCollection<PlayerManager> LivingPlayers => new ReadOnlyCollection<PlayerManager>(livingPlayers);
 
     public Round(List<PlayerManager> players)
     {
