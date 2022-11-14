@@ -51,7 +51,7 @@ public class GunFactory : MonoBehaviour
         // Stats is retrieved from gun body
         // NEVER REFERENCE THE GUNSTAT PREFAB DIRECTLY, GUNBODY AUTOMATICALLY INSTANTIATES IT
         // Seriously, i have no moral qualms with making your skulls into decorative ornaments
-        gunController.stats = gunBody.Stats;
+        gunController.stats = gunBody.InstantiateBaseStats;
 
         var gunBarrel = Instantiate(barrelPrefab, gunBody.attachmentSite.position, gunBody.attachmentSite.rotation, transform)
             .GetComponent<GunBarrel>();

@@ -8,7 +8,7 @@ public class GunBody : MonoBehaviour
     private GunStats stats;
 
     // Base stats of the gun
-    public GunStats Stats { get => Instantiate(stats); }
+    public GunStats InstantiateBaseStats { get => Instantiate(stats); }
 
     // Where to attach barrel
     public Transform attachmentSite;
