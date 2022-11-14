@@ -11,6 +11,7 @@ enum PlayerState
     DEAD
 }
 
+[RequireComponent(typeof(Rigidbody), typeof(Collider))]
 public class PlayerMovement : MonoBehaviour
 {
     private FPSInputManager fpsInput;

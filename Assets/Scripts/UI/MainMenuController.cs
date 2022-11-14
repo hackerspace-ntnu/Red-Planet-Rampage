@@ -89,6 +89,7 @@ public class MainMenuController : MonoBehaviour
     /// <param name="sceneName"></param>
     public void ChangeScene(string sceneName)
     {
+        playerInputManagerController.RemoveListeners();
         SceneManager.LoadSceneAsync(sceneName);
     }
 
