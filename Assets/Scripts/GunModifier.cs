@@ -31,8 +31,6 @@ public class GunModifier : MonoBehaviour
     {
         foreach(var modifier in statModifiers)
         {
-            //print(((ModifyableFloat)gun.stats.GetType().GetProperty("Firerate", typeof(ModifyableFloat)).GetValue(gun.stats, null)).value());
-
             ModifiableFloat stat = (ModifiableFloat) typeof(GunStats).GetProperty(modifier.name).GetValue(gun.stats, null);
             stat.AddBaseValue(modifier.addition);
             stat.AddMultiplier(modifier.multiplier);
