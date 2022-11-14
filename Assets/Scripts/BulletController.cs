@@ -39,15 +39,13 @@ public class BulletController : ProjectileController
         RaycastHit[] rayCasts;
         if (stats.ProjectileSize > 0)
         {
-            // Both of these need to be ordered
             rayCasts = Physics.SphereCastAll(transform.position, stats.ProjectileSize, direction, direction.magnitude);
         }
         else
         {
-            // Both of these need to be ordered
             rayCasts = Physics.RaycastAll(transform.position, direction, direction.magnitude);
         }
-
+        // Ordered by distance along path hit, so that things are hit in the correct order
         collisions = rayCasts.OrderBy(x => x.distance).Select(x => x.collider).ToArray();
         foreach(var collision in collisions)
         {
