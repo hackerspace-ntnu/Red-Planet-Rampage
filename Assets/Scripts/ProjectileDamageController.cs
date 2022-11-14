@@ -16,7 +16,7 @@ public class ProjectileDamageController : MonoBehaviour
         if( controller.health == null || !hitHealthControllers.Contains(controller.health))
         {
             hitHealthControllers.Add(controller.health);
-            controller.damageCollider(stats, (int)stats.ProjectileDamage.value());
+            controller.DamageCollider(stats, (int)stats.projectileDamage.Value());
         }
     }
 }

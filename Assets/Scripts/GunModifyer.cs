@@ -34,13 +34,14 @@ public class GunModifier : MonoBehaviour
             //print(((ModifyableFloat)gun.stats.GetType().GetProperty("Firerate", typeof(ModifyableFloat)).GetValue(gun.stats, null)).value());
 
             ModifiableFloat stat = (ModifiableFloat) typeof(GunStats).GetProperty(modifier.name).GetValue(gun.stats, null);
-            stat.addBaseValue(modifier.addition);
-            stat.addMultiplier(modifier.multiplier);
-            stat.addExponential(modifier.exponential);
+            stat.AddBaseValue(modifier.addition);
+            stat.AddMultiplier(modifier.multiplier);
+            stat.AddExponential(modifier.exponential);
         }
         if(bulletModifyerPrefab != null)
         {
             instantiatedBulletModifyer = Instantiate(bulletModifyerPrefab, gun.projectile.transform);
+            instantiatedBulletModifyer.GetComponent<ProjectileModifier>().projectile = gun.projectile.GetComponent<ProjectileController>();
         }
     }
     // Is run when component is remove
@@ -49,9 +50,9 @@ public class GunModifier : MonoBehaviour
         foreach (var modifier in statModifiers)
         {
             ModifiableFloat stat = (ModifiableFloat)typeof(GunStats).GetProperty(modifier.name).GetValue(gun.stats);
-            stat.addBaseValue(-modifier.addition);
-            stat.addMultiplier(-modifier.multiplier);
-            stat.addExponential(1/modifier.exponential);
+            stat.AddBaseValue(-modifier.addition);
+            stat.AddMultiplier(-modifier.multiplier);
+            stat.AddExponential(1/modifier.exponential);
         }
         if(instantiatedBulletModifyer != null)
         {

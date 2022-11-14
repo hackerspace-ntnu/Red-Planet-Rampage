@@ -9,4 +9,8 @@ public class ModifiableFloatDrawer : PropertyDrawer
     {
         SerializedProperty baseValueProperty = property.FindPropertyRelative("baseValue");
         EditorGUI.PropertyField(position, baseValueProperty, label);
+
+    }
+}
+
   

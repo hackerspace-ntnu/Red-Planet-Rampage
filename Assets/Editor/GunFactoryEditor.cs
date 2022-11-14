@@ -2,14 +2,14 @@ using UnityEngine;
 using System.Collections;
 using UnityEditor;
 
-[CustomEditor(typeof(GunController))]
-public class GunControllerEditor : Editor
+[CustomEditor(typeof(GunFactory))]
+public class GunFactoryEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
 
-        GunController myScript = (GunController)target;
+        GunFactory myScript = (GunFactory)target;
         if (GUILayout.Button("Build Gun"))
         {
             myScript.InitializeGun();

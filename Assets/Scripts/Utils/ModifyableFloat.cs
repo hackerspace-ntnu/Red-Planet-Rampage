@@ -19,29 +19,29 @@ public class ModifiableFloat
         baseValue = value;
     }
 
-    public void addMultiplier(float value)
+    public void AddMultiplier(float value)
     {
         multiplier += value;
     }
 
-    public void addExponential(float value)
+    public void AddExponential(float value)
     {
         exponential *= value;
     }
 
-    public void addBaseValue(float value)
+    public void AddBaseValue(float value)
     {
         addition += value;
     }
 
-    public float value()
+    public float Value()
     {
         return (baseValue + addition) * multiplier * exponential;
     }
 
     public static implicit operator float(ModifiableFloat a)
     {
-        return a.value();
+        return a.Value();
     }
 }
     

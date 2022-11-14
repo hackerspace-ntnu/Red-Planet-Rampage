@@ -11,8 +11,6 @@ GameObject:
   - component: {fileID: 3710363406649011011}
   - component: {fileID: 6140645927267441440}
   - component: {fileID: 8018401301706087704}
-  - component: {fileID: 5495101469979637663}
-  - component: {fileID: 7304855438440402616}
   - component: {fileID: 7069982767751095428}
   - component: {fileID: 4626309481527381612}
   m_Layer: 0
@@ -30,8 +28,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6450443625586930805}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.757, y: 0, z: 0}
-  m_LocalScale: {x: 0.01, y: 0.01, z: 0.02}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -50,6 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   state:
+    olderPosition: {x: 0, y: 0, z: 0}
     oldPosition: {x: 0, y: 0, z: 0}
     position: {x: 0, y: 0, z: 0}
     direction: {x: 0, y: 0, z: 0}
@@ -59,6 +58,7 @@ MonoBehaviour:
     collisionActive: 0
     lastUpdateTime: 0
   stats: {fileID: 0}
+  lifeTime: 2
 --- !u!114 &8018401301706087704
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -71,56 +71,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a80a02a33f4d484f9fd0e518d4d2931, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!33 &5495101469979637663
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6450443625586930805}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &7304855438440402616
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6450443625586930805}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 33821a3e4cb4bf742a640239a56dddb4, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!2083052967 &7069982767751095428
 VisualEffect:
   m_ObjectHideFlags: 0

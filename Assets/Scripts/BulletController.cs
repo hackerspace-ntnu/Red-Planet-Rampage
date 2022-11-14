@@ -37,10 +37,10 @@ public class BulletController : ProjectileController
 
         var direction = state.position - state.oldPosition;
         RaycastHit[] rayCasts;
-        if (stats.ProjectileSize > 0)
+        if (stats.projectileSize > 0)
         {
             // Both of these need to be ordered
-            rayCasts = Physics.SphereCastAll(transform.position, stats.ProjectileSize, direction, direction.magnitude);
+            rayCasts = Physics.SphereCastAll(transform.position, stats.projectileSize, direction, direction.magnitude);
         }
         else
         {

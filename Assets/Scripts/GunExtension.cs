@@ -10,6 +10,7 @@ public class GunExtension : GunModifier
     [SerializeField]
     private GameObject model;
 
+    // The projectile is shot from each of these outputs, might want to change this iw we want varying outputs, like alternate shooting
     [SerializeField]
     public Transform[] outputs;
 

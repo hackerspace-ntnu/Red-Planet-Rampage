@@ -49,7 +49,6 @@ public class BurstFirerateController : FireRateController
     private float fireDelay;
     private float lastFired = 0f;
     private int burst;
-
     private int currentBurstNum = 0;
     public BurstFirerateController(float fireRate, int burst)
     {

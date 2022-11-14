@@ -52,8 +52,9 @@ public class ProjectileController : MonoBehaviour
     // Delegates and Events
     
     // Used for describing how a projectile moves when asked to move a specific distance 
+    [System.Serializable]
     public delegate void PathUpdateEvent(float distance, ref ProjectileState state, GunStats stats);
-
+    [SerializeField]
     public PathUpdateEvent UpdateProjectileMovement;
 
     // Used for adding events when the projectile position is updated, like particle trails
@@ -75,17 +76,17 @@ public class ProjectileController : MonoBehaviour
 
     public virtual void Start()
     {
-        state = new ProjectileState(transform.position, transform.rotation, transform.forward, stats.ProjectileSpeed, stats.ProjectileGravityModifier);
+        state = new ProjectileState(transform.position, transform.rotation, transform.forward, stats.projectileSpeed, stats.projectileGravityModifier);
         Destroy(gameObject, lifeTime);
     }
 
-    public Vector3 lerpPos()
+    public Vector3 LerpPos()
     {
         var diff = (Time.time - state.lastUpdateTime)/Time.fixedDeltaTime;
         return Vector3.Lerp(state.oldPosition, state.position, diff);
     }
 
-    //public Vector3 qerpPos()
+    //public Vector3 LerpPos()
     //{
     //    var diff = (Time.time - state.lastUpdateTime) / Time.fixedDeltaTime;
     //
