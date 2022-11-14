@@ -14,6 +14,7 @@ public class GunExtension : GunModifier
     [SerializeField]
     public Transform[] outputs;
 
+    // Attaches the models to each of the attachment points of the barrel. Since a barrel can have multiple outputs (minigun)
     public void AttachToTransforms(Transform[] transforms)
     {
         foreach(var t in transforms[1..])
