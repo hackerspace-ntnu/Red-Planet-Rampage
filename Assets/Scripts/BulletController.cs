@@ -63,7 +63,7 @@ public class BulletController : ProjectileController
     }
     public void Update()
     {
-        transform.position = lerpPos();
+        transform.position = LerpPos();
     }
 
 }
