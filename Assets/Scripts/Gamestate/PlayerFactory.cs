@@ -12,7 +12,6 @@ public class PlayerFactory : MonoBehaviour
 
     private PlayerInputManagerController playerInputManagerController;
 
-
     private void Awake()
     {
         playerInputManagerController = PlayerInputManagerController.Singleton;
@@ -46,15 +45,19 @@ public class PlayerFactory : MonoBehaviour
     {
         // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
-        // Set recieved playerInput (and most importantly it's camera) at player's position with player's rotation
-        playerInput.transform.position = player.transform.position;
-        playerInput.transform.rotation = player.transform.rotation;
+        Transform cameraOffset = player.transform.Find("CameraOffset");
         // Make playerInput child of player it's attached to
         playerInput.transform.parent = player.transform;
+        // Set recieved playerInput (and most importantly its camera) at an offset from player's position
+        playerInput.transform.localPosition = cameraOffset.localPosition;
+        playerInput.transform.rotation = player.transform.rotation;
         // Enable Camera
         playerInput.GetComponent<Camera>().enabled = true;
         // Update player's movement script with which playerInput it should attach listeners to
         player.GetComponent<PlayerMovement>().SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
-        player.GetComponent<PlayerManager>().SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
+        var playerManager = player.GetComponent<PlayerManager>();
+        playerManager.SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
+        // Set unique layer for player
+        playerManager.SetLayer(playerInput.playerIndex);
     }
 }
