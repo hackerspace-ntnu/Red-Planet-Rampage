@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerIdentity : MonoBehaviour
 {
-    private Color color;
+    public Color color;
 
     void Start()
     {

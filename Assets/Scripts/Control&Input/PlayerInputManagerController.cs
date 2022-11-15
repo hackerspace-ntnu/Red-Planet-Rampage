@@ -12,6 +12,9 @@ public class PlayerInputManagerController : MonoBehaviour
 
     public PlayerInputManager playerInputManager;
 
+    [SerializeField]
+    private Color[] playerColors;
+
     void Awake()
     {
         #region Singleton boilerplate
@@ -42,6 +45,7 @@ public class PlayerInputManagerController : MonoBehaviour
 
     private void OnPlayerJoined(PlayerInput playerInput)
     {
+        playerInput.GetComponent<PlayerIdentity>().color = playerColors[playerInputs.Count];
         playerInputs.Add(playerInput);
     }
 
