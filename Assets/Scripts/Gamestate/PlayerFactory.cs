@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class PlayerFactory : MonoBehaviour
 {
@@ -27,12 +28,25 @@ public class PlayerFactory : MonoBehaviour
     /// </summary>
     private void TransferExistingInputs()
     {
+        //TODO: (not this, preferrably make playerfactory intstantiate by call instead of awake)
+        if (SceneManager.GetActiveScene().name == "Bidding")
+        {
+            playerInputManagerController.ChangeInputMaps("FPS");
+            foreach (PlayerInput inputs in playerInputManagerController.playerInputs)
+            {
+                inputs.GetComponent<InputManager>().RemoveListeners();
+                InstantiateBiddingPlayer(inputs);
+                inputs.GetComponent<InputManager>().AddListeners();
+            }
+        }
+        else { 
         playerInputManagerController.ChangeInputMaps("FPS");
         foreach (PlayerInput inputs in playerInputManagerController.playerInputs)
         {
             inputs.GetComponent<InputManager>().RemoveListeners();
-            InstantiatePlayer(inputs);
+            InstantiateFPSPlayer(inputs);
             inputs.GetComponent<InputManager>().AddListeners();
+        }
         }
     }
 
@@ -41,7 +55,7 @@ public class PlayerFactory : MonoBehaviour
     /// This function is where you should add delegate events for them to be properly invoked.
     /// </summary>
     /// <param name="playerInput">PlayerInput to tie the player prefab to.</param>
-    private void InstantiatePlayer(PlayerInput playerInput)
+    private void InstantiateFPSPlayer(PlayerInput playerInput)
     {
         // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
@@ -59,5 +73,17 @@ public class PlayerFactory : MonoBehaviour
         playerManager.SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
         // Set unique layer for player
         playerManager.SetLayer(playerInput.playerIndex);
+    }
+
+    private void InstantiateBiddingPlayer(PlayerInput playerInput)
+    {
+        // Spawn player at spawnPoint's position with spawnPoint's rotation
+        GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
+        // Make playerInput child of player it's attached to
+        playerInput.transform.parent = player.transform;
+        // Update player's movement script with which playerInput it should attach listeners to
+        player.GetComponent<PlayerMovement>().SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
+        var playerManager = player.GetComponent<PlayerManager>();
+        playerManager.SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
     }
 }
