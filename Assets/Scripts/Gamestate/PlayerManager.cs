@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(PlayerMovement))]
 public class PlayerManager : MonoBehaviour
@@ -21,6 +22,16 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private GameObject meshBase;
 
+    private GunController gunController;
+
+    // TODO do this in a better way?
+    [SerializeField]
+    private GameObject body;
+    [SerializeField]
+    private GameObject barrel;
+    [SerializeField]
+    private GameObject extension;
+
     /// <summary>
     /// Function for setting a playerInput and adding movement related listeners to it.
     /// </summary>
@@ -29,8 +40,33 @@ public class PlayerManager : MonoBehaviour
     {
         fpsInput = player;
         GetComponent<PlayerMovement>().SetPlayerInput(fpsInput);
-        // TODO Don't commit sudoku.
-        fpsInput.onFire += (ctx) => onDeath?.Invoke(this, this);
+        SetGunOffset(fpsInput.transform);
+        fpsInput.onFirePerformed += OnFire;
+        fpsInput.onFireCanceled += OnFireEnd;
+    }
+
+    void OnDestroy()
+    {
+        fpsInput.onFirePerformed -= OnFire;
+        fpsInput.onFireCanceled -= OnFireEnd;
+    }
+
+    private void OnFire(InputAction.CallbackContext ctx)
+    {
+        gunController.triggerHeld = true;
+        gunController.triggerPressed = true;
+        StartCoroutine(UnpressTrigger());
+    }
+
+    IEnumerator UnpressTrigger()
+    {
+        yield return new WaitForFixedUpdate();
+        gunController.triggerPressed = false;
+    }
+
+    private void OnFireEnd(InputAction.CallbackContext ctx)
+    {
+        gunController.triggerHeld = false;
     }
 
     public void SetLayer(int playerIndex)
@@ -46,6 +82,16 @@ public class PlayerManager : MonoBehaviour
         // Set correct layer on self, mesh and gun (TODO)
         gameObject.layer = playerLayer;
         SetLayerOnSubtree(meshBase, playerLayer);
+    }
+
+    private void SetGunOffset(Transform offset)
+    {
+        var gun = GunFactory.InstantiateGun(body, barrel, extension, offset);
+        // Set specific local transform
+        gun.transform.localPosition = new Vector3(0.3f, -0.12f, -0.4f);
+        gun.transform.localRotation = Quaternion.AngleAxis(-12.5f, Vector3.up);
+        // Remember gun controller
+        gunController = gun.GetComponent<GunController>();
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)
