@@ -87,6 +87,7 @@ public class MatchController : MonoBehaviour
     {
         onBiddingStart?.Invoke();
         SceneManager.LoadSceneAsync("Bidding");
+        PlayerInputManagerController.Singleton.playerInputManager.splitScreen = false;
     }
 
     public void EndActiveRound()

@@ -5,6 +5,9 @@ using UnityEngine.InputSystem;
 
 public class PodiumController : MonoBehaviour
 {
+    [SerializeField]
+    private AugmentType augmentType;
+
     private List<FPSInputManager> playersInRadius;
 
     private MatchController matchController = MatchController.Singleton;

@@ -31,7 +31,7 @@ public class PlayerFactory : MonoBehaviour
         //TODO: (not this, preferrably make playerfactory intstantiate by call instead of awake)
         if (SceneManager.GetActiveScene().name == "Bidding")
         {
-            playerInputManagerController.ChangeInputMaps("FPS");
+            playerInputManagerController.ChangeInputMaps("Menu");
             foreach (PlayerInput inputs in playerInputManagerController.playerInputs)
             {
                 inputs.GetComponent<InputManager>().RemoveListeners();
@@ -81,6 +81,8 @@ public class PlayerFactory : MonoBehaviour
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
         // Make playerInput child of player it's attached to
         playerInput.transform.parent = player.transform;
+        // Disable Camera
+        playerInput.GetComponent<Camera>().enabled = false;
         // Update player's movement script with which playerInput it should attach listeners to
         player.GetComponent<PlayerMovement>().SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
         var playerManager = player.GetComponent<PlayerManager>();
