@@ -69,9 +69,10 @@ public class Round
 
     public int KillCount(PlayerManager player)
     {
-        if (kills.TryGetValue(player, out var playerKills))
-            return playerKills.Count;
-        return 0;
+#if DEBUG
+        Debug.Assert(kills.ContainsKey(player), "player not registered in start of round!", player);
+#endif
+        return kills[player].Count;
     }
 
     public bool IsWinner(PlayerManager player)
@@ -93,7 +94,7 @@ public class Round
     private void OnDeath(PlayerManager killer, PlayerManager victim)
     {
 #if DEBUG
-        Debug.Assert(kills.ContainsKey(killer), "killer not registered in start of round!");
+        Debug.Assert(kills.ContainsKey(killer), "killer not registered in start of round!", killer);
 #endif
         kills[killer].Add(victim);
         livingPlayers.Remove(victim);
