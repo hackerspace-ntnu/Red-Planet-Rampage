@@ -25,7 +25,7 @@ public class AudioGroup : ScriptableObject
         source.pitch = Mathf.Pow(SEMITONE_PITCH_CONVERSION_UNIT, Random.Range(semitoneRange.Min, semitoneRange.Max));
         source.volume = Random.Range(volumeRange.Min, volumeRange.Max);
     }
-    public void PlayRandomFrom(AudioSource source)
+    public void Play(AudioSource source)
     {
         source.pitch = Mathf.Pow(SEMITONE_PITCH_CONVERSION_UNIT, Random.Range(semitoneRange.Min, semitoneRange.Max));
         source.volume = Random.Range(volumeRange.Min, volumeRange.Max);
@@ -52,35 +52,50 @@ public class AudioGroup : ScriptableObject
         AudioClip clip = sounds.RandomElement();
         clip.LoadAudioData();
         Modulate(previewSource);
-        previewSource.PlayOneShot(clip);
+        previewSource.clip = clip;
+        previewSource.Play();
     }
 
+    [ContextMenu("Play Min Pitch")]
     private void PreviewLowPitch()
     {
         AudioClip clip = sounds.RandomElement();
         clip.LoadAudioData();
         previewSource.pitch = Mathf.Pow(SEMITONE_PITCH_CONVERSION_UNIT, semitoneRange.Min);
-        previewSource.PlayOneShot(clip);
+        previewSource.volume = Mathf.Lerp(volumeRange.Min, volumeRange.Max, 0.5f);
+        previewSource.clip = clip;
+        previewSource.Play();
     }
 
+    [ContextMenu("Play Max Pitch")]
     private void PreviewHighPitch()
     {
         AudioClip clip = sounds.RandomElement();
         clip.LoadAudioData();
         previewSource.pitch = Mathf.Pow(SEMITONE_PITCH_CONVERSION_UNIT, semitoneRange.Max);
-        previewSource.PlayOneShot(clip);
+        previewSource.volume = Mathf.Lerp(volumeRange.Min, volumeRange.Max, 0.5f);
+        previewSource.clip = clip;
+        previewSource.Play();
     }
+    [ContextMenu("Play Low Volume")]
     private void PreviewLowVolume()
     {
         AudioClip clip = sounds.RandomElement();
         clip.LoadAudioData();
-        previewSource.PlayOneShot(clip, volumeRange.Min);
+        previewSource.pitch = Mathf.Pow(SEMITONE_PITCH_CONVERSION_UNIT, Mathf.Lerp(semitoneRange.Min, semitoneRange.Max, 0.5f));
+        previewSource.volume = volumeRange.Min;
+        previewSource.clip = clip;
+        previewSource.Play();
     }
+    [ContextMenu("Play High Volume")]
     private void PreviewHighVolume()
     {
         AudioClip clip = sounds.RandomElement();
         clip.LoadAudioData();
-        previewSource.PlayOneShot(clip, volumeRange.Max);
+        previewSource.pitch = Mathf.Pow(SEMITONE_PITCH_CONVERSION_UNIT, Mathf.Lerp(semitoneRange.Min, semitoneRange.Max, 0.5f));
+        previewSource.volume = volumeRange.Max;
+        previewSource.clip = clip;
+        previewSource.Play();
     }
 #endif
     #endregion
