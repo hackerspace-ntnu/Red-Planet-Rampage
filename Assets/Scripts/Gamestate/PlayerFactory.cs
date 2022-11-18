@@ -28,10 +28,11 @@ public class PlayerFactory : MonoBehaviour
     /// </summary>
     private void TransferExistingInputs()
     {
+        if(playerInputManagerController == null) { Debug.Log("Go to current scene from Menu to actually spawn players"); }
         //TODO: (not this, preferrably make playerfactory intstantiate by call instead of awake)
         if (SceneManager.GetActiveScene().name == "Bidding")
         {
-            playerInputManagerController.ChangeInputMaps("Menu");
+            playerInputManagerController.ChangeInputMaps("Bidding");
             foreach (PlayerInput inputs in playerInputManagerController.playerInputs)
             {
                 inputs.GetComponent<InputManager>().RemoveListeners();

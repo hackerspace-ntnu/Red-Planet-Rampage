@@ -21,6 +21,15 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private GameObject meshBase;
 
+    [SerializeField]
+    private List<Item> items;
+
+    public void PerformTransaction(Item item, int cost)
+    {
+        items.Add(item);
+        chips -= cost;
+    }
+
     /// <summary>
     /// Function for setting a playerInput and adding movement related listeners to it.
     /// </summary>

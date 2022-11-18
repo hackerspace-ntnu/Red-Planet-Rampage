@@ -588,15 +588,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76468c4b4230e084ebcdaaa14f74819d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numberOfItems: 1
-  baseWaitTime: 0
+  numberOfItems: 3
+  baseWaitTime: 30
   sequence:
-    stages: []
+    stages:
+    - {fileID: 11400000, guid: 0dfa3c69785a55340b094a494521ee26, type: 2}
   _EDITORONLY_ActiveBiddingRound:
     items: []
     tokens: 
     players: []
-  auctionTimer: {fileID: 0}
+  auctionTimer: {fileID: 1285074140}
 --- !u!114 &1285074140
 MonoBehaviour:
   m_ObjectHideFlags: 0

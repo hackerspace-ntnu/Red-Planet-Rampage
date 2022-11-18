@@ -7,14 +7,14 @@ public class BiddingRound
     [SerializeField] 
     public Item[] items;
     [SerializeField] 
-    public int[] tokens;
+    public int[] chips;
     [SerializeField] 
-    public PlayerInventory[] players;
+    public PlayerManager[] players;
 
     public BiddingRound(Item[] items)
     {
         this.items = items;
-        tokens = new int[items.Length];
-        players = new PlayerInventory[items.Length];
+        chips = new int[items.Length];
+        players = new PlayerManager[items.Length];
     }
 }

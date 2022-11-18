@@ -36,9 +36,9 @@ public class AuctionDriver : MonoBehaviour
     private BiddingRound ActiveBiddingRound => enumerator.Current;
 #endif
 
-    private HashSet<PlayerInventory> playersInAuction;
-    private HashSet<PlayerInventory> playersInAuctionRound;
-    private Dictionary<PlayerInventory, int> tokensInPlay = new Dictionary<PlayerInventory, int>();
+    private HashSet<PlayerManager> playersInAuction;
+    private HashSet<PlayerManager> playersInAuctionRound;
+    private Dictionary<PlayerManager, int> chipsInPlay = new Dictionary<PlayerManager, int>();
 
 
     [SerializeField] 
@@ -68,11 +68,11 @@ public class AuctionDriver : MonoBehaviour
 
     private void Start()
     {
-        playersInAuction = new HashSet<PlayerInventory>(FindObjectsOfType<PlayerInventory>());
-        playersInAuctionRound = new HashSet<PlayerInventory>(playersInAuction);
+        playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
+        playersInAuctionRound = new HashSet<PlayerManager>(playersInAuction);
     }
 
-    private bool TryPlaceBid(PlayerInventory player, int slot)
+    private bool TryPlaceBid(PlayerManager player, int slot)
     {
         if (!playersInAuctionRound.Contains(player))
         {
@@ -80,8 +80,8 @@ public class AuctionDriver : MonoBehaviour
             return false;
         }
 
-        int cost = ActiveBiddingRound.tokens[slot] + 1;
-        if (tokensInPlay[player] + cost >= player.Tokens)
+        int cost = ActiveBiddingRound.chips[slot] + 1;
+        if (chipsInPlay[player] + cost >= player.chips)
         {
             Debug.Log($"Player '{player.name}' tried to place a bid " +
                 $"on {ActiveBiddingRound.items[slot]} without having the tokens for it!");
@@ -92,21 +92,21 @@ public class AuctionDriver : MonoBehaviour
         // Has someone bid on this item before?
         if (ActiveBiddingRound.players[slot] != null)
         {
-            PlayerInventory outbid = ActiveBiddingRound.players[slot];
-            tokensInPlay[outbid] -= ActiveBiddingRound.tokens[slot];
+            PlayerManager outbid = ActiveBiddingRound.players[slot];
+            chipsInPlay[outbid] -= ActiveBiddingRound.chips[slot];
 
             Debug.Log($"Player '{player.name}' outbid Player '{outbid.name}'" +
-                $"for {ActiveBiddingRound.items[slot]} at a cost of {cost} tokens!");
+                $"for {ActiveBiddingRound.items[slot]} at a cost of {cost} chips!");
         }
 
         // Actually Place the bid
-        tokensInPlay[player] += cost;
-        ActiveBiddingRound.tokens[slot] = cost;
+        chipsInPlay[player] += cost;
+        ActiveBiddingRound.chips[slot] = cost;
         ActiveBiddingRound.players[slot] = player;
         return true;
     }
 
-    private void YieldFromAuction(PlayerInventory player)
+    private void YieldFromAuction(PlayerManager player)
     {
         playersInAuction.Remove(player);
         if (playersInAuction.Count == 0)
@@ -114,7 +114,7 @@ public class AuctionDriver : MonoBehaviour
             auctionTimer.StopTimer();
         }
     }
-    private void YieldFromRound(PlayerInventory player)
+    private void YieldFromRound(PlayerManager player)
     {
         playersInAuctionRound.Remove(player);
         if (playersInAuctionRound.Count == 0)
@@ -129,7 +129,7 @@ public class AuctionDriver : MonoBehaviour
     public void StartAuction()
     {
         foreach (var player in playersInAuction)
-            tokensInPlay[player] = 0;
+            chipsInPlay[player] = 0;
 
         enumerator = sequence.GetEnumerator();
         auctionTimer.StartTimer(10f, repeating: true);
@@ -168,7 +168,7 @@ public class AuctionDriver : MonoBehaviour
         {
             if (ActiveBiddingRound.players[i] != null)
             {
-                ActiveBiddingRound.players[i].PerformTransaction(ActiveBiddingRound.items[i], ActiveBiddingRound.tokens[i]);
+                ActiveBiddingRound.players[i].PerformTransaction(ActiveBiddingRound.items[i], ActiveBiddingRound.chips[i]);
             }
         }
     }
@@ -177,7 +177,7 @@ public class AuctionDriver : MonoBehaviour
     [ContextMenu("Yield All From Auction")]
     private void YieldAllPlayersFromAuction()
     {
-        PlayerInventory[] players = playersInAuction.ToArray();
+        PlayerManager[] players = playersInAuction.ToArray();
         for (int i = 0; i < players.Length; i++)
         {
             YieldFromAuction(players[i]);
@@ -186,7 +186,7 @@ public class AuctionDriver : MonoBehaviour
     [ContextMenu("Yield All From Round")]
     private void YieldAllPlayersFromRound()
     {
-        PlayerInventory[] players = playersInAuctionRound.ToArray();
+        PlayerManager[] players = playersInAuctionRound.ToArray();
         for (int i = 0; i < players.Length; i++)
         {
             YieldFromRound(players[i]);
@@ -196,14 +196,14 @@ public class AuctionDriver : MonoBehaviour
     [ContextMenu("Yield Random Player From Auction")]
     private void YieldRandomPlayerFromAuction()
     {
-        PlayerInventory yielding = playersInAuction.RandomElement();
+        PlayerManager yielding = playersInAuction.RandomElement();
         Debug.Log($"Player: {yielding} yielded from auction round");
         YieldFromAuction(yielding);
     }
     [ContextMenu("Yield Random Player From Round")]
     private void YieldRandomPlayerFromRound()
     {
-        PlayerInventory yielding = playersInAuctionRound.RandomElement();
+        PlayerManager yielding = playersInAuctionRound.RandomElement();
         YieldFromRound(yielding);
         Debug.Log($"Player: {yielding} yielded from auction round");
     }
@@ -214,7 +214,7 @@ public class AuctionDriver : MonoBehaviour
         foreach (var player in playersInAuction)
         {
             int itemSlot = Random.Range(0, ActiveBiddingRound.NumberOfItems);
-            PlayerInventory originalHolder = ActiveBiddingRound.players[itemSlot]; //(ActiveBiddingRound.playerIDs[itemSlot] != -1) ? playersInAuction[ActiveBiddingRound.playerIDs[itemSlot]] : null;
+            PlayerManager originalHolder = ActiveBiddingRound.players[itemSlot]; //(ActiveBiddingRound.playerIDs[itemSlot] != -1) ? playersInAuction[ActiveBiddingRound.playerIDs[itemSlot]] : null;
             if (TryPlaceBid(player, itemSlot))
             {
                 if (originalHolder != null)
@@ -223,7 +223,7 @@ public class AuctionDriver : MonoBehaviour
         }
     }
 
-    private PlayerInventory RandomBiddingWar(PlayerInventory originalHolder, PlayerInventory newHolder, int slot, float continue_chance = 0.9f)
+    private PlayerManager RandomBiddingWar(PlayerManager originalHolder, PlayerManager newHolder, int slot, float continue_chance = 0.9f)
     {
         bool continueMatching = Random.value < continue_chance;
         // Return winner of bidding war
