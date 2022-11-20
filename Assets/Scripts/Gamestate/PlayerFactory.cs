@@ -69,7 +69,6 @@ public class PlayerFactory : MonoBehaviour
         // Enable Camera
         playerInput.GetComponent<Camera>().enabled = true;
         // Update player's movement script with which playerInput it should attach listeners to
-        player.GetComponent<PlayerMovement>().SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
         var playerManager = player.GetComponent<PlayerManager>();
         playerManager.SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
         // Set unique layer for player
@@ -85,7 +84,6 @@ public class PlayerFactory : MonoBehaviour
         // Disable Camera
         playerInput.GetComponent<Camera>().enabled = false;
         // Update player's movement script with which playerInput it should attach listeners to
-        player.GetComponent<PlayerMovement>().SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
         var playerManager = player.GetComponent<PlayerManager>();
         playerManager.SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
     }
