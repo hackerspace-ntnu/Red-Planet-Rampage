@@ -44,13 +44,13 @@ public class MainMenuController : MonoBehaviour
     /// Typically used for jumping to a new button with onclick after toggleMenu()
     /// </summary>
     /// <param name="target"></param>
-    public void SelectButton(Button target)
+    public void SelectControl(Selectable target)
     {
         StartCoroutine(WaitSelect(target));
     }
 
     //Unity for some reason can't immediately Select() button after an onclick event, so this helper function skips a single frame to do so.
-    private IEnumerator WaitSelect(Button target)
+    private IEnumerator WaitSelect(Selectable target)
     {
         yield return null;
         target.Select();
