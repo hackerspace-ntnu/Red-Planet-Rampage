@@ -32,6 +32,26 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private GameObject extension;
 
+    private HealthController healthController;
+
+    void Start()
+    {
+        healthController = GetComponent<HealthController>();
+        healthController.onDamageTaken += OnDamageTaken;
+        healthController.onDeath += OnDeath;
+    }
+
+    void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
+    {
+        Debug.Log(this.ToString() + " took " + damage + " damage from " + info.sourcePlayer.ToString());
+    }
+
+    void OnDeath(HealthController healthController, float damage, DamageInfo info)
+    {
+        Debug.Log(this.ToString() + " was killed by " + info.sourcePlayer.ToString());
+        onDeath?.Invoke(info.sourcePlayer, this);
+    }
+
     /// <summary>
     /// Function for setting a playerInput and adding movement related listeners to it.
     /// </summary>
@@ -47,6 +67,8 @@ public class PlayerManager : MonoBehaviour
 
     void OnDestroy()
     {
+        healthController.onDamageTaken -= OnDamageTaken;
+        healthController.onDeath -= OnDeath;
         fpsInput.onFirePerformed -= OnFire;
         fpsInput.onFireCanceled -= OnFireEnd;
     }
@@ -92,6 +114,8 @@ public class PlayerManager : MonoBehaviour
         gun.transform.localRotation = Quaternion.AngleAxis(-12.5f, Vector3.up);
         // Remember gun controller
         gunController = gun.GetComponent<GunController>();
+        // Make gun remember who shoots with it
+        gunController.player = this;
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)

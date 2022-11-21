@@ -8,8 +8,9 @@ public class HitboxController : MonoBehaviour
 
     public HealthController health;
 
-    public void DamageCollider(GunStats stats, int damage)
+    public void DamageCollider(DamageInfo info)
     {
-        health?.dealDamage((int)(damage * (isCritical ? 1 : stats.CriticalMultiplier.Value()))); 
+        info.isCritical = isCritical;
+        health?.dealDamage(info);
     }
 }
