@@ -5,7 +5,8 @@ using UnityEngine.InputSystem;
 
 public class FPSInputManager : InputManager
 {
-    public InputEvent onFire;
+    public InputEvent onFirePerformed;
+    public InputEvent onFireCanceled;
     private InputEvent onLookPerformed;
     private InputEvent onLookCanceled;
 
@@ -26,7 +27,8 @@ public class FPSInputManager : InputManager
         onLookPerformed += LookInputPerformed;
         onLookCanceled += LookInputCanceled;
 
-        cleanupCalls.Add(FixListeners("Fire", true, onFire));
+        cleanupCalls.Add(FixListeners("Fire", true, onFirePerformed));
+        cleanupCalls.Add(FixListeners("Fire", false, onFireCanceled));
         cleanupCalls.Add(FixListeners("Look", true, onLookPerformed));
         cleanupCalls.Add(FixListeners("Look", false, onLookCanceled));
 

@@ -8,7 +8,7 @@ public class PodiumController : MonoBehaviour
     [SerializeField]
     private AugmentType augmentType;
 
-    private List<FPSInputManager> playersInRadius;
+    private List<PlayerManager> playersInRadius;
 
     private MatchController matchController = MatchController.Singleton;
 
@@ -19,17 +19,17 @@ public class PodiumController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        FPSInputManager player = GetComponentInChildren<FPSInputManager>();
+        PlayerManager player = GetComponentInChildren<PlayerManager>();
         if (player == null) { return; }
-        player.onFire += AddBid;
+        player.fpsInput.onFirePerformed += AddBid;
         playersInRadius.Add(player);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        FPSInputManager player = GetComponentInChildren<FPSInputManager>();
+        PlayerManager player = GetComponentInChildren<PlayerManager>();
         if (player == null) { return; }
-        player.onFire -= AddBid;
+        player.fpsInput.onFirePerformed -= AddBid;
         playersInRadius.Remove(player);
     }
 

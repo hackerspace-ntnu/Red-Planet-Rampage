@@ -9,22 +9,57 @@ public class Round
     private PlayerManager winner;
     public PlayerManager Winner => winner;
 
-    private Dictionary<PlayerManager, List<PlayerManager>> kills = new Dictionary<PlayerManager, List<PlayerManager>>();
-    public ReadOnlyDictionary<PlayerManager, ReadOnlyCollection<PlayerManager>> Kills =>
-            new ReadOnlyDictionary<PlayerManager, ReadOnlyCollection<PlayerManager>>(
-                kills.ToDictionary(kill => kill.Key, kill => new ReadOnlyCollection<PlayerManager>(kill.Value))
-            );
+    /* Readonly Terminology
+     * 
+     * readonly 
+     * attribute makes the member field only assignable during constructor call.
+     * 
+     * ReadOnlyDictionary 
+     * is a "view" (i.e. looking at same underlying values and space in memory as the dictionary it's wrapping)
+     *      Using it ensures that we cannot add new entries to the dictionary. (i.e. adding new keys)
+     *      It does not however restrict us changing the values pointed to by keys.
+     *      
+     *      Simply put: 
+     *          a ReadOnlyDictionary<int, List<int>> allows for changing the lists the existing integer keys point to
+     *      
+     * ReadOnlyCollection 
+     * is a "view" (i.e. looking at same underlying values and space in memory as the collection it's wrapping)
+     *      Using it ensures we cannot add new entries to the collection.
+     *      It does not however restrict us changing the values pointed to by the references held by the collection.
+     *      
+     *      Simply put: 
+     *          a ReadOnlyCollection<int> cannot have its entries changed, as they are value types.
+     *          a ReadOnlyCollection<PlayerManager> cannot have new or different entries, 
+     *              but the fields of each PlayerManager in the collection can change!
+     */
 
-    private List<PlayerManager> players = new List<PlayerManager>();
-    public ReadOnlyCollection<PlayerManager> Players => new ReadOnlyCollection<PlayerManager>(players);
 
-    private List<PlayerManager> livingPlayers = new List<PlayerManager>();
-    public ReadOnlyCollection<PlayerManager> LivingPlayers => new ReadOnlyCollection<PlayerManager>(livingPlayers);
+    //Number of players never change after the initialisation of the dictionary, hence ReadOnlyDictionary
+    private readonly ReadOnlyDictionary<PlayerManager, List<PlayerManager>> kills;
+    public readonly ReadOnlyDictionary<PlayerManager, ReadOnlyCollection<PlayerManager>> Kills;
 
-    public Round(List<PlayerManager> players)
+    private readonly List<PlayerManager> players;
+    public readonly ReadOnlyCollection<PlayerManager> Players;
+
+    private readonly List<PlayerManager> livingPlayers = new List<PlayerManager>();
+    public readonly ReadOnlyCollection<PlayerManager> LivingPlayers;
+
+    public Round(IEnumerable<PlayerManager> roundPlayers)
     {
-        this.players = players;
-        livingPlayers = players.ToList();
+        players = new List<PlayerManager>(roundPlayers);
+        livingPlayers = new List<PlayerManager>(roundPlayers);
+        kills = new ReadOnlyDictionary<PlayerManager, List<PlayerManager>>(players.ToDictionary(
+            /*key   */ player => player,
+            /*value */ player => new List<PlayerManager>()
+        ));
+
+        Players = new ReadOnlyCollection<PlayerManager>(this.players);
+        LivingPlayers = new ReadOnlyCollection<PlayerManager>(livingPlayers);
+        Kills = new ReadOnlyDictionary<PlayerManager, ReadOnlyCollection<PlayerManager>>(players.ToDictionary(
+            /*key   */ player => player,
+            /*value */ player => new ReadOnlyCollection<PlayerManager>(kills[player]) 
+        ));
+
         foreach (var player in players)
         {
             player.onDeath += OnDeath;
@@ -34,9 +69,10 @@ public class Round
 
     public int KillCount(PlayerManager player)
     {
-        if (kills.TryGetValue(player, out var playerKills))
-            return playerKills.Count;
-        return 0;
+#if DEBUG
+        Debug.Assert(kills.ContainsKey(player), "player not registered in start of round!", player);
+#endif
+        return kills[player].Count;
     }
 
     public bool IsWinner(PlayerManager player)
@@ -57,17 +93,10 @@ public class Round
     // (Currently waiting for damage/basic gunplay)
     private void OnDeath(PlayerManager killer, PlayerManager victim)
     {
-        if (kills.ContainsKey(killer))
-        {
-            kills[killer].Add(victim);
-        }
-        else
-        {
-            List<PlayerManager> playerKills = new List<PlayerManager>();
-            playerKills.Add(victim);
-            kills.Add(killer, playerKills);
-        }
-
+#if DEBUG
+        Debug.Assert(kills.ContainsKey(killer), "killer not registered in start of round!", killer);
+#endif
+        kills[killer].Add(victim);
         livingPlayers.Remove(victim);
 
         CheckWinCondition(killer);
