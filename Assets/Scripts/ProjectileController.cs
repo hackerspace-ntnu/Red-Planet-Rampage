@@ -1,19 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 [System.Serializable]
 public struct ProjectileState
 {
     // Used for lerping
     public Vector3 olderPosition;
     public Vector3 oldPosition;
-    
+
     // Position of the bullet
     public Vector3 position;
 
     // Normalized direction of projectile
     public Vector3 direction;
-    
+
     // Speed of the bullet
     public float speed;
 
@@ -41,16 +42,16 @@ public struct ProjectileState
         this.lastUpdateTime = Time.fixedTime;
     }
 }
+
 public class ProjectileController : MonoBehaviour
 {
-
     public ProjectileState state;
 
 
     [HideInInspector]
     public GunStats stats;
     // Delegates and Events
-    
+
     // Used for describing how a projectile moves when asked to move a specific distance 
     [System.Serializable]
     public delegate void PathUpdateEvent(float distance, ref ProjectileState state, GunStats stats);
@@ -82,7 +83,7 @@ public class ProjectileController : MonoBehaviour
 
     public Vector3 LerpPos()
     {
-        var diff = (Time.time - state.lastUpdateTime)/Time.fixedDeltaTime;
+        var diff = (Time.time - state.lastUpdateTime) / Time.fixedDeltaTime;
         return Vector3.Lerp(state.oldPosition, state.position, diff);
     }
 
