@@ -8,6 +8,9 @@ using UnityEngine.UI;
 
 public class OptionsMenu : MonoBehaviour
 {
+    // THIS NAME NEEEEEEDS TO MATCH THE GIVEN NAME OF THE EXPOSED AUDIO MIXER VARIABLE
+    private const string AUDIO_MIXER_MASTER_VOLUME = "AUDIO_MASTER_VOLUME";
+
     [SerializeField]
     private AudioMixer mainAudioMixer;
 
@@ -27,18 +30,17 @@ public class OptionsMenu : MonoBehaviour
         resolutionDropdown.AddOptions(resolutions.Select(r => $"{r.width} x {r.height}").ToList());
         resolutionDropdown.value = System.Array.FindIndex(resolutions, r => r.width == Screen.currentResolution.width && r.height == Screen.currentResolution.height);
         resolutionDropdown.RefreshShownValue();
-        resolutionDropdown.onValueChanged.AddListener(SetResolutionFromDropdown);
     }
 
-    private void SetMasterVolume(float volume)
+    public void SetMasterVolume(float volume)
     {
-        mainAudioMixer.SetFloat("masterVolume", volume);
+        mainAudioMixer.SetFloat(AUDIO_MIXER_MASTER_VOLUME, volume);
     }
-    private void SetQualityPreset(int qualityPresetIndex)
+    public void SetQualityPreset(int qualityPresetIndex)
     {
         QualitySettings.SetQualityLevel(qualityPresetIndex);
     }
-    private void SetResolutionFromDropdown(int dropdownIndex)
+    public void SetResolutionFromDropdown(int dropdownIndex)
     {
         var resolution = resolutions[dropdownIndex];
         Screen.SetResolution(resolution.width, resolution.height, true);
