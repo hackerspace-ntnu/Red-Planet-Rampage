@@ -29,6 +29,7 @@ public class GunController : MonoBehaviour
             FireGun();
         }
     }
+
     private void FireGun()
     {
         foreach (var output in outputs)

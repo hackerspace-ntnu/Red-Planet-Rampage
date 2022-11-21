@@ -6,11 +6,10 @@ using System.Linq;
 [RequireComponent(typeof(GunController))]
 public class GunFactory : MonoBehaviour
 {
-    static GameObject InstantiateGun(GameObject bodyPrefab, GameObject barrelPrefab, GameObject extensionPrefab)
+    public static GameObject InstantiateGun(GameObject bodyPrefab, GameObject barrelPrefab, GameObject extensionPrefab, Transform parent)
     {
-        GameObject gun = new GameObject();
+        GameObject gun = Instantiate(new GameObject(), parent);
         GunFactory controller = gun.AddComponent<GunFactory>();
-        gun.AddComponent<GunController>();
         controller.bodyPrefab = bodyPrefab;
         controller.barrelPrefab = barrelPrefab;
         controller.extensionPrefab = extensionPrefab;
@@ -31,7 +30,6 @@ public class GunFactory : MonoBehaviour
 
     private void Start()
     {
-        
         InitializeGun();
     }
 
@@ -39,7 +37,7 @@ public class GunFactory : MonoBehaviour
     public void InitializeGun()
     {
         gunController = GetComponent<GunController>();
-        
+
         // Destroys gun child before construction
         for (int i = this.transform.childCount; i > 0; --i)
             DestroyImmediate(this.transform.GetChild(0).gameObject);
@@ -99,8 +97,5 @@ public class GunFactory : MonoBehaviour
             modifier.Attach(gunController);
         }
     }
-
-    
-
 }
 
