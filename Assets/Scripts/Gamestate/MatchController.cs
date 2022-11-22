@@ -96,7 +96,7 @@ public class MatchController : MonoBehaviour
 
         AssignRewards();
 
-        if (!CheckWinCondition())
+        if (!IsWinCondition())
         {
             changeInputMappings("FPS");
             StartNextBidding();
@@ -126,7 +126,7 @@ public class MatchController : MonoBehaviour
         }
     }
 
-    private bool CheckWinCondition()
+    private bool IsWinCondition()
     {
         var lastWinner = rounds.Last().Winner;
         var wins = rounds.Where(round => round.IsWinner(lastWinner)).Count();

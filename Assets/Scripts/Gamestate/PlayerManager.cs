@@ -25,12 +25,6 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private List<Item> items;
 
-    public void PerformTransaction(Item item, int cost)
-    {
-        items.Add(item);
-        chips -= cost;
-    }
-
     private GunController gunController;
 
     // TODO do this in a better way?
@@ -48,6 +42,12 @@ public class PlayerManager : MonoBehaviour
         healthController = GetComponent<HealthController>();
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
+    }
+
+    public void PerformTransaction(Item item, int cost)
+    {
+        items.Add(item);
+        chips -= cost;
     }
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
