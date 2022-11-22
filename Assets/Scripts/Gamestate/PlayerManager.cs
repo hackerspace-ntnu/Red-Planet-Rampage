@@ -37,6 +37,9 @@ public class PlayerManager : MonoBehaviour
 
     private HealthController healthController;
 
+    [SerializeField]
+    private HUDController hudController;
+
     void Start()
     {
         healthController = GetComponent<HealthController>();
@@ -53,6 +56,7 @@ public class PlayerManager : MonoBehaviour
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
         Debug.Log(this.ToString() + " took " + damage + " damage from " + info.sourcePlayer.ToString());
+        hudController.UpdateHealthBar(healthController.CurrentHealth, healthController.MaxHealth);
     }
 
     void OnDeath(HealthController healthController, float damage, DamageInfo info)
@@ -64,14 +68,18 @@ public class PlayerManager : MonoBehaviour
     /// <summary>
     /// Function for setting a playerInput and adding movement related listeners to it.
     /// </summary>
-    /// <param name="player"></param>
-    public void SetPlayerInput(FPSInputManager player)
+    /// <param name="playerInput"></param>
+    public void SetPlayerInput(FPSInputManager playerInput)
     {
-        fpsInput = player;
+        fpsInput = playerInput;
         GetComponent<PlayerMovement>().SetPlayerInput(fpsInput);
         SetGunOffset(fpsInput.transform);
         fpsInput.onFirePerformed += OnFire;
         fpsInput.onFireCanceled += OnFireEnd;
+        // Set camera on canvas
+        var canvas = hudController.GetComponent<Canvas>();
+        canvas.worldCamera = fpsInput.GetComponentInChildren<Camera>();
+        canvas.planeDistance = 0.11f;
     }
 
     void OnDestroy()
