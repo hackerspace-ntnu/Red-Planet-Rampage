@@ -17,10 +17,13 @@ public class PlayerManager : MonoBehaviour
 
     public int chips;
 
-    private FPSInputManager fpsInput;
+    public FPSInputManager fpsInput;
 
     [SerializeField]
     private GameObject meshBase;
+
+    [SerializeField]
+    private List<Item> items;
 
     private GunController gunController;
 
@@ -39,6 +42,12 @@ public class PlayerManager : MonoBehaviour
         healthController = GetComponent<HealthController>();
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
+    }
+
+    public void PerformTransaction(Item item, int cost)
+    {
+        items.Add(item);
+        chips -= cost;
     }
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
