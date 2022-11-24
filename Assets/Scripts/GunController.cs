@@ -9,7 +9,6 @@ public class GunController : MonoBehaviour
 
     // Where the gun fires the bullets from
     // Is automatically set by barrel or extension (if one i available)
-    [HideInInspector]
     public Transform[] outputs;
 
     // Keeps track of when gun should be fired
