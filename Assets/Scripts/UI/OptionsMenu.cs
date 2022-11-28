@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class OptionsMenu : MonoBehaviour
 {
@@ -17,16 +18,18 @@ public class OptionsMenu : MonoBehaviour
     [SerializeField]
     private TMP_Dropdown resolutionDropdown;
 
+    [SerializeField]
+    private Slider mainVolSlider;
+
     // The resolutions available as this menu starts its lifetime.
     Resolution[] resolutions;
 
     bool fullscreen;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        resolutions = Screen.resolutions;
-        resolutionDropdown.ClearOptions();
+        resolutions = Screen.resolutions.Reverse().ToArray();
         resolutionDropdown.AddOptions(resolutions.Select(r => $"{r.width} x {r.height}").ToList());
         resolutionDropdown.value = System.Array.FindIndex(resolutions, r => r.width == Screen.currentResolution.width && r.height == Screen.currentResolution.height);
         resolutionDropdown.RefreshShownValue();
@@ -40,7 +43,7 @@ public class OptionsMenu : MonoBehaviour
     {
         QualitySettings.SetQualityLevel(qualityPresetIndex);
     }
-    public void SetResolutionFromDropdown(int dropdownIndex)
+    public void SetResolution(int dropdownIndex)
     {
         var resolution = resolutions[dropdownIndex];
         Screen.SetResolution(resolution.width, resolution.height, true);
