@@ -80,6 +80,10 @@ public class PlayerManager : MonoBehaviour
         var canvas = hudController.GetComponent<Canvas>();
         canvas.worldCamera = fpsInput.GetComponentInChildren<Camera>();
         canvas.planeDistance = 0.11f;
+        // Set player color
+        var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>();
+        var playerIdentity = fpsInput.GetComponent<PlayerIdentity>();
+        meshRenderer.materials[0].SetColor("_Color", playerIdentity.color);
     }
 
     void OnDestroy()
