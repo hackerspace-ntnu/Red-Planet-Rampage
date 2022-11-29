@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7583196319734858555}
   - component: {fileID: 3049982711304716190}
+  - component: {fileID: 7042748633319679116}
   m_Layer: 0
   m_Name: MatchManager
   m_TagString: Untagged
@@ -30,7 +31,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3049982711304716190
 MonoBehaviour:
@@ -44,3 +45,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e06c294a3dd98964b89405af885f5b4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startAmount: 0
+  rewardWin: 2
+  rewardKill: 1
+  rewardBase: 1
+  timer: {fileID: 7042748633319679116}
+--- !u!114 &7042748633319679116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4244699971652222381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf39a137c20631044b50258ded7b8ed2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseWaitTime: 0
+  additionalWaitTime: 0
+  repeat: 0

@@ -43,6 +43,8 @@ public class MatchController : MonoBehaviour
     [SerializeField]
     private int rewardBase = 1;
 
+    public Timer timer;
+
     private List<Player> players = new List<Player>();
     private List<Round> rounds = new List<Round>();
 
