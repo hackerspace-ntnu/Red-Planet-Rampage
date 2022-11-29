@@ -23,6 +23,9 @@ public class PlayerManager : MonoBehaviour
     private GameObject meshBase;
 
     [SerializeField]
+    private Rigidbody ragdoll;
+
+    [SerializeField]
     private List<Item> items;
 
     private GunController gunController;
@@ -63,6 +66,24 @@ public class PlayerManager : MonoBehaviour
     {
         Debug.Log(this.ToString() + " was killed by " + info.sourcePlayer.ToString());
         onDeath?.Invoke(info.sourcePlayer, this);
+        TurnIntoRagdoll(info.projectileState.position, info.projectileState.direction);
+    }
+
+    void TurnIntoRagdoll(Vector3 impactSite, Vector3 impactDirection)
+    {
+        // Disable components
+        GetComponent<PlayerMovement>().enabled = false;
+        fpsInput.GetComponent<Camera>().enabled = false;
+        healthController.enabled = false;
+        meshBase.SetActive(false);
+        // TODO display guns falling to the floor
+        gunController.gameObject.SetActive(false);
+        // Disable all colliders and physics
+        GetComponents<Collider>().ToList().ForEach(collider => collider.enabled = false);
+        GetComponent<Rigidbody>().useGravity = false;
+        // Ragdollify
+        ragdoll.gameObject.SetActive(true);
+        ragdoll.AddForceAtPosition(impactDirection * 4, impactSite, ForceMode.Impulse);
     }
 
     /// <summary>
@@ -82,8 +103,10 @@ public class PlayerManager : MonoBehaviour
         canvas.planeDistance = 0.11f;
         // Set player color
         var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>();
+        var ragdollRenderer = ragdoll.GetComponentInChildren<SkinnedMeshRenderer>();
         var playerIdentity = fpsInput.GetComponent<PlayerIdentity>();
         meshRenderer.materials[0].SetColor("_Color", playerIdentity.color);
+        ragdollRenderer.materials[0].SetColor("_Color", playerIdentity.color);
     }
 
     void OnDestroy()
