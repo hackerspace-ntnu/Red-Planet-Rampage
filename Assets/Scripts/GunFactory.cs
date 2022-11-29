@@ -6,11 +6,10 @@ using System.Linq;
 [RequireComponent(typeof(GunController))]
 public class GunFactory : MonoBehaviour
 {
-    static GameObject InstantiateGun(GameObject bodyPrefab, GameObject barrelPrefab, GameObject extensionPrefab)
+    public static GameObject InstantiateGun(GameObject bodyPrefab, GameObject barrelPrefab, GameObject extensionPrefab, Transform parent)
     {
-        GameObject gun = new GameObject();
+        GameObject gun = Instantiate(new GameObject(), parent);
         GunFactory controller = gun.AddComponent<GunFactory>();
-        gun.AddComponent<GunController>();
         controller.bodyPrefab = bodyPrefab;
         controller.barrelPrefab = barrelPrefab;
         controller.extensionPrefab = extensionPrefab;
@@ -31,7 +30,6 @@ public class GunFactory : MonoBehaviour
 
     private void Start()
     {
-        
         InitializeGun();
     }
 
@@ -39,7 +37,7 @@ public class GunFactory : MonoBehaviour
     public void InitializeGun()
     {
         gunController = GetComponent<GunController>();
-        
+
         // Destroys gun child before construction
         for (int i = this.transform.childCount; i > 0; --i)
             DestroyImmediate(this.transform.GetChild(0).gameObject);
@@ -64,10 +62,14 @@ public class GunFactory : MonoBehaviour
 
         if (extensionPrefab != null)
         {
+            // Instantiate extension itself *once*
             var extension = Instantiate(extensionPrefab, gunBarrel.attachmentPoints[0].position, gunBarrel.attachmentPoints[0].rotation, transform)
                 .GetComponent<GunExtension>();
-            extension.AttachToTransforms(gunBarrel.attachmentPoints);
-            gunController.outputs = extension.outputs;
+            // Instantiate remaining outputs and models, and register all outputs
+            var outputs = new List<Transform>();
+            outputs.AddRange(extension.outputs);
+            outputs.AddRange(extension.AttachToTransforms(gunBarrel.attachmentPoints));
+            gunController.outputs = outputs.ToArray();
         }
         else
         {
@@ -99,8 +101,5 @@ public class GunFactory : MonoBehaviour
             modifier.Attach(gunController);
         }
     }
-
-    
-
 }
 

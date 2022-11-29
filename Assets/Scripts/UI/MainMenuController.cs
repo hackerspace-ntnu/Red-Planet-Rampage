@@ -117,12 +117,14 @@ public class MainMenuController : MonoBehaviour
         GameObject panel = Instantiate(playerBackgroundPanel, characterView);
         playerBackgrounds.Add(panel);
 
-        //Update all panels' size and position
+        //Update all panels' size, position and color
         for (int i=0; i<playerBackgrounds.Count; i++)
         {
             playerBackgrounds[i].transform.LeanMoveLocalX(width * i, playerBackgroundPanelAppearTime);
             var rectTransform = playerBackgrounds[i].GetComponent<RectTransform>();
             rectTransform.sizeDelta = new Vector2(width, rectTransform.sizeDelta.y);
+            //Update color
+            playerBackgrounds[i].GetComponent<Image>().color = playerInputs[i].GetComponent<PlayerIdentity>().color;
         }
     }
 

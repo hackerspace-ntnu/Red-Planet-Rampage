@@ -83,13 +83,31 @@ public class MatchController : MonoBehaviour
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
     }
 
+    public void StartNextBidding()
+    {
+        onBiddingStart?.Invoke();
+        SceneManager.LoadSceneAsync("Bidding");
+        PlayerInputManagerController.Singleton.playerInputManager.splitScreen = false;
+    }
+
     public void EndActiveRound()
     {
         onRoundEnd?.Invoke();
 
         AssignRewards();
 
-        CheckWinCondition();
+        if (!IsWin())
+        {
+            changeInputMappings("FPS");
+            StartNextBidding();
+        }
+    }
+
+    public void EndActiveBidding()
+    {
+        onBiddingEnd?.Invoke();
+
+        StartNextRound();
     }
 
     private void AssignRewards()
@@ -108,7 +126,7 @@ public class MatchController : MonoBehaviour
         }
     }
 
-    private void CheckWinCondition()
+    private bool IsWin()
     {
         var lastWinner = rounds.Last().Winner;
         var wins = rounds.Where(round => round.IsWinner(lastWinner)).Count();
@@ -120,23 +138,28 @@ public class MatchController : MonoBehaviour
             Debug.Log("Aaaaand the winner iiiiiiiis " + lastWinner.ToString());
 
             // Update playerInputs in preperation for Menu scene
-            PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
-            foreach (PlayerInput inputs in PlayerInputManagerController.Singleton.playerInputs)
-            {
-                // Update listeners to new map
-                inputs.GetComponent<InputManager>().RemoveListeners();
-                inputs.GetComponent<InputManager>().AddListeners();
-                // Free the playerInputs from their mortail coils (Player prefab)
-                inputs.transform.parent = null;
-                DontDestroyOnLoad(inputs);
-            }
+            changeInputMappings("Menu");
 
-            SceneManager.LoadScene("Menu");
+            SceneManager.LoadSceneAsync("Menu");
+            return true;
         }
         else
         {
-            // TODO Go to bidding round first!
-            StartNextRound();
+            return false;
+        }
+    }
+
+    private void changeInputMappings(string inputMapName)
+    {
+        PlayerInputManagerController.Singleton.ChangeInputMaps(inputMapName);
+        foreach (PlayerInput inputs in PlayerInputManagerController.Singleton.playerInputs)
+        {
+            // Update listeners to new map
+            inputs.GetComponent<InputManager>().RemoveListeners();
+            inputs.GetComponent<InputManager>().AddListeners();
+            // Free the playerInputs from their mortail coils (Player prefab)
+            inputs.transform.parent = null;
+            DontDestroyOnLoad(inputs);
         }
     }
 }

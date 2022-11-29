@@ -9,12 +9,13 @@ public class GunController : MonoBehaviour
 
     // Where the gun fires the bullets from
     // Is automatically set by barrel or extension (if one i available)
-    [HideInInspector]
     public Transform[] outputs;
 
     // Keeps track of when gun should be fired
     [HideInInspector]
     public FireRateController fireRateController;
+
+    public PlayerManager player;
 
     // All the stats of the gun and projectile
     public GunStats stats { get; set; }
@@ -29,6 +30,7 @@ public class GunController : MonoBehaviour
             FireGun();
         }
     }
+
     private void FireGun()
     {
         foreach (var output in outputs)
@@ -44,7 +46,9 @@ public class GunController : MonoBehaviour
                 }
                 // Makes projectile 
                 // TODO: generalize this so that different methods of "Creating" bullets can be used to save performance
-                Instantiate(projectile, output.position, dir).SetActive(true);
+                var firedProjectile = Instantiate(projectile, output.position, dir);
+                firedProjectile.GetComponent<ProjectileDamageController>().player = player;
+                firedProjectile.SetActive(true);
             }
         }
     }
