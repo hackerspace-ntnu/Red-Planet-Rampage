@@ -9,31 +9,26 @@ using UnityEngine.EventSystems;
 
 public class OptionsMenu : MonoBehaviour
 {
-    #region Resolution variables
-    [Header("Resolution")]
+    #region Graphics variables
+    [Header("Graphics")]
     
     [SerializeField]
     private TMP_Dropdown resolutionDropdown;
-    
-    [SerializeField]
-    private TMP_Dropdown fullscreenTypeDropdown;
 
     // The resolutions available as this menu starts its lifetime.
     Resolution[] resolutions;
 
+    [SerializeField]
+    private TMP_Dropdown fullscreenTypeDropdown;
+
+    [SerializeField]
+    private TMP_Dropdown qualityDropdown;
+
+    private string[] qualityNames;
+
     #endregion
     #region Audio Variables
     [Header("Audio")]
-    /*
-    [SerializeField]
-    private Slider mainVolSlider;
-
-    [SerializeField]
-    private Slider musicVolSlider;
-
-    [SerializeField]
-    private Slider sfxVolSlider;
-    */
     // Exposed Audiomixer variable names
     private const string audioGroupMaster = "masterVolume";
     private const string audioGroupMusic = "musicVolume";
@@ -47,6 +42,7 @@ public class OptionsMenu : MonoBehaviour
     void Awake()
     {
         CheckResolutions();
+        CheckQuality();
     }
 
     /// <summary>
@@ -59,6 +55,13 @@ public class OptionsMenu : MonoBehaviour
         resolutionDropdown.AddOptions(resolutions.Select(r => $"{r.width} x {r.height}").ToList());
         resolutionDropdown.value = System.Array.FindIndex(resolutions, r => r.width == Screen.currentResolution.width && r.height == Screen.currentResolution.height);
         resolutionDropdown.RefreshShownValue();
+    }
+
+    private void CheckQuality()
+    {
+        qualityNames = QualitySettings.names;
+        qualityDropdown.AddOptions(qualityNames.ToList());
+        qualityDropdown.value = QualitySettings.GetQualityLevel();
     }
 
     public void SetMasterVolume(float volume)
@@ -75,10 +78,12 @@ public class OptionsMenu : MonoBehaviour
     {
         mainAudioMixer.SetFloat(audioGroupSFX, volume);
     }
-    public void SetQualityPreset(int qualityPresetIndex)
+
+    public void SetQualityLevel(int qualityPresetIndex)
     {
         QualitySettings.SetQualityLevel(qualityPresetIndex);
     }
+
     public void SetResolution(int dropdownIndex)
     {
         var resolution = resolutions[dropdownIndex];
