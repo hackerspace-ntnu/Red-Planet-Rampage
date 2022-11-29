@@ -45,12 +45,12 @@ public class OptionsMenu : MonoBehaviour
         CheckQuality();
     }
 
+    
     /// <summary>
     /// Determine the different resolutions the display supports
     /// </summary>
     private void CheckResolutions()
     {
-
         resolutions = Screen.resolutions.Reverse().ToArray();
         resolutionDropdown.AddOptions(resolutions.Select(r => $"{r.width} x {r.height}").ToList());
         resolutionDropdown.value = System.Array.FindIndex(resolutions, r => r.width == Screen.currentResolution.width && r.height == Screen.currentResolution.height);

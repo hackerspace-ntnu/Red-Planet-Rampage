@@ -110,17 +110,14 @@ public class MainMenuController : MonoBehaviour
             t.SetPlayerInput(playerInput);
         }
 
-        
-        //Width of the panel adjusted for amount of panels
-        //var width = characterView.rect.width/playerInputs.Count;
         GameObject panel = Instantiate(playerBackgroundPanel, characterView);
         playerBackgrounds.Add(panel);
 
         //Update all panels color
         for (int i = 0; i < playerBackgrounds.Count; i++)
         {
-            //Update color
-            playerBackgrounds[i].GetComponent<Image>().color = playerInputs[i].GetComponent<PlayerIdentity>().color;
+            // Update the visual loadout controller
+            playerBackgrounds[i].GetComponent<CharacterMenuLoadout>().SetupPreview("Player " + (i+1),playerInputs[i].GetComponent<PlayerIdentity>().color);
         }
     }
 
