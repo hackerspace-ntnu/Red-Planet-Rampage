@@ -15,8 +15,6 @@ public class MainMenuController : MonoBehaviour
     private RectTransform characterView;
     [SerializeField]
     private GameObject playerBackgroundPanel;
-    [SerializeField]
-    private float playerBackgroundPanelAppearTime = 0.25f;
 
     [SerializeField]
     private List<TabGroup> tabGroups;
@@ -112,17 +110,15 @@ public class MainMenuController : MonoBehaviour
             t.SetPlayerInput(playerInput);
         }
 
+        
         //Width of the panel adjusted for amount of panels
-        var width = characterView.rect.width/playerInputs.Count;
+        //var width = characterView.rect.width/playerInputs.Count;
         GameObject panel = Instantiate(playerBackgroundPanel, characterView);
         playerBackgrounds.Add(panel);
 
-        //Update all panels' size, position and color
-        for (int i=0; i<playerBackgrounds.Count; i++)
+        //Update all panels color
+        for (int i = 0; i < playerBackgrounds.Count; i++)
         {
-            playerBackgrounds[i].transform.LeanMoveLocalX(width * i, playerBackgroundPanelAppearTime);
-            var rectTransform = playerBackgrounds[i].GetComponent<RectTransform>();
-            rectTransform.sizeDelta = new Vector2(width, rectTransform.sizeDelta.y);
             //Update color
             playerBackgrounds[i].GetComponent<Image>().color = playerInputs[i].GetComponent<PlayerIdentity>().color;
         }
