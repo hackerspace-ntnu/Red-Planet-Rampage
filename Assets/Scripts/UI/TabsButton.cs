@@ -12,10 +12,4 @@ public class TabsButton : MonoBehaviour
     public GameObject tabContent;
 
     public Selectable firstItem;
-
-
-    private void Awake()
-    {
-        background = GetComponent<Image>();
-    }
 }
