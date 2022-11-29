@@ -1,26 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
+
 
 [RequireComponent(typeof(Image))]
-public class TabsButton : MonoBehaviour, ISelectHandler
+public class TabsButton : MonoBehaviour
 {
     public TabGroup tabGroup;
 
     public Image background;
 
-    public GameObject tab;
+    public GameObject tabContent;
 
-    public void OnSelect(BaseEventData eventData)
-    {
-        tabGroup.OnTabSelected(this);
-    }
+    public Selectable firstItem;
 
-    private void Start()
+
+    private void Awake()
     {
         background = GetComponent<Image>();
-        tabGroup.Subscribe(this);
     }
 }

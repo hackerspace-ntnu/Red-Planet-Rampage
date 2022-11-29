@@ -18,6 +18,9 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private float playerBackgroundPanelAppearTime = 0.25f;
 
+    [SerializeField]
+    private List<TabGroup> tabGroups;
+
     private PlayerInputManagerController playerInputManagerController;
     private List<PlayerInput> playerInputs = new List<PlayerInput>();
     private List<GameObject> playerBackgrounds = new List<GameObject>();
@@ -32,6 +35,7 @@ public class MainMenuController : MonoBehaviour
         {
             TransferExistingInputs();
         }
+
     }
 
     private void OnDestroy()
@@ -95,13 +99,19 @@ public class MainMenuController : MonoBehaviour
 
     /// <summary>
     /// Subscribes to onplayerjoined and is responsible for adapting menu to new player inputs.
-    /// Function needs to force the panels to have flex-like properties as Unity doens't support dynamic "stretch" of multiple elements inside a parent container.
+    /// Function needs to force the panels to have flex-like properties as Unity doesn't support dynamic "stretch" of multiple elements inside a parent container.
     /// </summary>
     /// <param name="playerInput"></param>
     private void AddPlayer(PlayerInput playerInput)
     {
         playerInput.GetComponent<Camera>().enabled = false;
         playerInputs.Add(playerInput);
+
+        foreach (TabGroup t in tabGroups)
+        {
+            t.SetPlayerInput(playerInput);
+        }
+
         //Width of the panel adjusted for amount of panels
         var width = characterView.rect.width/playerInputs.Count;
         GameObject panel = Instantiate(playerBackgroundPanel, characterView);
@@ -114,5 +124,10 @@ public class MainMenuController : MonoBehaviour
             var rectTransform = playerBackgrounds[i].GetComponent<RectTransform>();
             rectTransform.sizeDelta = new Vector2(width, rectTransform.sizeDelta.y);
         }
+    }
+
+    public void Quit()
+    {
+        Application.Quit();
     }
 }

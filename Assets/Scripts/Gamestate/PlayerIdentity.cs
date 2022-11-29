@@ -5,15 +5,4 @@ using UnityEngine;
 public class PlayerIdentity : MonoBehaviour
 {
     private Color color;
-
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 }

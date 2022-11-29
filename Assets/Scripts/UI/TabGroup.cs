@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
+
 
 public class TabGroup : MonoBehaviour
 {
@@ -9,6 +12,17 @@ public class TabGroup : MonoBehaviour
 
     public TabsButton selectedTab;
 
+    public void SetPlayerInput(PlayerInput playerInput)
+    {
+        playerInput.GetComponent<InputManager>().onLeftShoulderButtonPressed += ctx => OnLeftButton(ctx);
+        playerInput.GetComponent<InputManager>().onRightShoulderButtonPressed += ctx => OnRightButton(ctx);
+    }
+
+    private void Start()
+    {
+        tabButtons = GetComponentsInChildren<TabsButton>().ToList();
+        ResetTabs();
+    }
     public void Subscribe(TabsButton button)
     {
         if(tabButtons == null)
@@ -19,27 +33,58 @@ public class TabGroup : MonoBehaviour
         tabButtons.Add(button);
     }
 
-    public void OnTabSelected(TabsButton tab)
+    public void SelectTab(TabsButton tab)
     {
         // Change the contents
-        selectedTab.tab.SetActive(false);
-        tab.tab.SetActive(true);
+        selectedTab.tabContent.SetActive(false);
+        tab.tabContent.SetActive(true);
 
         // Change the tab UI
         selectedTab = tab;
+
+        // Reset the tab menu
         ResetTabs();
-        tab.background.color = tabActive;
-        
+
+        // Select the first element
+        MainMenuController mainMenuController = GetComponentInParent<MainMenuController>();
+        mainMenuController.SelectControl(selectedTab.firstItem);
+    }
+
+    private void OnLeftButton(InputAction.CallbackContext ctx)
+    {
+        if (this.isActiveAndEnabled)
+        {
+            // Move to the previous tab
+            int i = tabButtons.FindIndex(x => x == selectedTab);
+            if (i != 0)
+            {
+                i -= 1;
+                SelectTab(tabButtons[i]);
+            }
+        }
+    }
+
+    private void OnRightButton(InputAction.CallbackContext ctx)
+    {
+        if (this.isActiveAndEnabled)
+        {
+            // Move to the next tab
+            int i = tabButtons.FindIndex(x => x == selectedTab);
+            if (i != tabButtons.Count - 1)
+            {
+                i += 1;
+                SelectTab(tabButtons[i]);
+            }
+        }
     }
 
     public void ResetTabs()
     {
         foreach(TabsButton button in tabButtons)
-        {
-            if(selectedTab != null && button == selectedTab) 
-                continue;
-            
+        {      
             button.background.color = tabIdle;
         }
+
+        selectedTab.background.color = tabActive;
     }
 }

@@ -17,6 +17,8 @@ public class InputManager : MonoBehaviour
     public InputEvent onCancel;
     public InputEvent onMovePerformed;
     public InputEvent onMoveCanceled;
+    public InputEvent onLeftShoulderButtonPressed;
+    public InputEvent onRightShoulderButtonPressed;
 
     protected List<Action> cleanupCalls = new List<Action>();
 
@@ -73,6 +75,8 @@ public class InputManager : MonoBehaviour
         cleanupCalls.Add(FixListeners("Cancel", true, onCancel));
         cleanupCalls.Add(FixListeners("Move", true, onMovePerformed));
         cleanupCalls.Add(FixListeners("Move", false, onMoveCanceled));
+        cleanupCalls.Add(FixListeners("LeftButton", true, onLeftShoulderButtonPressed));
+        cleanupCalls.Add(FixListeners("RightButton", true, onRightShoulderButtonPressed));
 
         AddExtraListeners();
     }

@@ -59,9 +59,10 @@ public class OptionsMenu : MonoBehaviour
 
     private void CheckQuality()
     {
+        // We invert this list so the dropdown goes from high to low quality.
         qualityNames = QualitySettings.names;
-        qualityDropdown.AddOptions(qualityNames.ToList());
-        qualityDropdown.value = QualitySettings.GetQualityLevel();
+        qualityDropdown.AddOptions(qualityNames.Reverse().ToList());
+        qualityDropdown.value = QualitySettings.GetQualityLevel() - qualityNames.Length - 1;
     }
 
     public void SetMasterVolume(float volume)
@@ -81,7 +82,7 @@ public class OptionsMenu : MonoBehaviour
 
     public void SetQualityLevel(int qualityPresetIndex)
     {
-        QualitySettings.SetQualityLevel(qualityPresetIndex);
+        QualitySettings.SetQualityLevel(qualityNames.Length - qualityPresetIndex - 1);
     }
 
     public void SetResolution(int dropdownIndex)
