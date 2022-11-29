@@ -219,7 +219,7 @@ GameObject:
   - component: {fileID: 2630659873997500700}
   - component: {fileID: 1695463766077066205}
   m_Layer: 0
-  m_Name: spiral_extention
+  m_Name: spiral_extension
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -266,11 +266,15 @@ MonoBehaviour:
   - name: ProjectileSpeed
     addition: 0
     multiplier: 2
-    exponential: 10
+    exponential: 1
   - name: ProjectileGravityModifier
-    addition: 0
+    addition: 1
     multiplier: 0
     exponential: 1
+  - name: ProjectileDamage
+    addition: 0
+    multiplier: 0
+    exponential: 0.4
   bulletModifyerPrefab: {fileID: 3767032461262981500, guid: 8e82b8315a474ee439ea502a2e04d7d7, type: 3}
   model: {fileID: 3924203482660996617}
   outputs:

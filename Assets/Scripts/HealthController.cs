@@ -30,7 +30,7 @@ public class HealthController : MonoBehaviour
 
     public void dealDamage(DamageInfo info)
     {
-        float damage = info.stats.ProjectileDamage.Value() * (info.isCritical ? 1 : info.stats.CriticalMultiplier.Value());
+        float damage = info.stats.ProjectileDamage.Value() * (info.isCritical ? info.stats.CriticalMultiplier.Value() : 1);
         currentHealth -= damage;
         onDamageTaken?.Invoke(this, damage, info);
         if (currentHealth <= 0)

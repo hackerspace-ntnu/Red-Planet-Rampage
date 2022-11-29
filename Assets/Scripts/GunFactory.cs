@@ -62,10 +62,14 @@ public class GunFactory : MonoBehaviour
 
         if (extensionPrefab != null)
         {
+            // Instantiate extension itself *once*
             var extension = Instantiate(extensionPrefab, gunBarrel.attachmentPoints[0].position, gunBarrel.attachmentPoints[0].rotation, transform)
                 .GetComponent<GunExtension>();
-            extension.AttachToTransforms(gunBarrel.attachmentPoints);
-            gunController.outputs = extension.outputs;
+            // Instantiate remaining outputs and models, and register all outputs
+            var outputs = new List<Transform>();
+            outputs.AddRange(extension.outputs);
+            outputs.AddRange(extension.AttachToTransforms(gunBarrel.attachmentPoints));
+            gunController.outputs = outputs.ToArray();
         }
         else
         {
