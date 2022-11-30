@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerIdentity : MonoBehaviour
 {
     public Color color;
+    public string playerName;
 
     void Start()
     {
