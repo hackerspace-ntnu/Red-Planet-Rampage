@@ -75,8 +75,8 @@ public class InputManager : MonoBehaviour
         cleanupCalls.Add(FixListeners("Cancel", true, onCancel));
         cleanupCalls.Add(FixListeners("Move", true, onMovePerformed));
         cleanupCalls.Add(FixListeners("Move", false, onMoveCanceled));
-        cleanupCalls.Add(FixListeners("LeftButton", true, onLeftShoulderButtonPressed));
-        cleanupCalls.Add(FixListeners("RightButton", true, onRightShoulderButtonPressed));
+        cleanupCalls.Add(FixListeners("LeftTab", true, onLeftShoulderButtonPressed));
+        cleanupCalls.Add(FixListeners("RightTab", true, onRightShoulderButtonPressed));
 
         AddExtraListeners();
     }
