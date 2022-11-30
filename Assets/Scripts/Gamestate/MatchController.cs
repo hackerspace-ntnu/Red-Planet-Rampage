@@ -49,7 +49,7 @@ public class MatchController : MonoBehaviour
     public Timer roundTimer;
 
     [SerializeField]
-    private HUDGlobalController globalHud;
+    private GlobalHUDController globalHUDController;
 
     private List<Player> players = new List<Player>();
     private List<Round> rounds = new List<Round>();
@@ -140,7 +140,7 @@ public class MatchController : MonoBehaviour
 
     private void HUDTimerUpdate()
     {
-        globalHud.OnTimerUpdate(roundStartTime - roundTimer.ElapsedTime);
+        globalHUDController.OnTimerUpdate(roundStartTime - roundTimer.ElapsedTime);
     }
 
     private bool IsWin()

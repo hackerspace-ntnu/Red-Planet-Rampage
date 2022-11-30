@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class HUDGlobalController : MonoBehaviour
+public class GlobalHUDController : MonoBehaviour
 {
     [SerializeField]
     private TMP_Text roundTimer;
