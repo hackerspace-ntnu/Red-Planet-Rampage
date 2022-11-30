@@ -16,8 +16,8 @@ public class TabGroup : MonoBehaviour
 
     public void SetPlayerInput(PlayerInput playerInput)
     {
-        playerInput.GetComponent<InputManager>().onLeftShoulderButtonPressed += ctx => OnLeftButton(ctx);
-        playerInput.GetComponent<InputManager>().onRightShoulderButtonPressed += ctx => OnRightButton(ctx);
+        playerInput.GetComponent<InputManager>().onLeftTabPerformed += ctx => OnLeftButton(ctx);
+        playerInput.GetComponent<InputManager>().onRightTabPerformed += ctx => OnRightButton(ctx);
     }
 
 
