@@ -3,8 +3,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
-/// This class must be attached to every slider, It reselects the slider 
-/// element after the player selects it.
+/// This class must be attached to every slider, It reselects the 
+/// slider element after the player selects it.
 /// </summary>
 public class SliderFocus : MonoBehaviour, ISubmitHandler
 {
