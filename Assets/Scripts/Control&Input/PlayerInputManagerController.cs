@@ -8,7 +8,7 @@ public class PlayerInputManagerController : MonoBehaviour
 {
     public static PlayerInputManagerController Singleton { get; private set; }
 
-    public List<PlayerInput> playerInputs = new List<PlayerInput>();
+    public List<InputManager> playerInputs = new List<InputManager>();
 
     public PlayerInputManager playerInputManager;
 
@@ -17,6 +17,10 @@ public class PlayerInputManagerController : MonoBehaviour
 
     [SerializeField]
     private string[] playerNames;
+
+    public delegate void JoinEvent(InputManager inputManager);
+
+    public JoinEvent onPlayerInputJoined;
 
     void Awake()
     {
@@ -51,7 +55,9 @@ public class PlayerInputManagerController : MonoBehaviour
         var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
         playerIdentity.color = playerColors[playerInputs.Count];
         playerIdentity.playerName = playerNames[playerInputs.Count];
-        playerInputs.Add(playerInput);
+        InputManager inputManager = playerInput.GetComponent<InputManager>();
+        playerInputs.Add(inputManager);
+        onPlayerInputJoined(inputManager);
     }
 
     /// <summary>
@@ -60,9 +66,9 @@ public class PlayerInputManagerController : MonoBehaviour
     /// <param name="mapNameOrId">Name of the inputMap you want to change to</param>
     public void ChangeInputMaps(string mapNameOrId)
     {
-        foreach (PlayerInput input in playerInputs)
+        foreach (InputManager input in playerInputs)
         {
-            input.SwitchCurrentActionMap(mapNameOrId);
+            input.playerInput.SwitchCurrentActionMap(mapNameOrId);
         }
     }
 }
