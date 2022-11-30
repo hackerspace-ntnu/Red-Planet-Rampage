@@ -33,6 +33,9 @@ public class MatchController : MonoBehaviour
     public MatchEvent onBiddingStart;
     public MatchEvent onBiddingEnd;
 
+    [SerializeField]
+    private float roundStartTime;
+
     [Header("Chip rewards")]
     [SerializeField]
     private int startAmount = 0;
@@ -43,7 +46,10 @@ public class MatchController : MonoBehaviour
     [SerializeField]
     private int rewardBase = 1;
 
-    public Timer timer;
+    public Timer roundTimer;
+
+    [SerializeField]
+    private HUDGlobalController globalHud;
 
     private List<Player> players = new List<Player>();
     private List<Round> rounds = new List<Round>();
@@ -83,6 +89,9 @@ public class MatchController : MonoBehaviour
     {
         onRoundStart?.Invoke();
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
+        roundTimer.StartTimer(roundStartTime);
+        roundTimer.OnTimerUpdate += HUDTimerUpdate;
+        roundTimer.OnTimerRunCompleted += EndActiveRound;
     }
 
     public void StartNextBidding()
@@ -95,7 +104,8 @@ public class MatchController : MonoBehaviour
     public void EndActiveRound()
     {
         onRoundEnd?.Invoke();
-
+        roundTimer.OnTimerUpdate -= HUDTimerUpdate;
+        roundTimer.OnTimerRunCompleted -= EndActiveRound;
         AssignRewards();
 
         if (!IsWin())
@@ -128,9 +138,15 @@ public class MatchController : MonoBehaviour
         }
     }
 
+    private void HUDTimerUpdate()
+    {
+        globalHud.OnTimerUpdate(roundStartTime - roundTimer.ElapsedTime);
+    }
+
     private bool IsWin()
     {
         var lastWinner = rounds.Last().Winner;
+        if (lastWinner == null) { return false; }
         var wins = rounds.Where(round => round.IsWinner(lastWinner)).Count();
         Debug.Log("Current winner (" + lastWinner.ToString() + ") has " + wins + " wins.");
         if (wins >= 3)
