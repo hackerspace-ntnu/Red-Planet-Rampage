@@ -8,17 +8,19 @@ public class GlobalHUDController : MonoBehaviour
     [SerializeField]
     private TMP_Text roundTimer;
     [SerializeField]
+    private float textStartY = -25f;
+    [SerializeField]
     private float textOffsetY = 180f;
 
     void Start()
     {
         if (PlayerInputManagerController.Singleton.playerInputs.Count > 2)
         {
-            roundTimer.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+            roundTimer.GetComponent<TMP_Text>().alignment = TextAlignmentOptions.Center;
         }
         else
         {
-            roundTimer.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, textOffsetY);
+            roundTimer.GetComponent<TMP_Text>().alignment = TextAlignmentOptions.Top;
         }
     }
 
