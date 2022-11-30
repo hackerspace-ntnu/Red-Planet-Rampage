@@ -35,18 +35,18 @@ public class PlayerFactory : MonoBehaviour
             playerInputManagerController.ChangeInputMaps("Bidding");
             foreach (InputManager inputs in playerInputManagerController.playerInputs)
             {
-                inputs.GetComponent<InputManager>().RemoveListeners();
+                inputs.RemoveListeners();
                 InstantiateBiddingPlayer(inputs);
-                inputs.GetComponent<InputManager>().AddListeners();
+                inputs.AddListeners();
             }
         }
         else { 
         playerInputManagerController.ChangeInputMaps("FPS");
         foreach (InputManager inputs in playerInputManagerController.playerInputs)
         {
-            inputs.GetComponent<InputManager>().RemoveListeners();
+            inputs.RemoveListeners();
             InstantiateFPSPlayer(inputs);
-            inputs.GetComponent<InputManager>().AddListeners();
+            inputs.AddListeners();
         }
         }
     }
