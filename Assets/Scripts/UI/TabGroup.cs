@@ -12,7 +12,6 @@ public class TabGroup : MonoBehaviour
 
     public TabsButton selectedTab;
 
-
     private MainMenuController mainMenuController;
 
     public void SetPlayerInput(PlayerInput playerInput)
@@ -66,11 +65,8 @@ public class TabGroup : MonoBehaviour
         {
             // Move to the previous tab
             int i = tabButtons.FindIndex(x => x == selectedTab);
-            if (i != 0)
-            {
-                i -= 1;
-                SelectTab(tabButtons[i]);
-            }
+            if (i > 0)
+                SelectTab(tabButtons[i - 1]);
         }
     }
 
@@ -80,11 +76,8 @@ public class TabGroup : MonoBehaviour
         {
             // Move to the next tab
             int i = tabButtons.FindIndex(x => x == selectedTab);
-            if (i != tabButtons.Count - 1)
-            {
-                i += 1;
-                SelectTab(tabButtons[i]);
-            }
+            if (i <= tabButtons.Count - 1)
+                SelectTab(tabButtons[i+1]);
         }
     }
 
