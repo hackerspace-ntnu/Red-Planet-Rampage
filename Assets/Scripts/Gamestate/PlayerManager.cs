@@ -18,9 +18,13 @@ public class PlayerManager : MonoBehaviour
     public int chips;
 
     public FPSInputManager fpsInput;
+    public PlayerIdentity identity;
 
     [SerializeField]
     private GameObject meshBase;
+
+    [SerializeField]
+    private Rigidbody ragdoll;
 
     [SerializeField]
     private List<Item> items;
@@ -61,17 +65,36 @@ public class PlayerManager : MonoBehaviour
 
     void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
-        Debug.Log(this.ToString() + " was killed by " + info.sourcePlayer.ToString());
         onDeath?.Invoke(info.sourcePlayer, this);
+        TurnIntoRagdoll(info.projectileState.position, info.projectileState.direction);
+        hudController.DisplayDeathScreen(info.sourcePlayer.identity);
+    }
+
+    void TurnIntoRagdoll(Vector3 impactSite, Vector3 impactDirection)
+    {
+        // Disable components
+        GetComponent<PlayerMovement>().enabled = false;
+        healthController.enabled = false;
+        meshBase.SetActive(false);
+        // TODO display guns falling to the floor
+        gunController.gameObject.SetActive(false);
+        // Disable all colliders and physics
+        GetComponents<Collider>().ToList().ForEach(collider => collider.enabled = false);
+        GetComponent<Rigidbody>().useGravity = false;
+        // Ragdollify
+        ragdoll.gameObject.SetActive(true);
+        ragdoll.AddForceAtPosition(impactDirection * 4, impactSite, ForceMode.Impulse);
     }
 
     /// <summary>
-    /// Function for setting a playerInput and adding movement related listeners to it.
+    /// Function for setting a playerInput, adding movement related listeners to it
+    /// and performing other necessary operations that require playerInput/-Identity.
     /// </summary>
     /// <param name="playerInput"></param>
     public void SetPlayerInput(FPSInputManager playerInput)
     {
         fpsInput = playerInput;
+        identity = fpsInput.GetComponent<PlayerIdentity>();
         GetComponent<PlayerMovement>().SetPlayerInput(fpsInput);
         SetGunOffset(fpsInput.transform);
         fpsInput.onFirePerformed += OnFire;
@@ -82,8 +105,9 @@ public class PlayerManager : MonoBehaviour
         canvas.planeDistance = 0.11f;
         // Set player color
         var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>();
-        var playerIdentity = fpsInput.GetComponent<PlayerIdentity>();
-        meshRenderer.materials[0].SetColor("_Color", playerIdentity.color);
+        var ragdollRenderer = ragdoll.GetComponentInChildren<SkinnedMeshRenderer>();
+        meshRenderer.materials[0].SetColor("_Color", identity.color);
+        ragdollRenderer.materials[0].SetColor("_Color", identity.color);
     }
 
     void OnDestroy()
