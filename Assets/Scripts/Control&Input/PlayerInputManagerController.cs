@@ -50,8 +50,8 @@ public class PlayerInputManagerController : MonoBehaviour
     {
         playerInputs.Add(playerInput);
         var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
-        playerIdentity.color = playerColors[playerInputs.Count-1];
-        playerIdentity.playerName = playerNames[playerInputs.Count];
+        playerIdentity.color = playerColors[playerInputs.Count - 1];
+        playerIdentity.playerName = playerNames[playerInputs.Count - 1];
     }
 
     /// <summary>
