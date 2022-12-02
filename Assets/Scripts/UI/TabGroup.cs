@@ -34,7 +34,7 @@ public class TabGroup : MonoBehaviour
     }
     public void Subscribe(TabsButton button)
     {
-        if(tabButtons == null)
+        if (tabButtons == null)
         {
             tabButtons = new List<TabsButton>();
         }
@@ -76,15 +76,15 @@ public class TabGroup : MonoBehaviour
         {
             // Move to the next tab
             int i = tabButtons.FindIndex(x => x == selectedTab);
-            if (i <= tabButtons.Count - 1)
-                SelectTab(tabButtons[i+1]);
+            if (i < tabButtons.Count - 1)
+                SelectTab(tabButtons[i + 1]);
         }
     }
 
     public void ResetTabs()
     {
-        foreach(TabsButton button in tabButtons)
-        {      
+        foreach (TabsButton button in tabButtons)
+        {
             button.background.color = tabIdle;
         }
 
