@@ -107,7 +107,7 @@ public class MainMenuController : MonoBehaviour
 
         foreach (TabGroup t in tabGroups)
         {
-            t.SetPlayerInput(playerInput);
+            t.SetPlayerInput(inputManager);
         }
 
         GameObject panel = Instantiate(playerBackgroundPanel, characterView);

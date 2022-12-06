@@ -12,19 +12,16 @@ public class TabGroup : MonoBehaviour
 
     public TabsButton selectedTab;
 
-    private MainMenuController mainMenuController;
-
-    public void SetPlayerInput(PlayerInput playerInput)
+    public void SetPlayerInput(InputManager inputManager)
     {
-        playerInput.GetComponent<InputManager>().onLeftTabPerformed += ctx => OnLeftButton(ctx);
-        playerInput.GetComponent<InputManager>().onRightTabPerformed += ctx => OnRightButton(ctx);
+        inputManager.onLeftTabPerformed += ctx => OnLeftButton(ctx);
+        inputManager.onRightTabPerformed += ctx => OnRightButton(ctx);
     }
 
 
     private void Awake()
     {
         tabButtons = GetComponentsInChildren<TabsButton>().ToList();
-        mainMenuController = GetComponentInParent<MainMenuController>();
         ResetTabs();
     }
 

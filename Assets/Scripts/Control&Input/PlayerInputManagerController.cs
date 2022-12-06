@@ -53,8 +53,8 @@ public class PlayerInputManagerController : MonoBehaviour
     private void OnPlayerJoined(PlayerInput playerInput)
     {
         var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
-        playerIdentity.color = playerColors[playerInputs.Count - 1];
-        playerIdentity.playerName = playerNames[playerInputs.Count - 1];
+        playerIdentity.color = playerColors[playerInputs.Count];
+        playerIdentity.playerName = playerNames[playerInputs.Count];
         InputManager inputManager = playerInput.GetComponent<InputManager>();
         playerInputs.Add(inputManager);
         onPlayerInputJoined(inputManager);
