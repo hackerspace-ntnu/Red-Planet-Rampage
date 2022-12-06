@@ -33,8 +33,12 @@ public class MatchController : MonoBehaviour
     public MatchEvent onBiddingStart;
     public MatchEvent onBiddingEnd;
 
+    [Header("Timing")]
     [SerializeField]
     private float roundStartTime;
+
+    [SerializeField]
+    private float roundEndDelay;
 
     [Header("Chip rewards")]
     [SerializeField]
@@ -110,9 +114,15 @@ public class MatchController : MonoBehaviour
 
         if (!IsWin())
         {
-            changeInputMappings("FPS");
-            StartNextBidding();
+            StartCoroutine(WaitAndStartNextBidding());
         }
+    }
+
+    public IEnumerator WaitAndStartNextBidding()
+    {
+        yield return new WaitForSeconds(roundEndDelay);
+        changeInputMappings("FPS");
+        StartNextBidding();
     }
 
     public void EndActiveBidding()
