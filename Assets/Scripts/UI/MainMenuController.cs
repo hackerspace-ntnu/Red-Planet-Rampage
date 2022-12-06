@@ -116,8 +116,10 @@ public class MainMenuController : MonoBehaviour
         //Update all panels color
         for (int i = 0; i < playerBackgrounds.Count; i++)
         {
+            // Access the player identity
+            PlayerIdentity pi = playerInputs[i].GetComponent<PlayerIdentity>();
             // Update the visual loadout controller
-            playerBackgrounds[i].GetComponent<CharacterMenuLoadout>().SetupPreview("Player " + (i+1),playerInputs[i].GetComponent<PlayerIdentity>().color);
+            playerBackgrounds[i].GetComponent<CharacterMenuLoadout>().SetupPreview(pi.playerName, pi.color);
         }
     }
 
