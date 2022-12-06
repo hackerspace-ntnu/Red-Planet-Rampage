@@ -76,6 +76,12 @@ public class FlexibleGridLayout : LayoutGroup
         }
     }
 
+    public override void CalculateLayoutInputHorizontal()
+    {
+        base.CalculateLayoutInputHorizontal();
+
+        CalculateLayoutInputVertical();
+    }
     public override void SetLayoutHorizontal()
     {
 
