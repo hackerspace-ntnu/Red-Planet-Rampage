@@ -33,20 +33,20 @@ public class PlayerFactory : MonoBehaviour
         if (SceneManager.GetActiveScene().name == "Bidding")
         {
             playerInputManagerController.ChangeInputMaps("Bidding");
-            foreach (PlayerInput inputs in playerInputManagerController.playerInputs)
+            foreach (InputManager inputs in playerInputManagerController.playerInputs)
             {
-                inputs.GetComponent<InputManager>().RemoveListeners();
+                inputs.RemoveListeners();
                 InstantiateBiddingPlayer(inputs);
-                inputs.GetComponent<InputManager>().AddListeners();
+                inputs.AddListeners();
             }
         }
         else { 
         playerInputManagerController.ChangeInputMaps("FPS");
-        foreach (PlayerInput inputs in playerInputManagerController.playerInputs)
+        foreach (InputManager inputs in playerInputManagerController.playerInputs)
         {
-            inputs.GetComponent<InputManager>().RemoveListeners();
+            inputs.RemoveListeners();
             InstantiateFPSPlayer(inputs);
-            inputs.GetComponent<InputManager>().AddListeners();
+            inputs.AddListeners();
         }
         }
     }
@@ -55,36 +55,36 @@ public class PlayerFactory : MonoBehaviour
     /// Spawns a playerPrefab and attaches a playerInput to it as a child.
     /// This function is where you should add delegate events for them to be properly invoked.
     /// </summary>
-    /// <param name="playerInput">PlayerInput to tie the player prefab to.</param>
-    private void InstantiateFPSPlayer(PlayerInput playerInput)
+    /// <param name="inputManager">PlayerInput to tie the player prefab to.</param>
+    private void InstantiateFPSPlayer(InputManager inputManager)
     {
         // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
         Transform cameraOffset = player.transform.Find("CameraOffset");
         // Make playerInput child of player it's attached to
-        playerInput.transform.parent = player.transform;
+        inputManager.transform.parent = player.transform;
         // Set recieved playerInput (and most importantly its camera) at an offset from player's position
-        playerInput.transform.localPosition = cameraOffset.localPosition;
-        playerInput.transform.rotation = player.transform.rotation;
+        inputManager.transform.localPosition = cameraOffset.localPosition;
+        inputManager.transform.rotation = player.transform.rotation;
         // Enable Camera
-        playerInput.GetComponent<Camera>().enabled = true;
+        inputManager.GetComponent<Camera>().enabled = true;
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
-        playerManager.SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
+        playerManager.SetPlayerInput((FPSInputManager) inputManager);
         // Set unique layer for player
-        playerManager.SetLayer(playerInput.playerIndex);
+        playerManager.SetLayer(inputManager.playerInput.playerIndex);
     }
 
-    private void InstantiateBiddingPlayer(PlayerInput playerInput)
+    private void InstantiateBiddingPlayer(InputManager inputManager)
     {
         // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
         // Make playerInput child of player it's attached to
-        playerInput.transform.parent = player.transform;
+        inputManager.transform.parent = player.transform;
         // Disable Camera
-        playerInput.GetComponent<Camera>().enabled = false;
+        inputManager.GetComponent<Camera>().enabled = false;
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
-        playerManager.SetPlayerInput(playerInput.GetComponent<FPSInputManager>());
+        playerManager.SetPlayerInput((FPSInputManager) inputManager);
     }
 }

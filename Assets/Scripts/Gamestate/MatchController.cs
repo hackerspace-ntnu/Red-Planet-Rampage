@@ -170,11 +170,11 @@ public class MatchController : MonoBehaviour
     private void changeInputMappings(string inputMapName)
     {
         PlayerInputManagerController.Singleton.ChangeInputMaps(inputMapName);
-        foreach (PlayerInput inputs in PlayerInputManagerController.Singleton.playerInputs)
+        foreach (InputManager inputs in PlayerInputManagerController.Singleton.playerInputs)
         {
             // Update listeners to new map
-            inputs.GetComponent<InputManager>().RemoveListeners();
-            inputs.GetComponent<InputManager>().AddListeners();
+            inputs.RemoveListeners();
+            inputs.AddListeners();
             // Free the playerInputs from their mortail coils (Player prefab)
             inputs.transform.parent = null;
             DontDestroyOnLoad(inputs);

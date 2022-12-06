@@ -20,13 +20,13 @@ public class MainMenuController : MonoBehaviour
     private List<TabGroup> tabGroups;
 
     private PlayerInputManagerController playerInputManagerController;
-    private List<PlayerInput> playerInputs = new List<PlayerInput>();
+    private List<InputManager> playerInputs = new List<InputManager>();
     private List<GameObject> playerBackgrounds = new List<GameObject>();
 
     void Start()
     {
         playerInputManagerController = PlayerInputManagerController.Singleton;
-        playerInputManagerController.playerInputManager.onPlayerJoined += AddPlayer;
+        playerInputManagerController.onPlayerInputJoined += AddPlayer;
         playerInputManagerController.playerInputManager.splitScreen = false;
 
         if (playerInputManagerController.playerInputs.Count > 0)
@@ -38,7 +38,7 @@ public class MainMenuController : MonoBehaviour
 
     private void OnDestroy()
     {
-        playerInputManagerController.playerInputManager.onPlayerJoined -= AddPlayer;
+        playerInputManagerController.onPlayerInputJoined -= AddPlayer;
     }
 
     /// <summary>
@@ -64,11 +64,11 @@ public class MainMenuController : MonoBehaviour
     private void TransferExistingInputs()
     {
         playerInputManagerController.ChangeInputMaps("Menu");
-        foreach (PlayerInput inputs in playerInputManagerController.playerInputs)
+        foreach (InputManager inputs in playerInputManagerController.playerInputs)
         {
-            inputs.GetComponent<InputManager>().RemoveListeners();
+            inputs.RemoveListeners();
             AddPlayer(inputs);
-            inputs.GetComponent<InputManager>().AddListeners();
+            inputs.AddListeners();
         }
     }
 
@@ -99,15 +99,15 @@ public class MainMenuController : MonoBehaviour
     /// Subscribes to onplayerjoined and is responsible for adapting menu to new player inputs.
     /// Function needs to force the panels to have flex-like properties as Unity doesn't support dynamic "stretch" of multiple elements inside a parent container.
     /// </summary>
-    /// <param name="playerInput"></param>
-    private void AddPlayer(PlayerInput playerInput)
+    /// <param name="inputManager"></param>
+    private void AddPlayer(InputManager inputManager)
     {
-        playerInput.GetComponent<Camera>().enabled = false;
-        playerInputs.Add(playerInput);
+        inputManager.GetComponent<Camera>().enabled = false;
+        playerInputs.Add(inputManager);
 
         foreach (TabGroup t in tabGroups)
         {
-            t.SetPlayerInput(playerInput);
+            t.SetPlayerInput(inputManager);
         }
 
         GameObject panel = Instantiate(playerBackgroundPanel, characterView);
