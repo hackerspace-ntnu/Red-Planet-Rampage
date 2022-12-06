@@ -38,6 +38,10 @@ public class Timer : MonoBehaviour
     /// Runs once when the timer stops.
     /// </summary>
     public event Action OnStopTimer;
+    /// <summary>
+    /// Runs every time update changes time 
+    /// </summary>
+    public event Action OnTimerUpdate;
 
     public void StartTimer(float baseWaitTime, bool repeating = false)
     {
@@ -98,6 +102,8 @@ public class Timer : MonoBehaviour
     {
         if (!IsRunning) 
             return;
+
+        OnTimerUpdate.Invoke();
 
         if (ElapsedTime > WaitTime)
         {
