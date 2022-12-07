@@ -117,9 +117,9 @@ public class MainMenuController : MonoBehaviour
         for (int i = 0; i < playerBackgrounds.Count; i++)
         {
             // Access the player identity
-            PlayerIdentity pi = playerInputs[i].GetComponent<PlayerIdentity>();
+            PlayerIdentity playerIdentity = playerInputs[i].GetComponent<PlayerIdentity>();
             // Update the visual loadout controller
-            playerBackgrounds[i].GetComponent<CharacterMenuLoadout>().SetupPreview(pi.playerName, pi.color);
+            playerBackgrounds[i].GetComponent<CharacterMenuLoadout>().SetupPreview(playerIdentity.playerName, playerIdentity.color);
         }
     }
 
