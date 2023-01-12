@@ -9,6 +9,7 @@ using UnityEngine;
 // vs manually assigning component references
 //
 [RequireComponent(typeof(Timer))]
+[RequireComponent(typeof(PlayerFactory))]
 public class AuctionDriver : MonoBehaviour
 {
     [SerializeField] 
@@ -43,7 +44,9 @@ public class AuctionDriver : MonoBehaviour
 
     [SerializeField] 
     private Timer auctionTimer;
-    
+    [SerializeField]
+    private PlayerFactory playerFactory;
+
 #if UNITY_EDITOR
     private void OnValidate()
     {
@@ -68,6 +71,8 @@ public class AuctionDriver : MonoBehaviour
 
     private void Start()
     {
+        playerFactory = GetComponent<PlayerFactory>();
+        playerFactory.InstantiatePlayersBidding();
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
         playersInAuctionRound = new HashSet<PlayerManager>(playersInAuction);
     }

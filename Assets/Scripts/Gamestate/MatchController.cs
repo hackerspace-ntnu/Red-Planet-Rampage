@@ -22,9 +22,12 @@ public struct Player
     public PlayerManager playerManager;
 }
 
+[RequireComponent(typeof(PlayerFactory))]
 public class MatchController : MonoBehaviour
 {
     public static MatchController Singleton { get; private set; }
+
+    private PlayerFactory playerFactory;
 
     public delegate void MatchEvent();
 
@@ -76,6 +79,8 @@ public class MatchController : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
+        playerFactory = GetComponent<PlayerFactory>();
+        playerFactory.InstantiatePlayersFPS();
 
         PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput =>
         {
