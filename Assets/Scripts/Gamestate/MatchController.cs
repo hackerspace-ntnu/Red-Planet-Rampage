@@ -13,7 +13,7 @@ public struct Player
     public Player(PlayerIdentity playerIdentity, PlayerManager playerManager, int startAmount)
     {
         this.playerIdentity = playerIdentity;
-        playerManager.chips = startAmount;
+        playerManager.identity.chips = startAmount;
         this.playerManager = playerManager;
     }
     // Reference to player identity class
@@ -79,19 +79,25 @@ public class MatchController : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
-        playerFactory = GetComponent<PlayerFactory>();
-        playerFactory.InstantiatePlayersFPS();
+        playerFactory = FindObjectOfType<PlayerFactory>();
 
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput =>
+        // First time setup of playerInputs
+        if (rounds.Count == 0) 
         {
-            var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
-            var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
-            players.Add(new Player(playerIdentity, playerStateController, startAmount));
-        });
+            playerFactory.InstantiatePlayersFPS();
 
-        // TODO do something else funky wunky
-        onRoundEnd += () => Debug.Log("End of round " + rounds.Count());
-        StartNextRound();
+            PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput =>
+            {
+                var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
+                var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
+                players.Add(new Player(playerIdentity, playerStateController, startAmount));
+            });
+
+            // TODO do something else funky wunky
+            onRoundEnd += () => Debug.Log("End of round " + rounds.Count());
+            StartNextRound();
+        }
+
     }
 
     public void StartNextRound()
@@ -106,6 +112,7 @@ public class MatchController : MonoBehaviour
     public void StartNextBidding()
     {
         onBiddingStart?.Invoke();
+        // TODO: Add Destroy on match win
         SceneManager.LoadSceneAsync("Bidding");
         PlayerInputManagerController.Singleton.playerInputManager.splitScreen = false;
     }
@@ -148,8 +155,8 @@ public class MatchController : MonoBehaviour
             if (lastRound.IsWinner(player.playerManager))
                 reward += rewardWin;
 
-            player.playerManager.chips += reward;
-            Debug.Log(player.playerManager.ToString() + " was awarded " + reward + " chips.");
+            player.playerManager.identity.chips += reward;
+            Debug.Log(player.playerManager.ToString() + " was awarded " + reward + " chips, and now has a total of "+ player.playerManager.identity.chips);
         }
     }
 

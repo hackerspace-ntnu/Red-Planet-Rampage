@@ -15,8 +15,8 @@ public class PlayerStatUI : MonoBehaviour
         playerNameText.SetText(name);
     }
 
-    public void setChips(int chips)
+    public void SetChips(int amount)
     {
-        chipsText.SetText(chips.ToString());
+        chipsText.SetText(amount.ToString());
     }
 }

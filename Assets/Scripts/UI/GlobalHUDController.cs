@@ -29,8 +29,8 @@ public class GlobalHUDController : MonoBehaviour
         GameObject playerStatUIObject = Instantiate(PlayerStatUI, gameObject.transform);
         PlayerStatUI playerStatUI = playerStatUIObject.GetComponent<PlayerStatUI>();
         playerStatUI.setName(playerManager.identity.playerName);
-        // TODO: Create a delegate to subscribe this function to to keep updated chip amoun in UI
-        playerStatUI.setChips(playerManager.chips);
+        playerStatUI.SetChips(playerManager.identity.chips);
+        playerManager.identity.onChipChange += playerStatUI.SetChips;
     }
 
     public void OnTimerUpdate(float time)

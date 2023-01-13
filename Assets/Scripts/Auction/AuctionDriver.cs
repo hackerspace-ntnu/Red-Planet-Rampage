@@ -86,7 +86,7 @@ public class AuctionDriver : MonoBehaviour
         }
 
         int cost = ActiveBiddingRound.chips[slot] + 1;
-        if (chipsInPlay[player] + cost >= player.chips)
+        if (chipsInPlay[player] + cost >= player.identity.chips)
         {
             Debug.Log($"Player '{player.name}' tried to place a bid " +
                 $"on {ActiveBiddingRound.items[slot]} without having the tokens for it!");

@@ -15,8 +15,6 @@ public class PlayerManager : MonoBehaviour
 
     public HitEvent onDeath;
 
-    public int chips;
-
     public FPSInputManager fpsInput;
     public PlayerIdentity identity;
 
@@ -54,7 +52,7 @@ public class PlayerManager : MonoBehaviour
     public void PerformTransaction(Item item, int cost)
     {
         items.Add(item);
-        chips -= cost;
+        identity.chips -= cost;
     }
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)

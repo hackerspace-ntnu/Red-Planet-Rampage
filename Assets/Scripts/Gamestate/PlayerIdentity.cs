@@ -6,15 +6,27 @@ public class PlayerIdentity : MonoBehaviour
 {
     public Color color;
     public string playerName;
+    public int chips;
 
-    void Start()
+    public delegate void ChipEvent(int amount);
+
+    public ChipEvent onChipGain;
+    public ChipEvent onChipSpent;
+    public ChipEvent onChipChange;
+
+    public void UpdateChip(int amount)
     {
+        if (amount == 0) return;
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        onChipChange(chips+amount);
+        
+        if (amount < 0)
+        {
+            onChipSpent(amount);    
+        }
+        else
+        {
+            onChipGain(amount);
+        }
     }
 }
