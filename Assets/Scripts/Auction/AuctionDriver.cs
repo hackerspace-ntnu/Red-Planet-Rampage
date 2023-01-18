@@ -173,7 +173,7 @@ public class AuctionDriver : MonoBehaviour
         {
             if (ActiveBiddingRound.players[i] != null)
             {
-                ActiveBiddingRound.players[i].PerformTransaction(ActiveBiddingRound.items[i], ActiveBiddingRound.chips[i]);
+                ActiveBiddingRound.players[i].identity.PerformTransaction(ActiveBiddingRound.items[i], ActiveBiddingRound.chips[i]);
             }
         }
     }

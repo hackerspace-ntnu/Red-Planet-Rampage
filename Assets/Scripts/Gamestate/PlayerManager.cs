@@ -24,8 +24,6 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private Rigidbody ragdoll;
 
-    [SerializeField]
-    private List<Item> items;
 
     private GunController gunController;
 
@@ -47,12 +45,6 @@ public class PlayerManager : MonoBehaviour
         healthController = GetComponent<HealthController>();
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
-    }
-
-    public void PerformTransaction(Item item, int cost)
-    {
-        items.Add(item);
-        identity.chips -= cost;
     }
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)

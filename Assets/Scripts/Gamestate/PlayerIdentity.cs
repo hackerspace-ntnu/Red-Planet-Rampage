@@ -6,6 +6,10 @@ public class PlayerIdentity : MonoBehaviour
 {
     public Color color;
     public string playerName;
+
+    [SerializeField]
+    private List<Item> items;
+
     public int chips;
 
     public delegate void ChipEvent(int amount);
@@ -17,6 +21,7 @@ public class PlayerIdentity : MonoBehaviour
     public void UpdateChip(int amount)
     {
         if (amount == 0) return;
+        chips += amount;
 
         onChipChange(chips+amount);
         
@@ -28,5 +33,11 @@ public class PlayerIdentity : MonoBehaviour
         {
             onChipGain(amount);
         }
+    }
+
+    public void PerformTransaction(Item item, int cost)
+    {
+        items.Add(item);
+        UpdateChip(-cost);
     }
 }
