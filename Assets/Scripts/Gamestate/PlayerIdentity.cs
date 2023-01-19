@@ -23,15 +23,15 @@ public class PlayerIdentity : MonoBehaviour
         if (amount == 0) return;
         chips += amount;
 
-        onChipChange(chips+amount);
+        onChipChange(chips);
         
         if (amount < 0)
         {
-            onChipSpent(amount);    
+            //onChipSpent(amount);    
         }
         else
         {
-            onChipGain(amount);
+            //onChipGain(amount);
         }
     }
 

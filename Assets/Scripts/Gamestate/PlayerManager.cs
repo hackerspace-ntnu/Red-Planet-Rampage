@@ -24,6 +24,8 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private Rigidbody ragdoll;
 
+    public BiddingPlatform selectedBiddingPlatform;
+
 
     private GunController gunController;
 
@@ -113,6 +115,10 @@ public class PlayerManager : MonoBehaviour
         gunController.triggerHeld = true;
         gunController.triggerPressed = true;
         StartCoroutine(UnpressTrigger());
+
+        if (!selectedBiddingPlatform) return;
+        selectedBiddingPlatform.TryPlaceBid(identity);
+
     }
 
     IEnumerator UnpressTrigger()
