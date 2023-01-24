@@ -91,6 +91,7 @@ public class MatchController : MonoBehaviour
 
     public void StartNextRound()
     {
+        MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
         onRoundStart?.Invoke();
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
         roundTimer.StartTimer(roundStartTime);
@@ -100,6 +101,7 @@ public class MatchController : MonoBehaviour
 
     public void StartNextBidding()
     {
+        MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
         onBiddingStart?.Invoke();
         SceneManager.LoadSceneAsync("Bidding");
         PlayerInputManagerController.Singleton.playerInputManager.splitScreen = false;
@@ -168,6 +170,7 @@ public class MatchController : MonoBehaviour
             // Update playerInputs in preperation for Menu scene
             changeInputMappings("Menu");
 
+            MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
             SceneManager.LoadSceneAsync("Menu");
             return true;
         }
