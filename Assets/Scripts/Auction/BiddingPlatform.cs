@@ -7,7 +7,7 @@ using UnityEngine;
 public class BiddingPlatform : MonoBehaviour
 {
     [SerializeField]
-    public Item item;
+    private Item item;
 
     [SerializeField]
     public int chips = 0;
@@ -62,17 +62,11 @@ public class BiddingPlatform : MonoBehaviour
         return false;
     }
 
-    // Start is called before the first frame update
-    void Start()
+    public void setItem(Item item)
     {
+        this.item = item;
         itemNameText.text = item.displayName;
         itemDescriptionText.text = item.displayDescription;
         itemCostText.text = chips.ToString();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

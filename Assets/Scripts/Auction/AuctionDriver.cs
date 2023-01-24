@@ -20,6 +20,11 @@ public class AuctionDriver : MonoBehaviour
     private AuctionSequence sequence;
     private IEnumerator<BiddingRound> enumerator;
 
+    private List<BiddingPlatform> biddingPlatforms;
+    [SerializeField]
+    private RandomisedAuctionStage[] availableAuctionStages;
+
+
 #if UNITY_EDITOR
     // USING THIS PATTERN TO SHOW PROPERTIES IN EDITOR, UPON BUILD COMPILATION THIS OVERHEAD IS REMOVED
     // DO NOT USE _EDITORONLY_ prepended fields outside of an UNITY_EDITOR block!
@@ -75,6 +80,25 @@ public class AuctionDriver : MonoBehaviour
         playerFactory.InstantiatePlayersBidding();
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
         playersInAuctionRound = new HashSet<PlayerManager>(playersInAuction);
+
+        // TODO: Make AuctionDriver instantiate bidding platforms instead of finding them?
+        biddingPlatforms = FindPlatforms();
+        PopulatePlatforms();
+        
+    }
+
+    private List<BiddingPlatform> FindPlatforms()
+    {
+        return FindObjectsOfType<BiddingPlatform>().ToList();
+    }
+
+    private void PopulatePlatforms()
+    {
+        for (int i = 0; i < biddingPlatforms.Count; i++)
+        {
+            availableAuctionStages[i].Promote(out BiddingRound biddingRound);
+            biddingPlatforms[i].setItem(biddingRound.items[0]);
+        }
     }
 
     private bool TryPlaceBid(PlayerManager player, int slot)
