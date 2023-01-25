@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Timer))]
 public class BiddingPlatform : MonoBehaviour
 {
     [SerializeField]
@@ -24,6 +25,20 @@ public class BiddingPlatform : MonoBehaviour
     [SerializeField]
     private TMP_Text itemCostText;
 
+    [SerializeField]
+    private TMP_Text timerText;
+
+    [SerializeField]
+    private float baseWaitTime;
+
+    [SerializeField]
+    private float bumpTime = 5.0f;
+
+    public BiddingRound activeBiddingRound;
+
+    [SerializeField]
+    private Timer auctionTimer;
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent(out PlayerManager playerManager)){
@@ -41,32 +56,64 @@ public class BiddingPlatform : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        auctionTimer = GetComponent<Timer>();
+        auctionTimer.OnTimerUpdate += UpdateTimer;
+        auctionTimer.OnTimerRunCompleted += EndAuction;
+    }
+
+    private void OnDestroy()
+    {
+        auctionTimer.OnTimerUpdate -= UpdateTimer;
+        auctionTimer.OnTimerRunCompleted -= EndAuction;
+    }
+
     public bool TryPlaceBid(PlayerIdentity playerIdentity)
     {
+        if(activeBiddingRound == null)
+        {
+            Debug.Log("No active biddingRound on biddingPlatform!");
+            return false;
+        }
+
         if (playerIdentity.chips > chips)
         {
-            // TODO: Rewrite this to use auction driver
-
             // Refund
             if (leadingBidder)
             {
                 leadingBidder.UpdateChip(chips);
             }
-
+            //activeBiddingRound.chips[0] = chips++;
             chips++;
             playerIdentity.UpdateChip(-chips); 
             itemCostText.text = chips.ToString();
             leadingBidder = playerIdentity;
+
+            if((auctionTimer.WaitTime - auctionTimer.ElapsedTime) < bumpTime) { auctionTimer.AddTime(bumpTime); }
+
             return true;
         }
         return false;
     }
 
-    public void setItem(Item item)
+    private void UpdateTimer()
+    {
+        timerText.text = Mathf.Round(auctionTimer.WaitTime - auctionTimer.ElapsedTime).ToString();
+    }
+
+    private void EndAuction()
+    {
+        if (leadingBidder)
+        leadingBidder.PerformTransaction(item, chips);
+    }
+
+    public void SetItem(Item item)
     {
         this.item = item;
         itemNameText.text = item.displayName;
         itemDescriptionText.text = item.displayDescription;
         itemCostText.text = chips.ToString();
+        auctionTimer.StartTimer(baseWaitTime);
     }
 }

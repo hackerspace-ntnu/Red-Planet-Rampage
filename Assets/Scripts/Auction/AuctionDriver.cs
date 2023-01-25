@@ -97,7 +97,8 @@ public class AuctionDriver : MonoBehaviour
         for (int i = 0; i < biddingPlatforms.Count; i++)
         {
             availableAuctionStages[i].Promote(out BiddingRound biddingRound);
-            biddingPlatforms[i].setItem(biddingRound.items[0]);
+            biddingPlatforms[i].activeBiddingRound = biddingRound;
+            biddingPlatforms[i].SetItem(biddingRound.items[0]);
         }
     }
 
