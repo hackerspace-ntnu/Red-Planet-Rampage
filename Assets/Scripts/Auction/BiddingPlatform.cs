@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Timer))]
@@ -105,7 +106,10 @@ public class BiddingPlatform : MonoBehaviour
     private void EndAuction()
     {
         if (leadingBidder)
-        leadingBidder.PerformTransaction(item, chips);
+        leadingBidder.PerformTransaction(item);
+
+        //TODO: Remove this, call from auction driver or matchmanager
+        SceneManager.LoadSceneAsync("DemoArena");
     }
 
     public void SetItem(Item item)

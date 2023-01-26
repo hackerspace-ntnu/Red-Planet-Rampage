@@ -12,8 +12,7 @@ public class Item : ScriptableObject
 {
     public string displayName;
     public string displayDescription;
-    [SerializeField]
-    private AugmentType augmentType;
+    public AugmentType augmentType;
 
     public GameObject augment;
 }

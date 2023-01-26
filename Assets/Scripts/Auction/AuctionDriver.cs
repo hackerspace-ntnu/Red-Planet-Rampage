@@ -84,6 +84,12 @@ public class AuctionDriver : MonoBehaviour
         // TODO: Make AuctionDriver instantiate bidding platforms instead of finding them?
         biddingPlatforms = FindPlatforms();
         PopulatePlatforms();
+
+        // TODO:
+        // - Rewrite AuctionDriver to be a manager of bidding rounds on BiddingPlatforms 
+        // - We /can/ use biddingRound to store relevant values (If we want to show a summary for bidding at the end or something), but it seems a bit out of scope atm
+        // - AuctionDriver should be the class responsible for handling all AuctionStage-related tasks
+        // - AuctionDriver should be responsible for detecting when all auctions are done and then trigger needed responses (preferably by calling MatchManager).
         
     }
 
@@ -198,7 +204,7 @@ public class AuctionDriver : MonoBehaviour
         {
             if (ActiveBiddingRound.players[i] != null)
             {
-                ActiveBiddingRound.players[i].identity.PerformTransaction(ActiveBiddingRound.items[i], ActiveBiddingRound.chips[i]);
+                ActiveBiddingRound.players[i].identity.PerformTransaction(ActiveBiddingRound.items[i]);
             }
         }
     }

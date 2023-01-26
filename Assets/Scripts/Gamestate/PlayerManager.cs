@@ -88,7 +88,7 @@ public class PlayerManager : MonoBehaviour
         fpsInput = playerInput;
         identity = fpsInput.GetComponent<PlayerIdentity>();
         GetComponent<PlayerMovement>().SetPlayerInput(fpsInput);
-        SetGunOffset(fpsInput.transform);
+        SetGun(fpsInput.transform);
         fpsInput.onFirePerformed += OnFire;
         fpsInput.onFireCanceled += OnFireEnd;
         // Set camera on canvas
@@ -147,8 +147,30 @@ public class PlayerManager : MonoBehaviour
         SetLayerOnSubtree(meshBase, playerLayer);
     }
 
-    private void SetGunOffset(Transform offset)
+    private void SetGun(Transform offset)
     {
+        if (identity.items.Count > 0)
+        {
+            foreach(Item item in identity.items)
+            {
+                 switch (item.augmentType)
+                {
+                    case AugmentType.Body:
+                        body = item.augment;
+                        break;
+                    case AugmentType.Barrel:
+                        barrel = item.augment;
+                        break;
+                    case AugmentType.Extension:
+                        extension = item.augment;
+                        break;
+                    default:
+                        Debug.Log("No appropritate augmentType found in item.");
+                        break;
+                }
+            }
+        }
+
         var gun = GunFactory.InstantiateGun(body, barrel, extension, offset);
         // Set specific local transform
         gun.transform.localPosition = new Vector3(0.39f, -0.12f, -0.4f);

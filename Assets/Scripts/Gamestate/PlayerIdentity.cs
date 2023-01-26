@@ -8,7 +8,7 @@ public class PlayerIdentity : MonoBehaviour
     public string playerName;
 
     [SerializeField]
-    private List<Item> items;
+    public List<Item> items { get; private set; } = new List<Item>();
 
     public int chips;
 
@@ -35,9 +35,8 @@ public class PlayerIdentity : MonoBehaviour
         }
     }
 
-    public void PerformTransaction(Item item, int cost)
+    public void PerformTransaction(Item item)
     {
         items.Add(item);
-        UpdateChip(-cost);
     }
 }
