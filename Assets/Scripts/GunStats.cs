@@ -1,7 +1,7 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "GunStats", menuName = "ScriptableObjects/GunStats", order = 1)]
-public class GunStats: ScriptableObject
+[CreateAssetMenu(fileName = "GunStats", menuName = "Augments/New GunStats")]
+public class GunStats : ScriptableObject
 {
 
     // -- IMPORTANT INFO --
@@ -18,14 +18,14 @@ public class GunStats: ScriptableObject
     // Projectiles per second
     [SerializeField]
     private ModifiableFloat firerate = new ModifiableFloat(5f);
-    public ModifiableFloat Firerate { get => firerate;}
+    public ModifiableFloat Firerate { get => firerate; }
 
     // Time to reload gun
     [SerializeField]
     private ModifiableFloat reloadTime = new ModifiableFloat(3f);
     public ModifiableFloat ReloadTime { get => reloadTime; }
 
-    
+
     //How many projectiles in a clip
     public int magazineSize = 20;
 
@@ -71,7 +71,7 @@ public class GunStats: ScriptableObject
     private ModifiableFloat projectileSize = new ModifiableFloat(0f);
     public ModifiableFloat ProjectileSize { get => projectileSize; }
 
-    
+
     // How to scale the projectile model 
     [SerializeField]
     private ModifiableFloat projectileScale = new ModifiableFloat(1f);
