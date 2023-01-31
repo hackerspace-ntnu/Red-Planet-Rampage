@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 using UnityEditor;
 
 [CustomEditor(typeof(GunFactory))]
@@ -9,10 +8,10 @@ public class GunFactoryEditor : Editor
     {
         DrawDefaultInspector();
 
-        GunFactory myScript = (GunFactory)target;
+        GunFactory gunFactory = (GunFactory)target;
         if (GUILayout.Button("Build Gun"))
         {
-            myScript.InitializeGun();
+            gunFactory.InitializeGun();
         }
     }
 }

@@ -7,7 +7,7 @@ public class OptionsMenu : MonoBehaviour
 {
     #region Graphics variables
     [Header("Graphics")]
-    
+
     [SerializeField]
     private TMP_Dropdown resolutionDropdown;
 
@@ -41,7 +41,7 @@ public class OptionsMenu : MonoBehaviour
         CheckQuality();
     }
 
-    
+
     /// <summary>
     /// Determine the different resolutions the display supports
     /// </summary>
