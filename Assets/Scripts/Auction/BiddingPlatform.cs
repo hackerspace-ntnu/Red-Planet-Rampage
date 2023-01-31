@@ -109,7 +109,7 @@ public class BiddingPlatform : MonoBehaviour
         leadingBidder.PerformTransaction(item);
 
         //TODO: Remove this, call from auction driver or matchmanager
-        SceneManager.LoadSceneAsync("DemoArena");
+        StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
     }
 
     public void SetItem(Item item)

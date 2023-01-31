@@ -95,6 +95,7 @@ public class MatchController : MonoBehaviour
 
             // TODO do something else funky wunky
             onRoundEnd += () => Debug.Log("End of round " + rounds.Count());
+            
             StartNextRound();
         }
 
@@ -111,6 +112,7 @@ public class MatchController : MonoBehaviour
 
     public void StartNextBidding()
     {
+        changeInputMappings("Bidding");
         onBiddingStart?.Invoke();
         // TODO: Add Destroy on match win
         SceneManager.LoadSceneAsync("Bidding");
@@ -133,8 +135,16 @@ public class MatchController : MonoBehaviour
     public IEnumerator WaitAndStartNextBidding()
     {
         yield return new WaitForSeconds(roundEndDelay);
-        changeInputMappings("FPS");
         StartNextBidding();
+    }
+
+    public IEnumerator WaitAndStartNextRound()
+    {
+        yield return new WaitForSeconds(roundEndDelay);
+        // This needs to be called after inputs are set at start the first time this is needed.
+        changeInputMappings("FPS");
+        SceneManager.LoadScene("DemoArena");
+        StartNextRound();
     }
 
     public void EndActiveBidding()
