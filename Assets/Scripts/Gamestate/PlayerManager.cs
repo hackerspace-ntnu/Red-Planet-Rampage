@@ -15,8 +15,6 @@ public class PlayerManager : MonoBehaviour
 
     public HitEvent onDeath;
 
-    public int chips;
-
     public FPSInputManager fpsInput;
     public PlayerIdentity identity;
 
@@ -26,8 +24,8 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private Rigidbody ragdoll;
 
-    [SerializeField]
-    private List<Item> items;
+    public BiddingPlatform selectedBiddingPlatform;
+
 
     private GunController gunController;
 
@@ -51,15 +49,8 @@ public class PlayerManager : MonoBehaviour
         healthController.onDeath += OnDeath;
     }
 
-    public void PerformTransaction(Item item, int cost)
-    {
-        items.Add(item);
-        chips -= cost;
-    }
-
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
-        Debug.Log(this.ToString() + " took " + damage + " damage from " + info.sourcePlayer.ToString());
         hudController.UpdateHealthBar(healthController.CurrentHealth, healthController.MaxHealth);
     }
 
@@ -96,7 +87,7 @@ public class PlayerManager : MonoBehaviour
         fpsInput = playerInput;
         identity = fpsInput.GetComponent<PlayerIdentity>();
         GetComponent<PlayerMovement>().SetPlayerInput(fpsInput);
-        SetGunOffset(fpsInput.transform);
+        SetGun(fpsInput.transform);
         fpsInput.onFirePerformed += OnFire;
         fpsInput.onFireCanceled += OnFireEnd;
         // Set camera on canvas
@@ -116,6 +107,8 @@ public class PlayerManager : MonoBehaviour
         healthController.onDeath -= OnDeath;
         fpsInput.onFirePerformed -= OnFire;
         fpsInput.onFireCanceled -= OnFireEnd;
+        //Remove the gun
+        Destroy(gunController.gameObject);
     }
 
     private void OnFire(InputAction.CallbackContext ctx)
@@ -123,6 +116,10 @@ public class PlayerManager : MonoBehaviour
         gunController.triggerHeld = true;
         gunController.triggerPressed = true;
         StartCoroutine(UnpressTrigger());
+
+        if (!selectedBiddingPlatform) return;
+        selectedBiddingPlatform.TryPlaceBid(identity);
+
     }
 
     IEnumerator UnpressTrigger()
@@ -151,8 +148,27 @@ public class PlayerManager : MonoBehaviour
         SetLayerOnSubtree(meshBase, playerLayer);
     }
 
-    private void SetGunOffset(Transform offset)
+    private void SetGun(Transform offset)
     {
+        foreach(Item item in identity.items)
+        {
+            switch (item.augmentType)
+            {
+                case AugmentType.Body:
+                    body = item.augment;
+                    break;
+                case AugmentType.Barrel:
+                    barrel = item.augment;
+                    break;
+                case AugmentType.Extension:
+                    extension = item.augment;
+                    break;
+                default:
+                    Debug.Log("No appropritate augmentType found in item.");
+                    break;
+            }
+        }
+
         var gun = GunFactory.InstantiateGun(body, barrel, extension, offset);
         // Set specific local transform
         gun.transform.localPosition = new Vector3(0.39f, -0.12f, -0.4f);

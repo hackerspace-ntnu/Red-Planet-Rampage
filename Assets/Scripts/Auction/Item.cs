@@ -10,10 +10,9 @@ public enum AugmentType
 [CreateAssetMenu(menuName = "Auction/Item")]
 public class Item : ScriptableObject
 {
-    [SerializeField]
-    private string displayName;
-    [SerializeField]
-    private AugmentType augmentType;
+    public string displayName;
+    public string displayDescription;
+    public AugmentType augmentType;
 
     public GameObject augment;
 }

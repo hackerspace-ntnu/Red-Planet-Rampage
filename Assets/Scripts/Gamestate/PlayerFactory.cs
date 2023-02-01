@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class PlayerFactory : MonoBehaviour
 {
+
     [SerializeField]
     private GameObject playerPrefab;
     [SerializeField]
@@ -13,34 +14,21 @@ public class PlayerFactory : MonoBehaviour
 
     private PlayerInputManagerController playerInputManagerController;
 
+    [SerializeField]
+    private GlobalHUDController globalHUDController;
+
     private void Awake()
     {
+
         playerInputManagerController = PlayerInputManagerController.Singleton;
-        TransferExistingInputs();
 
         // Enable splitscreen
         playerInputManagerController.playerInputManager.DisableJoining();
         playerInputManagerController.playerInputManager.splitScreen = true;
     }
 
-    /// <summary>
-    /// Updates playerInputs to use FPS-related actionMap + update eventlisteners
-    /// </summary>
-    private void TransferExistingInputs()
+    public void InstantiatePlayersFPS()
     {
-        if(playerInputManagerController == null) { Debug.Log("Go to current scene from Menu to actually spawn players"); }
-        //TODO: (not this, preferrably make playerfactory intstantiate by call instead of awake)
-        if (SceneManager.GetActiveScene().name == "Bidding")
-        {
-            playerInputManagerController.ChangeInputMaps("Bidding");
-            foreach (InputManager inputs in playerInputManagerController.playerInputs)
-            {
-                inputs.RemoveListeners();
-                InstantiateBiddingPlayer(inputs);
-                inputs.AddListeners();
-            }
-        }
-        else { 
         playerInputManagerController.ChangeInputMaps("FPS");
         foreach (InputManager inputs in playerInputManagerController.playerInputs)
         {
@@ -48,6 +36,16 @@ public class PlayerFactory : MonoBehaviour
             InstantiateFPSPlayer(inputs);
             inputs.AddListeners();
         }
+    }
+
+    public void InstantiatePlayersBidding()
+    {
+        playerInputManagerController.ChangeInputMaps("Bidding");
+        foreach (InputManager inputs in playerInputManagerController.playerInputs)
+        {
+            inputs.RemoveListeners();
+            InstantiateBiddingPlayer(inputs);
+            inputs.AddListeners();
         }
     }
 
@@ -86,5 +84,7 @@ public class PlayerFactory : MonoBehaviour
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
         playerManager.SetPlayerInput((FPSInputManager) inputManager);
+        // Add player UI to globalUI
+        globalHUDController.SetPlayer(playerManager);
     }
 }

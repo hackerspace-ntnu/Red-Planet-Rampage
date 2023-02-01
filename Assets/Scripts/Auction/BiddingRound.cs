@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [System.Serializable]
 public class BiddingRound
@@ -10,6 +11,8 @@ public class BiddingRound
     public int[] chips;
     [SerializeField] 
     public PlayerManager[] players;
+
+    private Dictionary<PlayerManager, int> chipsInPlay = new Dictionary<PlayerManager, int>();
 
     public BiddingRound(Item[] items)
     {

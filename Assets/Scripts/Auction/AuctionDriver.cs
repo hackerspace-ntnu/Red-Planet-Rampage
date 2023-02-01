@@ -9,6 +9,7 @@ using UnityEngine;
 // vs manually assigning component references
 //
 [RequireComponent(typeof(Timer))]
+[RequireComponent(typeof(PlayerFactory))]
 public class AuctionDriver : MonoBehaviour
 {
     [SerializeField] 
@@ -18,6 +19,12 @@ public class AuctionDriver : MonoBehaviour
     [SerializeField] 
     private AuctionSequence sequence;
     private IEnumerator<BiddingRound> enumerator;
+
+    [SerializeField]
+    private BiddingPlatform[] biddingPlatforms;
+    [SerializeField]
+    private RandomisedAuctionStage[] availableAuctionStages;
+
 
 #if UNITY_EDITOR
     // USING THIS PATTERN TO SHOW PROPERTIES IN EDITOR, UPON BUILD COMPILATION THIS OVERHEAD IS REMOVED
@@ -43,7 +50,9 @@ public class AuctionDriver : MonoBehaviour
 
     [SerializeField] 
     private Timer auctionTimer;
-    
+    [SerializeField]
+    private PlayerFactory playerFactory;
+
 #if UNITY_EDITOR
     private void OnValidate()
     {
@@ -68,8 +77,35 @@ public class AuctionDriver : MonoBehaviour
 
     private void Start()
     {
+        playerFactory = GetComponent<PlayerFactory>();
+        playerFactory.InstantiatePlayersBidding();
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
         playersInAuctionRound = new HashSet<PlayerManager>(playersInAuction);
+
+        // TODO: Make AuctionDriver instantiate bidding platforms instead of finding them?
+        PopulatePlatforms();
+
+        // TODO:
+        // - Rewrite AuctionDriver to be a manager of bidding rounds on BiddingPlatforms 
+        // - We /can/ use biddingRound to store relevant values (If we want to show a summary for bidding at the end or something), but it seems a bit out of scope atm
+        // - AuctionDriver should be the class responsible for handling all AuctionStage-related tasks
+        // - AuctionDriver should be responsible for detecting when all auctions are done and then trigger needed responses (preferably by calling MatchManager).
+        
+    }
+
+    private void PopulatePlatforms()
+    {
+        if (!(availableAuctionStages.Length == biddingPlatforms.Length))
+        {
+            Debug.Log("Not enough avialable auctionStages or biddingPlatforms!");
+        }
+
+        for (int i = 0; i < biddingPlatforms.Length; i++)
+        {
+            availableAuctionStages[i].Promote(out BiddingRound biddingRound);
+            biddingPlatforms[i].ActiveBiddingRound = biddingRound;
+            biddingPlatforms[i].SetItem(biddingRound.items[0]);
+        }
     }
 
     private bool TryPlaceBid(PlayerManager player, int slot)
@@ -81,7 +117,7 @@ public class AuctionDriver : MonoBehaviour
         }
 
         int cost = ActiveBiddingRound.chips[slot] + 1;
-        if (chipsInPlay[player] + cost >= player.chips)
+        if (chipsInPlay[player] + cost >= player.identity.chips)
         {
             Debug.Log($"Player '{player.name}' tried to place a bid " +
                 $"on {ActiveBiddingRound.items[slot]} without having the tokens for it!");
@@ -168,7 +204,7 @@ public class AuctionDriver : MonoBehaviour
         {
             if (ActiveBiddingRound.players[i] != null)
             {
-                ActiveBiddingRound.players[i].PerformTransaction(ActiveBiddingRound.items[i], ActiveBiddingRound.chips[i]);
+                ActiveBiddingRound.players[i].identity.PerformTransaction(ActiveBiddingRound.items[i]);
             }
         }
     }

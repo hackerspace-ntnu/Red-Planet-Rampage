@@ -7,14 +7,36 @@ public class PlayerIdentity : MonoBehaviour
     public Color color;
     public string playerName;
 
-    void Start()
-    {
+    [SerializeField]
+    public List<Item> items { get; private set; } = new List<Item>();
 
+    public int chips { get; private set; } = 0;
+
+    public delegate void ChipEvent(int amount);
+
+    public ChipEvent onChipGain;
+    public ChipEvent onChipSpent;
+    public ChipEvent onChipChange;
+
+    public void UpdateChip(int amount)
+    {
+        if (amount == 0) return;
+        chips += amount;
+
+        onChipChange?.Invoke(chips);
+        
+        if (amount < 0)
+        {
+            onChipSpent?.Invoke(amount);    
+        }
+        else
+        {
+            onChipGain?.Invoke(amount);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void PerformTransaction(Item item)
     {
-
+        items.Add(item);
     }
 }
