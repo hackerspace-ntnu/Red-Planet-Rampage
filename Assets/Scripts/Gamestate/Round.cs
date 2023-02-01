@@ -6,8 +6,8 @@ using UnityEngine;
 
 public class Round
 {
-    private PlayerManager winner;
-    public PlayerIdentity Winner => winner.identity;
+    private PlayerIdentity winner;
+    public PlayerIdentity Winner => winner;
 
     /* Readonly Terminology
      * 
@@ -106,7 +106,7 @@ public class Round
     {
         if (livingPlayers.Count < 2)
         {
-            winner = lastKiller;
+            winner = lastKiller.identity;
             MatchController.Singleton.EndActiveRound();
         }
     }
