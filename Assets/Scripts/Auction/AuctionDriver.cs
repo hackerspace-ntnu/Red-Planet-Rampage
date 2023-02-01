@@ -20,7 +20,8 @@ public class AuctionDriver : MonoBehaviour
     private AuctionSequence sequence;
     private IEnumerator<BiddingRound> enumerator;
 
-    private List<BiddingPlatform> biddingPlatforms;
+    [SerializeField]
+    private BiddingPlatform[] biddingPlatforms;
     [SerializeField]
     private RandomisedAuctionStage[] availableAuctionStages;
 
@@ -82,7 +83,6 @@ public class AuctionDriver : MonoBehaviour
         playersInAuctionRound = new HashSet<PlayerManager>(playersInAuction);
 
         // TODO: Make AuctionDriver instantiate bidding platforms instead of finding them?
-        biddingPlatforms = FindPlatforms();
         PopulatePlatforms();
 
         // TODO:
@@ -93,17 +93,17 @@ public class AuctionDriver : MonoBehaviour
         
     }
 
-    private List<BiddingPlatform> FindPlatforms()
-    {
-        return FindObjectsOfType<BiddingPlatform>().ToList();
-    }
-
     private void PopulatePlatforms()
     {
-        for (int i = 0; i < biddingPlatforms.Count; i++)
+        if (!(availableAuctionStages.Length == biddingPlatforms.Length))
+        {
+            Debug.Log("Not enough avialable auctionStages or biddingPlatforms!");
+        }
+
+        for (int i = 0; i < biddingPlatforms.Length; i++)
         {
             availableAuctionStages[i].Promote(out BiddingRound biddingRound);
-            biddingPlatforms[i].activeBiddingRound = biddingRound;
+            biddingPlatforms[i].ActiveBiddingRound = biddingRound;
             biddingPlatforms[i].SetItem(biddingRound.items[0]);
         }
     }

@@ -35,7 +35,7 @@ public class BiddingPlatform : MonoBehaviour
     [SerializeField]
     private float bumpTime = 5.0f;
 
-    public BiddingRound activeBiddingRound;
+    public BiddingRound ActiveBiddingRound;
 
     [SerializeField]
     private Timer auctionTimer;
@@ -57,7 +57,7 @@ public class BiddingPlatform : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void Awake()
     {
         auctionTimer = GetComponent<Timer>();
         auctionTimer.OnTimerUpdate += UpdateTimer;
@@ -72,7 +72,7 @@ public class BiddingPlatform : MonoBehaviour
 
     public bool TryPlaceBid(PlayerIdentity playerIdentity)
     {
-        if(activeBiddingRound == null)
+        if(ActiveBiddingRound == null)
         {
             Debug.Log("No active biddingRound on biddingPlatform!");
             return false;

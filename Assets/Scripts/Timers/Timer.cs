@@ -103,10 +103,7 @@ public class Timer : MonoBehaviour
         if (!IsRunning) 
             return;
 
-        if (OnTimerUpdate == null) 
-            return;
-
-        OnTimerUpdate.Invoke();
+        OnTimerUpdate?.Invoke();
 
         if (ElapsedTime > WaitTime)
         {

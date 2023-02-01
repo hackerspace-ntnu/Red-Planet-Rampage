@@ -150,25 +150,22 @@ public class PlayerManager : MonoBehaviour
 
     private void SetGun(Transform offset)
     {
-        if (identity.items.Count > 0)
+        foreach(Item item in identity.items)
         {
-            foreach(Item item in identity.items)
+            switch (item.augmentType)
             {
-                 switch (item.augmentType)
-                {
-                    case AugmentType.Body:
-                        body = item.augment;
-                        break;
-                    case AugmentType.Barrel:
-                        barrel = item.augment;
-                        break;
-                    case AugmentType.Extension:
-                        extension = item.augment;
-                        break;
-                    default:
-                        Debug.Log("No appropritate augmentType found in item.");
-                        break;
-                }
+                case AugmentType.Body:
+                    body = item.augment;
+                    break;
+                case AugmentType.Barrel:
+                    barrel = item.augment;
+                    break;
+                case AugmentType.Extension:
+                    extension = item.augment;
+                    break;
+                default:
+                    Debug.Log("No appropritate augmentType found in item.");
+                    break;
             }
         }
 
