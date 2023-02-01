@@ -7,7 +7,7 @@ using UnityEngine;
 public class Round
 {
     private PlayerManager winner;
-    public PlayerManager Winner => winner;
+    public PlayerIdentity Winner => winner.identity;
 
     /* Readonly Terminology
      * 
@@ -75,9 +75,9 @@ public class Round
         return kills[player].Count;
     }
 
-    public bool IsWinner(PlayerManager player)
+    public bool IsWinner(PlayerIdentity player)
     {
-        return player == winner;
+        return player == Winner;
     }
 
     public void OnRoundEnd()

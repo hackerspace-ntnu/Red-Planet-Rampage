@@ -10,7 +10,7 @@ public class PlayerIdentity : MonoBehaviour
     [SerializeField]
     public List<Item> items { get; private set; } = new List<Item>();
 
-    public int chips;
+    public int chips { get; private set; } = 0;
 
     public delegate void ChipEvent(int amount);
 
@@ -23,15 +23,15 @@ public class PlayerIdentity : MonoBehaviour
         if (amount == 0) return;
         chips += amount;
 
-        onChipChange(chips);
+        onChipChange?.Invoke(chips);
         
         if (amount < 0)
         {
-            //onChipSpent(amount);    
+            onChipSpent?.Invoke(amount);    
         }
         else
         {
-            //onChipGain(amount);
+            onChipGain?.Invoke(amount);
         }
     }
 

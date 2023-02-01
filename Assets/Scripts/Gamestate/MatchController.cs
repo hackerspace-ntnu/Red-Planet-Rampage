@@ -13,7 +13,6 @@ public struct Player
     public Player(PlayerIdentity playerIdentity, PlayerManager playerManager, int startAmount)
     {
         this.playerIdentity = playerIdentity;
-        playerManager.identity.chips = startAmount;
         this.playerManager = playerManager;
     }
     // Reference to player identity class
@@ -59,10 +58,11 @@ public class MatchController : MonoBehaviour
     private GlobalHUDController globalHUDController;
 
     private List<Player> players = new List<Player>();
-    private List<Round> rounds = new List<Round>();
+    private static List<Round> rounds = new List<Round>();
 
     void Start()
     {
+
         #region Singleton boilerplate
 
         if (Singleton != null)
@@ -79,30 +79,28 @@ public class MatchController : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
+
         playerFactory = FindObjectOfType<PlayerFactory>();
 
-        // First time setup of playerInputs
-        if (rounds.Count == 0) 
-        {
-            playerFactory.InstantiatePlayersFPS();
-
-            PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput =>
-            {
-                var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
-                var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
-                players.Add(new Player(playerIdentity, playerStateController, startAmount));
-            });
-
-            // TODO do something else funky wunky
-            onRoundEnd += () => Debug.Log("End of round " + rounds.Count());
-            
-            StartNextRound();
-        }
+        StartNextRound();
+        
 
     }
 
     public void StartNextRound()
     {
+        // Setup of playerInputs
+        playerFactory.InstantiatePlayersFPS();
+
+        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput =>
+        {
+            var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
+            var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
+            players.Add(new Player(playerIdentity, playerStateController, startAmount));
+        });
+
+        // TODO do something else funky wunky
+
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
         onRoundStart?.Invoke();
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
@@ -113,7 +111,7 @@ public class MatchController : MonoBehaviour
 
     public void StartNextBidding()
     {
-        changeInputMappings("Bidding");
+        ChangeInputMappings("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
         onBiddingStart?.Invoke();
         // TODO: Add Destroy on match win
@@ -144,7 +142,7 @@ public class MatchController : MonoBehaviour
     {
         yield return new WaitForSeconds(roundEndDelay);
         // This needs to be called after inputs are set at start the first time this is needed.
-        changeInputMappings("FPS");
+        ChangeInputMappings("FPS");
         SceneManager.LoadScene("DemoArena");
         StartNextRound();
     }
@@ -164,11 +162,10 @@ public class MatchController : MonoBehaviour
             // Base reward and kill bonus
             var reward = rewardBase + lastRound.KillCount(player.playerManager) * rewardKill;
             // Win bonus
-            if (lastRound.IsWinner(player.playerManager))
+            if (lastRound.IsWinner(player.playerManager.identity))
                 reward += rewardWin;
 
-            player.playerManager.identity.chips += reward;
-            Debug.Log(player.playerManager.ToString() + " was awarded " + reward + " chips, and now has a total of "+ player.playerManager.identity.chips);
+            player.playerManager.identity.UpdateChip(reward);
         }
     }
 
@@ -190,7 +187,7 @@ public class MatchController : MonoBehaviour
             Debug.Log("Aaaaand the winner iiiiiiiis " + lastWinner.ToString());
 
             // Update playerInputs in preperation for Menu scene
-            changeInputMappings("Menu");
+            ChangeInputMappings("Menu");
 
             MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
             SceneManager.LoadSceneAsync("Menu");
@@ -202,7 +199,7 @@ public class MatchController : MonoBehaviour
         }
     }
 
-    private void changeInputMappings(string inputMapName)
+    private void ChangeInputMappings(string inputMapName)
     {
         PlayerInputManagerController.Singleton.ChangeInputMaps(inputMapName);
         foreach (InputManager inputs in PlayerInputManagerController.Singleton.playerInputs)

@@ -4,6 +4,7 @@ using Unity.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -18,6 +19,10 @@ public class MainMenuController : MonoBehaviour
 
     [SerializeField]
     private List<TabGroup> tabGroups;
+    [SerializeField]
+    private Selectable defaultButton;
+    [SerializeField]
+    private GameObject defaultMenu;
 
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
@@ -26,14 +31,19 @@ public class MainMenuController : MonoBehaviour
     void Start()
     {
         playerInputManagerController = PlayerInputManagerController.Singleton;
-        playerInputManagerController.onPlayerInputJoined += AddPlayer;
         playerInputManagerController.playerInputManager.splitScreen = false;
-
+        playerInputManagerController.onPlayerInputJoined += AddPlayer;
         if (playerInputManagerController.playerInputs.Count > 0)
         {
+            // None of this works... yet
+            //InputSystemUIInputModule inputSystem = GetComponent<InputSystemUIInputModule>();
+            //inputSystem.actionsAsset = playerInputManagerController.playerInputs[0].playerInput.actions;
+            //playerInputManagerController.playerInputs[0].playerInput.uiInputModule = inputSystem;
+            //playerInputManagerController.GetComponent<MultiplayerEventSystem>().playerRoot = defaultMenu;
             TransferExistingInputs();
         }
 
+        SelectControl(defaultButton);
     }
 
     private void OnDestroy()

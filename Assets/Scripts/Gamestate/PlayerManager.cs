@@ -51,7 +51,6 @@ public class PlayerManager : MonoBehaviour
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
-        Debug.Log(this.ToString() + " took " + damage + " damage from " + info.sourcePlayer.ToString());
         hudController.UpdateHealthBar(healthController.CurrentHealth, healthController.MaxHealth);
     }
 
@@ -108,6 +107,8 @@ public class PlayerManager : MonoBehaviour
         healthController.onDeath -= OnDeath;
         fpsInput.onFirePerformed -= OnFire;
         fpsInput.onFireCanceled -= OnFireEnd;
+        //Remove the gun
+        Destroy(gunController.gameObject);
     }
 
     private void OnFire(InputAction.CallbackContext ctx)
