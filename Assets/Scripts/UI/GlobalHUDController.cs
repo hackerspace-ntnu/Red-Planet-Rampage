@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ public class GlobalHUDController : MonoBehaviour
     private TMP_Text roundTimer;
 
     [SerializeField]
-    private GameObject PlayerStatUI;
+    private GameObject playerStatUIPrefab;
 
     void Start()
     {
@@ -26,11 +27,8 @@ public class GlobalHUDController : MonoBehaviour
 
     public void SetPlayer(PlayerManager playerManager)
     {
-        GameObject playerStatUIObject = Instantiate(PlayerStatUI, gameObject.transform);
-        PlayerStatUI playerStatUI = playerStatUIObject.GetComponent<PlayerStatUI>();
-        playerStatUI.setName(playerManager.identity.playerName);
-        playerStatUI.SetChips(playerManager.identity.chips);
-        playerManager.identity.onChipChange += playerStatUI.SetChips;
+        GameObject playerStatUIObject = Instantiate(playerStatUIPrefab, gameObject.transform);
+        playerStatUIObject.GetComponent<PlayerStatUI>().playerManager = playerManager;
     }
 
     public void OnTimerUpdate(float time)

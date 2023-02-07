@@ -6,7 +6,7 @@ public class GunStats : ScriptableObject
 
     // -- IMPORTANT INFO --
 
-    // It is fine to add new properties to this file, but be carefull when REMOVING them
+    // It is fine to add new properties to this file, but be careful when REMOVING them
     // If you remove, for example, magazineSize from these properties and then save, all object data of magazine size 
     // will be removed in every instance of the sriptable object
     public enum FireModes

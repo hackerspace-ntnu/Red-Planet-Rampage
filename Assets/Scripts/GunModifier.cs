@@ -16,7 +16,7 @@ public class GunModifier : MonoBehaviour
 
     // Sets the order the modifiers are applied, for consitency
     public virtual int priority { get => 100; }
-    
+
     // Adds simple stat modifications
     public Modifier[] statModifiers;
 
@@ -24,38 +24,44 @@ public class GunModifier : MonoBehaviour
     public GameObject bulletModifyerPrefab;
 
     // Used to keep track of added projectile modfyer to delete it 
-    private GameObject instantiatedBulletModifyer;
+    private GameObject instantiatedBulletModifier;
 
     // Is run when the gun is built
     public virtual void Attach(GunController gun)
     {
-        foreach(var modifier in statModifiers)
+        Modify(gun.stats);
+        if (bulletModifyerPrefab != null)
         {
-            ModifiableFloat stat = (ModifiableFloat) typeof(GunStats).GetProperty(modifier.name).GetValue(gun.stats, null);
+            instantiatedBulletModifier = Instantiate(bulletModifyerPrefab, gun.projectile.transform);
+            instantiatedBulletModifier.GetComponent<ProjectileModifier>().projectile = gun.projectile.GetComponent<ProjectileController>();
+        }
+    }
+
+    public virtual void Modify(GunStats stats)
+    {
+        foreach (var modifier in statModifiers)
+        {
+            ModifiableFloat stat = (ModifiableFloat)typeof(GunStats).GetProperty(modifier.name).GetValue(stats, null);
             stat.AddBaseValue(modifier.addition);
             stat.AddMultiplier(modifier.multiplier);
             stat.AddExponential(modifier.exponential);
         }
-        if(bulletModifyerPrefab != null)
-        {
-            instantiatedBulletModifyer = Instantiate(bulletModifyerPrefab, gun.projectile.transform);
-            instantiatedBulletModifyer.GetComponent<ProjectileModifier>().projectile = gun.projectile.GetComponent<ProjectileController>();
-        }
     }
-    // Is run when component is remove
+
+    // Is run when component is removed
     // Not currently in use
-    public virtual void Detach(GunController gun) {
+    public virtual void Detach(GunController gun)
+    {
         foreach (var modifier in statModifiers)
         {
             ModifiableFloat stat = (ModifiableFloat)typeof(GunStats).GetProperty(modifier.name).GetValue(gun.stats);
             stat.AddBaseValue(-modifier.addition);
             stat.AddMultiplier(-modifier.multiplier);
-            stat.AddExponential(1/modifier.exponential);
+            stat.AddExponential(1 / modifier.exponential);
         }
-        if(instantiatedBulletModifyer != null)
+        if (instantiatedBulletModifier != null)
         {
-            Destroy(instantiatedBulletModifyer);
+            Destroy(instantiatedBulletModifier);
         }
     }
-
 }

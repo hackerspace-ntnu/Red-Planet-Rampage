@@ -16,6 +16,15 @@ public class GunFactory : MonoBehaviour
 
         return gun;
     }
+
+    public static GunStats GetGunStats(Item body, Item barrel, Item extension)
+    {
+        GunStats stats = body.augment.GetComponent<GunBody>().InstantiateBaseStats;
+        barrel.augment.GetComponent<GunBarrel>().Modify(stats);
+        extension.augment.GetComponent<GunExtension>().Modify(stats);
+        return stats;
+    }
+
     // Prefabs of the different parts
     [SerializeField]
     public GameObject bodyPrefab;
