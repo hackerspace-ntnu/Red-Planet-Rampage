@@ -51,7 +51,6 @@ public class PlayerManager : MonoBehaviour
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
-        Debug.Log(this.ToString() + " took " + damage + " damage from " + info.sourcePlayer.ToString());
         hudController.UpdateHealthBar(healthController.CurrentHealth, healthController.MaxHealth);
     }
 
@@ -108,6 +107,8 @@ public class PlayerManager : MonoBehaviour
         healthController.onDeath -= OnDeath;
         fpsInput.onFirePerformed -= OnFire;
         fpsInput.onFireCanceled -= OnFireEnd;
+        //Remove the gun
+        Destroy(gunController.gameObject);
     }
 
     private void OnFire(InputAction.CallbackContext ctx)
@@ -149,25 +150,22 @@ public class PlayerManager : MonoBehaviour
 
     private void SetGun(Transform offset)
     {
-        if (identity.items.Count > 0)
+        foreach(Item item in identity.items)
         {
-            foreach(Item item in identity.items)
+            switch (item.augmentType)
             {
-                 switch (item.augmentType)
-                {
-                    case AugmentType.Body:
-                        body = item.augment;
-                        break;
-                    case AugmentType.Barrel:
-                        barrel = item.augment;
-                        break;
-                    case AugmentType.Extension:
-                        extension = item.augment;
-                        break;
-                    default:
-                        Debug.Log("No appropritate augmentType found in item.");
-                        break;
-                }
+                case AugmentType.Body:
+                    body = item.augment;
+                    break;
+                case AugmentType.Barrel:
+                    barrel = item.augment;
+                    break;
+                case AugmentType.Extension:
+                    extension = item.augment;
+                    break;
+                default:
+                    Debug.Log("No appropritate augmentType found in item.");
+                    break;
             }
         }
 
