@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
 [System.Serializable]
 public class Modifier
@@ -21,18 +18,21 @@ public class GunModifier : MonoBehaviour
     public Modifier[] statModifiers;
 
     // This prefab is added as a child to the projectile in order to modify it
-    public GameObject bulletModifyerPrefab;
+    public GameObject bulletModifierPrefab;
 
     // Used to keep track of added projectile modfyer to delete it 
     private GameObject instantiatedBulletModifier;
+
+    // Where to shoot bullets
+    public Transform[] outputs;
 
     // Is run when the gun is built
     public virtual void Attach(GunController gun)
     {
         Modify(gun.stats);
-        if (bulletModifyerPrefab != null)
+        if (bulletModifierPrefab != null)
         {
-            instantiatedBulletModifier = Instantiate(bulletModifyerPrefab, gun.projectile.transform);
+            instantiatedBulletModifier = Instantiate(bulletModifierPrefab, gun.projectile.transform);
             instantiatedBulletModifier.GetComponent<ProjectileModifier>().projectile = gun.projectile.GetComponent<ProjectileController>();
         }
     }
@@ -46,6 +46,7 @@ public class GunModifier : MonoBehaviour
             stat.AddMultiplier(modifier.multiplier);
             stat.AddExponential(modifier.exponential);
         }
+        stats.ProjectilesPerShot.AddExponential(outputs.Length);
     }
 
     // Is run when component is removed
