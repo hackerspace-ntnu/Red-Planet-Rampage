@@ -20,8 +20,12 @@ public class GunFactory : MonoBehaviour
     public static GunStats GetGunStats(Item body, Item barrel, Item extension)
     {
         GunStats stats = body.augment.GetComponent<GunBody>().InstantiateBaseStats;
-        barrel.augment.GetComponent<GunBarrel>().Modify(stats);
-        extension.augment.GetComponent<GunExtension>().Modify(stats);
+        GunBarrel gunBarrel = barrel.augment.GetComponent<GunBarrel>();
+        gunBarrel.Modify(stats);
+        stats.ProjectilesPerShot.AddExponential(gunBarrel.outPuts.Length);
+        GunExtension gunExtension = extension.augment.GetComponent<GunExtension>();
+        gunExtension.Modify(stats);
+        stats.ProjectilesPerShot.AddExponential(gunExtension.outputs.Length);
         return stats;
     }
 
