@@ -24,6 +24,9 @@ public class StatBar : MonoBehaviour
     private RawImage deltaImage;
 
     [SerializeField]
+    private float tweenDuration = .07f;
+
+    [SerializeField]
     private float baseValue = 100;
     public float BaseValue
     {
@@ -50,7 +53,6 @@ public class StatBar : MonoBehaviour
     void Awake()
     {
         deltaImage = deltaRect.GetComponent<RawImage>();
-        Debug.Log($"hello this is {deltaImage}");
         baseRect.GetComponent<RawImage>().color = baseColor;
 
         UpdateMeter();
@@ -58,19 +60,20 @@ public class StatBar : MonoBehaviour
 
     private void UpdateMeter()
     {
+        float height = baseRect.sizeDelta.y;
         if (newValue < baseValue)
         {
             // Negative delta; base will have delta take a slice out of it
             deltaImage.color = negativeColor;
-            baseRect.sizeDelta = new Vector2(newValue * displayScale, baseRect.sizeDelta.y);
-            deltaRect.sizeDelta = new Vector2((baseValue - newValue) * displayScale, deltaRect.sizeDelta.y);
+            LeanTween.size(baseRect, new Vector2(newValue * displayScale, height), tweenDuration);
+            LeanTween.size(deltaRect, new Vector2((baseValue - newValue) * displayScale, height), tweenDuration);
         }
         else
         {
             // Positive (or zero) delta; base and delta purely display their value
-            deltaImage.color = positiveColor;
-            baseRect.sizeDelta = new Vector2(baseValue * displayScale, baseRect.sizeDelta.y);
-            deltaRect.sizeDelta = new Vector2((newValue - baseValue) * displayScale, deltaRect.sizeDelta.y);
+            if (newValue > baseValue) deltaImage.color = positiveColor;
+            LeanTween.size(baseRect, new Vector2(baseValue * displayScale, height), tweenDuration);
+            LeanTween.size(deltaRect, new Vector2((newValue - baseValue) * displayScale, height), tweenDuration);
         }
     }
 }
