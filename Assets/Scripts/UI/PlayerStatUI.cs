@@ -55,6 +55,7 @@ public class PlayerStatUI : MonoBehaviour
         if (platform == null || platform.Item == null)
         {
             ResetNewGunStats();
+            return;
         }
 
         Item body = playerManager.identity.Body;
