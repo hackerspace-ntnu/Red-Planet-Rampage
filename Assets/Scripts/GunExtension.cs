@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,10 +8,6 @@ public class GunExtension : GunModifier
 
     [SerializeField]
     private GameObject model;
-
-    // The projectile is shot from each of these outputs, might want to change this iw we want varying outputs, like alternate shooting
-    [SerializeField]
-    public Transform[] outputs;
 
     /// <summary>
     /// Attaches the extension model(s) to each of the attachment points of the barrel.

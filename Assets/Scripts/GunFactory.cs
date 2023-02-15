@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -16,6 +15,15 @@ public class GunFactory : MonoBehaviour
 
         return gun;
     }
+
+    public static GunStats GetGunStats(Item body, Item barrel, Item extension)
+    {
+        GunStats stats = body.augment.GetComponent<GunBody>().InstantiateBaseStats;
+        barrel.augment.GetComponent<GunBarrel>().Modify(stats);
+        extension.augment.GetComponent<GunExtension>().Modify(stats);
+        return stats;
+    }
+
     // Prefabs of the different parts
     [SerializeField]
     public GameObject bodyPrefab;
@@ -73,7 +81,7 @@ public class GunFactory : MonoBehaviour
         }
         else
         {
-            gunController.outputs = gunBarrel.outPuts;
+            gunController.outputs = gunBarrel.outputs;
         }
 
         // Sets firemode
@@ -95,7 +103,6 @@ public class GunFactory : MonoBehaviour
         }
 
         // Runs attach of all modifyers in ascending order
-
         foreach (var modifier in GetComponentsInChildren<GunModifier>().OrderBy(x => x.priority))
         {
             modifier.Attach(gunController);
