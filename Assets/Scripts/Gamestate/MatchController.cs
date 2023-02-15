@@ -148,7 +148,7 @@ public class MatchController : MonoBehaviour
         yield return new WaitForSeconds(roundEndDelay);
         // This needs to be called after inputs are set at start the first time this is needed.
         PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
-        SceneManager.LoadScene("DemoArena");
+        SceneManager.LoadScene("Cratertown");
         StartNextRound();
     }
 
