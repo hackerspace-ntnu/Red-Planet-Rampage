@@ -107,6 +107,8 @@ public class GunFactory : MonoBehaviour
         {
             modifier.Attach(gunController);
         }
+
+        gunController.onInitialize?.Invoke(gunController.stats);
     }
 }
 
