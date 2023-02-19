@@ -5,7 +5,7 @@ public class HealthController : MonoBehaviour
     [SerializeField]
     private int maxhHealth = 100;
     public int MaxHealth { get => maxhHealth; }
-
+    [SerializeField]
     private float currentHealth = 0;
 
     public float CurrentHealth { get => currentHealth; }

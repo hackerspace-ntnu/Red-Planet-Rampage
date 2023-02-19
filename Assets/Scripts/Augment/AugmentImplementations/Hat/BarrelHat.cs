@@ -25,7 +25,7 @@ public class BarrelHat : MonoBehaviour
 
     private void OnInitialize(GunStats gunstats)
     {
-        animator.speed = gunstats.Firerate;
+        animator.speed = Mathf.Max(gunstats.Firerate, 1f);
     }
 
     private void OnFire(GunStats gunstats)

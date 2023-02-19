@@ -7,26 +7,25 @@ using UnityEngine;
 /// </summary>
 public class StickyProjectileModifier : ProjectileModifier
 {
+    // Model to stick to target
     [SerializeField]
     private GameObject stuckObject;
     [SerializeField]
     private float stuckLifeTime = 5f;
+    // Does stuck object trigger onHit?
     [SerializeField]
     private bool triggerOnHit = true;
+    // How often does it trigger onHit (in seconds)?
     [SerializeField]
     private float onHitInterval = 1f;
 
-    private ProjectileState projectileState;
-
-    private void StickToTarget(HitboxController controller, ref ProjectileState state, GunStats stats)
+    public void StickToTarget(HitboxController controller, ref ProjectileState state, GunStats stats)
     {
-        projectileState = state;
-        var stuck = Instantiate(stuckObject, transform);
+        var stuck = Instantiate(stuckObject, state.position, state.rotation, controller.transform);
         Destroy(stuck, stuckLifeTime);
     }
     void Start()
     {
-        // TODO: Rewrite OnHitBoxCollision to use out instead of ref, because this is starting to get stupid.
         projectile.OnHitboxCollision += StickToTarget;
     }
 

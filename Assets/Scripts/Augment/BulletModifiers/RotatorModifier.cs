@@ -8,20 +8,28 @@ using UnityEngine;
 public class RotatorModifier : ProjectileModifier
 {
     [SerializeField]
-    private float rotationX = 0f;
+    Vector3 rotationPerUpdate = Vector3.zero;
     [SerializeField]
-    private float rotationY = 0f;
+    private bool randomStartAngleX;
     [SerializeField]
-    private float rotationZ = 0f;
+    private bool randomStartAngleY;
+    [SerializeField]
+    private bool randomStartAngleZ;
 
-    private void Rotate(float distance, ref ProjectileState state, GunStats stats)
+    public void Rotate(float distance, ref ProjectileState state, GunStats stats)
     {
-        state.rotation *= Quaternion.Euler(rotationX*distance, rotationY*distance, rotationZ*distance);
+        if (distance > 0) {
+            state.rotation *= Quaternion.Euler(rotationPerUpdate * distance);
+        }
+        else
+        {
+            state.rotation = Quaternion.Euler(randomStartAngleX ? Random.Range(0,360) : 0, randomStartAngleY ? Random.Range(0, 360) : 0, randomStartAngleZ ? Random.Range(0, 360) : 0);
+        }
+        
     }
 
-    void Start()
+    void Awake()
     {
-        // TODO: Implement local rotation in BulletController, which is currently not implemented apparently
         projectile.UpdateProjectileMovement += Rotate;
     }
 

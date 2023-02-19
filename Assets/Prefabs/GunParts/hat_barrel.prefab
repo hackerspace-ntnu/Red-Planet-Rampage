@@ -304,8 +304,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0798da53ce119cf4cba859cb8e9ca69a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  statModifiers: []
-  bulletModifierPrefab: {fileID: 0}
+  statModifiers:
+  - name: ProjectileGravityModifier
+    addition: 1
+    multiplier: 0
+    exponential: 0.1
+  bulletModifierPrefab: {fileID: 7230786531980126404, guid: 13e086978b8806c429501e188e215c00, type: 3}
   outputs:
   - {fileID: 2006913084140856218}
   projectile: {fileID: 7671496889312377090, guid: 85abc04a515deae4fb21cdf2af1dc04e, type: 3}

@@ -20,7 +20,7 @@ public class GunModifier : MonoBehaviour
     // This prefab is added as a child to the projectile in order to modify it
     public GameObject bulletModifierPrefab;
 
-    // Used to keep track of added projectile modfyer to delete it 
+    // Used to keep track of added projectile modifier to delete it 
     private GameObject instantiatedBulletModifier;
 
     // Where to shoot bullets
@@ -33,7 +33,10 @@ public class GunModifier : MonoBehaviour
         if (bulletModifierPrefab != null)
         {
             instantiatedBulletModifier = Instantiate(bulletModifierPrefab, gun.projectile.transform);
-            instantiatedBulletModifier.GetComponent<ProjectileModifier>().projectile = gun.projectile.GetComponent<ProjectileController>();
+            foreach (ProjectileModifier modifier in instantiatedBulletModifier.GetComponents<ProjectileModifier>())
+            {
+                modifier.projectile = gun.projectile.GetComponent<ProjectileController>();
+            }
         }
     }
 
