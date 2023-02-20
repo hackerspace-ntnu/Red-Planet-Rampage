@@ -81,6 +81,12 @@ public class MatchController : MonoBehaviour
 
         playerFactory = FindObjectOfType<PlayerFactory>();
 
+        // Makes shooting end quickly if testing with 1 player
+        #if UNITY_EDITOR
+        if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
+            roundLength = 5f;
+        #endif
+
         StartNextRound();
 
 
