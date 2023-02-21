@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Class that ties the functions and properties of the completed gun to the animations of the hat barrel
 /// </summary>
-public class BarrelHat : MonoBehaviour
+public class HatBarrel : MonoBehaviour
 {
     private GunController gunController;
     [SerializeField]

@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Rotates a bullet with specified amount of degrees on it's trajectory
 /// </summary>
-public class RotatorModifier : ProjectileModifier
+public class RotationModifier : ProjectileModifier
 {
     [SerializeField]
     Vector3 rotationPerUpdate = Vector3.zero;

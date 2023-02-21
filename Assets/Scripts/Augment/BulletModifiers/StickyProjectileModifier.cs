@@ -21,7 +21,7 @@ public class StickyProjectileModifier : ProjectileModifier
 
     public void StickToTarget(HitboxController controller, ref ProjectileState state, GunStats stats)
     {
-        var stuck = Instantiate(stuckObject, state.position, state.rotation, controller.transform);
+        var stuck = Instantiate(stuckObject, state.olderPosition, state.rotation, controller.transform);
         Destroy(stuck, stuckLifeTime);
     }
     void Start()

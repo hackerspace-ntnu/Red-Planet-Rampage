@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Class for moving individual parts of the model that can't be controlled by the normal animation controller.
 /// </summary>
-public class BarrelHatModel : MonoBehaviour
+public class HatBarrelModel : MonoBehaviour
 {
     [SerializeField]
     private GameObject hatPrefab;
