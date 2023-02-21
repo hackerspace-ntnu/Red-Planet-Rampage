@@ -4,6 +4,9 @@ using UnityEngine;
 public class PlayerStatUI : MonoBehaviour
 {
     [SerializeField]
+    private CanvasGroup statContainer;
+
+    [SerializeField]
     private TMP_Text playerNameText;
 
     [SerializeField]
@@ -25,6 +28,18 @@ public class PlayerStatUI : MonoBehaviour
 
     void Start()
     {
+        OnEnable();
+    }
+
+    void OnEnable()
+    {
+        if (!playerManager)
+        {
+            return;
+        }
+
+        statContainer.alpha = 1;
+
         SetName(playerManager.identity.playerName);
 
         SetChips(playerManager.identity.chips);
@@ -36,10 +51,23 @@ public class PlayerStatUI : MonoBehaviour
         // Respond to stat changes
         playerManager.identity.onInventoryChange += OnInventoryChange;
         playerManager.onSelectedBiddingPlatformChange += OnBiddingPlatformChange;
+
+    }
+
+    void OnDisable()
+    {
+        // Hide stats
+        statContainer.alpha = 0;
     }
 
     void OnDestroy()
     {
+        if (!playerManager)
+        {
+            return;
+        }
+
+
         playerManager.identity.onChipChange -= SetChips;
         playerManager.identity.onInventoryChange -= OnInventoryChange;
         playerManager.onSelectedBiddingPlatformChange -= OnBiddingPlatformChange;

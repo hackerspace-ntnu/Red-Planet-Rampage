@@ -19,7 +19,12 @@ public class StatBar : MonoBehaviour
     private Color positiveColor;
 
     [SerializeField]
-    private float displayScale = 1;
+    private float maxWidth = 100;
+
+    [SerializeField]
+    private float defaultMaxValue = 30;
+
+    private float currentMaxValue;
 
     private RawImage deltaImage;
 
@@ -27,7 +32,7 @@ public class StatBar : MonoBehaviour
     private float tweenDuration = .07f;
 
     [SerializeField]
-    private float baseValue = 100;
+    private float baseValue = 50;
     public float BaseValue
     {
         get { return baseValue; }
@@ -54,6 +59,7 @@ public class StatBar : MonoBehaviour
     {
         deltaImage = deltaRect.GetComponent<RawImage>();
         baseRect.GetComponent<RawImage>().color = baseColor;
+        currentMaxValue = defaultMaxValue;
 
         UpdateMeter();
     }
@@ -61,19 +67,27 @@ public class StatBar : MonoBehaviour
     private void UpdateMeter()
     {
         float height = baseRect.sizeDelta.y;
+
+        // Set new max if we need to
+        currentMaxValue = Mathf.Max(currentMaxValue, Mathf.Max(newValue, baseValue));
+
+        // Interpolate normalized value
+        float newLerpedValue = Mathf.Lerp(0, maxWidth, newValue / currentMaxValue);
+        float baseLerpedValue = Mathf.Lerp(0, maxWidth, baseValue / currentMaxValue);
+
         if (newValue < baseValue)
         {
             // Negative delta; base will have delta take a slice out of it
             deltaImage.color = negativeColor;
-            LeanTween.size(baseRect, new Vector2(newValue * displayScale, height), tweenDuration);
-            LeanTween.size(deltaRect, new Vector2((baseValue - newValue) * displayScale, height), tweenDuration);
+            LeanTween.size(baseRect, new Vector2(newLerpedValue, height), tweenDuration);
+            LeanTween.size(deltaRect, new Vector2(baseLerpedValue - newLerpedValue, height), tweenDuration);
         }
         else
         {
             // Positive (or zero) delta; base and delta purely display their value
             if (newValue > baseValue) deltaImage.color = positiveColor;
-            LeanTween.size(baseRect, new Vector2(baseValue * displayScale, height), tweenDuration);
-            LeanTween.size(deltaRect, new Vector2((newValue - baseValue) * displayScale, height), tweenDuration);
+            LeanTween.size(baseRect, new Vector2(baseLerpedValue, height), tweenDuration);
+            LeanTween.size(deltaRect, new Vector2(newLerpedValue - baseLerpedValue, height), tweenDuration);
         }
     }
 }
