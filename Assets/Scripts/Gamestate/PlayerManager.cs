@@ -69,15 +69,15 @@ public class PlayerManager : MonoBehaviour
         // Disable components
         GetComponent<PlayerMovement>().enabled = false;
         healthController.enabled = false;
-        meshBase.SetActive(false);
         // TODO display guns falling to the floor
         gunController.gameObject.SetActive(false);
         // Disable all colliders and physics
-        GetComponents<Collider>().ToList().ForEach(collider => collider.enabled = false);
-        GetComponent<Rigidbody>().useGravity = false;
         // Ragdollify
-        ragdoll.gameObject.SetActive(true);
-        ragdoll.AddForceAtPosition(impactDirection * 4, impactSite, ForceMode.Impulse);
+
+        // TODO: Make accurate hitbox forces for the different limbs of the player
+        //ragdoll.AddForceAtPosition(impactDirection * 4, impactSite, ForceMode.Impulse);
+
+        GetComponent<RagdollController>().EnableRagdoll();
     }
 
     /// <summary>
@@ -97,11 +97,12 @@ public class PlayerManager : MonoBehaviour
         var canvas = hudController.GetComponent<Canvas>();
         canvas.worldCamera = fpsInput.GetComponentInChildren<Camera>();
         canvas.planeDistance = 0.11f;
+        
         // Set player color
-        var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>();
-        var ragdollRenderer = ragdoll.GetComponentInChildren<SkinnedMeshRenderer>();
-        meshRenderer.materials[0].SetColor("_Color", identity.color);
-        ragdollRenderer.materials[0].SetColor("_Color", identity.color);
+        // var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>();
+        // var ragdollRenderer = ragdoll.GetComponentInChildren<SkinnedMeshRenderer>();
+        // meshRenderer.materials[0].SetColor("_Color", identity.color);
+        // ragdollRenderer.materials[0].SetColor("_Color", identity.color);
     }
 
     void OnDestroy()

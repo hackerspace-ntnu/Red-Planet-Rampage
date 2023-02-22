@@ -37,7 +37,6 @@ public class SpiralPathModifier : ProjectileModifier
     }
     private void Start()
     {
-        
         projectile.UpdateProjectileMovement += addSpiralDisplacement;
         if (randomAngle)
             offset = Random.Range(0, 2 * Mathf.PI);
