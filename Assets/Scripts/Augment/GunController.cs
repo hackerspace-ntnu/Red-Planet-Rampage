@@ -23,6 +23,11 @@ public class GunController : MonoBehaviour
     // Inputs
     public bool triggerHeld, triggerPressed;
 
+    public delegate void GunEvent(GunStats gunStats);
+
+    public GunEvent onInitialize;
+    public GunEvent onFire;
+
     private void FixedUpdate()
     {
         if (fireRateController.shouldFire(triggerPressed, triggerHeld))
@@ -33,6 +38,7 @@ public class GunController : MonoBehaviour
 
     private void FireGun()
     {
+        onFire?.Invoke(stats);
         foreach (var output in outputs)
         {
             for (int i = 0; i < Mathf.Max((int)stats.ProjectilesPerShot.Value(), 1); i++)

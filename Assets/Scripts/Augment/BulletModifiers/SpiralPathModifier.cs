@@ -5,7 +5,7 @@ using UnityEngine;
 public class SpiralPathModifier : ProjectileModifier
 {
 
-    //Modifyer for adding a spiral movement to any projectile
+    //Modifier for adding a spiral movement to any projectile
     public AnimationCurve radialLerp;
 
     public float spiralRadius, spiralWavelength, spiralLerpDist;
