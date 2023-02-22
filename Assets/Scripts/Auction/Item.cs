@@ -11,6 +11,7 @@ public enum AugmentType
 public class Item : ScriptableObject
 {
     public string displayName;
+    public string secretName;
     public string displayDescription;
     public AugmentType augmentType;
 
