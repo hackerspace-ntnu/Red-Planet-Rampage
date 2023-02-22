@@ -19,6 +19,9 @@ public class PlayerMovement : MonoBehaviour
     private Collider hitbox;
 
     [SerializeField]
+    private LayerMask ignoreMask;
+
+    [SerializeField]
     private float lookSpeed = 3;
 
     [SerializeField]
@@ -112,7 +115,7 @@ public class PlayerMovement : MonoBehaviour
     {
         // Cast a box to detect (partial) ground. See OnDrawGizmos for what I think is the extent of the box cast.
         // No, this does not work if the cast start at the bottom.
-        return !Physics.BoxCast(hitbox.bounds.center, 0.5f * Vector3.one, Vector3.down, Quaternion.identity, 0.5f + airThreshold);
+        return !Physics.BoxCast(hitbox.bounds.center, 0.5f * Vector3.one, Vector3.down, Quaternion.identity, 0.5f + airThreshold, ignoreMask); ;
     }
 
     private void UpdatePosition(Vector3 input)

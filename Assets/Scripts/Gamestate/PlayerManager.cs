@@ -75,7 +75,6 @@ public class PlayerManager : MonoBehaviour
         // Ragdollify
 
         // TODO: Make accurate hitbox forces for the different limbs of the player
-        //ragdoll.AddForceAtPosition(impactDirection * 4, impactSite, ForceMode.Impulse);
 
         GetComponent<RagdollController>().EnableRagdoll();
     }
@@ -99,10 +98,10 @@ public class PlayerManager : MonoBehaviour
         canvas.planeDistance = 0.11f;
         
         // Set player color
-        // var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>();
-        // var ragdollRenderer = ragdoll.GetComponentInChildren<SkinnedMeshRenderer>();
-        // meshRenderer.materials[0].SetColor("_Color", identity.color);
-        // ragdollRenderer.materials[0].SetColor("_Color", identity.color);
+         //var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>();
+         //var ragdollRenderer = ragdoll.GetComponentInChildren<SkinnedMeshRenderer>();
+         //meshRenderer.materials[0].SetColor("_Color", identity.color);
+         //ragdollRenderer.materials[0].SetColor("_Color", identity.color);
     }
 
     void OnDestroy()
