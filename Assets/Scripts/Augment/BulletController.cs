@@ -62,6 +62,7 @@ public class BulletController : ProjectileController
     public void Update()
     {
         transform.position = LerpPos();
+        transform.rotation = state.rotation;
     }
 
 }
