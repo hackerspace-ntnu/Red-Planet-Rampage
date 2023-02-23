@@ -19,6 +19,9 @@ public class PlayerMovement : MonoBehaviour
     private Collider hitbox;
 
     [SerializeField]
+    private LayerMask ignoreMask;
+
+    [SerializeField]
     private float lookSpeed = 3;
 
     [SerializeField]
@@ -31,7 +34,7 @@ public class PlayerMovement : MonoBehaviour
     private float inAirStrafeForce = 10;
 
     [SerializeField]
-    private float jumpForce = 50;
+    private float jumpSpeed = 5;
 
     [SerializeField]
     private float jumpTimeout = 0.5f;
@@ -47,7 +50,11 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField, ReadOnly]
     private PlayerState state = PlayerState.GROUNDED;
 
+    [SerializeField]
+    private Animator animator;
+
     private Vector2 aimAngle = Vector2.zero;
+
 
     void Start()
     {
@@ -81,7 +88,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (canJump && state == PlayerState.GROUNDED)
         {
-            body.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            body.AddForce(Vector3.up * jumpSpeed, ForceMode.VelocityChange);
             StartCoroutine(JumpTimeout());
         }
     }
@@ -108,7 +115,7 @@ public class PlayerMovement : MonoBehaviour
     {
         // Cast a box to detect (partial) ground. See OnDrawGizmos for what I think is the extent of the box cast.
         // No, this does not work if the cast start at the bottom.
-        return !Physics.BoxCast(hitbox.bounds.center, 0.5f * Vector3.one, Vector3.down, Quaternion.identity, 0.5f + airThreshold);
+        return !Physics.BoxCast(hitbox.bounds.center, 0.5f * Vector3.one, Vector3.down, Quaternion.identity, 0.5f + airThreshold, ignoreMask); ;
     }
 
     private void UpdatePosition(Vector3 input)
@@ -151,6 +158,12 @@ public class PlayerMovement : MonoBehaviour
         fpsInput.transform.localRotation = Quaternion.AngleAxis(aimAngle.y * Mathf.Rad2Deg, Vector3.left);
     }
 
+    private void UpdateAnimatorParameters()
+    {
+        animator.SetFloat("Forward", Vector3.Dot(body.velocity, transform.forward) / maxVelocity);
+        animator.SetFloat("Right", Vector3.Dot(body.velocity, transform.right) / maxVelocity);
+    }
+
     void OnDrawGizmos()
     {
         if (!hitbox) return;
@@ -168,5 +181,6 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         UpdateRotation();
+        UpdateAnimatorParameters();
     }
 }
