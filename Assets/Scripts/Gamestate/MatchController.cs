@@ -43,13 +43,13 @@ public class MatchController : MonoBehaviour
 
     [Header("Chip rewards")]
     [SerializeField]
-    private int startAmount = 0;
+    private int startAmount = 5;
     [SerializeField]
-    private int rewardWin = 2;
+    private int rewardWin = 1;
     [SerializeField]
     private int rewardKill = 1;
     [SerializeField]
-    private int rewardBase = 1;
+    private int rewardBase = 2;
 
     public Timer roundTimer;
 

@@ -55,6 +55,7 @@ public class ProjectileController : MonoBehaviour
     // Used for describing how a projectile moves when asked to move a specific distance 
     [System.Serializable]
     public delegate void PathUpdateEvent(float distance, ref ProjectileState state, GunStats stats);
+
     [SerializeField]
     public PathUpdateEvent UpdateProjectileMovement;
 
@@ -86,6 +87,7 @@ public class ProjectileController : MonoBehaviour
         var diff = (Time.time - state.lastUpdateTime) / Time.fixedDeltaTime;
         return Vector3.Lerp(state.oldPosition, state.position, diff);
     }
+
 
     //public Vector3 QerpPos()
     //{

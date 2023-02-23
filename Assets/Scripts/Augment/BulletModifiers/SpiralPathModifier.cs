@@ -5,7 +5,7 @@ using UnityEngine;
 public class SpiralPathModifier : ProjectileModifier
 {
 
-    //Modifyer for adding a spiral movement to any projectile
+    //Modifier for adding a spiral movement to any projectile
     public AnimationCurve radialLerp;
 
     public float spiralRadius, spiralWavelength, spiralLerpDist;
@@ -37,7 +37,6 @@ public class SpiralPathModifier : ProjectileModifier
     }
     private void Start()
     {
-        
         projectile.UpdateProjectileMovement += addSpiralDisplacement;
         if (randomAngle)
             offset = Random.Range(0, 2 * Mathf.PI);
