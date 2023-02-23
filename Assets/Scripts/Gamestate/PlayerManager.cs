@@ -98,10 +98,7 @@ public class PlayerManager : MonoBehaviour
         canvas.planeDistance = 0.11f;
         
         // Set player color
-         //var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>();
-         //var ragdollRenderer = ragdoll.GetComponentInChildren<SkinnedMeshRenderer>();
-         //meshRenderer.materials[0].SetColor("_Color", identity.color);
-         //ragdollRenderer.materials[0].SetColor("_Color", identity.color);
+        var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
     }
 
     void OnDestroy()
