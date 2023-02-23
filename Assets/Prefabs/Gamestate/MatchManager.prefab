@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7583196319734858555}
   - component: {fileID: 3049982711304716190}
   - component: {fileID: 7042748633319679116}
+  - component: {fileID: 3686467445548701086}
   m_Layer: 0
   m_Name: MatchManager
   m_TagString: Untagged
@@ -46,12 +47,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e06c294a3dd98964b89405af885f5b4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roundStartTime: 180
+  roundLength: 5
   roundEndDelay: 0
-  startAmount: 0
-  rewardWin: 2
+  startAmount: 5
+  rewardWin: 1
   rewardKill: 1
-  rewardBase: 1
+  rewardBase: 2
   roundTimer: {fileID: 7042748633319679116}
   globalHUDController: {fileID: 1760732758}
 --- !u!114 &7042748633319679116
@@ -69,6 +70,21 @@ MonoBehaviour:
   baseWaitTime: 0
   additionalWaitTime: 0
   repeat: 0
+--- !u!114 &3686467445548701086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4244699971652222381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b18a938eb13d13540b14e958b874d1b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerPrefab: {fileID: 0}
+  spawnPoint: {fileID: 0}
+  globalHUDController: {fileID: 0}
 --- !u!1001 &3272573476935254913
 PrefabInstance:
   m_ObjectHideFlags: 0

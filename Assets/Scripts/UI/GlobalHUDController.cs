@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -9,7 +7,9 @@ public class GlobalHUDController : MonoBehaviour
     private TMP_Text roundTimer;
 
     [SerializeField]
-    private GameObject PlayerStatUI;
+    private PlayerStatUI[] playerStatPanels;
+
+    private int nextPlayerStatIndex = 0;
 
     void Start()
     {
@@ -22,15 +22,23 @@ public class GlobalHUDController : MonoBehaviour
         {
             roundTimer.alignment = TextAlignmentOptions.Top;
         }
+
+        foreach (PlayerStatUI playerStatUI in playerStatPanels)
+        {
+            playerStatUI.enabled = false;
+        }
     }
 
     public void SetPlayer(PlayerManager playerManager)
     {
-        GameObject playerStatUIObject = Instantiate(PlayerStatUI, gameObject.transform);
-        PlayerStatUI playerStatUI = playerStatUIObject.GetComponent<PlayerStatUI>();
-        playerStatUI.setName(playerManager.identity.playerName);
-        playerStatUI.SetChips(playerManager.identity.chips);
-        playerManager.identity.onChipChange += playerStatUI.SetChips;
+        if (nextPlayerStatIndex >= playerStatPanels.Length)
+        {
+            Debug.LogWarning("Too many player inputs!");
+            return;
+        }
+        playerStatPanels[nextPlayerStatIndex].playerManager = playerManager;
+        playerStatPanels[nextPlayerStatIndex].enabled = true;
+        nextPlayerStatIndex++;
     }
 
     public void OnTimerUpdate(float time)

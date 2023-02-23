@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -15,6 +14,9 @@ public class PlayerManager : MonoBehaviour
 
     public HitEvent onDeath;
 
+    public delegate void BiddingPlatformEvent(BiddingPlatform platform);
+    public BiddingPlatformEvent onSelectedBiddingPlatformChange;
+
     public FPSInputManager fpsInput;
     public PlayerIdentity identity;
 
@@ -24,18 +26,19 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private Rigidbody ragdoll;
 
-    public BiddingPlatform selectedBiddingPlatform;
+    private BiddingPlatform selectedBiddingPlatform;
+    public BiddingPlatform SelectedBiddingPlatform
+    {
+        get { return selectedBiddingPlatform; }
+        set
+        {
+            selectedBiddingPlatform = value;
+            onSelectedBiddingPlatformChange?.Invoke(value);
+        }
+    }
 
 
     private GunController gunController;
-
-    // TODO do this in a better way?
-    [SerializeField]
-    private GameObject body;
-    [SerializeField]
-    private GameObject barrel;
-    [SerializeField]
-    private GameObject extension;
 
     private HealthController healthController;
 
@@ -66,15 +69,14 @@ public class PlayerManager : MonoBehaviour
         // Disable components
         GetComponent<PlayerMovement>().enabled = false;
         healthController.enabled = false;
-        meshBase.SetActive(false);
         // TODO display guns falling to the floor
         gunController.gameObject.SetActive(false);
         // Disable all colliders and physics
-        GetComponents<Collider>().ToList().ForEach(collider => collider.enabled = false);
-        GetComponent<Rigidbody>().useGravity = false;
         // Ragdollify
-        ragdoll.gameObject.SetActive(true);
-        ragdoll.AddForceAtPosition(impactDirection * 4, impactSite, ForceMode.Impulse);
+
+        // TODO: Make accurate hitbox forces for the different limbs of the player
+
+        GetComponent<RagdollController>().EnableRagdoll();
     }
 
     /// <summary>
@@ -94,11 +96,9 @@ public class PlayerManager : MonoBehaviour
         var canvas = hudController.GetComponent<Canvas>();
         canvas.worldCamera = fpsInput.GetComponentInChildren<Camera>();
         canvas.planeDistance = 0.11f;
+        
         // Set player color
-        var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>();
-        var ragdollRenderer = ragdoll.GetComponentInChildren<SkinnedMeshRenderer>();
-        meshRenderer.materials[0].SetColor("_Color", identity.color);
-        ragdollRenderer.materials[0].SetColor("_Color", identity.color);
+        var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
     }
 
     void OnDestroy()
@@ -119,7 +119,6 @@ public class PlayerManager : MonoBehaviour
 
         if (!selectedBiddingPlatform) return;
         selectedBiddingPlatform.TryPlaceBid(identity);
-
     }
 
     IEnumerator UnpressTrigger()
@@ -150,26 +149,7 @@ public class PlayerManager : MonoBehaviour
 
     private void SetGun(Transform offset)
     {
-        foreach(Item item in identity.items)
-        {
-            switch (item.augmentType)
-            {
-                case AugmentType.Body:
-                    body = item.augment;
-                    break;
-                case AugmentType.Barrel:
-                    barrel = item.augment;
-                    break;
-                case AugmentType.Extension:
-                    extension = item.augment;
-                    break;
-                default:
-                    Debug.Log("No appropritate augmentType found in item.");
-                    break;
-            }
-        }
-
-        var gun = GunFactory.InstantiateGun(body, barrel, extension, offset);
+        var gun = GunFactory.InstantiateGun(identity.Body.augment, identity.Barrel.augment, identity.Extension.augment, offset);
         // Set specific local transform
         gun.transform.localPosition = new Vector3(0.39f, -0.12f, -0.4f);
         gun.transform.localRotation = Quaternion.AngleAxis(-12.5f, Vector3.up);

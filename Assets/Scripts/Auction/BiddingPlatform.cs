@@ -10,6 +10,7 @@ public class BiddingPlatform : MonoBehaviour
 {
     [SerializeField]
     private Item item;
+    public Item Item => item;
 
     [SerializeField]
     public int chips = 0;
@@ -42,8 +43,9 @@ public class BiddingPlatform : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out PlayerManager playerManager)){
-            playerManager.selectedBiddingPlatform = this;
+        if (other.TryGetComponent(out PlayerManager playerManager))
+        {
+            playerManager.SelectedBiddingPlatform = this;
         }
 
     }
@@ -52,8 +54,8 @@ public class BiddingPlatform : MonoBehaviour
     {
         if (other.TryGetComponent(out PlayerManager playerManager))
         {
-            if (playerManager.selectedBiddingPlatform == this)
-            playerManager.selectedBiddingPlatform = null;
+            if (playerManager.SelectedBiddingPlatform == this)
+                playerManager.SelectedBiddingPlatform = null;
         }
     }
 
@@ -72,7 +74,7 @@ public class BiddingPlatform : MonoBehaviour
 
     public bool TryPlaceBid(PlayerIdentity playerIdentity)
     {
-        if(ActiveBiddingRound == null)
+        if (ActiveBiddingRound == null)
         {
             Debug.Log("No active biddingRound on biddingPlatform!");
             return false;
@@ -87,11 +89,11 @@ public class BiddingPlatform : MonoBehaviour
             }
             //activeBiddingRound.chips[0] = chips++;
             chips++;
-            playerIdentity.UpdateChip(-chips); 
+            playerIdentity.UpdateChip(-chips);
             itemCostText.text = chips.ToString();
             leadingBidder = playerIdentity;
 
-            if((auctionTimer.WaitTime - auctionTimer.ElapsedTime) < bumpTime) { auctionTimer.AddTime(bumpTime); }
+            if ((auctionTimer.WaitTime - auctionTimer.ElapsedTime) < bumpTime) { auctionTimer.AddTime(bumpTime); }
 
             return true;
         }
@@ -106,7 +108,7 @@ public class BiddingPlatform : MonoBehaviour
     private void EndAuction()
     {
         if (leadingBidder)
-        leadingBidder.PerformTransaction(item);
+            leadingBidder.PerformTransaction(item);
 
         //TODO: Remove this, call from auction driver or matchmanager
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());

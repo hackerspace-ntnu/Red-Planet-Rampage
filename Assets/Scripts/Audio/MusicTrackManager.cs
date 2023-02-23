@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -31,9 +30,6 @@ public class MusicTrackManager : MonoBehaviour
 
     [SerializeField]
     private MusicTrack battleTheme;
-
-    [SerializeField]
-    private MusicTrack battleThemeLoop;
 
     void Awake()
     {
@@ -95,11 +91,6 @@ public class MusicTrackManager : MonoBehaviour
     {
         MusicTrack track = GetTrack(type);
         StartCoroutine(FadeOutThenSwitch(track));
-        if (type == MusicType.BATTLE)
-        {
-            // After fade + intro part of battle theme, we should loop the same intense part of the track
-            StartCoroutine(SwitchAfterSeconds(battleThemeLoop, fadeDuration + track.Layers.First().length));
-        }
     }
 
     private IEnumerator FadeOutThenSwitch(MusicTrack track)
@@ -120,13 +111,5 @@ public class MusicTrackManager : MonoBehaviour
         // Reset volume and switch track
         AssignPlayedLayers(track);
         mixer.SetFloat("musicVolume", startVolume);
-    }
-
-    private IEnumerator SwitchAfterSeconds(MusicTrack track, float seconds)
-    {
-        yield return new WaitForSecondsRealtime(seconds);
-
-        // Switch to (looping) track
-        AssignPlayedLayers(track);
     }
 }

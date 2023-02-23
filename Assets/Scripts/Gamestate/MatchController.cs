@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
 /// Wrapper struct for tying refference to Player class with the in-game player.
@@ -37,20 +36,20 @@ public class MatchController : MonoBehaviour
 
     [Header("Timing")]
     [SerializeField]
-    private float roundStartTime;
+    private float roundLength;
 
     [SerializeField]
     private float roundEndDelay;
 
     [Header("Chip rewards")]
     [SerializeField]
-    private int startAmount = 0;
+    private int startAmount = 5;
     [SerializeField]
-    private int rewardWin = 2;
+    private int rewardWin = 1;
     [SerializeField]
     private int rewardKill = 1;
     [SerializeField]
-    private int rewardBase = 1;
+    private int rewardBase = 2;
 
     public Timer roundTimer;
 
@@ -82,8 +81,14 @@ public class MatchController : MonoBehaviour
 
         playerFactory = FindObjectOfType<PlayerFactory>();
 
+        // Makes shooting end quickly if testing with 1 player
+        #if UNITY_EDITOR
+        if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
+            roundLength = 5f;
+        #endif
+
         StartNextRound();
-        
+
 
     }
 
@@ -104,7 +109,7 @@ public class MatchController : MonoBehaviour
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
         onRoundStart?.Invoke();
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
-        roundTimer.StartTimer(roundStartTime);
+        roundTimer.StartTimer(roundLength);
         roundTimer.OnTimerUpdate += HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted += EndActiveRound;
     }
@@ -171,7 +176,7 @@ public class MatchController : MonoBehaviour
 
     private void HUDTimerUpdate()
     {
-        globalHUDController.OnTimerUpdate(roundStartTime - roundTimer.ElapsedTime);
+        globalHUDController.OnTimerUpdate(roundLength - roundTimer.ElapsedTime);
     }
 
     private bool IsWin()
