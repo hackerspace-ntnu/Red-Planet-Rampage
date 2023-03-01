@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -14,11 +12,14 @@ public class HUDController : MonoBehaviour
     [SerializeField]
     private TMP_Text deathText;
 
+    [SerializeField]
+    private float tweenDuration = .07f;
+
     public void UpdateHealthBar(float currentHealth, float maxHealth)
     {
         float width = (Mathf.Max(currentHealth, 0f) / maxHealth) * 200f;
-        healthBar.sizeDelta = new Vector2(width, healthBar.sizeDelta.y);
-        healthBar.anchoredPosition = new Vector2(25 + width / 2f, healthBar.anchoredPosition.y);
+        LeanTween.size(healthBar, new Vector2(width, healthBar.sizeDelta.y), tweenDuration);
+        LeanTween.move(healthBar, new Vector2(25 + width / 2f, healthBar.anchoredPosition.y), tweenDuration);
     }
 
     public void DisplayDeathScreen(PlayerIdentity killer)
