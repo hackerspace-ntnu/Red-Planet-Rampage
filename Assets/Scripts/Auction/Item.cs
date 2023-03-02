@@ -16,4 +16,9 @@ public class Item : ScriptableObject
     public AugmentType augmentType;
 
     public GameObject augment;
+
+    public override string ToString()
+    {
+        return displayName;
+    }
 }

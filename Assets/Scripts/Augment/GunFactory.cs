@@ -2,21 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-[System.Serializable]
-public struct SecretNameOverride
-{
-    public Item body;
-    public Item barrel;
-    public Item extension;
-    public string name;
-}
-
 [RequireComponent(typeof(GunController))]
 public class GunFactory : MonoBehaviour
 {
-    [SerializeField]
-    private SecretNameOverride[] overrideNames;
-
     public static GameObject InstantiateGun(GameObject bodyPrefab, GameObject barrelPrefab, GameObject extensionPrefab, Transform parent)
     {
         GameObject gun = Instantiate(new GameObject(), parent);
@@ -35,12 +23,13 @@ public class GunFactory : MonoBehaviour
         extension.augment.GetComponent<GunExtension>().Modify(stats);
         return stats;
     }
-    /*
+
     public static string GetGunName(Item body, Item barrel, Item extension)
     {
-
+        OverrideName result = StaticInfo.Singleton.SecretNames.Where(x => (x.Body == body && x.Barrel == barrel && x.Extension == extension)).FirstOrDefault();
+        if (!(result.Name is null)) { return result.Name; }
+        return $"The {body.secretName} {extension.secretName} {barrel.secretName}";
     }
-    */
 
     // Prefabs of the different parts
     [SerializeField]
@@ -128,5 +117,6 @@ public class GunFactory : MonoBehaviour
 
         gunController.onInitialize?.Invoke(gunController.stats);
     }
+
 }
 
