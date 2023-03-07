@@ -17,7 +17,7 @@ public struct OverrideName
 /// This information is accessiable in the StaticInfo prefab.
 /// New instances of override names should be set in the same scriptableObject that is used in StaticInfo.
 /// </summary>
-public class SecretNamesScriptable : ScriptableObject
+public class SecretNamesStaticStorage : ScriptableObject
 {
     public OverrideName[] Overrides;
 }

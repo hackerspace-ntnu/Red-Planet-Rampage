@@ -26,7 +26,7 @@ public class StaticInfo : MonoBehaviour
     [Header("Override for certain item combinations")]
     // Overrides of secret names given a specific combination
     [SerializeField]
-    private SecretNamesScriptable secretNames;
+    private SecretNamesStaticStorage secretNames;
 
     public ReadOnlyArray<Item> Bodies;
     public ReadOnlyArray<Item> Barrels;
