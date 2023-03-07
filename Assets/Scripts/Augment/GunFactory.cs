@@ -1,6 +1,7 @@
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(GunController))]
 public class GunFactory : MonoBehaviour
@@ -12,6 +13,9 @@ public class GunFactory : MonoBehaviour
         controller.bodyPrefab = bodyPrefab;
         controller.barrelPrefab = barrelPrefab;
         controller.extensionPrefab = extensionPrefab;
+
+        // Initialize everything
+        gun.GetComponent<GunFactory>().InitializeGun();
 
         return gun;
     }
@@ -36,10 +40,15 @@ public class GunFactory : MonoBehaviour
 
     private GunController gunController;
 
+#if UNITY_EDITOR
     private void Start()
     {
-        InitializeGun();
+        if (SceneManager.GetActiveScene().name == "GunTest")
+        {
+            InitializeGun();
+        }
     }
+#endif
 
     // Builds the gun from parts
     public void InitializeGun()
