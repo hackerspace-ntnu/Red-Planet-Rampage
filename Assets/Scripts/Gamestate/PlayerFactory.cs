@@ -77,8 +77,12 @@ public class PlayerFactory : MonoBehaviour
     {
         // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
+        Transform cameraOffset = player.transform.Find("CameraOffset");
         // Make playerInput child of player it's attached to
         inputManager.transform.parent = player.transform;
+        // Make playerInput (with the gun) get placed at correct position
+        inputManager.transform.localPosition = cameraOffset.localPosition;
+        inputManager.transform.rotation = player.transform.rotation;
         // Disable Camera
         inputManager.GetComponent<Camera>().enabled = false;
         // Update player's movement script with which playerInput it should attach listeners to

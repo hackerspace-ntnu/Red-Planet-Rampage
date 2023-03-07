@@ -82,10 +82,10 @@ public class MatchController : MonoBehaviour
         playerFactory = FindObjectOfType<PlayerFactory>();
 
         // Makes shooting end quickly if testing with 1 player
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
             roundLength = 5f;
-        #endif
+#endif
 
         StartNextRound();
 
@@ -184,12 +184,12 @@ public class MatchController : MonoBehaviour
         var lastWinner = rounds.Last().Winner;
         if (lastWinner == null) { return false; }
         var wins = rounds.Where(round => round.IsWinner(lastWinner)).Count();
-        Debug.Log("Current winner (" + lastWinner.ToString() + ") has " + wins + " wins.");
+        Debug.Log($"Current winner ({lastWinner}) has {wins} wins.");
         if (wins >= 3)
         {
             // We have a winner!
             // TODO Go to victory scene
-            Debug.Log("Aaaaand the winner iiiiiiiis " + lastWinner.ToString());
+            Debug.Log($"Aaaaand the winner iiiiiiiis {lastWinner}");
 
             // Update playerInputs in preperation for Menu scene
             ChangeInputMappings("Menu");
