@@ -89,4 +89,9 @@ public class PlayerIdentity : MonoBehaviour
         }
         onInventoryChange?.Invoke(item);
     }
+
+    public override string ToString()
+    {
+        return name;
+    }
 }
