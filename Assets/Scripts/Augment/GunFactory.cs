@@ -28,6 +28,13 @@ public class GunFactory : MonoBehaviour
         return stats;
     }
 
+    public static string GetGunName(Item body, Item barrel, Item extension)
+    {
+        OverrideName result = StaticInfo.Singleton.SecretNames.Where(x => (x.Body == body && x.Barrel == barrel && x.Extension == extension)).FirstOrDefault();
+        if (!(result.Name is null)) { return result.Name; }
+        return $"The {body.secretName} {extension.secretName} {barrel.secretName}";
+    }
+
     // Prefabs of the different parts
     [SerializeField]
     public GameObject bodyPrefab;
@@ -119,5 +126,6 @@ public class GunFactory : MonoBehaviour
 
         gunController.onInitialize?.Invoke(gunController.stats);
     }
+
 }
 

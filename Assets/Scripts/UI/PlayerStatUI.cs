@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using SecretName;
 
 public class PlayerStatUI : MonoBehaviour
 {
@@ -11,6 +12,9 @@ public class PlayerStatUI : MonoBehaviour
 
     [SerializeField]
     private TMP_Text chipsText;
+
+    [SerializeField]
+    private TMP_Text gunNameText;
 
     [SerializeField]
     private StatBar damageBar;
@@ -44,6 +48,8 @@ public class PlayerStatUI : MonoBehaviour
 
         SetChips(playerManager.identity.chips);
         playerManager.identity.onChipChange += SetChips;
+
+        SetGunName(playerManager.GetGunName());
 
         // Set current stats
         OnInventoryChange(null);
@@ -83,6 +89,7 @@ public class PlayerStatUI : MonoBehaviour
         if (platform == null || platform.Item == null)
         {
             ResetNewGunStats();
+            SetGunName(playerManager.GetGunName());
             return;
         }
 
@@ -106,6 +113,7 @@ public class PlayerStatUI : MonoBehaviour
         }
         GunStats stats = GunFactory.GetGunStats(body, barrel, extension);
         SetNewGunStats(stats);
+        SetGunName(GunFactory.GetGunName(body, barrel, extension));
     }
 
     public void SetName(string name)
@@ -116,6 +124,11 @@ public class PlayerStatUI : MonoBehaviour
     public void SetChips(int amount)
     {
         chipsText.SetText($"{amount.ToString()} chips");
+    }
+
+    public void SetGunName(string name)
+    {
+        gunNameText.SetText(name);
     }
 
     public void SetBaseGunStats(GunStats gunStats)

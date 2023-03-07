@@ -97,7 +97,7 @@ public class AuctionDriver : MonoBehaviour
     {
         if (!(availableAuctionStages.Length == biddingPlatforms.Length))
         {
-            Debug.Log("Not enough avialable auctionStages or biddingPlatforms!");
+            Debug.Log("Not enough available auctionStages or biddingPlatforms!");
         }
 
         for (int i = 0; i < biddingPlatforms.Length; i++)
