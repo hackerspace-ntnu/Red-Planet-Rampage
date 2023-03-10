@@ -1066,7 +1066,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6968452648316269152}
   m_LocalRotation: {x: 0.7071068, y: -0.7071068, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: 0.0087}
+  m_LocalPosition: {x: 0, y: 0, z: 0.0001}
   m_LocalScale: {x: 0.0005, y: 0.0005, z: 0.0005}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1328,7 +1328,7 @@ Transform:
   m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: 0.5}
   m_LocalPosition: {x: -6, y: -0.5, z: -1.55}
   m_LocalScale: {x: 100, y: 100, z: 100}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 6968452648316269153}
   m_Father: {fileID: 0}
@@ -1362,7 +1362,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 3876542345217667742, guid: 8579f2b17b254764dbd6c151900d83a9, type: 3}
+  - {fileID: -876546973899608171, guid: 6f2bb8445d79c4d80982fdae02f04605, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1417,7 +1417,8 @@ MonoBehaviour:
   itemCostText: {fileID: 6968452648127290460}
   timerText: {fileID: 1896505330482283342}
   baseWaitTime: 30
-  activeBiddingRound:
+  bumpTime: 5
+  ActiveBiddingRound:
     items: []
     chips: 
     players: []
