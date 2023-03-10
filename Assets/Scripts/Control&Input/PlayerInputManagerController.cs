@@ -62,13 +62,20 @@ public class PlayerInputManagerController : MonoBehaviour
 
     /// <summary>
     /// Changes the inputMap of all current playerInputs to specified inputMap
+    /// This function is used for changing inputs between scenes.
     /// </summary>
     /// <param name="mapNameOrId">Name of the inputMap you want to change to</param>
     public void ChangeInputMaps(string mapNameOrId)
     {
-        foreach (InputManager input in playerInputs)
+        playerInputs.ForEach(playerInput =>
         {
-            input.playerInput.SwitchCurrentActionMap(mapNameOrId);
-        }
+            playerInput.playerInput.SwitchCurrentActionMap(mapNameOrId);
+            playerInput.RemoveListeners();
+            playerInput.AddListeners();
+
+            // Free the playerInputs from their mortail coils (Player prefab or similar assets)
+            playerInput.transform.parent = null;
+            DontDestroyOnLoad(playerInput);
+        });
     }
 }

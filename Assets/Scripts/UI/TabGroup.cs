@@ -14,10 +14,9 @@ public class TabGroup : MonoBehaviour
 
     public void SetPlayerInput(InputManager inputManager)
     {
-        inputManager.onLeftTabPerformed += ctx => OnLeftButton(ctx);
-        inputManager.onRightTabPerformed += ctx => OnRightButton(ctx);
+        inputManager.onLeftTab += OnLeftButton;
+        inputManager.onRightTab += OnRightButton;
     }
-
 
     private void Awake()
     {

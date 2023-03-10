@@ -81,9 +81,7 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.ChangeInputMaps("Menu");
         foreach (InputManager inputs in playerInputManagerController.playerInputs)
         {
-            inputs.RemoveListeners();
             AddPlayer(inputs);
-            inputs.AddListeners();
         }
     }
 
