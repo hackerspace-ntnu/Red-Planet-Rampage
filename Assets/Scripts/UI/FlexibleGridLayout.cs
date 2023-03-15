@@ -26,7 +26,7 @@ public class FlexibleGridLayout : LayoutGroup
     
     public override void CalculateLayoutInputVertical()
     {
-        base.CalculateLayoutInputHorizontal();
+        
 
         if (fitType == FitType.Width || fitType == FitType.Height || fitType == FitType.Uniform)
         {
@@ -49,10 +49,10 @@ public class FlexibleGridLayout : LayoutGroup
         float parentHeight = rectTransform.rect.height;
 
         // Determine the child size
-        float cellWidth = (parentWidth / (float)columns) - (spacing.x / (float)columns) - (padding.left / (float)columns) - (padding.right / (float)columns);
+        float cellWidth = (parentWidth / (float)columns)  - (padding.left / (float)columns) - (padding.right / (float)columns);
         float cellHeight = (parentHeight / (float)rows) - (spacing.y / (float)rows) - (padding.top / (float)rows) - (padding.bottom / (float) rows);
 
-        cellSize.x = fitX ? cellWidth : cellSize.x;
+        cellSize.x = (fitX ? cellWidth : cellSize.x) - spacing.x;
         cellSize.y = fitY ? cellHeight : cellSize.y;
 
         int columnCount = 0;
@@ -74,6 +74,7 @@ public class FlexibleGridLayout : LayoutGroup
             SetChildAlongAxis(item, 0, xPos, cellSize.x);
             SetChildAlongAxis(item, 1, yPos, cellSize.y);
         }
+        base.CalculateLayoutInputHorizontal();
     }
 
     public override void CalculateLayoutInputHorizontal()
@@ -83,11 +84,16 @@ public class FlexibleGridLayout : LayoutGroup
     
     public override void SetLayoutHorizontal()
     {
-
+        
     }
 
     public override void SetLayoutVertical()
     {
 
+    }
+
+    public void update()
+    {
+        
     }
 }

@@ -13,6 +13,7 @@ public class GunFactory : MonoBehaviour
         controller.Body = bodyPrefab;
         controller.Barrel = barrelPrefab;
         controller.Extension = extensionPrefab;
+        
 
         // Initialize everything
         gun.GetComponent<GunFactory>().InitializeGun();
@@ -131,9 +132,18 @@ public class GunFactory : MonoBehaviour
 
         modifiers.OrderByDescending(modifier => (int) modifier.GetPriority()).ToList();
         modifiers.ForEach(modifier => modifier.ModifyProjectile(ref projectileController));
-
         gunController.onInitialize?.Invoke(gunController.stats);
     }
 
+    // Lagrer våpen kombo til spiller
+  // private void UnlockedWeapon(GameObject bodyPrefab, GameObject barrelPrefab, GameObject extensionPrefab,PlayerPrefs prefs)
+    //{
+        //hvordan hente items
+//        StaticInfo.Singelton.barrels;
+
+
+  //  }
+
+    
 }
 
