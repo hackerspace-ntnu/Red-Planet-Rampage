@@ -36,6 +36,10 @@ public class GunFactory : MonoBehaviour
 
     private GunController gunController;
 
+    private List<ProjectileModifier> modifiers = new List<ProjectileModifier>();
+
+    private ProjectileController projectileController;
+
     private void Start()
     {
         InitializeGun();

@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Linq;
+using System.Collections.Generic;
 
 [System.Serializable]
 public class Modifier
@@ -23,8 +25,31 @@ public class GunModifier : MonoBehaviour
     // Used to keep track of added projectile modifier to delete it 
     private GameObject instantiatedBulletModifier;
 
+    // All modifier children of current gun
+    private List<ProjectileModifier> projectileModifiers = new List<ProjectileModifier>();
+
     // Where to shoot bullets
     public Transform[] outputs;
+
+
+    public void BuildStats(GunStats gunStats)
+    {
+        foreach (var modifier in statModifiers)
+        {
+            ModifiableFloat stat = (ModifiableFloat)typeof(GunStats).GetProperty(modifier.name).GetValue(gunStats, null);
+            stat.AddBaseValue(modifier.addition);
+            stat.AddMultiplier(modifier.multiplier);
+            stat.AddExponential(modifier.exponential);
+        }
+        gunStats.ProjectilesPerShot.AddExponential(outputs.Length);
+    }
+
+    public void GetModifiers()
+    {
+
+    }
+
+
 
     // Is run when the gun is built
     public virtual void Attach(GunController gun)
@@ -33,10 +58,8 @@ public class GunModifier : MonoBehaviour
         if (bulletModifierPrefab != null)
         {
             instantiatedBulletModifier = Instantiate(bulletModifierPrefab, gun.projectile.transform);
-            foreach (ProjectileModifier modifier in instantiatedBulletModifier.GetComponents<ProjectileModifier>())
-            {
-                modifier.projectile = gun.projectile.GetComponent<ProjectileController>();
-            }
+            ProjectileController projectile = gun.projectile.GetComponent<ProjectileController>();
+            instantiatedBulletModifier.GetComponents<ProjectileModifier>().ToList().ForEach(projectileModifier => projectileModifier.ModifyProjectile(ref projectile));
         }
     }
 
