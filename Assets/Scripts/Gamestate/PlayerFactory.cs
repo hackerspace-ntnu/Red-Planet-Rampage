@@ -32,9 +32,7 @@ public class PlayerFactory : MonoBehaviour
         playerInputManagerController.ChangeInputMaps("FPS");
         foreach (InputManager inputs in playerInputManagerController.playerInputs)
         {
-            inputs.RemoveListeners();
             InstantiateFPSPlayer(inputs);
-            inputs.AddListeners();
         }
     }
 
@@ -43,9 +41,7 @@ public class PlayerFactory : MonoBehaviour
         playerInputManagerController.ChangeInputMaps("Bidding");
         foreach (InputManager inputs in playerInputManagerController.playerInputs)
         {
-            inputs.RemoveListeners();
             InstantiateBiddingPlayer(inputs);
-            inputs.AddListeners();
         }
     }
 
@@ -68,7 +64,7 @@ public class PlayerFactory : MonoBehaviour
         inputManager.GetComponent<Camera>().enabled = true;
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
-        playerManager.SetPlayerInput((FPSInputManager) inputManager);
+        playerManager.SetPlayerInput(inputManager);
         // Set unique layer for player
         playerManager.SetLayer(inputManager.playerInput.playerIndex);
     }
@@ -87,7 +83,7 @@ public class PlayerFactory : MonoBehaviour
         inputManager.GetComponent<Camera>().enabled = false;
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
-        playerManager.SetPlayerInput((FPSInputManager) inputManager);
+        playerManager.SetPlayerInput(inputManager);
         // Add player UI to globalUI
         globalHUDController.SetPlayer(playerManager);
     }
