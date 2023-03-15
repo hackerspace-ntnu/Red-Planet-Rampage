@@ -61,19 +61,24 @@ public class OptionsMenu : MonoBehaviour
         qualityDropdown.value = QualitySettings.GetQualityLevel() - qualityNames.Length - 1;
     }
 
+    private float LinearToLogarithmicVolume(float volume)
+    {
+        return 20 * (Mathf.Log10(10 * Mathf.Max(volume, .0001f)) - 1);
+    }
+
     public void SetMasterVolume(float volume)
     {
-        mainAudioMixer.SetFloat(audioGroupMaster, volume);
+        mainAudioMixer.SetFloat(audioGroupMaster, LinearToLogarithmicVolume(volume));
     }
 
     public void SetMusicVolume(float volume)
     {
-        mainAudioMixer.SetFloat(audioGroupMusic, volume);
+        mainAudioMixer.SetFloat(audioGroupMusic, LinearToLogarithmicVolume(volume));
     }
 
     public void SetSFXVolume(float volume)
     {
-        mainAudioMixer.SetFloat(audioGroupSFX, volume);
+        mainAudioMixer.SetFloat(audioGroupSFX, LinearToLogarithmicVolume(volume));
     }
 
     public void SetQualityLevel(int qualityPresetIndex)
