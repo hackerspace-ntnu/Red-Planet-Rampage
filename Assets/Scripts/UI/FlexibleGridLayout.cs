@@ -26,7 +26,7 @@ public class FlexibleGridLayout : LayoutGroup
     
     public override void CalculateLayoutInputVertical()
     {
-        
+        base.CalculateLayoutInputHorizontal();
 
         if (fitType == FitType.Width || fitType == FitType.Height || fitType == FitType.Uniform)
         {
@@ -45,8 +45,11 @@ public class FlexibleGridLayout : LayoutGroup
             columns = Mathf.CeilToInt(transform.childCount / (float)rows);
 
         // Get width and height of container
-        float parentWidth = rectTransform.rect.width;
-        float parentHeight = rectTransform.rect.height;
+        float parentWidth = rectTransform.sizeDelta.x;
+        float parentHeight = rectTransform.sizeDelta.y;
+
+        if (parentHeight == 0) // TODO: This is cancer, figure out why sizeDelta returns 0 (TORE APPROVED (kinda))
+            parentHeight = 980;
 
         // Determine the child size
         float cellWidth = (parentWidth / (float)columns)  - (padding.left / (float)columns) - (padding.right / (float)columns);
@@ -74,7 +77,6 @@ public class FlexibleGridLayout : LayoutGroup
             SetChildAlongAxis(item, 0, xPos, cellSize.x);
             SetChildAlongAxis(item, 1, yPos, cellSize.y);
         }
-        base.CalculateLayoutInputHorizontal();
     }
 
     public override void CalculateLayoutInputHorizontal()
