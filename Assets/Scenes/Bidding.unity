@@ -1084,7 +1084,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 30
-  m_Range: 100
+  m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -1480,7 +1480,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 30
-  m_Range: 100
+  m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -2285,7 +2285,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 30
-  m_Range: 100
+  m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -3156,7 +3156,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 0.8612724, b: 0.4669811, a: 1}
   m_Intensity: 100
-  m_Range: 100
+  m_Range: 50
   m_SpotAngle: 158.66649
   m_InnerSpotAngle: 118.246
   m_CookieSize: 10
@@ -3271,7 +3271,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 0.8612724, b: 0.4669811, a: 1}
   m_Intensity: 100
-  m_Range: 100
+  m_Range: 50
   m_SpotAngle: 158.66649
   m_InnerSpotAngle: 118.246
   m_CookieSize: 10
@@ -3516,7 +3516,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 30
-  m_Range: 100
+  m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -5188,7 +5188,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 30
-  m_Range: 100
+  m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -5889,7 +5889,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 0.8612724, b: 0.4669811, a: 1}
   m_Intensity: 100
-  m_Range: 100
+  m_Range: 50
   m_SpotAngle: 158.66649
   m_InnerSpotAngle: 118.246
   m_CookieSize: 10
@@ -6271,7 +6271,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 30
-  m_Range: 100
+  m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -6662,6 +6662,7 @@ GameObject:
   - component: {fileID: 6465330167126038685}
   - component: {fileID: 5304597691271531621}
   - component: {fileID: 1327163547820445539}
+  - component: {fileID: 6465330167126038686}
   m_Layer: 0
   m_Name: Piano
   m_TagString: Untagged
@@ -7154,6 +7155,20 @@ Transform:
   m_Father: {fileID: 543450653622308821}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!64 &6465330167126038686
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2294639978745524683}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 3985615260038707078, guid: a28bee1c76ca8f14996da01b20b5185b, type: 3}
 --- !u!4 &6538288175444750602
 Transform:
   m_ObjectHideFlags: 0
@@ -7456,6 +7471,7 @@ GameObject:
   - component: {fileID: 739608226415717822}
   - component: {fileID: 4531882775574270763}
   - component: {fileID: 8130032146985503466}
+  - component: {fileID: 8130032146985503467}
   m_Layer: 0
   m_Name: Saloon Door
   m_TagString: Untagged
@@ -7525,6 +7541,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &8130032146985503467
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7527908024068416420}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -2495000645047325702, guid: a28bee1c76ca8f14996da01b20b5185b, type: 3}
 --- !u!4 &8139254362907257070
 Transform:
   m_ObjectHideFlags: 0
@@ -7592,6 +7622,7 @@ GameObject:
   - component: {fileID: 3541929006509453557}
   - component: {fileID: 3761871041882035622}
   - component: {fileID: 3472330485540713914}
+  - component: {fileID: 8726698663172908393}
   m_Layer: 0
   m_Name: Podium
   m_TagString: Untagged
@@ -7599,6 +7630,20 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!64 &8726698663172908393
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8726698663172908392}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -4437772860958094431, guid: a28bee1c76ca8f14996da01b20b5185b, type: 3}
 --- !u!4 &8789862351638797192
 Transform:
   m_ObjectHideFlags: 0
@@ -7640,6 +7685,7 @@ GameObject:
   - component: {fileID: 8891792828221461104}
   - component: {fileID: 8330839513762657154}
   - component: {fileID: 4053793225885197174}
+  - component: {fileID: 9152363913696883479}
   m_Layer: 0
   m_Name: Table
   m_TagString: Untagged
@@ -7647,3 +7693,17 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!64 &9152363913696883479
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9152363913696883478}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -6692290496178104961, guid: a28bee1c76ca8f14996da01b20b5185b, type: 3}
