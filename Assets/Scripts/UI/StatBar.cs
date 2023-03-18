@@ -66,6 +66,14 @@ public class StatBar : MonoBehaviour
 
     private void UpdateMeter()
     {
+        // Avoid one peculiar bug where the RectTransform is null
+        // and the MissingReferenceException spam prevents the next scene from loading
+        if (baseRect == null)
+        {
+            Debug.LogWarning("yeah it almost happened");
+            return;
+        }
+
         float height = baseRect.sizeDelta.y;
 
         // Set new max if we need to
