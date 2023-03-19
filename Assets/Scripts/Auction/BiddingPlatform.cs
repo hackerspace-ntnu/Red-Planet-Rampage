@@ -83,7 +83,7 @@ public class BiddingPlatform : MonoBehaviour
             return false;
         }
 
-        if (playerIdentity.chips > chips)
+        if (playerIdentity.chips > chips && playerIdentity != leadingBidder)
         {
             // Refund
             if (leadingBidder)
