@@ -2,6 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum Priority
+{
+    BEFORE_AUGMENTS,
+    BODY,
+    BARREL,
+    EXTENSION,
+    ARBITRARY
+}
 /// <summary>
 /// An interface that can be implemented in order to give additional functional property to any projectile created by any set of parts.
 /// Why? Because putting a copy of every needed bullet script on every single bullet that is created is very inefficient.
@@ -13,4 +21,6 @@ using UnityEngine;
 public interface ProjectileModifier 
 {
     public void ModifyProjectile(ref ProjectileController projectile);
+
+    public Priority GetPriority();
 }

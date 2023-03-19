@@ -19,6 +19,14 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
     [SerializeField]
     private float onHitInterval = 1f;
 
+    [SerializeField]
+    private Priority priority = Priority.ARBITRARY;
+
+    public Priority GetPriority()
+    {
+        return priority;
+    }
+
     public void ModifyProjectile(ref ProjectileController projectile)
     {
         projectile.OnHitboxCollision += StickToTarget;

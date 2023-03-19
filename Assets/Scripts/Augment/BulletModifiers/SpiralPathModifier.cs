@@ -17,6 +17,9 @@ public class SpiralPathModifier : MonoBehaviour, ProjectileModifier
     [SerializeField]
     private bool randomAngle = false;
 
+    [SerializeField]
+    private Priority priority = Priority.ARBITRARY;
+
     public void ModifyProjectile(ref ProjectileController projectile)
     {
         projectile.UpdateProjectileMovement += addSpiralDisplacement;
@@ -42,4 +45,8 @@ public class SpiralPathModifier : MonoBehaviour, ProjectileModifier
  
     }
 
+    public Priority GetPriority()
+    {
+        return priority;
+    }
 }

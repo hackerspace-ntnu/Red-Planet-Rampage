@@ -16,10 +16,17 @@ public class RotationModifier : MonoBehaviour, ProjectileModifier
     [SerializeField]
     private bool randomStartAngleZ;
 
+    [SerializeField]
+    private Priority priority = Priority.ARBITRARY;
+
+    public Priority GetPriority()
+    {
+        return priority;
+    }
+
     public void ModifyProjectile(ref ProjectileController projectile)
     {
         projectile.UpdateProjectileMovement += Rotate;
-        Debug.Log("Modified rotation!");
     }
 
     public void Rotate(float distance, ref ProjectileState state, GunStats stats)
@@ -31,7 +38,6 @@ public class RotationModifier : MonoBehaviour, ProjectileModifier
         {
             state.rotation = Quaternion.Euler(randomStartAngleX ? Random.Range(0,360) : 0, randomStartAngleY ? Random.Range(0, 360) : 0, randomStartAngleZ ? Random.Range(0, 360) : 0);
         }
-        Debug.Log("Rotation Event called");
     }
 
 }
