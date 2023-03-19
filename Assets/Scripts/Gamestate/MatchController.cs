@@ -110,6 +110,7 @@ public class MatchController : MonoBehaviour
         onRoundStart?.Invoke();
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
         roundTimer.StartTimer(roundLength);
+        roundTimer.OnTimerUpdate += AdjustMusic;
         roundTimer.OnTimerUpdate += HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted += EndActiveRound;
     }
@@ -127,6 +128,7 @@ public class MatchController : MonoBehaviour
     public void EndActiveRound()
     {
         onRoundEnd?.Invoke();
+        roundTimer.OnTimerUpdate -= AdjustMusic;
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
         AssignRewards();
@@ -171,6 +173,14 @@ public class MatchController : MonoBehaviour
                 reward += rewardWin;
 
             player.playerManager.identity.UpdateChip(reward);
+        }
+    }
+
+    private void AdjustMusic()
+    {
+        if (roundTimer.ElapsedTime > roundLength * .7f)
+        {
+            MusicTrackManager.Singleton.IntensifyBattleTheme();
         }
     }
 
