@@ -12,4 +12,23 @@ public class GunBody : MonoBehaviour
 
     // Where to attach barrel
     public Transform attachmentSite;
+
+    //TODO: Modifier refactor
+    private GunController gunController;
+
+    public void Start()
+    {
+        GunController gunController = transform.parent.GetComponent<GunController>();
+        if (!gunController)
+        {
+            Debug.Log("HatBarrel not attached to gun parent!");
+            return;
+
+        }
+    }
+
+    public void Reload(float magazinePercentage)
+    {
+        
+    }
 }
