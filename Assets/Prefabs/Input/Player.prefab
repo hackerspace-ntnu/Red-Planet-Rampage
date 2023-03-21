@@ -9,10 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 71015680234268071}
+  - component: {fileID: 71015680234268069}
   - component: {fileID: 71015680234268065}
   - component: {fileID: 9672907109803670}
   - component: {fileID: 71015680234268068}
-  - component: {fileID: 71015680234268069}
   - component: {fileID: -437592331247616425}
   - component: {fileID: 6717855691676836013}
   - component: {fileID: 3252978923923797766}
@@ -41,6 +41,32 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &71015680234268069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71015680234268067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe68c66043cf4fa30b1b60bfdcd38608, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ignoreMask:
+    serializedVersion: 2
+    m_Bits: 65335
+  lookSpeed: 3
+  maxVelocity: 10
+  strafeForce: 40
+  inAirStrafeForce: 15
+  drag: 6
+  airDrag: 2
+  jumpForce: 10
+  jumpTimeout: 0.5
+  airThreshold: 0.4
+  state: 1
+  animator: {fileID: 289053663840324231}
 --- !u!23 &71015680234268065
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -105,38 +131,13 @@ Rigidbody:
   m_GameObject: {fileID: 71015680234268067}
   serializedVersion: 2
   m_Mass: 10
-  m_Drag: 0
+  m_Drag: 4
   m_AngularDrag: 0.05
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &71015680234268069
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 71015680234268067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe68c66043cf4fa30b1b60bfdcd38608, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ignoreMask:
-    serializedVersion: 2
-    m_Bits: 65335
-  lookSpeed: 3
-  maxVelocity: 7
-  strafeForce: 30
-  inAirStrafeForce: 15
-  jumpSpeed: 5
-  jumpTimeout: 0.5
-  airThreshold: 0.4
-  dampening: 0.04
-  state: 1
-  animator: {fileID: 289053663840324231}
 --- !u!114 &-437592331247616425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -149,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b92c430e6e288cc42a9a091e7fefacaf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fpsInput: {fileID: 0}
+  inputManager: {fileID: 0}
   identity: {fileID: 0}
   meshBase: {fileID: 5330336945653279977}
   ragdoll: {fileID: 0}
@@ -568,6 +569,7 @@ MonoBehaviour:
   healthBar: {fileID: 8281853296856510176}
   deathScreen: {fileID: 1029316632486890240}
   deathText: {fileID: 9172283963218471322}
+  tweenDuration: 0.07
 --- !u!1 &8105111567943840941
 GameObject:
   m_ObjectHideFlags: 0
