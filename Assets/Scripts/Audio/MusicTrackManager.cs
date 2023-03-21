@@ -113,9 +113,9 @@ public class MusicTrackManager : MonoBehaviour
     {
         MusicTrack track = GetTrack(type);
         StartCoroutine(FadeOutThenSwitchTo(track));
+        if (trackSwitchingRoutine != null) StopCoroutine(trackSwitchingRoutine);
         if (track.LoopLayers.Length > 0)
         {
-            if (trackSwitchingRoutine != null) StopCoroutine(trackSwitchingRoutine);
             trackSwitchingRoutine = StartCoroutine(WaitThenSwitchToLoop(track, fadeDuration + track.Layers.First().length));
         }
     }
