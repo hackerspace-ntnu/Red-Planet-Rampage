@@ -21,9 +21,6 @@ public abstract class Augment : MonoBehaviour
     // Used to keep track of added projectile modifier to delete it 
     private GameObject instantiatedBulletModifier;
 
-    // All modifier children of current gun
-    private List<ProjectileModifier> projectileModifiers = new List<ProjectileModifier>();
-
     // Where to shoot bullets
     public Transform[] outputs;
 
@@ -45,10 +42,11 @@ public abstract class Augment : MonoBehaviour
         if (bulletModifierPrefab == null)
             return new List<ProjectileModifier>();
 
-        if (instantiatedBulletModifier) 
-            return projectileModifiers;
+        if (!instantiatedBulletModifier)
+        {
+            instantiatedBulletModifier = Instantiate(bulletModifierPrefab, transform);
+        }
 
-        instantiatedBulletModifier = Instantiate(bulletModifierPrefab, transform);
         return instantiatedBulletModifier.GetComponents<ProjectileModifier>().ToList();
     }
 
