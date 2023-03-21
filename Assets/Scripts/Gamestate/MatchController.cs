@@ -61,7 +61,6 @@ public class MatchController : MonoBehaviour
 
     void Start()
     {
-
         #region Singleton boilerplate
 
         if (Singleton != null)
@@ -79,6 +78,10 @@ public class MatchController : MonoBehaviour
 
         #endregion Singleton boilerplate
 
+        if (rounds.Count == 0)
+        {
+            PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+        }
         playerFactory = FindObjectOfType<PlayerFactory>();
 
         // Makes shooting end quickly if testing with 1 player
@@ -88,8 +91,6 @@ public class MatchController : MonoBehaviour
 #endif
 
         StartNextRound();
-
-
     }
 
     public void StartNextRound()
@@ -134,9 +135,7 @@ public class MatchController : MonoBehaviour
         AssignRewards();
 
         if (!IsWin())
-        {
             StartCoroutine(WaitAndStartNextBidding());
-        }
     }
 
     public IEnumerator WaitAndStartNextBidding()
@@ -205,6 +204,8 @@ public class MatchController : MonoBehaviour
             PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
 
             MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
+            rounds = new List<Round>();
+            PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
             SceneManager.LoadSceneAsync("Menu");
             return true;
         }

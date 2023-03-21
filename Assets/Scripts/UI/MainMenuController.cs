@@ -30,6 +30,7 @@ public class MainMenuController : MonoBehaviour
 
     void Start()
     {
+
         playerInputManagerController = PlayerInputManagerController.Singleton;
         playerInputManagerController.playerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
@@ -46,6 +47,10 @@ public class MainMenuController : MonoBehaviour
             //playerInputManagerController.playerInputs[0].playerInput.uiInputModule = inputSystem;
             //playerInputManagerController.GetComponent<MultiplayerEventSystem>().playerRoot = defaultMenu;
             TransferExistingInputs();
+        }
+        else
+        {
+            DontDestroyOnLoad(EventSystem.current);
         }
 
         SelectControl(defaultButton);

@@ -90,6 +90,17 @@ public class PlayerIdentity : MonoBehaviour
         onInventoryChange?.Invoke(item);
     }
 
+    public void resetItems()
+    {
+        Bodies = new List<Item>();
+        Barrels = new List<Item>();
+        Extensions = new List<Item>();
+        body = StaticInfo.Singleton.StartingBody;
+        barrel = StaticInfo.Singleton.StartingBarrel;
+        extension = null;
+        chips = 0;
+    }
+
     public override string ToString()
     {
         return name;

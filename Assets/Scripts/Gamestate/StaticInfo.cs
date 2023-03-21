@@ -23,6 +23,13 @@ public class StaticInfo : MonoBehaviour
     [SerializeField]
     private Item[] extensions;
 
+    [SerializeField]
+    private Item startingBody;
+    public Item StartingBody => startingBody;
+    [SerializeField]
+    private Item startingBarrel;
+    public Item StartingBarrel => startingBarrel;
+
     [Header("Override for certain item combinations")]
     // Overrides of secret names given a specific combination
     [SerializeField]

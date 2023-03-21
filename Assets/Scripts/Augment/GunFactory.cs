@@ -24,7 +24,7 @@ public class GunFactory : MonoBehaviour
     {
         GunStats stats = body.augment.GetComponent<GunBody>().InstantiateBaseStats;
         barrel.augment.GetComponent<GunBarrel>().Modify(stats);
-        extension.augment.GetComponent<GunExtension>().Modify(stats);
+        extension?.augment.GetComponent<GunExtension>().Modify(stats);
         return stats;
     }
 
@@ -32,7 +32,7 @@ public class GunFactory : MonoBehaviour
     {
         OverrideName result = StaticInfo.Singleton.SecretNames.Where(x => (x.Body == body && x.Barrel == barrel && x.Extension == extension)).FirstOrDefault();
         if (!(result.Name is null)) { return result.Name; }
-        return $"The {body.secretName} {extension.secretName} {barrel.secretName}";
+        return $"The {body.secretName} {extension?.secretName} {barrel.secretName}";
     }
 
     // Prefabs of the different parts
