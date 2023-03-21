@@ -22,5 +22,8 @@ public interface ProjectileModifier
 {
     public ref ProjectileController ModifyProjectile(ref ProjectileController projectile);
 
-    public Priority GetPriority();
+    public Priority GetPriority() 
+    {
+        return Priority.ARBITRARY;
+    }
 }
