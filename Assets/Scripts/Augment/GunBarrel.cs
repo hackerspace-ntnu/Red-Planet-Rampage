@@ -1,12 +1,9 @@
 using UnityEngine;
 
-public class GunBarrel : GunModifier
+public class GunBarrel : Augment
 {
 
-    public override int priority { get => 1; }
-
-    // The barel decides the type of projectile to shoot
-
+    // The barrel decides the type of projectile to shoot
     [SerializeField]
     private GameObject projectile;
 
@@ -18,7 +15,7 @@ public class GunBarrel : GunModifier
     {
         get
         {
-            var instance = Instantiate(projectile);
+            var instance = Instantiate(projectile, transform);
             instance.SetActive(false);
             return instance;
         }

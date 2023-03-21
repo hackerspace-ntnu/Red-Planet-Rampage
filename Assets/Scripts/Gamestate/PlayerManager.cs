@@ -147,7 +147,7 @@ public class PlayerManager : MonoBehaviour
 
     private void SetGun(Transform offset)
     {
-        var gun = GunFactory.InstantiateGun(identity.Body.augment, identity.Barrel.augment, identity.Extension?.augment, offset);
+        var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, offset);
         // Set specific local transform
         gun.transform.localPosition = new Vector3(0.39f, -0.12f, -0.4f);
         gun.transform.localRotation = Quaternion.AngleAxis(-12.5f, Vector3.up);
