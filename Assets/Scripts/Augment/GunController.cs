@@ -48,11 +48,12 @@ public class GunController : MonoBehaviour
                 if (stats.ProjectileSpread > 0)
                 {
                     Vector2 rand = Random.insideUnitCircle * stats.ProjectileSpread;
-                    dir = dir * Quaternion.Euler(rand.x, rand.y, 0f);
+                    dir *= Quaternion.Euler(rand.x, rand.y, 0f);
                 }
                 // Makes projectile 
                 // TODO: generalize this so that different methods of "Creating" bullets can be used to save performance
-                var firedProjectile = Instantiate(projectile, output.position, dir);
+                var firedProjectile = Instantiate(projectile, output.position, dir, transform);
+                firedProjectile.GetComponent<ProjectileController>().OnClone(projectile.GetComponent<ProjectileController>());
                 firedProjectile.GetComponent<ProjectileDamageController>().player = player;
                 firedProjectile.SetActive(true);
             }
