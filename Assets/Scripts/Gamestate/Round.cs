@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -57,7 +56,7 @@ public class Round
         LivingPlayers = new ReadOnlyCollection<PlayerManager>(livingPlayers);
         Kills = new ReadOnlyDictionary<PlayerManager, ReadOnlyCollection<PlayerManager>>(players.ToDictionary(
             /*key   */ player => player,
-            /*value */ player => new ReadOnlyCollection<PlayerManager>(kills[player]) 
+            /*value */ player => new ReadOnlyCollection<PlayerManager>(kills[player])
         ));
 
         foreach (var player in players)
@@ -98,6 +97,11 @@ public class Round
 #endif
         kills[killer].Add(victim);
         livingPlayers.Remove(victim);
+
+        if (livingPlayers.Count == 2)
+        {
+            MusicTrackManager.Singleton.IntensifyBattleTheme();
+        }
 
         CheckWinCondition(killer);
     }
