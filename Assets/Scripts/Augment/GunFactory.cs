@@ -32,7 +32,9 @@ public class GunFactory : MonoBehaviour
     {
         OverrideName result = StaticInfo.Singleton.SecretNames.Where(x => (x.Body == body && x.Barrel == barrel && x.Extension == extension)).FirstOrDefault();
         if (!(result.Name is null)) { return result.Name; }
-        return $"The {body.secretName} {extension?.secretName} {barrel.secretName}";
+        if (extension == null)
+            return $"The {body.secretName} {barrel.secretName}";
+        return $"The {body.secretName} {extension.secretName} {barrel.secretName}";
     }
 
     // Prefabs of the different parts
