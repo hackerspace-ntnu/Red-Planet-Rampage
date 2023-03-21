@@ -49,7 +49,6 @@ public class BulletController : ProjectileController
         collisions = rayCasts.OrderBy(x => x.distance).Select(x => x.collider).ToArray();
         foreach(var collision in collisions)
         {
-
             OnColliderHit?.Invoke(collision, ref state, stats);
             HitboxController hitbox = collision.GetComponent<HitboxController>();
 

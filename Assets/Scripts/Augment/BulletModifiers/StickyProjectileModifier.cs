@@ -27,14 +27,15 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
         return priority;
     }
 
-    public void ModifyProjectile(ref ProjectileController projectile)
+    public ref ProjectileController ModifyProjectile(ref ProjectileController projectile)
     {
         projectile.OnHitboxCollision += StickToTarget;
+        return ref projectile;
     }
 
-    public void StickToTarget(HitboxController controller, ref ProjectileState state, GunStats stats)
+    public void StickToTarget(HitboxController hitboxController, ref ProjectileState state, GunStats stats)
     {
-        var stuck = Instantiate(stuckObject, state.olderPosition, state.rotation, controller.transform);
+        var stuck = Instantiate(stuckObject, state.olderPosition, state.rotation, hitboxController.transform);
         Destroy(stuck, stuckLifeTime);
     }
 }

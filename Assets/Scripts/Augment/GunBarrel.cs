@@ -15,7 +15,7 @@ public class GunBarrel : Augment
     {
         get
         {
-            var instance = Instantiate(projectile);
+            var instance = Instantiate(projectile, transform);
             instance.SetActive(false);
             return instance;
         }

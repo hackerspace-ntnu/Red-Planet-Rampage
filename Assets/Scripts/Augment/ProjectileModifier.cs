@@ -20,7 +20,7 @@ public enum Priority
 /// </summary>
 public interface ProjectileModifier 
 {
-    public void ModifyProjectile(ref ProjectileController projectile);
+    public ref ProjectileController ModifyProjectile(ref ProjectileController projectile);
 
     public Priority GetPriority();
 }

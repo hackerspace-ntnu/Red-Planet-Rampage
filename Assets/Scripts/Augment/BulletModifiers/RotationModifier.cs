@@ -24,9 +24,10 @@ public class RotationModifier : MonoBehaviour, ProjectileModifier
         return priority;
     }
 
-    public void ModifyProjectile(ref ProjectileController projectile)
+    public ref ProjectileController ModifyProjectile(ref ProjectileController projectile)
     {
         projectile.UpdateProjectileMovement += Rotate;
+        return ref projectile;
     }
 
     public void Rotate(float distance, ref ProjectileState state, GunStats stats)

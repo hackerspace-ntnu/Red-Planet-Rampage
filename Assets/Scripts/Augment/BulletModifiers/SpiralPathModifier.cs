@@ -20,14 +20,17 @@ public class SpiralPathModifier : MonoBehaviour, ProjectileModifier
     [SerializeField]
     private Priority priority = Priority.ARBITRARY;
 
-    public void ModifyProjectile(ref ProjectileController projectile)
+    public ref ProjectileController ModifyProjectile(ref ProjectileController projectile)
     {
-        projectile.UpdateProjectileMovement += addSpiralDisplacement;
+        projectile.UpdateProjectileMovement += AddSpiralDisplacement;
         if (randomAngle)
+        {
             offset = Random.Range(0, 2 * Mathf.PI);
+        }
+        return ref projectile;
     }
 
-    public void addSpiralDisplacement(float distance, ref ProjectileState state, GunStats stats)
+    public void AddSpiralDisplacement(float distance, ref ProjectileState state, GunStats stats)
     {
         float oldRadius = radialLerp.Evaluate(pathTraveled / spiralLerpDist) * spiralRadius;
         float newRadius = radialLerp.Evaluate((pathTraveled + distance) / spiralLerpDist) * spiralRadius;

@@ -36,8 +36,6 @@ public class GunFactory : MonoBehaviour
 
     private GunController gunController;
 
-    private List<ProjectileModifier> modifiers = new List<ProjectileModifier>();
-
     private void Start()
     {
         InitializeGun();
@@ -47,6 +45,8 @@ public class GunFactory : MonoBehaviour
     public void InitializeGun()
     {
         gunController = GetComponent<GunController>();
+
+        List<ProjectileModifier> modifiers = new List<ProjectileModifier>();
 
         // Destroys gun child before construction
         for (int i = this.transform.childCount; i > 0; --i)
@@ -68,7 +68,8 @@ public class GunFactory : MonoBehaviour
         // It is stored as an inactive object in the gun, which allows for modifications without changing the prefab
         gunController.projectile = gunBarrel.Projectile;
         gunController.projectile.transform.SetParent(transform);
-        gunController.projectile.GetComponent<ProjectileController>().stats = gunController.stats;
+        ProjectileController projectileController = gunController.projectile.GetComponent<ProjectileController>();
+        projectileController.stats = gunController.stats;
 
         // Sets firemode
 
@@ -88,7 +89,7 @@ public class GunFactory : MonoBehaviour
                 break;
         }
 
-        modifiers.Concat(gunBarrel.GetModifiers());
+        modifiers.AddRange(gunBarrel.GetModifiers());
         gunBarrel.BuildStats(gunController.stats);
 
         if (Extension != null)
@@ -102,7 +103,7 @@ public class GunFactory : MonoBehaviour
             outputs.AddRange(gunExtension.AttachToTransforms(gunBarrel.attachmentPoints));
             gunController.outputs = outputs.ToArray();
 
-            modifiers.Concat(gunExtension.GetModifiers());
+            modifiers.AddRange(gunExtension.GetModifiers());
             gunExtension.BuildStats(gunController.stats);
         }
         else
@@ -110,10 +111,7 @@ public class GunFactory : MonoBehaviour
             gunController.outputs = gunBarrel.outputs;
         }
 
-        // Sort modifiers by priority
         modifiers.OrderByDescending(modifier => (int) modifier.GetPriority()).ToList();
-
-        ProjectileController projectileController = gunController.projectile.GetComponent<ProjectileController>();
         modifiers.ForEach(modifier => modifier.ModifyProjectile(ref projectileController));
 
         gunController.onInitialize?.Invoke(gunController.stats);
