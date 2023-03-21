@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpiralPathModifier : ProjectileModifier
+public class SpiralPathModifier : MonoBehaviour, ProjectileModifier
 {
 
     //Modifier for adding a spiral movement to any projectile
@@ -17,8 +17,17 @@ public class SpiralPathModifier : ProjectileModifier
     [SerializeField]
     private bool randomAngle = false;
 
+    public ref ProjectileController ModifyProjectile(ref ProjectileController projectile)
+    {
+        projectile.UpdateProjectileMovement += AddSpiralDisplacement;
+        if (randomAngle)
+        {
+            offset = Random.Range(0, 2 * Mathf.PI);
+        }
+        return ref projectile;
+    }
 
-    public void addSpiralDisplacement(float distance, ref ProjectileState state, GunStats stats)
+    public void AddSpiralDisplacement(float distance, ref ProjectileState state, GunStats stats)
     {
         float oldRadius = radialLerp.Evaluate(pathTraveled / spiralLerpDist) * spiralRadius;
         float newRadius = radialLerp.Evaluate((pathTraveled + distance) / spiralLerpDist) * spiralRadius;
@@ -34,11 +43,5 @@ public class SpiralPathModifier : ProjectileModifier
 
         state.position += state.rotation * (newVector - oldVector);
  
-    }
-    private void Start()
-    {
-        projectile.UpdateProjectileMovement += addSpiralDisplacement;
-        if (randomAngle)
-            offset = Random.Range(0, 2 * Mathf.PI);
     }
 }

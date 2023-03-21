@@ -1,8 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 
 public class PlayerFactory : MonoBehaviour
 {
@@ -10,12 +9,14 @@ public class PlayerFactory : MonoBehaviour
     [SerializeField]
     private GameObject playerPrefab;
     [SerializeField]
-    private Transform spawnPoint;
+    private Transform[] spawnPoints;
 
     private PlayerInputManagerController playerInputManagerController;
 
     [SerializeField]
     private GlobalHUDController globalHUDController;
+
+    private static readonly System.Random random = new System.Random();
 
     private void Awake()
     {
@@ -30,31 +31,39 @@ public class PlayerFactory : MonoBehaviour
     public void InstantiatePlayersFPS()
     {
         playerInputManagerController.ChangeInputMaps("FPS");
-        foreach (InputManager inputs in playerInputManagerController.playerInputs)
-        {
-            inputs.RemoveListeners();
-            InstantiateFPSPlayer(inputs);
-            inputs.AddListeners();
-        }
+        InstantiateInputsOnSpawnpoints(InstantiateFPSPlayer);
     }
 
     public void InstantiatePlayersBidding()
     {
         playerInputManagerController.ChangeInputMaps("Bidding");
-        foreach (InputManager inputs in playerInputManagerController.playerInputs)
+        InstantiateInputsOnSpawnpoints(InstantiateBiddingPlayer);
+    }
+
+    private void InstantiateInputsOnSpawnpoints(Action<InputManager, Transform> instantiate)
+    {
+        var shuffledSpawnPoints = new List<Transform>(spawnPoints);
+        // Fisher-Yates shuffle
+        for (int i = spawnPoints.Length - 1; i > 0; i--)
         {
-            inputs.RemoveListeners();
-            InstantiateBiddingPlayer(inputs);
-            inputs.AddListeners();
+            var k = random.Next(i);
+            var firstSwapped = shuffledSpawnPoints[i];
+            shuffledSpawnPoints[i] = shuffledSpawnPoints[k];
+            shuffledSpawnPoints[k] = firstSwapped;
+        }
+        for (int i = 0; i < playerInputManagerController.playerInputs.Count; i++)
+        {
+            instantiate(playerInputManagerController.playerInputs[i], shuffledSpawnPoints[i % spawnPoints.Length]);
         }
     }
+
 
     /// <summary>
     /// Spawns a playerPrefab and attaches a playerInput to it as a child.
     /// This function is where you should add delegate events for them to be properly invoked.
     /// </summary>
     /// <param name="inputManager">PlayerInput to tie the player prefab to.</param>
-    private void InstantiateFPSPlayer(InputManager inputManager)
+    private void InstantiateFPSPlayer(InputManager inputManager, Transform spawnPoint)
     {
         // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
@@ -68,12 +77,12 @@ public class PlayerFactory : MonoBehaviour
         inputManager.GetComponent<Camera>().enabled = true;
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
-        playerManager.SetPlayerInput((FPSInputManager) inputManager);
+        playerManager.SetPlayerInput(inputManager);
         // Set unique layer for player
         playerManager.SetLayer(inputManager.playerInput.playerIndex);
     }
 
-    private void InstantiateBiddingPlayer(InputManager inputManager)
+    private void InstantiateBiddingPlayer(InputManager inputManager, Transform spawnPoint)
     {
         // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
@@ -87,7 +96,7 @@ public class PlayerFactory : MonoBehaviour
         inputManager.GetComponent<Camera>().enabled = false;
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
-        playerManager.SetPlayerInput((FPSInputManager) inputManager);
+        playerManager.SetPlayerInput(inputManager);
         // Add player UI to globalUI
         globalHUDController.SetPlayer(playerManager);
     }

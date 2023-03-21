@@ -83,7 +83,7 @@ public class BiddingPlatform : MonoBehaviour
             return false;
         }
 
-        if (playerIdentity.chips > chips)
+        if (playerIdentity.chips > chips && playerIdentity != leadingBidder)
         {
             // Refund
             if (leadingBidder)
@@ -125,6 +125,7 @@ public class BiddingPlatform : MonoBehaviour
 
         //TODO: Remove this, call from auction driver or matchmanager
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
+        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
     }
 
     public void SetItem(Item item)

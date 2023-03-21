@@ -110,13 +110,14 @@ public class MatchController : MonoBehaviour
         onRoundStart?.Invoke();
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
         roundTimer.StartTimer(roundLength);
+        roundTimer.OnTimerUpdate += AdjustMusic;
         roundTimer.OnTimerUpdate += HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted += EndActiveRound;
     }
 
     public void StartNextBidding()
     {
-        ChangeInputMappings("Bidding");
+        PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
         onBiddingStart?.Invoke();
         // TODO: Add Destroy on match win
@@ -127,6 +128,7 @@ public class MatchController : MonoBehaviour
     public void EndActiveRound()
     {
         onRoundEnd?.Invoke();
+        roundTimer.OnTimerUpdate -= AdjustMusic;
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
         AssignRewards();
@@ -147,8 +149,8 @@ public class MatchController : MonoBehaviour
     {
         yield return new WaitForSeconds(roundEndDelay);
         // This needs to be called after inputs are set at start the first time this is needed.
-        ChangeInputMappings("FPS");
-        SceneManager.LoadScene("DemoArena");
+        PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
+        SceneManager.LoadScene("CraterTown");
         StartNextRound();
     }
 
@@ -174,6 +176,14 @@ public class MatchController : MonoBehaviour
         }
     }
 
+    private void AdjustMusic()
+    {
+        if (roundTimer.ElapsedTime > roundLength * .7f)
+        {
+            MusicTrackManager.Singleton.IntensifyBattleTheme();
+        }
+    }
+
     private void HUDTimerUpdate()
     {
         globalHUDController.OnTimerUpdate(roundLength - roundTimer.ElapsedTime);
@@ -192,7 +202,7 @@ public class MatchController : MonoBehaviour
             Debug.Log($"Aaaaand the winner iiiiiiiis {lastWinner}");
 
             // Update playerInputs in preperation for Menu scene
-            ChangeInputMappings("Menu");
+            PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
 
             MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
             SceneManager.LoadSceneAsync("Menu");
@@ -204,17 +214,4 @@ public class MatchController : MonoBehaviour
         }
     }
 
-    private void ChangeInputMappings(string inputMapName)
-    {
-        PlayerInputManagerController.Singleton.ChangeInputMaps(inputMapName);
-        foreach (InputManager inputs in PlayerInputManagerController.Singleton.playerInputs)
-        {
-            // Update listeners to new map
-            inputs.RemoveListeners();
-            inputs.AddListeners();
-            // Free the playerInputs from their mortail coils (Player prefab)
-            inputs.transform.parent = null;
-            DontDestroyOnLoad(inputs);
-        }
-    }
 }

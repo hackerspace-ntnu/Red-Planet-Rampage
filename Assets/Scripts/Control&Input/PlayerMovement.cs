@@ -14,7 +14,7 @@ enum PlayerState
 [RequireComponent(typeof(Rigidbody), typeof(Collider))]
 public class PlayerMovement : MonoBehaviour
 {
-    private FPSInputManager fpsInput;
+    private InputManager inputManager;
     private Rigidbody body;
     private Collider hitbox;
 
@@ -63,25 +63,15 @@ public class PlayerMovement : MonoBehaviour
         hitbox = GetComponent<BoxCollider>();
     }
 
-    private void OnDestroy()
-    {
-        //Remove listeners
-        if (fpsInput)
-        {
-            fpsInput.onSelect -= OnJump;
-            fpsInput.onMoveCanceled -= OnMoveCanceled;
-        }
-    }
-
     /// <summary>
     /// Function for setting a playerInput and adding movement related listeners to it.
     /// </summary>
     /// <param name="player"></param>
-    public void SetPlayerInput(FPSInputManager player)
+    public void SetPlayerInput(InputManager player)
     {
-        fpsInput = player;
-        fpsInput.onSelect += OnJump;
-        fpsInput.onMoveCanceled += OnMoveCanceled;
+        inputManager = player;
+        inputManager.onSelect += OnJump;
+        inputManager.onMoveCanceled += OnMoveCanceled;
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
@@ -148,14 +138,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateRotation()
     {
-        aimAngle += fpsInput.lookInput * lookSpeed * Time.deltaTime;
+        aimAngle += inputManager.lookInput * lookSpeed * Time.deltaTime;
         // Constrain aiming angle vertically and wrap horizontally.
         aimAngle.y = Mathf.Clamp(aimAngle.y, -Mathf.PI / 2, Mathf.PI / 2);
         aimAngle.x = (aimAngle.x + Mathf.PI) % (2 * Mathf.PI) - Mathf.PI;
         // Rotate rigidbody.
         body.MoveRotation(Quaternion.AngleAxis(aimAngle.x * Mathf.Rad2Deg, Vector3.up));
         // Rotate look separately. Camera is attached to FPSInputManager.
-        fpsInput.transform.localRotation = Quaternion.AngleAxis(aimAngle.y * Mathf.Rad2Deg, Vector3.left);
+        inputManager.transform.localRotation = Quaternion.AngleAxis(aimAngle.y * Mathf.Rad2Deg, Vector3.left);
     }
 
     private void UpdateAnimatorParameters()
@@ -174,7 +164,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        var positionInput = new Vector3(fpsInput.moveInput.x, 0, fpsInput.moveInput.y);
+        var positionInput = new Vector3(inputManager.moveInput.x, 0, inputManager.moveInput.y);
         UpdatePosition(positionInput * Time.deltaTime);
     }
 
