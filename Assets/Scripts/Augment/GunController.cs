@@ -27,6 +27,7 @@ public class GunController : MonoBehaviour
 
     public GunEvent onInitialize;
     public GunEvent onFire;
+    public GunEvent onReload;
 
     private void FixedUpdate()
     {
@@ -36,8 +37,23 @@ public class GunController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Expects a percentage of ammunition to be reloaded.
+    /// This percentage is normalized eg. min = 0, max = 1.
+    /// </summary>
+    /// <param name="percentageNormalized">Percentage of ammunition to be reloaded.</param>
+    public void Reload(float percentageNormalized)
+    {
+        int amount = Mathf.Max(1, Mathf.FloorToInt(stats.magazineSize * percentageNormalized));
+        onReload?.Invoke(stats);
+        stats.Ammo = Mathf.Min(stats.Ammo + amount, stats.magazineSize);
+    }
+
     private void FireGun()
     {
+        if (stats.Ammo <= 0)
+            return;
+        stats.Ammo--;
         onFire?.Invoke(stats);
         foreach (var output in outputs)
         {
