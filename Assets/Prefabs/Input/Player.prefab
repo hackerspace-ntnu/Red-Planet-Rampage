@@ -38,6 +38,8 @@ Transform:
   - {fileID: 6507685450046118291}
   - {fileID: 254547644754247345}
   - {fileID: 3570743071879246586}
+  - {fileID: 8000393816351880123}
+  - {fileID: 36907832646192316}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -67,6 +69,8 @@ MonoBehaviour:
   airThreshold: 0.4
   state: 1
   animator: {fileID: 289053663840324231}
+  stepCheckLow: {fileID: 8000393816351880123}
+  stepCheckHigh: {fileID: 36907832646192316}
 --- !u!23 &71015680234268065
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -570,6 +574,37 @@ MonoBehaviour:
   deathScreen: {fileID: 1029316632486890240}
   deathText: {fileID: 9172283963218471322}
   tweenDuration: 0.07
+--- !u!1 &5486012356184692975
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8000393816351880123}
+  m_Layer: 0
+  m_Name: StepCheckLow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8000393816351880123
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5486012356184692975}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.287}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 71015680234268071}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8105111567943840941
 GameObject:
   m_ObjectHideFlags: 0
@@ -809,6 +844,37 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
+--- !u!1 &9038489486304626901
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 36907832646192316}
+  m_Layer: 0
+  m_Name: StepCheckHigh
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &36907832646192316
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9038489486304626901}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.331, z: 0.287}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 71015680234268071}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &3287810421515891185
 PrefabInstance:
   m_ObjectHideFlags: 0

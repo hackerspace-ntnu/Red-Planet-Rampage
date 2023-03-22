@@ -55,6 +55,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private Animator animator;
 
+    [SerializeField]
+    private Transform stepCheckLow;
+
+    [SerializeField]
+    private Transform stepCheckHigh;
+
     private Vector2 aimAngle = Vector2.zero;
 
 
@@ -146,12 +152,28 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("Right", Vector3.Dot(body.velocity, transform.right) / maxVelocity);
     }
 
+    private void StepUpIfPossible()
+    {
+        if (Physics.Raycast(stepCheckLow.position, transform.forward, .2f, ignoreMask))
+        {
+            Debug.Log("Hit low");
+            if (!Physics.Raycast(stepCheckHigh.position, transform.forward, .1f, ignoreMask))
+            {
+                Debug.Log("No hit high");
+                body.position += Vector3.up * .03f;
+            }
+
+        }
+    }
+
     void OnDrawGizmos()
     {
         if (!hitbox) return;
         var extents = new Vector3(1, 1.5f + airThreshold, 1);
         var center = hitbox.bounds.center + (0.25f + 0.5f * airThreshold) * Vector3.down;
+        Debug.DrawRay(transform.position + new Vector3(hitbox.bounds.center.x, hitbox.bounds.extents.y, hitbox.bounds.extents.z), Vector3.forward);
         Gizmos.DrawWireCube(center, extents);
+        Gizmos.DrawRay(new Vector3(hitbox.bounds.center.x, hitbox.bounds.extents.y + .2f, hitbox.bounds.extents.z), transform.forward);
     }
 
     void FixedUpdate()
@@ -164,6 +186,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        StepUpIfPossible();
         UpdateRotation();
         UpdateAnimatorParameters();
     }
