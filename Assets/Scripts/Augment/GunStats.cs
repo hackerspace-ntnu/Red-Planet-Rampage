@@ -29,6 +29,8 @@ public class GunStats : ScriptableObject
     //How many projectiles in a clip
     public int magazineSize = 20;
 
+    public int Ammo = 20;
+
     // Damage of each projectile
     [SerializeField]
     private ModifiableFloat projectileDamage = new ModifiableFloat(10f);
