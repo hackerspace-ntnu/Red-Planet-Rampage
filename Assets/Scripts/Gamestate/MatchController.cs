@@ -41,6 +41,13 @@ public class MatchController : MonoBehaviour
     [SerializeField]
     private float roundEndDelay;
 
+    [SerializeField]
+    private float biddingEndDelay = 1;
+
+    [SerializeField]
+    private float matchEndDelay = 5;
+
+
     [Header("Chip rewards")]
     [SerializeField]
     private int startAmount = 5;
@@ -146,7 +153,7 @@ public class MatchController : MonoBehaviour
 
     public IEnumerator WaitAndStartNextRound()
     {
-        yield return new WaitForSeconds(roundEndDelay);
+        yield return new WaitForSeconds(biddingEndDelay);
         // This needs to be called after inputs are set at start the first time this is needed.
         PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
         SceneManager.LoadScene("CraterTown");

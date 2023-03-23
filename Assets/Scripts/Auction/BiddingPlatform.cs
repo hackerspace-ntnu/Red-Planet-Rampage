@@ -134,6 +134,10 @@ public class BiddingPlatform : MonoBehaviour
         itemNameText.text = item.displayName;
         itemDescriptionText.text = item.displayDescription;
         itemCostText.text = chips.ToString();
+#if UNITY_EDITOR
+        auctionTimer.StartTimer(10);
+#else
         auctionTimer.StartTimer(baseWaitTime);
+#endif
     }
 }
