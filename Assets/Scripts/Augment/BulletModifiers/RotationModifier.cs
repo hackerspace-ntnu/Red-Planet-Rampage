@@ -28,9 +28,13 @@ public class RotationModifier : ProjectileModifier
         
     }
 
-    void Awake()
+    public override void Attach(ProjectileController projectile)
     {
         projectile.UpdateProjectileMovement += Rotate;
     }
 
+    public override void Detach(ProjectileController projectile)
+    {
+        projectile.UpdateProjectileMovement += Rotate;
+    }
 }

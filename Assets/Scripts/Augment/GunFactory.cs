@@ -65,8 +65,8 @@ public class GunFactory : MonoBehaviour
         // Gets the projectile from the barrel
         // It is stored as an inactive object in the gun, which allows for modifications without changing the prefab
         gunController.projectile = gunBarrel.Projectile;
-        gunController.projectile.transform.SetParent(transform);
-        gunController.projectile.GetComponent<ProjectileController>().stats = gunController.stats;
+        gunController.projectile.stats = gunController.stats;
+       
 
         if (extensionPrefab != null)
         {
@@ -83,7 +83,7 @@ public class GunFactory : MonoBehaviour
         {
             gunController.outputs = gunBarrel.outputs;
         }
-
+        gunController.projectile.projectileOutput = gunController.outputs[0];
         // Sets firemode
 
         switch (gunController.stats.fireMode)

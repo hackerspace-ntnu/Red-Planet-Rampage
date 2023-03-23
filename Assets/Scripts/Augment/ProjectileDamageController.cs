@@ -26,7 +26,7 @@ public class ProjectileDamageController : MonoBehaviour
     public PlayerManager player;
 
     private HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
-    private void Start()
+    private void Awake()
     {
         GetComponentInParent<ProjectileController>().OnHitboxCollision += DamageHitbox;
     }

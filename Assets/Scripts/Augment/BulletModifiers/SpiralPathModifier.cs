@@ -35,11 +35,17 @@ public class SpiralPathModifier : ProjectileModifier
         state.position += state.rotation * (newVector - oldVector);
  
     }
-    private void Start()
+    public override void Attach(ProjectileController projectile)
     {
-        
         projectile.UpdateProjectileMovement += addSpiralDisplacement;
-        if (randomAngle)
-            offset = Random.Range(0, 2 * Mathf.PI);
+
+        // TODO: add functionality to add additional data to state, so that (for instance), the random starting angle of this component can be stored for each bullet instance
+        //if (randomAngle)
+        //   offset = Random.Range(0, 2 * Mathf.PI);
     }
+    public override void Detach(ProjectileController projectile)
+    {
+        projectile.UpdateProjectileMovement -= addSpiralDisplacement;
+    }
+
 }

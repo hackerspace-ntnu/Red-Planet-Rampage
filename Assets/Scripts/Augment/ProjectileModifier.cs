@@ -12,5 +12,8 @@ using UnityEngine;
 /// </summary>
 public abstract class ProjectileModifier : MonoBehaviour
 {
-    public ProjectileController projectile;
+    //public ProjectileController projectile;
+
+    public abstract void Attach(ProjectileController projectile);
+    public abstract void Detach(ProjectileController projectile);
 }

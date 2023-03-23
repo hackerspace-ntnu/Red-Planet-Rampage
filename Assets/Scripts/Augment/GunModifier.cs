@@ -17,26 +17,25 @@ public class GunModifier : MonoBehaviour
     // Adds simple stat modifications
     public Modifier[] statModifiers;
 
+    public ProjectileModifier[] projectileModifiers;
+
     // This prefab is added as a child to the projectile in order to modify it
-    public GameObject bulletModifierPrefab;
+    // REMOVED
+    //public GameObject bulletModifierPrefab;
 
     // Used to keep track of added projectile modifier to delete it 
-    private GameObject instantiatedBulletModifier;
+    // private GameObject instantiatedBulletModifier;
 
     // Where to shoot bullets
     public Transform[] outputs;
 
-    // Is run when the gun is built
+
     public virtual void Attach(GunController gun)
     {
         Modify(gun.stats);
-        if (bulletModifierPrefab != null)
+        foreach (ProjectileModifier modifier in projectileModifiers)
         {
-            instantiatedBulletModifier = Instantiate(bulletModifierPrefab, gun.projectile.transform);
-            foreach (ProjectileModifier modifier in instantiatedBulletModifier.GetComponents<ProjectileModifier>())
-            {
-                modifier.projectile = gun.projectile.GetComponent<ProjectileController>();
-            }
+            modifier.Attach(gun.projectile);
         }
     }
 
@@ -52,8 +51,6 @@ public class GunModifier : MonoBehaviour
         stats.ProjectilesPerShot.AddExponential(outputs.Length);
     }
 
-    // Is run when component is removed
-    // Not currently in use
     public virtual void Detach(GunController gun)
     {
         foreach (var modifier in statModifiers)
@@ -63,9 +60,9 @@ public class GunModifier : MonoBehaviour
             stat.AddMultiplier(-modifier.multiplier);
             stat.AddExponential(1 / modifier.exponential);
         }
-        if (instantiatedBulletModifier != null)
+        foreach (ProjectileModifier modifier in projectileModifiers)
         {
-            Destroy(instantiatedBulletModifier);
+            modifier.Detach(gun.projectile);
         }
     }
 }
