@@ -197,23 +197,14 @@ public class MatchController : MonoBehaviour
 
     private bool IsWin()
     {
-        var lastWinner = rounds.Last().Winner;
-        if (lastWinner == null) { return false; }
-        var wins = rounds.Where(round => round.IsWinner(lastWinner)).Count();
-        Debug.Log($"Current winner ({lastWinner}) has {wins} wins.");
+        var winner = rounds.Last().Winner;
+        if (winner == null) { return false; }
+        var wins = rounds.Where(round => round.IsWinner(winner)).Count();
+        Debug.Log($"Current winner ({winner}) has {wins} wins.");
         if (wins >= 3)
         {
             // We have a winner!
-            // TODO Go to victory scene
-            Debug.Log($"Aaaaand the winner iiiiiiiis {lastWinner}");
-
-            // Update playerInputs in preperation for Menu scene
-            PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
-
-            MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
-            rounds = new List<Round>();
-            PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
-            SceneManager.LoadSceneAsync("Menu");
+            StartCoroutine(DisplayWinScreenAndRestart(winner));
             return true;
         }
         else
@@ -222,4 +213,19 @@ public class MatchController : MonoBehaviour
         }
     }
 
+    private IEnumerator DisplayWinScreenAndRestart(PlayerIdentity winner)
+    {
+        globalHUDController.DisplayWinScreen(winner);
+
+        yield return new WaitForSecondsRealtime(matchEndDelay);
+
+        // Update playerInputs in preperation for Menu scene
+        PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
+
+        MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
+        rounds = new List<Round>();
+        PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+        SceneManager.LoadSceneAsync("Menu");
+
+    }
 }
