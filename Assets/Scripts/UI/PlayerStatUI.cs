@@ -42,7 +42,7 @@ public class PlayerStatUI : MonoBehaviour
             return;
         }
 
-        statContainer.alpha = 1;
+        //statContainer.alpha = 1;
 
         SetName(playerManager.identity.playerName);
 
@@ -63,7 +63,7 @@ public class PlayerStatUI : MonoBehaviour
     void OnDisable()
     {
         // Hide stats
-        statContainer.alpha = 0;
+        //statContainer.alpha = 0;
     }
 
     void OnDestroy()
