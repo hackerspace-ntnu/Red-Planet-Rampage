@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using SecretName;
 
 public class PlayerStatUI : MonoBehaviour
@@ -28,10 +29,13 @@ public class PlayerStatUI : MonoBehaviour
     [SerializeField]
     private StatBar projectileSpeedBar;
 
+    private Outline outline;
+
     public PlayerManager playerManager;
 
     void Start()
     {
+        outline = GetComponent<Outline>();
         OnEnable();
     }
 
@@ -45,6 +49,7 @@ public class PlayerStatUI : MonoBehaviour
         statContainer.alpha = 1;
 
         SetName(playerManager.identity.playerName);
+        SetColor(playerManager.identity.color);
 
         SetChips(playerManager.identity.chips);
         playerManager.identity.onChipChange += SetChips;
@@ -119,6 +124,11 @@ public class PlayerStatUI : MonoBehaviour
     public void SetName(string name)
     {
         playerNameText.SetText(name);
+    }
+
+    public void SetColor(Color color)
+    {
+        outline.effectColor = color;
     }
 
     public void SetChips(int amount)

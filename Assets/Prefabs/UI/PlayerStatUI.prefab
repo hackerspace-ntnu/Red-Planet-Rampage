@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5238424435532929004}
   - component: {fileID: 8824187383498726237}
   - component: {fileID: 3626706776777579660}
+  - component: {fileID: 829215917}
   m_Layer: 0
   m_Name: PlayerStatUI
   m_TagString: Untagged
@@ -75,10 +76,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 10
-    m_Right: 10
-    m_Top: 10
-    m_Bottom: 20
+    m_Left: 7
+    m_Right: 7
+    m_Top: 7
+    m_Bottom: 17
   m_ChildAlignment: 0
   m_Spacing: 0
   m_ChildForceExpandWidth: 1
@@ -109,7 +110,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.14117648}
+  m_Color: {r: 0.46652934, g: 0.39618525, b: 0.34879074, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -126,6 +127,21 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &829215917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1774292626038758922}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 1, g: 0.47450984, b: 0.24705884, a: 1}
+  m_EffectDistance: {x: 4, y: 4}
+  m_UseGraphicAlpha: 0
 --- !u!1 &2086259411032913143
 GameObject:
   m_ObjectHideFlags: 0
@@ -991,7 +1007,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6718470205430105812, guid: 17df745e02bd45b0c9436e1b60f6ffa4, type: 3}
       propertyPath: m_text
-      value: Bullet Spd
+      value: Bullet Speed
       objectReference: {fileID: 0}
     - target: {fileID: 6860733559585620445, guid: 17df745e02bd45b0c9436e1b60f6ffa4, type: 3}
       propertyPath: m_AnchorMax.y
