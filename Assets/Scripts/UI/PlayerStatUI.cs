@@ -133,7 +133,7 @@ public class PlayerStatUI : MonoBehaviour
 
     public void SetChips(int amount)
     {
-        chipsText.SetText($"{amount.ToString()} chips");
+        chipsText.SetText(amount.ToString());
     }
 
     public void SetGunName(string name)
