@@ -9,6 +9,12 @@ public class GlobalHUDController : MonoBehaviour
     [SerializeField]
     private PlayerStatUI[] playerStatPanels;
 
+    [SerializeField]
+    private TMP_Text winText;
+
+    [SerializeField]
+    private GameObject winScreen;
+
     private int nextPlayerStatIndex = 0;
 
     void Start()
@@ -52,5 +58,12 @@ public class GlobalHUDController : MonoBehaviour
             int seconds = Mathf.FloorToInt(time % 60);
             roundTimer.text = Mathf.FloorToInt(time / 60) + ":" + (seconds < 10 ? "0" : "") + seconds;
         }
+    }
+
+    public void DisplayWinScreen(PlayerIdentity winner)
+    {
+        winText.text = winner.playerName;
+        winText.color = winner.color;
+        winScreen.SetActive(true);
     }
 }
