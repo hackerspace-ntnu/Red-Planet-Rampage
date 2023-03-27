@@ -28,7 +28,7 @@ public class HealthController : MonoBehaviour
         currentHealth = maxhHealth;
     }
 
-    public void dealDamage(DamageInfo info)
+    public void DealDamage(DamageInfo info)
     {
         
         currentHealth -= info.damage;
@@ -38,4 +38,15 @@ public class HealthController : MonoBehaviour
             onDeath?.Invoke(this, info.damage, info);
         }
     }
+
+    public void DealNonPlayerDamage(float damage, DamageInfo info)
+    {
+        currentHealth -= damage;
+        onDamageTaken?.Invoke(this, damage, info);
+        if (currentHealth <= 0)
+        {
+            onDeath?.Invoke(this, damage, info);
+        }
+    }
+ //   public void dealDamage();{continue;}
 }

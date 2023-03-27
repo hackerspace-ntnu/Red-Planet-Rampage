@@ -39,7 +39,7 @@ public class ProjectileDamageController : MonoBehaviour, ProjectileModifier
     private void DamageHitbox(HitboxController controller, ref ProjectileState state)
     {
         DamageInfo info = new DamageInfo(player, state.damage);
-        if (controller.health == null || !state.hitHealthControllers.Contains(controller.health))
+        if (controller.health && !state.hitHealthControllers.Contains(controller.health))
         {
             state.hitHealthControllers.Add(controller.health);
             controller.DamageCollider(info);
