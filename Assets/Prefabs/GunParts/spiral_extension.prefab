@@ -218,6 +218,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2630659873997500700}
   - component: {fileID: 1695463766077066205}
+  - component: {fileID: 7096156345712969214}
   m_Layer: 0
   m_Name: spiral_extension
   m_TagString: Untagged
@@ -260,29 +261,70 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   statModifiers:
   - name: Firerate
-    addition: 0
-    multiplier: 0
-    exponential: 1
+    addition: 100
+    multiplier: 100
+    exponential: 100
   - name: ProjectileSpeed
     addition: 0
     multiplier: 2
     exponential: 1
   - name: ProjectileGravityModifier
-    addition: 1
+    addition: -1
     multiplier: 0
     exponential: 1
   - name: ProjectileDamage
     addition: 0
     multiplier: 0
     exponential: 0.4
-  bulletModifierPrefab: {fileID: 3767032461262981500, guid: 8e82b8315a474ee439ea502a2e04d7d7, type: 3}
-  model: {fileID: 3924203482660996617}
+  projectileModifiers:
+  - {fileID: 7096156345712969214}
   outputs:
   - {fileID: 2577779482283733333}
   - {fileID: 2573743963398441194}
   - {fileID: 3372226503572897552}
   - {fileID: 5926534310450649701}
   - {fileID: 2554867221378465866}
+  model: {fileID: 3924203482660996617}
+--- !u!114 &7096156345712969214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5989357933958802726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 915a184c9cc9689449e710bd516be7d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radialLerp:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spiralRadius: 0.2
+  spiralWavelength: 3
+  spiralLerpDist: 1
+  randomAngle: 1
 --- !u!1 &6016455867067499489
 GameObject:
   m_ObjectHideFlags: 0

@@ -25,7 +25,7 @@ public class ProjectileDamageController : MonoBehaviour
 {
     public PlayerManager player;
 
-    private HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
+    
     private void Awake()
     {
         GetComponentInParent<ProjectileController>().OnHitboxCollision += DamageHitbox;
@@ -34,9 +34,9 @@ public class ProjectileDamageController : MonoBehaviour
     private void DamageHitbox(HitboxController controller, ref ProjectileState state, GunStats stats)
     {
         DamageInfo info = new DamageInfo(player, stats, state);
-        if (controller.health == null || !hitHealthControllers.Contains(controller.health))
+        if (controller.health == null || !state.hitHealthControllers.Contains(controller.health))
         {
-            hitHealthControllers.Add(controller.health);
+            state.hitHealthControllers.Add(controller.health);
             controller.DamageCollider(info);
         }
     }

@@ -262,6 +262,7 @@ GameObject:
   - component: {fileID: 6537988700951070003}
   - component: {fileID: 7617790890687186095}
   - component: {fileID: 8515215133120317911}
+  - component: {fileID: 7327065496144923300}
   m_Layer: 0
   m_Name: bullet_barrel
   m_TagString: Untagged
@@ -321,10 +322,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectileOutput: {fileID: 5765902433490691002}
   stats: {fileID: 0}
-  maxDistance: 50
-  collisionSamples: 60
+  collisionLayers:
+    serializedVersion: 2
+    m_Bits: 1
+  maxDistance: 20
+  collisionSamples: 30
   trail: {fileID: 1393106611541694855}
   flash: {fileID: 261841362781268065}
+--- !u!114 &7327065496144923300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6861618831928518119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a80a02a33f4d484f9fd0e518d4d2931, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
 --- !u!1 &7239404913100344541
 GameObject:
   m_ObjectHideFlags: 0

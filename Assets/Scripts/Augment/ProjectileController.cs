@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 [System.Serializable]
 public class ProjectileState
 {
@@ -29,7 +30,7 @@ public class ProjectileState
     // Speed of the bullet
     public float speed = 0f;
 
-    // Direction bullet is pointing
+    // Rotation of the bullet, typically used for vfx, such as aligning a rocket
     public Quaternion rotation = Quaternion.identity;
 
     // Current gravity
@@ -43,6 +44,12 @@ public class ProjectileState
 
     // If the projectile is being used or not
     public bool active = true;
+
+    // Dictionary for storing properties that a projectile modifier might need, see SpiralPathModifier for an example
+    public Dictionary<string, object> additionalProperties = new Dictionary<string, object>();
+
+    // Used to keep track of the healthControllers currently damaged
+    public HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
 }
 
 public abstract class ProjectileController : MonoBehaviour
@@ -72,7 +79,7 @@ public abstract class ProjectileController : MonoBehaviour
     
     // Used for modifications done to the projectile upon creation
     public delegate void ProjectileInitializationEvent(ref ProjectileState state, GunStats stats);
-    public ProjectileInitializationEvent onProjectileInit;
+    public ProjectileInitializationEvent OnProjectileInit;
 
     // Used for adding events when the projectile position is updated, like particle trails
     public delegate void PositionUpdateEvent(Vector3 oldPos, Vector3 newPos, ref ProjectileState state, GunStats stats);

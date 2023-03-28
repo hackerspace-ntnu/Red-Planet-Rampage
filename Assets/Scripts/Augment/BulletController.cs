@@ -5,10 +5,11 @@ using System.Linq;
 using UnityEngine.VFX;
 public class BulletController : ProjectileController
 {
-
-   
     [SerializeField]
-    private float maxDistance = 50;
+    private LayerMask collisionLayers;
+
+    [SerializeField]
+    private float maxDistance = 20;
 
     [SerializeField]
     private int collisionSamples = 60;
@@ -23,6 +24,8 @@ public class BulletController : ProjectileController
 
     [SerializeField]
     private VisualEffect flash;
+
+    private ProjectileState projectile = new ProjectileState();
     public static void MoveWithGravity(float distance, ref ProjectileState state, GunStats stats)
     {
         //Update the position of the projectile
@@ -34,42 +37,24 @@ public class BulletController : ProjectileController
         velocity += Vector3.up * state.gravity * time;
         state.speed = velocity.magnitude;
         state.direction = velocity.normalized;
+        state.distanceTraveled += distance;
     }
-
-
-
 
     public void Awake()
     {
         UpdateProjectileMovement += MoveWithGravity;
-
         trailPositions = new float[vfxPositionsPerSample * collisionSamples * 3];
         trailPosTexture = new Texture2D(vfxPositionsPerSample * collisionSamples, 3 , TextureFormat.RFloat, false);
         trail.SetTexture("Position", this.trailPosTexture);
     }
 
 
-    //public void InitializeNewProjectile(Transform output)
-    //{
-    //    int i = 0;
-    //    while (i < maxProjectiles)
-    //    {
-    //        if (!states[currentProjectileIdx].active)
-    //        {
-    //
-    //            InitalizeProjectileState(ref states[currentProjectileIdx], output);
-    //            return;
-    //        }
-    //        i++;
-    //    }
-    //    Debug.LogError("Bullets exeeded max number");
-    //    //(transform.position, transform.rotation, transform.forward, stats.ProjectileSpeed, stats.ProjectileGravityModifier);
-    //}
+
 
     public override void InitializeProjectile(GunStats stats)
-    {
-        var projectile = new ProjectileState();
+    {   
         projectile.active = true;
+        projectile.distanceTraveled = 0f;
         projectile.position = projectileOutput.position;
         projectile.oldPosition = projectileOutput.position;
         projectile.direction = projectileOutput.forward;
@@ -78,25 +63,76 @@ public class BulletController : ProjectileController
         projectile.initializationTime = Time.fixedTime;
         projectile.speed = stats.ProjectileSpeed;
         projectile.gravity = stats.ProjectileGravityModifier * 9.81f;
+        projectile.additionalProperties.Clear();
+        projectile.hitHealthControllers.Clear();
+        OnProjectileInit?.Invoke(ref projectile, stats);
 
-        onProjectileInit?.Invoke(ref projectile, stats);
-       
-        for (int i = 0; i < collisionSamples; i++)
+        int sampleNum = 0;
+
+        while (sampleNum < collisionSamples && projectile.active)
         {
+            
             projectile.oldPosition = projectile.position;
 
             projectile.lastUpdateTime = Time.time;
 
-            for (int j = 0; j < vfxPositionsPerSample; j++)
+            for(int j = 0; j < vfxPositionsPerSample; j++)
             {
-                UpdateProjectileMovement?.Invoke(maxDistance / (collisionSamples * vfxPositionsPerSample), ref projectile, stats);
+                trailPositions[(sampleNum * vfxPositionsPerSample + j)] = projectile.position.x;
+                trailPositions[(sampleNum * vfxPositionsPerSample + j) + (vfxPositionsPerSample * collisionSamples) * 1] = projectile.position.y;
+                trailPositions[(sampleNum * vfxPositionsPerSample + j) + (vfxPositionsPerSample * collisionSamples) * 2] = projectile.position.z;
 
-                trailPositions[(i * vfxPositionsPerSample + j)] = projectile.position.x;
-                trailPositions[(i * vfxPositionsPerSample + j) + (vfxPositionsPerSample * collisionSamples) * 1] = projectile.position.y;
-                trailPositions[(i * vfxPositionsPerSample + j) + (vfxPositionsPerSample * collisionSamples) * 2] = projectile.position.z;
+                UpdateProjectileMovement?.Invoke(maxDistance / (collisionSamples * vfxPositionsPerSample), ref projectile, stats);
+            }
+            
+            Collider[] collisions;
+
+            var direction = projectile.position - projectile.oldPosition;
+            RaycastHit[] rayCasts;
+
+            if (stats.ProjectileSize > 0)
+            {
+                rayCasts = Physics.SphereCastAll(projectile.oldPosition, stats.ProjectileSize, direction, direction.magnitude, collisionLayers);
+            }
+            else
+            {
+                rayCasts = Physics.RaycastAll(projectile.oldPosition, direction, direction.magnitude, collisionLayers);
+            }
+
+            // Ordered by distance along path hit, so that things are hit in the correct order
+
+            collisions = rayCasts.OrderBy(x => x.distance).Select(x => x.collider).ToArray();
+            if(collisions.Length > 0)
+            {
+                Debug.Log("Collided");
+                OnColliderHit?.Invoke(collisions[0], ref projectile, stats);
+                HitboxController hitbox = collisions[0].GetComponent<HitboxController>();
+
+                if (hitbox != null)
+                {
+                    OnHitboxCollision?.Invoke(hitbox, ref projectile, stats);
+                }
+                projectile.active = false;
+                sampleNum += 1;
+
+                trailPositions[(sampleNum * vfxPositionsPerSample)] = projectile.position.x;
+                trailPositions[(sampleNum * vfxPositionsPerSample) + (vfxPositionsPerSample * collisionSamples) * 1] = projectile.position.y;
+                trailPositions[(sampleNum * vfxPositionsPerSample) + (vfxPositionsPerSample * collisionSamples) * 2] = projectile.position.z;
+            }
+            else
+            {
+                sampleNum += 1;
             }
         }
 
+        
+
+        for (int i = sampleNum * vfxPositionsPerSample + 1; i < collisionSamples * vfxPositionsPerSample; i++)
+        {
+            trailPositions[i] = trailPositions[i - 1];
+            trailPositions[i + (vfxPositionsPerSample * collisionSamples) * 1] = trailPositions[i - 1 + (vfxPositionsPerSample * collisionSamples) * 1];
+            trailPositions[i + (vfxPositionsPerSample * collisionSamples) * 2] = trailPositions[i - 1 + (vfxPositionsPerSample * collisionSamples) * 2];
+        }
 
         // Set up the trail positions
         trailPosTexture.SetPixelData<float>(trailPositions, 0, 0);
@@ -105,37 +141,6 @@ public class BulletController : ProjectileController
         // Play the flash and trail
         trail.SendEvent("OnPlay");
         flash.SendEvent("OnPlay");
-
-
-
-        Collider[] collisions;
-
-        var direction = projectile.position - projectile.oldPosition;
-        RaycastHit[] rayCasts;
-
-        if (stats.ProjectileSize > 0)
-        {
-            rayCasts = Physics.SphereCastAll(transform.position, stats.ProjectileSize, direction, direction.magnitude);
-        }
-        else
-        {
-            rayCasts = Physics.RaycastAll(transform.position, direction, direction.magnitude);
-        }
-
-        // Ordered by distance along path hit, so that things are hit in the correct order
-
-        collisions = rayCasts.OrderBy(x => x.distance).Select(x => x.collider).ToArray();
-        foreach (var collision in collisions)
-        {
-
-            OnColliderHit?.Invoke(collision, ref projectile, stats);
-            HitboxController hitbox = collision.GetComponent<HitboxController>();
-
-            if (hitbox != null)
-            {
-                OnHitboxCollision?.Invoke(hitbox, ref projectile, stats);
-            }
-        }
     }
 
     public Vector3 LerpPos(ProjectileState state)
