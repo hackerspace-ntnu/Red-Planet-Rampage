@@ -21,6 +21,8 @@ public class PlayerManager : MonoBehaviour
 
     public HitEvent onDeath;
 
+    private PlayerManager lastPlayerThatHitMe;
+
     public delegate void BiddingPlatformEvent(BiddingPlatform platform);
     public BiddingPlatformEvent onSelectedBiddingPlatformChange;
 
@@ -72,13 +74,24 @@ public class PlayerManager : MonoBehaviour
     {
         hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
         PlayOnHit();
+        if (info.sourcePlayer != this)
+        {
+            lastPlayerThatHitMe = info.sourcePlayer;
+        }
     }
 
     void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
-        onDeath?.Invoke(info.sourcePlayer, this);
+        var killer = info.sourcePlayer;
+        if (info.sourcePlayer == this && lastPlayerThatHitMe)
+        {
+            killer = lastPlayerThatHitMe;
+        }
+
+        onDeath?.Invoke(killer, this);
         TurnIntoRagdoll();
-        hudController.DisplayDeathScreen(info.sourcePlayer.identity);
+        hudController.DisplayDeathScreen(killer.identity);
+
     }
 
     void TurnIntoRagdoll()
