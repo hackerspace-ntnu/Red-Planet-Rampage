@@ -9,11 +9,11 @@ using UnityEngine.VFX;
 public class ExplosionController : MonoBehaviour
 {
     // Might need modification or futher testing when added to a rocket/granade
-    [SerializeField] public int damage;
+    [SerializeField] private int damage;
 
-    [SerializeField] private VisualEffect visualEffect;
+    private VisualEffect visualEffect;
 
-    [SerializeField] public float radius;
+    [SerializeField] private float radius;
 
     [SerializeField] private LayerMask hitBoxLayers;
 
@@ -23,28 +23,30 @@ public class ExplosionController : MonoBehaviour
 
     private void Start()
     {
+        visualEffect = GetComponent<VisualEffect>();
         visualEffect.enabled = false;
     }
 
     public void OnDrawGizmos()
     {
+        Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, radius);
     }
 
     // Function that runs turns on the visual effect and calculates damage
-    public void Explode()
+    public void Explode(PlayerManager sourcePlayer)
     {
         visualEffect.enabled = true;
         visualEffect.SendEvent("OnPlay");
         Collider[] colliderList = Physics.OverlapSphere(transform.position, radius, hitBoxLayers);
         foreach (Collider collider in colliderList)
         {
-            DealDamage(collider);
+            DealDamage(collider,sourcePlayer);
         }
         
     }
 
-    private void DealDamage(Collider collider)
+    private void DealDamage(Collider collider,PlayerManager sourcePlayer)
     {
         HitboxController controller = collider.GetComponent<HitboxController>();
         if (!controller.health || !hitHealthControllers.Contains(controller.health))
@@ -52,7 +54,7 @@ public class ExplosionController : MonoBehaviour
             hitHealthControllers.Add(controller.health);
             float distanceScaling = math.pow((Vector3.Distance(collider.transform.position, transform.position) / radius), 2);
             float damageFinal = (1 - distanceScaling) * damage;
-            controller.DamageCollider(damageFinal);
+            controller.DamageCollider(new DamageInfo(sourcePlayer,damageFinal));
         }
     }
 }

@@ -77,11 +77,11 @@ public class PlayerManager : MonoBehaviour
     void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
         onDeath?.Invoke(info.sourcePlayer, this);
-        TurnIntoRagdoll(info.position, info.force);
+        TurnIntoRagdoll();
         hudController.DisplayDeathScreen(info.sourcePlayer.identity);
     }
 
-    void TurnIntoRagdoll(Vector3 impactSite, Vector3 impactDirection)
+    void TurnIntoRagdoll()
     {
         // Disable components
         GetComponent<PlayerMovement>().enabled = false;
@@ -207,7 +207,7 @@ public class PlayerManager : MonoBehaviour
 
     private void PlayOnHit()
     {
-        if(Random.Range(0, 100) > 5)
+        if (Random.Range(0, 100) > 5)
         {
             hitSounds.Play(audioSource);
         }

@@ -30,7 +30,7 @@ public class HealthController : MonoBehaviour
 
     public void DealDamage(DamageInfo info)
     {
-        
+
         currentHealth -= info.damage;
         onDamageTaken?.Invoke(this, info.damage, info);
         if (currentHealth <= 0)
@@ -38,15 +38,4 @@ public class HealthController : MonoBehaviour
             onDeath?.Invoke(this, info.damage, info);
         }
     }
-
-    public void DealNonPlayerDamage(float damage, DamageInfo info)
-    {
-        currentHealth -= damage;
-        onDamageTaken?.Invoke(this, damage, info);
-        if (currentHealth <= 0)
-        {
-            onDeath?.Invoke(this, damage, info);
-        }
-    }
- //   public void dealDamage();{continue;}
 }
