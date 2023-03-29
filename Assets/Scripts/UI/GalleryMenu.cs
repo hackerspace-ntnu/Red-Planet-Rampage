@@ -54,6 +54,7 @@ public class GalleryMenu : MonoBehaviour
         gridElements.RemoveAt(0); // GetComponentInChildren returns this element as well, which we don't want
 
         int unlockedElementsOffset = gridElements.Count * page;
+        Vector2 gridCellSize = new Vector2((gridLayout.cellSize.x - gridLayout.spacing.x) / 2, (gridLayout.cellSize.y - gridLayout.spacing.y) / 2);
 
         for (int i = unlockedElementsOffset; i < gridElements.Count + unlockedElementsOffset; i++)
         {
@@ -63,32 +64,29 @@ public class GalleryMenu : MonoBehaviour
                 gridElement.gameObject.SetActive(true);
 
                 Weapon weapon = unlockedElements[i];
-                GameObject gun = GunFactory.InstantiateGun(weapon.body, weapon.barrel, weapon.extension, gridElement);
-
-                //gun = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                //gun.transform.SetParent(gridElement.transform);
-                //gun.transform.localPosition = Vector3.zero + Vector3.up * gridLayout.cellSize.y / 4f;
+                GameObject gun = GunFactory.InstantiateGun(weapon.body, weapon.barrel, weapon.extension, gridElement, Vector3.one);
 
                 Bounds bounds = new Bounds();
                 foreach (var renderer in gun.GetComponentsInChildren<Renderer>())
                 {
                     renderer.gameObject.layer = LayerMask.NameToLayer("UI");
                     bounds.Encapsulate(renderer.bounds);
-                    //TODO This does not really work figure out why.
                 }
 
                 // Scale the weapon so it fits within the UI 
-                float maxSize = (gridLayout.cellSize.x - gridLayout.spacing.x) / 2;
-                float sizeFactor = maxSize / bounds.size.x /  10 ;
-                gun.transform.localScale = new Vector3(sizeFactor / gun.transform.lossyScale.x, sizeFactor / gun.transform.lossyScale.y, sizeFactor / gun.transform.lossyScale.z);
+                float scaleFactor = gridCellSize.x / bounds.size.z;
 
-                Debug.Log("MaxSize: " + maxSize.ToString());
-                Debug.Log("MinExtents: " + bounds.min);
-                Debug.Log("MaxExtents: " + bounds.max);
-                Debug.Log("SizeFactor: " + sizeFactor.ToString());
+                gun.transform.localScale = new Vector3(scaleFactor / gun.transform.lossyScale.x, scaleFactor / gun.transform.lossyScale.y, scaleFactor / gun.transform.lossyScale.z);
 
-                // Center the weapon on the UI element
-                gun.transform.Translate(Vector3.left * (bounds.size.x) / 20);
+                // Recalculate bounds
+                foreach (var renderer in gun.GetComponentsInChildren<Renderer>())
+                {
+                    renderer.gameObject.layer = LayerMask.NameToLayer("UI");
+                    bounds.Encapsulate(renderer.bounds);
+                }
+
+                // Center the gun on the grid cell
+                gun.transform.localPosition = new Vector3(0 - bounds.center.z * gridCellSize.x / 4, gridCellSize.y / 3, -bounds.extents.x);
 
                 // Rotate the weapon to the correct angle
                 gun.transform.Rotate(Vector3.up * 90);
@@ -101,10 +99,8 @@ public class GalleryMenu : MonoBehaviour
             {
                 // We are out of displayable weapons, disable objects
                 gridElement.gameObject.SetActive(false);
-            }
-            
+            }    
         }
-
     }
 }
 
