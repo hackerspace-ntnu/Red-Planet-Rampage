@@ -43,7 +43,7 @@ public class PlayerManager : MonoBehaviour
     private HealthController healthController;
 
     [SerializeField]
-    private HUDController hudController;
+    private PlayerHUDController hudController;
 
     void Start()
     {
@@ -54,7 +54,7 @@ public class PlayerManager : MonoBehaviour
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
-        hudController.UpdateHealthBar(healthController.CurrentHealth, healthController.MaxHealth);
+        hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
     }
 
     void OnDeath(HealthController healthController, float damage, DamageInfo info)
@@ -96,7 +96,7 @@ public class PlayerManager : MonoBehaviour
         var canvas = hudController.GetComponent<Canvas>();
         canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
         canvas.planeDistance = 0.11f;
-        
+
         // Set player color
         var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
     }
