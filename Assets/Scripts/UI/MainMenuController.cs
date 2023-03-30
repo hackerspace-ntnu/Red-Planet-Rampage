@@ -21,8 +21,9 @@ public class MainMenuController : MonoBehaviour
     private List<TabGroup> tabGroups;
     [SerializeField]
     private Selectable defaultButton;
+    public GameObject defaultMenu;
     [SerializeField]
-    private GameObject defaultMenu;
+    private GalleryMenu galleryMenu;
 
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
@@ -117,6 +118,8 @@ public class MainMenuController : MonoBehaviour
         {
             t.SetPlayerInput(inputManager);
         }
+
+        galleryMenu.SetPlayerInput(inputManager);
 
         GameObject panel = Instantiate(playerBackgroundPanel, characterView);
         playerBackgrounds.Add(panel);

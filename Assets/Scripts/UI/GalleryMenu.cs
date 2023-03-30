@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.IO;
-using Unity.VisualScripting;
+using UnityEngine.InputSystem;
 
 [System.Serializable]
     public struct Weapon
@@ -20,27 +18,40 @@ public class GalleryMenu : MonoBehaviour
     private Weapon[] unlockedElements;
     private int pageIndex = 0;
     private int maxPages = 0;
+    private List<GameObject> spawnedWeapons = new List<GameObject>();
+    private List<RectTransform> gridElements = new List<RectTransform>();
 
     public Transform gridBase;
-    public TabGroup tabGroup;
+    public Transform navigation;
     public TabsButton tabPrefab;
 
+    private MainMenuController mainMenuController;
     private void Start()
     {
-        List<RectTransform> gridElements = gridBase.GetComponentsInChildren<Image>().Select(x => x.GetComponent<RectTransform>()).ToList();
-        maxPages = Mathf.CeilToInt(unlockedElements.Length /gridElements.Count);
+        mainMenuController= GetComponentInParent<MainMenuController>();
+
+        gridElements = gridBase.GetComponentsInChildren<Image>(true).Select(x => x.GetComponent<RectTransform>()).ToList();
+        gridElements.RemoveAt(0); // GetComponentInChildren returns this element as well, which we don't want
+
+        maxPages = Mathf.CeilToInt(unlockedElements.Length / gridElements.Count);
 
         CreateTabs(maxPages);
         PopulateGrid(0);
     }
 
+    public void SetPlayerInput(InputManager inputManager)
+    {
+        inputManager.onLeftTab += PrevPage;
+        inputManager.onRightTab += NextPage;
+        inputManager.onCancel += Back;
+    }
+
     private void CreateTabs(int pages)
     {
-        for(int i = 1; i < pages; i++)
-        { 
-            TabsButton tab = Instantiate(tabPrefab, tabGroup.transform).GetComponent<TabsButton>();
-            tab.GetComponentInChildren<TMP_Text>().text = i.ToString();
-            tabGroup.Subscribe(tab);
+        for (int i = 0; i <= pages; i++)
+        {
+            TabsButton tab = Instantiate(tabPrefab, navigation.transform).GetComponent<TabsButton>();
+            tab.GetComponentInChildren<TMP_Text>().text = (i + 1).ToString();
         }
     }
 
@@ -49,9 +60,14 @@ public class GalleryMenu : MonoBehaviour
     /// </summary>
     void PopulateGrid(int page)
     {
+        // Remove previous guns
+        foreach (GameObject g in spawnedWeapons)
+        {
+            GameObject.DestroyImmediate(g);
+        }
+        spawnedWeapons.Clear();
+
         FlexibleGridLayout gridLayout = gridBase.GetComponent<FlexibleGridLayout>();
-        List<RectTransform> gridElements = gridBase.GetComponentsInChildren<Image>().Select(x => x.GetComponent<RectTransform>()).ToList();
-        gridElements.RemoveAt(0); // GetComponentInChildren returns this element as well, which we don't want
 
         int unlockedElementsOffset = gridElements.Count * page;
         Vector2 gridCellSize = new Vector2((gridLayout.cellSize.x - gridLayout.spacing.x) / 2, (gridLayout.cellSize.y - gridLayout.spacing.y) / 2);
@@ -59,12 +75,14 @@ public class GalleryMenu : MonoBehaviour
         for (int i = unlockedElementsOffset; i < gridElements.Count + unlockedElementsOffset; i++)
         {
             RectTransform gridElement = gridElements[i%gridElements.Count];
+            gridElement.gameObject.SetActive(true);
+            Debug.Log(i);
             if (i < unlockedElements.Length)
-            {
-                gridElement.gameObject.SetActive(true);
-
+            { 
                 Weapon weapon = unlockedElements[i];
                 GameObject gun = GunFactory.InstantiateGun(weapon.body, weapon.barrel, weapon.extension, gridElement, Vector3.one);
+
+                spawnedWeapons.Add(gun);
 
                 Bounds bounds = new Bounds();
                 foreach (var renderer in gun.GetComponentsInChildren<Renderer>())
@@ -101,6 +119,40 @@ public class GalleryMenu : MonoBehaviour
                 gridElement.gameObject.SetActive(false);
             }    
         }
+    }
+
+    public void NextPage(InputAction.CallbackContext ctx)
+    {
+        if(pageIndex == maxPages)
+        {
+            pageIndex = 0;
+        }
+        else
+        {
+            pageIndex++;
+        }
+
+        PopulateGrid(pageIndex);
+
+    }
+
+    public void PrevPage(InputAction.CallbackContext ctx)
+    {
+        if (pageIndex == 0)
+        {
+            pageIndex = maxPages;
+        }
+        else
+        {
+            pageIndex--;
+        }
+
+        PopulateGrid(pageIndex);
+    }
+
+    public void Back(InputAction.CallbackContext ctx)
+    {
+        mainMenuController.SwitchToMenu(mainMenuController.defaultMenu);
     }
 }
 
