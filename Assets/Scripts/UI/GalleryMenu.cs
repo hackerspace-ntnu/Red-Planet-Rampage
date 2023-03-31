@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
+using System.Threading;
 
 [System.Serializable]
     public struct Weapon
@@ -17,6 +18,12 @@ using UnityEngine.InputSystem;
             body = Body;
             barrel = Barrel;
             extension = Extension;
+        }
+        public Weapon(Item Body, Item Barrel)
+        {
+            body = Body;
+            barrel = Barrel;
+            extension = null;
         }
 
     }
@@ -48,7 +55,7 @@ public class GalleryMenu : MonoBehaviour
         gridElements = gridBase.GetComponentsInChildren<Image>(true).Select(x => x.GetComponent<RectTransform>()).ToList();
         gridElements.RemoveAt(0); // GetComponentInChildren returns this element as well, which we don't want
 
-        maxPages = Mathf.CeilToInt(unlockedElements.Length / gridElements.Count);
+        maxPages = Mathf.CeilToInt((float)unlockedElements.Length / gridElements.Count);
 
         CreateTabs(maxPages);
         PopulateGrid(0);
@@ -63,10 +70,10 @@ public class GalleryMenu : MonoBehaviour
 
     private void CreateTabs(int pages)
     {
-        for (int i = 0; i <= pages; i++)
+        for (int i = 1; i <= pages; i++)
         {
             TabsButton tab = Instantiate(tabPrefab, navigation.transform).GetComponent<TabsButton>();
-            tab.GetComponentInChildren<TMP_Text>().text = (i + 1).ToString();
+            tab.GetComponentInChildren<TMP_Text>().text = (i).ToString();
             tabs.Add(tab);
             tab.GetComponent<Image>().color = disabledColor;
         }
@@ -96,7 +103,7 @@ public class GalleryMenu : MonoBehaviour
         {
             RectTransform gridElement = gridElements[i%gridElements.Count];
             gridElement.gameObject.SetActive(true);
-            Debug.Log(i);
+
             if (i < unlockedElements.Length)
             { 
                 Weapon weapon = unlockedElements[i];
@@ -143,7 +150,7 @@ public class GalleryMenu : MonoBehaviour
 
     public void NextPage(InputAction.CallbackContext ctx)
     {
-        if(pageIndex == maxPages)
+        if(pageIndex == maxPages - 1)
         {
             pageIndex = 0;
         }
@@ -163,7 +170,7 @@ public class GalleryMenu : MonoBehaviour
     {
         if (pageIndex == 0)
         {
-            pageIndex = maxPages;
+            pageIndex = maxPages - 1;
         }
         else
         {
@@ -180,6 +187,7 @@ public class GalleryMenu : MonoBehaviour
     public void Back(InputAction.CallbackContext ctx)
     {
         mainMenuController.SwitchToMenu(mainMenuController.defaultMenu);
+        mainMenuController.SelectControl(mainMenuController.GetComponentInChildren<Button>());
     }
 
     private Weapon[] CreateAllWeapons()
@@ -191,9 +199,16 @@ public class GalleryMenu : MonoBehaviour
         {
             for(int barrel = 0; barrel < sInfo.Barrels.Count; barrel++)
             {
-                for(int extension = 0; extension < sInfo.Extensions.Count; extension++)
+                for(int extension = -1; extension < sInfo.Extensions.Count; extension++)
                 {
-                    list.Add(new Weapon(sInfo.Bodies[body], sInfo.Barrels[barrel], sInfo.Extensions[extension]));
+                    if(extension == -1)
+                    {
+                        list.Add(new Weapon(sInfo.Bodies[body], sInfo.Barrels[barrel]));
+                    }
+                    else
+                    {
+                        list.Add(new Weapon(sInfo.Bodies[body], sInfo.Barrels[barrel], sInfo.Extensions[extension]));
+                    }
                 }
             }
         }
