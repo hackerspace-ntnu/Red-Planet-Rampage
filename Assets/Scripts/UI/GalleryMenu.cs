@@ -11,6 +11,14 @@ using UnityEngine.InputSystem;
         public Item body;
         public Item barrel;
         public Item extension;
+
+        public Weapon(Item Body, Item Barrel, Item Extension)
+        {
+            body = Body;
+            barrel = Barrel;
+            extension = Extension;
+        }
+
     }
 public class GalleryMenu : MonoBehaviour
 {
@@ -25,9 +33,16 @@ public class GalleryMenu : MonoBehaviour
     public Transform navigation;
     public TabsButton tabPrefab;
 
+    [Header("Tabs")]
+    public Color disabledColor;
+    public Color selectedColor;
+    private TabsButton selectedTab;
+    private List<TabsButton> tabs = new List<TabsButton>();
+
     private MainMenuController mainMenuController;
     private void Start()
     {
+        unlockedElements = CreateAllWeapons();
         mainMenuController= GetComponentInParent<MainMenuController>();
 
         gridElements = gridBase.GetComponentsInChildren<Image>(true).Select(x => x.GetComponent<RectTransform>()).ToList();
@@ -52,7 +67,12 @@ public class GalleryMenu : MonoBehaviour
         {
             TabsButton tab = Instantiate(tabPrefab, navigation.transform).GetComponent<TabsButton>();
             tab.GetComponentInChildren<TMP_Text>().text = (i + 1).ToString();
+            tabs.Add(tab);
+            tab.GetComponent<Image>().color = disabledColor;
         }
+
+        selectedTab = tabs[0];
+        selectedTab.GetComponent<Image>().color = selectedColor;
     }
 
     /// <summary>
@@ -132,8 +152,11 @@ public class GalleryMenu : MonoBehaviour
             pageIndex++;
         }
 
-        PopulateGrid(pageIndex);
+        selectedTab.GetComponent<Image>().color = disabledColor;
+        selectedTab = tabs[pageIndex];
+        selectedTab.GetComponent<Image>().color = selectedColor;
 
+        PopulateGrid(pageIndex);
     }
 
     public void PrevPage(InputAction.CallbackContext ctx)
@@ -147,12 +170,34 @@ public class GalleryMenu : MonoBehaviour
             pageIndex--;
         }
 
+        selectedTab.GetComponent<Image>().color = disabledColor;
+        selectedTab = tabs[pageIndex];
+        selectedTab.GetComponent<Image>().color = selectedColor;
+
         PopulateGrid(pageIndex);
     }
 
     public void Back(InputAction.CallbackContext ctx)
     {
         mainMenuController.SwitchToMenu(mainMenuController.defaultMenu);
+    }
+
+    private Weapon[] CreateAllWeapons()
+    {
+        StaticInfo sInfo = StaticInfo.Singleton;
+
+        List<Weapon> list = new List<Weapon>();
+        for(int body = 0; body < sInfo.Bodies.Count; body++)
+        {
+            for(int barrel = 0; barrel < sInfo.Barrels.Count; barrel++)
+            {
+                for(int extension = 0; extension < sInfo.Extensions.Count; extension++)
+                {
+                    list.Add(new Weapon(sInfo.Bodies[body], sInfo.Barrels[barrel], sInfo.Extensions[extension]));
+                }
+            }
+        }
+        return list.ToArray();
     }
 }
 
