@@ -87,11 +87,9 @@ public class PlayerManager : MonoBehaviour
         {
             killer = lastPlayerThatHitMe;
         }
-
         onDeath?.Invoke(killer, this);
         TurnIntoRagdoll();
         hudController.DisplayDeathScreen(killer.identity);
-
     }
 
     void TurnIntoRagdoll()
