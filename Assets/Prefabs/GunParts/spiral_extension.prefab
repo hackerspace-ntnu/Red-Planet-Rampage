@@ -264,9 +264,9 @@ MonoBehaviour:
     addition: 100
     multiplier: 100
     exponential: 100
-  - name: ProjectileSpeed
+  - name: ProjectileSpeedFactor
     addition: 0
-    multiplier: 2
+    multiplier: 1
     exponential: 1
   - name: ProjectileGravityModifier
     addition: -1
@@ -276,8 +276,6 @@ MonoBehaviour:
     addition: 0
     multiplier: 0
     exponential: 0.4
-  projectileModifiers:
-  - {fileID: 7096156345712969214}
   outputs:
   - {fileID: 2577779482283733333}
   - {fileID: 2573743963398441194}
@@ -301,22 +299,22 @@ MonoBehaviour:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
+      time: 0.24166489
+      value: 0.79953
+      inSlope: 0.2643554
+      outSlope: 0.2643554
+      tangentMode: 34
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
+      inSlope: 0.2643554
+      outSlope: 0.2643554
+      tangentMode: 34
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.33333334
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2

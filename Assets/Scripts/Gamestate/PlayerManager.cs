@@ -17,7 +17,7 @@ public class PlayerManager : MonoBehaviour
     public delegate void BiddingPlatformEvent(BiddingPlatform platform);
     public BiddingPlatformEvent onSelectedBiddingPlatformChange;
 
-    public FPSInputManager fpsInput;
+    public InputManager inputManager;
     public PlayerIdentity identity;
 
     [SerializeField]
@@ -60,7 +60,7 @@ public class PlayerManager : MonoBehaviour
     void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
         onDeath?.Invoke(info.sourcePlayer, this);
-        TurnIntoRagdoll(info.projectileState.position, info.projectileState.direction);
+        TurnIntoRagdoll(info.position, info.force);
         hudController.DisplayDeathScreen(info.sourcePlayer.identity);
     }
 
@@ -69,15 +69,14 @@ public class PlayerManager : MonoBehaviour
         // Disable components
         GetComponent<PlayerMovement>().enabled = false;
         healthController.enabled = false;
-        meshBase.SetActive(false);
         // TODO display guns falling to the floor
         gunController.gameObject.SetActive(false);
         // Disable all colliders and physics
-        GetComponents<Collider>().ToList().ForEach(collider => collider.enabled = false);
-        GetComponent<Rigidbody>().useGravity = false;
         // Ragdollify
-        ragdoll.gameObject.SetActive(true);
-        ragdoll.AddForceAtPosition(impactDirection * 4, impactSite, ForceMode.Impulse);
+
+        // TODO: Make accurate hitbox forces for the different limbs of the player
+
+        GetComponent<RagdollController>().EnableRagdoll();
     }
 
     /// <summary>
@@ -85,31 +84,27 @@ public class PlayerManager : MonoBehaviour
     /// and performing other necessary operations that require playerInput/-Identity.
     /// </summary>
     /// <param name="playerInput"></param>
-    public void SetPlayerInput(FPSInputManager playerInput)
+    public void SetPlayerInput(InputManager playerInput)
     {
-        fpsInput = playerInput;
-        identity = fpsInput.GetComponent<PlayerIdentity>();
-        GetComponent<PlayerMovement>().SetPlayerInput(fpsInput);
-        SetGun(fpsInput.transform);
-        fpsInput.onFirePerformed += OnFire;
-        fpsInput.onFireCanceled += OnFireEnd;
+        inputManager = playerInput;
+        identity = inputManager.GetComponent<PlayerIdentity>();
+        GetComponent<PlayerMovement>().SetPlayerInput(inputManager);
+        SetGun(inputManager.transform);
+        inputManager.onFirePerformed += OnFire;
+        inputManager.onFireCanceled += OnFireEnd;
         // Set camera on canvas
         var canvas = hudController.GetComponent<Canvas>();
-        canvas.worldCamera = fpsInput.GetComponentInChildren<Camera>();
+        canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
         canvas.planeDistance = 0.11f;
+        
         // Set player color
-        var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>();
-        var ragdollRenderer = ragdoll.GetComponentInChildren<SkinnedMeshRenderer>();
-        meshRenderer.materials[0].SetColor("_Color", identity.color);
-        ragdollRenderer.materials[0].SetColor("_Color", identity.color);
+        var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
     }
 
     void OnDestroy()
     {
         healthController.onDamageTaken -= OnDamageTaken;
         healthController.onDeath -= OnDeath;
-        fpsInput.onFirePerformed -= OnFire;
-        fpsInput.onFireCanceled -= OnFireEnd;
         //Remove the gun
         Destroy(gunController.gameObject);
     }
@@ -143,7 +138,7 @@ public class PlayerManager : MonoBehaviour
         // Bitwise negation of this player's model layer and all gun layers that do not belong to this player
         // Gun layers are 4 above their respective player layers.
         var mask = ((1 << 16) - 1) ^ ((1 << playerLayer) | ((1 << (playerLayer + 4)) ^ allGunsMask));
-        fpsInput.GetComponent<Camera>().cullingMask = mask;
+        inputManager.GetComponent<Camera>().cullingMask = mask;
 
         // Set correct layer on self, mesh and gun (TODO)
         gameObject.layer = playerLayer;
@@ -152,10 +147,10 @@ public class PlayerManager : MonoBehaviour
 
     private void SetGun(Transform offset)
     {
-        var gun = GunFactory.InstantiateGun(identity.Body.augment, identity.Barrel.augment, identity.Extension.augment, offset);
+        var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, offset);
         // Set specific local transform
-        gun.transform.localPosition = new Vector3(0.39f, -0.12f, -0.4f);
-        gun.transform.localRotation = Quaternion.AngleAxis(-12.5f, Vector3.up);
+        gun.transform.localPosition = new Vector3(0.39f, -0.34f, 0.5f);
+        gun.transform.localRotation = Quaternion.AngleAxis(0.5f, Vector3.up);
         // Remember gun controller
         gunController = gun.GetComponent<GunController>();
         // Make gun remember who shoots with it
@@ -173,6 +168,6 @@ public class PlayerManager : MonoBehaviour
 
     new public string ToString()
     {
-        return "Player " + fpsInput.playerInput.playerIndex;
+        return "Player " + inputManager.playerInput.playerIndex;
     }
 }

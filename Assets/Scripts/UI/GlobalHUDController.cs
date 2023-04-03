@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -10,7 +7,15 @@ public class GlobalHUDController : MonoBehaviour
     private TMP_Text roundTimer;
 
     [SerializeField]
-    private GameObject playerStatUIPrefab;
+    private PlayerStatUI[] playerStatPanels;
+
+    [SerializeField]
+    private TMP_Text winText;
+
+    [SerializeField]
+    private GameObject winScreen;
+
+    private int nextPlayerStatIndex = 0;
 
     void Start()
     {
@@ -23,12 +28,23 @@ public class GlobalHUDController : MonoBehaviour
         {
             roundTimer.alignment = TextAlignmentOptions.Top;
         }
+
+        foreach (PlayerStatUI playerStatUI in playerStatPanels)
+        {
+            playerStatUI.enabled = false;
+        }
     }
 
     public void SetPlayer(PlayerManager playerManager)
     {
-        GameObject playerStatUIObject = Instantiate(playerStatUIPrefab, gameObject.transform);
-        playerStatUIObject.GetComponent<PlayerStatUI>().playerManager = playerManager;
+        if (nextPlayerStatIndex >= playerStatPanels.Length)
+        {
+            Debug.LogWarning("Too many player inputs!");
+            return;
+        }
+        playerStatPanels[nextPlayerStatIndex].playerManager = playerManager;
+        playerStatPanels[nextPlayerStatIndex].enabled = true;
+        nextPlayerStatIndex++;
     }
 
     public void OnTimerUpdate(float time)
@@ -42,5 +58,12 @@ public class GlobalHUDController : MonoBehaviour
             int seconds = Mathf.FloorToInt(time % 60);
             roundTimer.text = Mathf.FloorToInt(time / 60) + ":" + (seconds < 10 ? "0" : "") + seconds;
         }
+    }
+
+    public void DisplayWinScreen(PlayerIdentity winner)
+    {
+        winText.text = winner.playerName;
+        winText.color = winner.color;
+        winScreen.SetActive(true);
     }
 }

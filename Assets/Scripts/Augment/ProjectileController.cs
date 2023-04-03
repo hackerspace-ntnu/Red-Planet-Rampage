@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Linq;
 
 [System.Serializable]
 public class ProjectileState
@@ -30,6 +30,9 @@ public class ProjectileState
     // Speed of the bullet
     public float speed = 0f;
 
+    // Stat modifier of the projectile speed
+    public float speedFactor = 1f;
+
     // Rotation of the bullet, typically used for vfx, such as aligning a rocket
     public Quaternion rotation = Quaternion.identity;
 
@@ -37,19 +40,40 @@ public class ProjectileState
     public float gravity = 0f;
 
     // Set to false if bullet should no longer hit stuff
-    public bool collisionActive = false;
+    public bool collisionActive = true;
 
     // Used for Lerping
     public float lastUpdateTime = 0f;
 
     // If the projectile is being used or not
-    public bool active = true;
+    public bool active = false;
+
+    public float damage = 0f;
+
+    // TODO: Make this to anything
+    public float size = 0f;
 
     // Dictionary for storing properties that a projectile modifier might need, see SpiralPathModifier for an example
     public Dictionary<string, object> additionalProperties = new Dictionary<string, object>();
 
     // Used to keep track of the healthControllers currently damaged
     public HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
+
+    public ProjectileState(GunStats stats, Transform output)
+    {
+        initializationTime = Time.fixedTime;
+        lastUpdateTime = Time.fixedTime;
+
+        position = output.position;
+        oldPosition = output.position;
+        direction = output.forward;
+        rotation = output.rotation;
+
+        speedFactor = stats.ProjectileSpeedFactor;
+        gravity = stats.ProjectileGravityModifier * 9.81f;
+        damage = stats.ProjectileDamage;
+    }
+    public ProjectileState() {}
 }
 
 public abstract class ProjectileController : MonoBehaviour
@@ -64,16 +88,19 @@ public abstract class ProjectileController : MonoBehaviour
     public GunStats stats;
     // Delegates and Events
 
+    // The player shooting the projectile
+    [HideInInspector]
+    public PlayerManager player;
 
     // PLEASE READ
     // This is how the event-system of the guns work, all of these delegate are "hooks" that additional effects can be applied to
     // Each implementation of a projectile type must also describe when these events are triggered
     // This base class never actually TRIGGERES the events, subclasses have to trigger them, ( See BulletController )
     
-
     // Used for describing how a projectile moves when asked to move a specific distance 
     [System.Serializable]
-    public delegate void PathUpdateEvent(float distance, ref ProjectileState state, GunStats stats);
+    public delegate void PathUpdateEvent(float distance, ref ProjectileState state);
+
     [SerializeField]
     public PathUpdateEvent UpdateProjectileMovement;
     
@@ -82,19 +109,56 @@ public abstract class ProjectileController : MonoBehaviour
     public ProjectileInitializationEvent OnProjectileInit;
 
     // Used for adding events when the projectile position is updated, like particle trails
-    public delegate void PositionUpdateEvent(Vector3 oldPos, Vector3 newPos, ref ProjectileState state, GunStats stats);
-    public PositionUpdateEvent OnBulletTravel;
+    public delegate void PositionUpdateEvent(ref ProjectileState state);
+    public PositionUpdateEvent OnProjectileTravel;
 
     // Used whenever a projectile hits any hitbox
-    public delegate void HitboxInteraction(HitboxController controller, ref ProjectileState state, GunStats stats);
+    public delegate void HitboxInteraction(HitboxController controller, ref ProjectileState state);
     public HitboxInteraction OnHitboxCollision;
 
     // Used whenever a projectile hits any collider, though 
-    public delegate void CollisionEvent(Collider other, ref ProjectileState state, GunStats stats);
+    public delegate void CollisionEvent(Collider other, ref ProjectileState state);
     public CollisionEvent OnColliderHit;
 
 
     // The meat and potatoes of the gun, this is what initializes a "bullet", whatever the fuck that is supposed to mean
     // Again, subclasses decide for themselves what initializing a bullet does
     public abstract void InitializeProjectile(GunStats stats);
+
 }
+
+
+
+public class ProjectileMotions
+{
+    public static void MoveWithGravity(float distance, ref ProjectileState state)
+    {
+        //Update the position of the projectile
+        state.position += state.direction * distance;
+
+        //Update the velocity of the projectile
+        float time = distance / state.speed;
+        Vector3 velocity = state.direction * state.speed;
+        velocity += Vector3.up * state.gravity * time;
+        state.speed = velocity.magnitude;
+        state.direction = velocity.normalized;
+        state.distanceTraveled += distance;
+    }
+    public static Collider[] GetPathCollisions(ProjectileState state, LayerMask collisionLayers)
+    {
+        var direction = state.position - state.oldPosition;
+        RaycastHit[] rayCasts;
+
+                if (state.size > 0)
+                {
+                    rayCasts = Physics.SphereCastAll(state.oldPosition, state.size, direction, direction.magnitude, collisionLayers);
+                }
+                else
+                {
+                    rayCasts = Physics.RaycastAll(state.oldPosition, direction, direction.magnitude, collisionLayers);
+                }
+       
+        return rayCasts.OrderBy(x => x.distance).Select(x => x.collider).ToArray();
+    }
+
+} 

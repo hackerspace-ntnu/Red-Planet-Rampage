@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// A modifier to stick a gameObject (stuckObject) to a target after hitting said target.
 /// </summary>
-public class StickyProjectileModifier : ProjectileModifier
+public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
 {
     // Model to stick to target
     [SerializeField]
@@ -19,18 +19,25 @@ public class StickyProjectileModifier : ProjectileModifier
     [SerializeField]
     private float onHitInterval = 1f;
 
-    public void StickToTarget(HitboxController controller, ref ProjectileState state, GunStats stats)
+    [SerializeField]
+    private Priority priority = Priority.ARBITRARY;
+
+    public Priority GetPriority()
     {
-        var stuck = Instantiate(stuckObject, state.oldPosition, state.rotation, controller.transform);
-        Destroy(stuck, stuckLifeTime);
+        return priority;
     }
-    public override void Attach(ProjectileController projectile)
+
+    public void Attach(ProjectileController projectile)
     {
         projectile.OnHitboxCollision += StickToTarget;
     }
-    public override void Detach(ProjectileController projectile)
+    public void Detach(ProjectileController projectile)
     {
         projectile.OnHitboxCollision -= StickToTarget;
     }
-
+    public void StickToTarget(HitboxController hitboxController, ref ProjectileState state)
+    {
+        var stuck = Instantiate(stuckObject, state.oldPosition, state.rotation, hitboxController.transform);
+        Destroy(stuck, stuckLifeTime);
+    }
 }

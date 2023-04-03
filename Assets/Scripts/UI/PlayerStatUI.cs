@@ -1,13 +1,20 @@
 using TMPro;
 using UnityEngine;
+using SecretName;
 
 public class PlayerStatUI : MonoBehaviour
 {
+    [SerializeField]
+    private CanvasGroup statContainer;
+
     [SerializeField]
     private TMP_Text playerNameText;
 
     [SerializeField]
     private TMP_Text chipsText;
+
+    [SerializeField]
+    private TMP_Text gunNameText;
 
     [SerializeField]
     private StatBar damageBar;
@@ -25,10 +32,24 @@ public class PlayerStatUI : MonoBehaviour
 
     void Start()
     {
+        OnEnable();
+    }
+
+    void OnEnable()
+    {
+        if (!playerManager)
+        {
+            return;
+        }
+
+        statContainer.alpha = 1;
+
         SetName(playerManager.identity.playerName);
 
         SetChips(playerManager.identity.chips);
         playerManager.identity.onChipChange += SetChips;
+
+        SetGunName(playerManager.GetGunName());
 
         // Set current stats
         OnInventoryChange(null);
@@ -36,10 +57,23 @@ public class PlayerStatUI : MonoBehaviour
         // Respond to stat changes
         playerManager.identity.onInventoryChange += OnInventoryChange;
         playerManager.onSelectedBiddingPlatformChange += OnBiddingPlatformChange;
+
+    }
+
+    void OnDisable()
+    {
+        // Hide stats
+        statContainer.alpha = 0;
     }
 
     void OnDestroy()
     {
+        if (!playerManager)
+        {
+            return;
+        }
+
+
         playerManager.identity.onChipChange -= SetChips;
         playerManager.identity.onInventoryChange -= OnInventoryChange;
         playerManager.onSelectedBiddingPlatformChange -= OnBiddingPlatformChange;
@@ -55,6 +89,7 @@ public class PlayerStatUI : MonoBehaviour
         if (platform == null || platform.Item == null)
         {
             ResetNewGunStats();
+            SetGunName(playerManager.GetGunName());
             return;
         }
 
@@ -78,6 +113,7 @@ public class PlayerStatUI : MonoBehaviour
         }
         GunStats stats = GunFactory.GetGunStats(body, barrel, extension);
         SetNewGunStats(stats);
+        SetGunName(GunFactory.GetGunName(body, barrel, extension));
     }
 
     public void SetName(string name)
@@ -90,13 +126,18 @@ public class PlayerStatUI : MonoBehaviour
         chipsText.SetText($"{amount.ToString()} chips");
     }
 
+    public void SetGunName(string name)
+    {
+        gunNameText.SetText(name);
+    }
+
     public void SetBaseGunStats(GunStats gunStats)
     {
         // TODO Change the set of stats every time (?)
         damageBar.BaseValue = gunStats.ProjectileDamage;
         fireRateBar.BaseValue = gunStats.Firerate;
         projectilesPerShotBar.BaseValue = gunStats.ProjectilesPerShot;
-        projectileSpeedBar.BaseValue = gunStats.ProjectileSpeed;
+        projectileSpeedBar.BaseValue = gunStats.ProjectileSpeedFactor;
     }
 
     public void SetNewGunStats(GunStats gunStats)
@@ -104,7 +145,7 @@ public class PlayerStatUI : MonoBehaviour
         damageBar.NewValue = gunStats.ProjectileDamage;
         fireRateBar.NewValue = gunStats.Firerate;
         projectilesPerShotBar.NewValue = gunStats.ProjectilesPerShot;
-        projectileSpeedBar.NewValue = gunStats.ProjectileSpeed;
+        projectileSpeedBar.NewValue = gunStats.ProjectileSpeedFactor;
     }
 
     public void ResetNewGunStats()

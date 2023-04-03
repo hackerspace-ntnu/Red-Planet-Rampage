@@ -7,17 +7,19 @@ public struct DamageInfo
 {
     public PlayerManager sourcePlayer;
 
-    public GunStats stats;
-    public ProjectileState projectileState;
+    public float damage;
 
-    public bool isCritical;
+    public Vector3 position;
 
-    public DamageInfo(PlayerManager source, GunStats stats, ProjectileState projectileState)
+    public Vector3 force;
+    public DamageInfo(PlayerManager source, float damage)
     {
         this.sourcePlayer = source;
-        this.stats = stats;
-        this.projectileState = projectileState;
-        this.isCritical = false;
+        this.damage = damage;
+
+        // Todo, re-implement this with actual damage position and force
+        this.position = Vector3.zero;
+        this.force  = Vector3.zero;
     }
 }
 
@@ -25,15 +27,14 @@ public class ProjectileDamageController : MonoBehaviour
 {
     public PlayerManager player;
 
-    
     private void Awake()
     {
         GetComponentInParent<ProjectileController>().OnHitboxCollision += DamageHitbox;
     }
 
-    private void DamageHitbox(HitboxController controller, ref ProjectileState state, GunStats stats)
+    private void DamageHitbox(HitboxController controller, ref ProjectileState state)
     {
-        DamageInfo info = new DamageInfo(player, stats, state);
+        DamageInfo info = new DamageInfo(player, state.damage);
         if (controller.health == null || !state.hitHealthControllers.Contains(controller.health))
         {
             state.hitHealthControllers.Add(controller.health);

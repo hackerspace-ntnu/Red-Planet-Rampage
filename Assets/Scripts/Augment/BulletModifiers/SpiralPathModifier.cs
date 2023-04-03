@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpiralPathModifier : ProjectileModifier
+public class SpiralPathModifier : MonoBehaviour, ProjectileModifier
 {
 
     //Modifier for adding a spiral movement to any projectile
@@ -13,7 +13,8 @@ public class SpiralPathModifier : ProjectileModifier
     [SerializeField]
     private bool randomAngle = false;
 
-    public void addSpiralDisplacement(float distance, ref ProjectileState state, GunStats stats)
+
+    public void addSpiralDisplacement(float distance, ref ProjectileState state)
     {
         float oldRadius = radialLerp.Evaluate(state.distanceTraveled / spiralLerpDist) * spiralRadius;
         float newRadius = radialLerp.Evaluate((state.distanceTraveled + distance) / spiralLerpDist) * spiralRadius;
@@ -28,23 +29,22 @@ public class SpiralPathModifier : ProjectileModifier
         state.position += state.rotation * (newVector - oldVector);
  
     }
-
+    public Priority GetPriority()
+    {
+        return Priority.EXTENSION;
+    }
     public void setProjectileAngle(ref ProjectileState state, GunStats stats)
     {
         state.additionalProperties["spiralOffset"] = randomAngle ? Random.Range(0, 2 * Mathf.PI) : 0f;
     }
-    public override void Attach(ProjectileController projectile)
+    public void Attach(ProjectileController projectile)
     {
         projectile.UpdateProjectileMovement += addSpiralDisplacement;
         projectile.OnProjectileInit += setProjectileAngle;
-
-        // TODO: add functionality to add additional data to state, so that (for instance), the random starting angle of this component can be stored for each bullet instance
-        //if (randomAngle)
-        //   offset = Random.Range(0, 2 * Mathf.PI);
     }
-    public override void Detach(ProjectileController projectile)
+    public void Detach(ProjectileController projectile)
     {
         projectile.UpdateProjectileMovement -= addSpiralDisplacement;
+        projectile.OnProjectileInit -= setProjectileAngle;
     }
-
 }

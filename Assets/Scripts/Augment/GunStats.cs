@@ -29,6 +29,8 @@ public class GunStats : ScriptableObject
     //How many projectiles in a clip
     public int magazineSize = 20;
 
+    public int Ammo = 20;
+
     // Damage of each projectile
     [SerializeField]
     private ModifiableFloat projectileDamage = new ModifiableFloat(10f);
@@ -37,8 +39,8 @@ public class GunStats : ScriptableObject
 
     // Projectile initial velocity in in-game units
     [SerializeField]
-    private ModifiableFloat projectileSpeed = new ModifiableFloat(1f);
-    public ModifiableFloat ProjectileSpeed { get => projectileSpeed; }
+    private ModifiableFloat projectileSpeedFactor = new ModifiableFloat(1f);
+    public ModifiableFloat ProjectileSpeedFactor { get => projectileSpeedFactor; }
 
 
     //How much the projectile is affected by gravity

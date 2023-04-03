@@ -1,13 +1,5 @@
 using UnityEngine;
 
-[System.Serializable]
-public class Modifier
-{
-    public string name;
-    public float addition = 0;
-    public float multiplier = 0;
-    public float exponential = 1;
-}
 public class GunModifier : MonoBehaviour
 {
 

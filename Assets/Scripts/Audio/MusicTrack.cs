@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "MusicTrack", menuName = "Audio/New Music Track")]
@@ -15,6 +12,14 @@ public class MusicTrack : ScriptableObject
     public string Composer => composer;
 
     [SerializeField]
+    private bool[] enabledLayers;
+    public bool[] EnabledLayers => enabledLayers;
+
+    [SerializeField]
     private AudioClip[] layers;
     public AudioClip[] Layers => layers;
+
+    [SerializeField]
+    private AudioClip[] loopLayers;
+    public AudioClip[] LoopLayers => loopLayers;
 }

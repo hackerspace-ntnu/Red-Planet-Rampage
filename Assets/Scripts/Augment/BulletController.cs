@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.VFX;
+
 public class BulletController : ProjectileController
 {
     [SerializeField]
@@ -12,12 +13,15 @@ public class BulletController : ProjectileController
     private float maxDistance = 20;
 
     [SerializeField]
-    private int collisionSamples = 60;
+    private int collisionSamples = 30;
 
     private int vfxPositionsPerSample = 3;
 
-    private Texture2D trailPosTexture;
-    private float[] trailPositions;
+    private float bulletSpeed = 50f;
+
+    private VFXTextureFormatter trailPosTexture;
+    //private Texture2D trailPosTexture;
+    //private float[] trailPositions;
 
     [SerializeField]
     private VisualEffect trail;
@@ -26,33 +30,24 @@ public class BulletController : ProjectileController
     private VisualEffect flash;
 
     private ProjectileState projectile = new ProjectileState();
-    public static void MoveWithGravity(float distance, ref ProjectileState state, GunStats stats)
-    {
-        //Update the position of the projectile
-        state.position += state.direction * distance;
-
-        //Update the velocity of the projectile
-        float time = distance / state.speed;
-        Vector3 velocity = state.direction * state.speed;
-        velocity += Vector3.up * state.gravity * time;
-        state.speed = velocity.magnitude;
-        state.direction = velocity.normalized;
-        state.distanceTraveled += distance;
-    }
+    
 
     public void Awake()
     {
-        UpdateProjectileMovement += MoveWithGravity;
-        trailPositions = new float[vfxPositionsPerSample * collisionSamples * 3];
-        trailPosTexture = new Texture2D(vfxPositionsPerSample * collisionSamples, 3 , TextureFormat.RFloat, false);
-        trail.SetTexture("Position", this.trailPosTexture);
+        UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
+        //trailPositions = new float[vfxPositionsPerSample * collisionSamples * 3];
+        trailPosTexture = new VFXTextureFormatter(vfxPositionsPerSample * collisionSamples);
+        trail.SetTexture("Position", this.trailPosTexture.Texture);
     }
-
-
-
-
+    private void Start()
+    {
+        flash.transform.position = projectileOutput.position;
+    }
     public override void InitializeProjectile(GunStats stats)
     {   
+
+        // TODO: Possibly standardize this better
+
         projectile.active = true;
         projectile.distanceTraveled = 0f;
         projectile.position = projectileOutput.position;
@@ -61,11 +56,14 @@ public class BulletController : ProjectileController
         projectile.maxDistance = this.maxDistance;
         projectile.rotation = projectileOutput.rotation;
         projectile.initializationTime = Time.fixedTime;
-        projectile.speed = stats.ProjectileSpeed;
+        projectile.speedFactor = stats.ProjectileSpeedFactor;
         projectile.gravity = stats.ProjectileGravityModifier * 9.81f;
         projectile.additionalProperties.Clear();
         projectile.hitHealthControllers.Clear();
+
         OnProjectileInit?.Invoke(ref projectile, stats);
+
+        projectile.speed = bulletSpeed * stats.ProjectileSpeedFactor;
 
         int sampleNum = 0;
 
@@ -73,71 +71,44 @@ public class BulletController : ProjectileController
         {
             
             projectile.oldPosition = projectile.position;
-
             projectile.lastUpdateTime = Time.time;
+
 
             for(int j = 0; j < vfxPositionsPerSample; j++)
             {
-                trailPositions[(sampleNum * vfxPositionsPerSample + j)] = projectile.position.x;
-                trailPositions[(sampleNum * vfxPositionsPerSample + j) + (vfxPositionsPerSample * collisionSamples) * 1] = projectile.position.y;
-                trailPositions[(sampleNum * vfxPositionsPerSample + j) + (vfxPositionsPerSample * collisionSamples) * 2] = projectile.position.z;
-
-                UpdateProjectileMovement?.Invoke(maxDistance / (collisionSamples * vfxPositionsPerSample), ref projectile, stats);
-            }
-            
-            Collider[] collisions;
-
-            var direction = projectile.position - projectile.oldPosition;
-            RaycastHit[] rayCasts;
-
-            if (stats.ProjectileSize > 0)
-            {
-                rayCasts = Physics.SphereCastAll(projectile.oldPosition, stats.ProjectileSize, direction, direction.magnitude, collisionLayers);
-            }
-            else
-            {
-                rayCasts = Physics.RaycastAll(projectile.oldPosition, direction, direction.magnitude, collisionLayers);
+                trailPosTexture.setValue(sampleNum * vfxPositionsPerSample + j, projectile.position);
+                UpdateProjectileMovement?.Invoke(maxDistance / (collisionSamples * vfxPositionsPerSample), ref projectile);
             }
 
-            // Ordered by distance along path hit, so that things are hit in the correct order
+            Collider[] collisions = ProjectileMotions.GetPathCollisions(projectile, collisionLayers);
 
-            collisions = rayCasts.OrderBy(x => x.distance).Select(x => x.collider).ToArray();
             if(collisions.Length > 0)
             {
-                Debug.Log("Collided");
-                OnColliderHit?.Invoke(collisions[0], ref projectile, stats);
+                OnColliderHit?.Invoke(collisions[0], ref projectile);
                 HitboxController hitbox = collisions[0].GetComponent<HitboxController>();
 
                 if (hitbox != null)
                 {
-                    OnHitboxCollision?.Invoke(hitbox, ref projectile, stats);
+                    OnHitboxCollision?.Invoke(hitbox, ref projectile);
                 }
                 projectile.active = false;
                 sampleNum += 1;
-
-                trailPositions[(sampleNum * vfxPositionsPerSample)] = projectile.position.x;
-                trailPositions[(sampleNum * vfxPositionsPerSample) + (vfxPositionsPerSample * collisionSamples) * 1] = projectile.position.y;
-                trailPositions[(sampleNum * vfxPositionsPerSample) + (vfxPositionsPerSample * collisionSamples) * 2] = projectile.position.z;
+                trailPosTexture.setValue(sampleNum * vfxPositionsPerSample, projectile.position);
+  
             }
             else
             {
                 sampleNum += 1;
             }
         }
-
-        
-
+  
         for (int i = sampleNum * vfxPositionsPerSample + 1; i < collisionSamples * vfxPositionsPerSample; i++)
         {
-            trailPositions[i] = trailPositions[i - 1];
-            trailPositions[i + (vfxPositionsPerSample * collisionSamples) * 1] = trailPositions[i - 1 + (vfxPositionsPerSample * collisionSamples) * 1];
-            trailPositions[i + (vfxPositionsPerSample * collisionSamples) * 2] = trailPositions[i - 1 + (vfxPositionsPerSample * collisionSamples) * 2];
+            trailPosTexture.setValue(i, projectile.position);
         }
 
-        // Set up the trail positions
-        trailPosTexture.SetPixelData<float>(trailPositions, 0, 0);
-        trailPosTexture.Apply();
-        trail.SetTexture("Position", this.trailPosTexture);
+        trailPosTexture.ApplyChanges();
+        
         // Play the flash and trail
         trail.SendEvent("OnPlay");
         flash.SendEvent("OnPlay");

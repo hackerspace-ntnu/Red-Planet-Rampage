@@ -28,8 +28,9 @@ public class GunController : MonoBehaviour
 
     public delegate void GunEvent(GunStats gunStats);
 
-    public GunEvent onInitialize;
+    public GunEvent onReload;
     public GunEvent onFire;
+    public GunEvent onInitializeGun;
 
     private void FixedUpdate()
     {
@@ -38,30 +39,24 @@ public class GunController : MonoBehaviour
             FireGun();
         }
     }
+    /// <summary>
+    /// Expects a fraction of ammunition to be reloaded.
+    /// This fraction is normalized eg. min = 0, max = 1.
+    /// </summary>
+    /// <param name="fractionNormalized">Percentage of ammunition to be reloaded.</param>
+    public void Reload(float fractionNormalized)
+    {
+        int amount = Mathf.Max(1, Mathf.FloorToInt(stats.magazineSize * fractionNormalized));
+        onReload?.Invoke(stats);
+        stats.Ammo = Mathf.Min(stats.Ammo + amount, stats.magazineSize);
+    }
 
     private void FireGun()
     {
-        onFire?.Invoke(stats);
+        if (stats.Ammo <= 0)
+            return;
+        stats.Ammo--;
 
         projectile.InitializeProjectile(stats);
-
-        //foreach (var output in outputs)
-        //{
-        //    for (int i = 0; i < Mathf.Max((int)stats.ProjectilesPerShot.Value(), 1); i++)
-        //    {
-        //        // Adds spread
-        //        Quaternion dir = output.rotation;
-        //        if (stats.ProjectileSpread > 0)
-        //        {
-        //            Vector2 rand = Random.insideUnitCircle * stats.ProjectileSpread;
-        //            dir = dir * Quaternion.Euler(rand.x, rand.y, 0f);
-        //        }
-        //        // Makes projectile 
-        //        // TODO: generalize this so that different methods of "Creating" bullets can be used to save performance
-        //        var firedProjectile = Instantiate(projectile, output.position, dir);
-        //        firedProjectile.GetComponent<ProjectileDamageController>().player = player;
-        //        firedProjectile.SetActive(true);
-        //    }
-        //}
     }
 }
