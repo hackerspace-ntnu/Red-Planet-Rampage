@@ -463,6 +463,8 @@ GameObject:
   - component: {fileID: 3195878148966934061}
   - component: {fileID: 4303347013267294340}
   - component: {fileID: 555885729091202788}
+  - component: {fileID: 1470896919934443344}
+  - component: {fileID: 8895775278094654065}
   m_Layer: 5
   m_Name: HUD
   m_TagString: Untagged
@@ -570,6 +572,41 @@ MonoBehaviour:
   deathScreen: {fileID: 1029316632486890240}
   deathText: {fileID: 9172283963218471322}
   tweenDuration: 0.07
+--- !u!222 &1470896919934443344
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3124495339848130259}
+  m_CullTransparentMesh: 1
+--- !u!114 &8895775278094654065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3124495339848130259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: -876546973899608171, guid: 47b4aa04d5141539b8dbdb2324ccadcd, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Texture: {fileID: 0}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
 --- !u!1 &8105111567943840941
 GameObject:
   m_ObjectHideFlags: 0

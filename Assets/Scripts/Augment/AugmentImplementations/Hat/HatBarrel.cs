@@ -137,7 +137,6 @@ public class HatBarrel : ProjectileController
     private void UpdateProjectile(ProjectileState state)
     {
         state.oldPosition = state.position;
-        print(state.speedFactor);
         UpdateProjectileMovement?.Invoke(state.speed * state.speedFactor * Time.fixedDeltaTime, ref state);
         OnProjectileTravel?.Invoke(ref state);
 
