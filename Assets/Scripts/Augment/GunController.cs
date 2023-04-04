@@ -47,8 +47,8 @@ public class GunController : MonoBehaviour
     public void Reload(float fractionNormalized)
     {
         int amount = Mathf.Max(1, Mathf.FloorToInt(stats.magazineSize * fractionNormalized));
-        onReload?.Invoke(stats);
         stats.Ammo = Mathf.Min(stats.Ammo + amount, stats.magazineSize);
+        onReload?.Invoke(stats);
     }
 
     private void FireGun()

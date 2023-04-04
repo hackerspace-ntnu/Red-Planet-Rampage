@@ -58,6 +58,8 @@ public class HatBarrel : ProjectileController
         positionActiveTexture = new VFXTextureFormatter(maxHatProjectiles);
 
         hatVfx.SetTexture("Positions", positionActiveTexture.Texture);
+        hatVfx.SetInt("MaxParticleCount", maxHatProjectiles);
+        hatVfx.SendEvent("OnPlay");
     }
 
     private void OnInitialize(GunStats gunstats)
@@ -110,10 +112,9 @@ public class HatBarrel : ProjectileController
                 positionActiveTexture.ApplyChanges();
 
                 currentStateIndex = (currentStateIndex + 1) % maxHatProjectiles;
-                hatVfx.SendEvent("OnPlay");
-
                 loadedProjectile = null;
 
+                
                 return;
             }
             currentStateIndex = (currentStateIndex + 1) % maxHatProjectiles;
