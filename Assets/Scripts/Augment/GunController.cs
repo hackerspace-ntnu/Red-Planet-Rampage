@@ -54,7 +54,10 @@ public class GunController : MonoBehaviour
     private void FireGun()
     {
         if (stats.Ammo <= 0)
+        {
+            Reload(1);
             return;
+        }
         stats.Ammo--;
 
         projectile.InitializeProjectile(stats);

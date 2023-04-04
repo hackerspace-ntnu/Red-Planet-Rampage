@@ -50,6 +50,7 @@ public class BulletController : ProjectileController
 
         projectile.active = true;
         projectile.distanceTraveled = 0f;
+        projectile.damage = stats.ProjectileDamage;
         projectile.position = projectileOutput.position;
         projectile.oldPosition = projectileOutput.position;
         projectile.direction = projectileOutput.forward;

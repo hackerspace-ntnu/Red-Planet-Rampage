@@ -23,15 +23,18 @@ public struct DamageInfo
     }
 }
 
-public class ProjectileDamageController : MonoBehaviour
+public class ProjectileDamageController : MonoBehaviour, ProjectileModifier
 {
     public PlayerManager player;
-
-    private void Awake()
+    public void Attach(ProjectileController projectile)
     {
-        GetComponentInParent<ProjectileController>().OnHitboxCollision += DamageHitbox;
+        projectile.OnHitboxCollision += DamageHitbox;
     }
-
+    public void Detach(ProjectileController projectile)
+    {
+        projectile.OnHitboxCollision -= DamageHitbox;
+    }
+ 
     private void DamageHitbox(HitboxController controller, ref ProjectileState state)
     {
         DamageInfo info = new DamageInfo(player, state.damage);
