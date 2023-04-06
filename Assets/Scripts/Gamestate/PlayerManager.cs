@@ -106,7 +106,7 @@ public class PlayerManager : MonoBehaviour
         healthController.onDamageTaken -= OnDamageTaken;
         healthController.onDeath -= OnDeath;
         //Remove the gun
-        Destroy(gunController.gameObject);
+        if (gunController) Destroy(gunController.gameObject);
     }
 
     private void OnFire(InputAction.CallbackContext ctx)
@@ -147,14 +147,12 @@ public class PlayerManager : MonoBehaviour
 
     private void SetGun(Transform offset)
     {
-        var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, offset);
+        var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, this, offset);
         // Set specific local transform
         gun.transform.localPosition = new Vector3(0.39f, -0.34f, 0.5f);
         gun.transform.localRotation = Quaternion.AngleAxis(0.5f, Vector3.up);
         // Remember gun controller
         gunController = gun.GetComponent<GunController>();
-        // Make gun remember who shoots with it
-        gunController.player = this;
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)

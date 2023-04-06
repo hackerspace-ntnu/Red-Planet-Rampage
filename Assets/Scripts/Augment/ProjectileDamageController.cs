@@ -19,7 +19,7 @@ public struct DamageInfo
 
         // Todo, re-implement this with actual damage position and force
         this.position = Vector3.zero;
-        this.force  = Vector3.zero;
+        this.force = Vector3.zero;
     }
 }
 
@@ -28,13 +28,14 @@ public class ProjectileDamageController : MonoBehaviour, ProjectileModifier
     public PlayerManager player;
     public void Attach(ProjectileController projectile)
     {
+        player = projectile.player;
         projectile.OnHitboxCollision += DamageHitbox;
     }
     public void Detach(ProjectileController projectile)
     {
         projectile.OnHitboxCollision -= DamageHitbox;
     }
- 
+
     private void DamageHitbox(HitboxController controller, ref ProjectileState state)
     {
         DamageInfo info = new DamageInfo(player, state.damage);

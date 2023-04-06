@@ -302,10 +302,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   statModifiers: []
-  projectileModifiers: []
   outputs:
   - {fileID: 5765902433490691002}
-  projectile: {fileID: 8515215133120317911}
   attachmentPoints:
   - {fileID: 5765902433490691002}
 --- !u!114 &8515215133120317911
@@ -322,9 +320,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectileOutput: {fileID: 5765902433490691002}
   stats: {fileID: 0}
+  player: {fileID: 0}
   collisionLayers:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 9
   maxDistance: 20
   collisionSamples: 30
   trail: {fileID: 1393106611541694855}
