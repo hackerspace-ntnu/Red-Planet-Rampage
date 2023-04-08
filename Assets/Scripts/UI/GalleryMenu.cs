@@ -7,26 +7,25 @@ using UnityEngine.InputSystem;
 using System.Threading;
 
 [System.Serializable]
-    public struct Weapon
+public struct Weapon
+{
+    public Item body;
+    public Item barrel;
+    public Item extension;
+
+    public Weapon(Item Body, Item Barrel, Item Extension)
     {
-        public Item body;
-        public Item barrel;
-        public Item extension;
-
-        public Weapon(Item Body, Item Barrel, Item Extension)
-        {
-            body = Body;
-            barrel = Barrel;
-            extension = Extension;
-        }
-        public Weapon(Item Body, Item Barrel)
-        {
-            body = Body;
-            barrel = Barrel;
-            extension = null;
-        }
-
+        body = Body;
+        barrel = Barrel;
+        extension = Extension;
     }
+    public Weapon(Item Body, Item Barrel)
+    {
+        body = Body;
+        barrel = Barrel;
+        extension = null;
+    }
+}
 public class GalleryMenu : MonoBehaviour
 {
     [SerializeField]
@@ -36,6 +35,7 @@ public class GalleryMenu : MonoBehaviour
     private List<GameObject> spawnedWeapons = new List<GameObject>();
     private List<RectTransform> gridElements = new List<RectTransform>();
 
+    [Header("Dependencies")]
     public Transform gridBase;
     public Transform navigation;
     public TabsButton tabPrefab;
@@ -83,7 +83,7 @@ public class GalleryMenu : MonoBehaviour
     }
 
     /// <summary>
-    /// Update the grid elements
+    /// Update the grid items with the corresponding page of items
     /// </summary>
     void PopulateGrid(int page)
     {
@@ -190,11 +190,14 @@ public class GalleryMenu : MonoBehaviour
         mainMenuController.SelectControl(mainMenuController.GetComponentInChildren<Button>());
     }
 
+    /// <summary>
+    /// Creates and returns an array of all possible weapon combinations
+    /// </summary>
     private Weapon[] CreateAllWeapons()
     {
         StaticInfo sInfo = StaticInfo.Singleton;
 
-        List<Weapon> list = new List<Weapon>();
+        List<Weapon> weaponList = new List<Weapon>();
         for(int body = 0; body < sInfo.Bodies.Count; body++)
         {
             for(int barrel = 0; barrel < sInfo.Barrels.Count; barrel++)
@@ -203,16 +206,16 @@ public class GalleryMenu : MonoBehaviour
                 {
                     if(extension == -1)
                     {
-                        list.Add(new Weapon(sInfo.Bodies[body], sInfo.Barrels[barrel]));
+                        weaponList.Add(new Weapon(sInfo.Bodies[body], sInfo.Barrels[barrel]));
                     }
                     else
                     {
-                        list.Add(new Weapon(sInfo.Bodies[body], sInfo.Barrels[barrel], sInfo.Extensions[extension]));
+                        weaponList.Add(new Weapon(sInfo.Bodies[body], sInfo.Barrels[barrel], sInfo.Extensions[extension]));
                     }
                 }
             }
         }
-        return list.ToArray();
+        return weaponList.ToArray();
     }
 }
 
