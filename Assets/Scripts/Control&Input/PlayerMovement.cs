@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,7 +13,7 @@ enum PlayerState
 [RequireComponent(typeof(Rigidbody), typeof(Collider))]
 public class PlayerMovement : MonoBehaviour
 {
-    private FPSInputManager fpsInput;
+    private InputManager inputManager;
     private Rigidbody body;
     private Collider hitbox;
 
@@ -28,13 +27,19 @@ public class PlayerMovement : MonoBehaviour
     private float maxVelocity = 10;
 
     [SerializeField]
-    private float strafeForce = 20;
+    private float strafeForce = 50;
 
     [SerializeField]
-    private float inAirStrafeForce = 10;
+    private float inAirStrafeForce = 16;
 
     [SerializeField]
-    private float jumpSpeed = 5;
+    private float drag = 6f;
+
+    [SerializeField]
+    private float airDrag = 2f;
+
+    [SerializeField]
+    private float jumpForce = 10;
 
     [SerializeField]
     private float jumpTimeout = 0.5f;
@@ -43,9 +48,6 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField]
     private float airThreshold = 0.4f;
-
-    [SerializeField]
-    private float dampening = 0.04f;
 
     [SerializeField, ReadOnly]
     private PlayerState state = PlayerState.GROUNDED;
@@ -59,36 +61,24 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         body = GetComponent<Rigidbody>();
-        body.maxLinearVelocity = maxVelocity;
         hitbox = GetComponent<BoxCollider>();
-    }
-
-    private void OnDestroy()
-    {
-        //Remove listeners
-        if (fpsInput)
-        {
-            fpsInput.onSelect -= OnJump;
-            fpsInput.onMoveCanceled -= OnMoveCanceled;
-        }
     }
 
     /// <summary>
     /// Function for setting a playerInput and adding movement related listeners to it.
     /// </summary>
     /// <param name="player"></param>
-    public void SetPlayerInput(FPSInputManager player)
+    public void SetPlayerInput(InputManager player)
     {
-        fpsInput = player;
-        fpsInput.onSelect += OnJump;
-        fpsInput.onMoveCanceled += OnMoveCanceled;
+        inputManager = player;
+        inputManager.onSelect += OnJump;
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
     {
         if (canJump && state == PlayerState.GROUNDED)
         {
-            body.AddForce(Vector3.up * jumpSpeed, ForceMode.VelocityChange);
+            body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
             StartCoroutine(JumpTimeout());
         }
     }
@@ -100,16 +90,6 @@ public class PlayerMovement : MonoBehaviour
         canJump = true;
     }
 
-
-    private void OnMoveCanceled(InputAction.CallbackContext ctx)
-    {
-        if (state == PlayerState.GROUNDED)
-        {
-            // Rapidly decelerate if movement stops when grounded.
-            var velocity = new Vector3(body.velocity.x, 0, body.velocity.z);
-            body.AddForce(-velocity * strafeForce * dampening, ForceMode.VelocityChange);
-        }
-    }
 
     private bool IsInAir()
     {
@@ -126,14 +106,16 @@ public class PlayerMovement : MonoBehaviour
         {
             case PlayerState.IN_AIR:
                 {
-                    // Strafe slightly.
+                    // Strafe slightly with less drag.
+                    body.drag = airDrag;
                     body.AddForce(input * inAirStrafeForce, ForceMode.VelocityChange);
                     if (!IsInAir()) state = PlayerState.GROUNDED;
                     break;
                 }
             case PlayerState.GROUNDED:
                 {
-                    // Strafe normally.
+                    // Strafe normally with heavy drag.
+                    body.drag = drag;
                     body.AddForce(input * strafeForce, ForceMode.VelocityChange);
                     if (IsInAir()) state = PlayerState.IN_AIR;
                     break;
@@ -148,14 +130,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateRotation()
     {
-        aimAngle += fpsInput.lookInput * lookSpeed * Time.deltaTime;
+        aimAngle += inputManager.lookInput * lookSpeed * Time.deltaTime;
         // Constrain aiming angle vertically and wrap horizontally.
         aimAngle.y = Mathf.Clamp(aimAngle.y, -Mathf.PI / 2, Mathf.PI / 2);
         aimAngle.x = (aimAngle.x + Mathf.PI) % (2 * Mathf.PI) - Mathf.PI;
         // Rotate rigidbody.
         body.MoveRotation(Quaternion.AngleAxis(aimAngle.x * Mathf.Rad2Deg, Vector3.up));
         // Rotate look separately. Camera is attached to FPSInputManager.
-        fpsInput.transform.localRotation = Quaternion.AngleAxis(aimAngle.y * Mathf.Rad2Deg, Vector3.left);
+        inputManager.transform.localRotation = Quaternion.AngleAxis(aimAngle.y * Mathf.Rad2Deg, Vector3.left);
     }
 
     private void UpdateAnimatorParameters()
@@ -174,8 +156,10 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        var positionInput = new Vector3(fpsInput.moveInput.x, 0, fpsInput.moveInput.y);
+        var positionInput = new Vector3(inputManager.moveInput.x, 0, inputManager.moveInput.y);
         UpdatePosition(positionInput * Time.deltaTime);
+        // Limit velocity
+        body.velocity = new Vector3(Mathf.Clamp(body.velocity.x, -maxVelocity, maxVelocity), body.velocity.y, Mathf.Clamp(body.velocity.z, -maxVelocity, maxVelocity));
     }
 
     void Update()

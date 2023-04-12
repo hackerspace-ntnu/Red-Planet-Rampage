@@ -1,0 +1,161 @@
+# This is a reusable workflow; see https://docs.github.com/en/actions/using-workflows/reusing-workflows.
+# It was created because GitHub projects' workflows (see e.g. https://github.com/orgs/hackerspace-ntnu/projects/1/workflows)
+# don't (currently) support doing the specific things done in the steps below.
+#
+# The workflow requires that the following repository variables have been created:
+# - `ORGANIZATION_PROJECT_NUMBER` - The number/ID in the project URL (https://github.com/orgs/hackerspace-ntnu/projects/1)
+# - `ORGANIZATION_PROJECT__STATUS_VALUE_FOR_CLOSED_ITEMS` - The value of the 'Status' field set for an item when closed
+#                                                           (see https://github.com/orgs/hackerspace-ntnu/projects/1/workflows/3836538)
+# and the following organization variables:
+# - `ORGANIZATION_NAME` - The name of the organization in the project URL (https://github.com/orgs/hackerspace-ntnu/projects/1)
+#
+# The workflow also expects that the following project workflows are turned on for the project:
+# - "Item closed" (https://github.com/orgs/hackerspace-ntnu/projects/1/workflows/3836538):
+#   - "When an item is closed": "issue, pull request"
+#   - "Set value": "Status: <the value of the `ORGANIZATION_PROJECT__STATUS_VALUE_FOR_CLOSED_ITEMS` repository variable>"
+# and that the following project workflows are turned off:
+# - "Item added to project"
+# - "Item reopened"
+# (The "Pull request merged" project workflow (https://github.com/orgs/hackerspace-ntnu/projects/1/workflows/3836539)
+# does not affect and is not affected by any of this.
+# However, it could be natural that it sets the same value as the "Item closed" project workflow.)
+
+name: Add content to project
+
+on:
+  workflow_call:
+    inputs:
+      content_id:
+        description: "The ID of an issue or a PR, to be added to this repo's GitHub project"
+        required: true
+        type: string
+      status_field_value_name:
+        description: "The name of one of the values of the project's (single select) 'Status' field, to set for the added project item"
+        required: true
+        type: string
+
+jobs:
+  add_content:
+    runs-on: ubuntu-latest
+    # Code based on https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions#example-workflow-authenticating-with-a-github-app
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@b62528385c34dbc9f38e5f4225ac829252d1ea92 # v1.8.0
+        with:
+          app_id: ${{ secrets.HACKERSPACE_BOT_APP_ID }}
+          private_key: ${{ secrets.HACKERSPACE_BOT_APP_PEM }}
+
+      - name: Get project data
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          ORGANIZATION: ${{ vars.ORGANIZATION_NAME }}
+          PROJECT_NUMBER: ${{ vars.ORGANIZATION_PROJECT_NUMBER }}
+          # This name is hardcoded by GitHub and cannot be changed
+          STATUS_FIELD_NAME: Status
+          STATUS_FIELD_VALUE_NAME: ${{ inputs.status_field_value_name }}
+        run: |
+          gh api graphql -f query='
+            query ($org: String!, $number: Int!) {
+              organization(login: $org) {
+                projectV2(number: $number) {
+                  id
+                  fields(first: 20) {
+                    nodes {
+                      ... on ProjectV2Field {
+                        id
+                        name
+                      }
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f org="$ORGANIZATION" -F number="$PROJECT_NUMBER" > project_data.json
+
+          {
+            # The ID of this repo's GitHub project
+            echo "PROJECT_ID=$(jq -r '.data.organization.projectV2.id' project_data.json)"
+            # The ID of the project's status field
+            echo "STATUS_FIELD_ID=$(jq --arg FIELD_NAME "$STATUS_FIELD_NAME" -r '.data.organization.projectV2.fields.nodes[] | select(.name==$FIELD_NAME) | .id' project_data.json)"
+            # The ID of one of the values of the project's (single select) status field, with name `inputs.status_field_value_name`
+            echo "STATUS_FIELD_VALUE_ID=$(jq --arg FIELD_NAME "$STATUS_FIELD_NAME" --arg STATUS_NAME "$STATUS_FIELD_VALUE_NAME" -r '.data.organization.projectV2.fields.nodes[] | select(.name==$FIELD_NAME) | .options[] | select(.name==$STATUS_NAME) | .id' project_data.json)"
+          } >> "$GITHUB_ENV"
+
+      - name: Add content to project
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          CONTENT_ID: ${{ inputs.content_id }}
+        run: |
+          item_id="$( gh api graphql -f query='
+            mutation ($project: ID!, $content: ID!) {
+              addProjectV2ItemById(input: {projectId: $project, contentId: $content}) {
+                item {
+                  id
+                }
+              }
+            }' -f project="$PROJECT_ID" -f content="$CONTENT_ID" --jq '.data.addProjectV2ItemById.item.id' )"
+
+          # The ID of the project item (representing an issue or a PR with ID `inputs.content_id`), which was either added or already existed
+          echo "ITEM_ID=$item_id" >> "$GITHUB_ENV"
+
+      - name: Get project item data
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+        run: |
+          gh api graphql -f query='
+            query ($itemId: ID!) {
+              node(id: $itemId) {
+                ... on ProjectV2Item {
+                  fieldValues(first: 20) {
+                    nodes {
+                      ... on ProjectV2ItemFieldSingleSelectValue {
+                        name
+                        field {
+                          ... on ProjectV2SingleSelectField {
+                            id
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f itemId="$ITEM_ID" > project_item_data.json
+
+          {
+            # The value of the project item's status field (with ID `env.STATUS_FIELD_ID`)
+            echo "STATUS_FIELD_VALUE=$(jq --arg FIELD_ID "$STATUS_FIELD_ID" -r '.data.node.fieldValues.nodes[] | select(.field.id==$FIELD_ID) | .name' project_item_data.json)"
+          } >> "$GITHUB_ENV"
+
+      - name: Set status
+        # Only set the status if it's not already set,
+        # or if it's a reopened issue/PR (as they should be marked with the value of `ORGANIZATION_PROJECT__STATUS_VALUE_FOR_CLOSED_ITEMS` when closed
+        # - see https://github.com/orgs/hackerspace-ntnu/projects/1/workflows/3836538)
+        if: ${{ !env.STATUS_FIELD_VALUE
+          || github.event.action == 'reopened' && env.STATUS_FIELD_VALUE == vars.ORGANIZATION_PROJECT__STATUS_VALUE_FOR_CLOSED_ITEMS }}
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+        run: |
+          gh api graphql -f query='
+            mutation ($project: ID!, $item: ID!, $status_field: ID!, $status_value: String!) {
+              set_status: updateProjectV2ItemFieldValue(input: {
+                projectId: $project
+                itemId: $item
+                fieldId: $status_field
+                value: {
+                  singleSelectOptionId: $status_value
+                }
+              }) {
+                projectV2Item {
+                  id
+                }
+              }
+            }' -f project="$PROJECT_ID" -f item="$ITEM_ID" -f status_field="$STATUS_FIELD_ID" -f status_value="$STATUS_FIELD_VALUE_ID" --silent

@@ -41,6 +41,13 @@ public class MatchController : MonoBehaviour
     [SerializeField]
     private float roundEndDelay;
 
+    [SerializeField]
+    private float biddingEndDelay = 1;
+
+    [SerializeField]
+    private float matchEndDelay = 5;
+
+
     [Header("Chip rewards")]
     [SerializeField]
     private int startAmount = 5;
@@ -61,7 +68,6 @@ public class MatchController : MonoBehaviour
 
     void Start()
     {
-
         #region Singleton boilerplate
 
         if (Singleton != null)
@@ -79,17 +85,19 @@ public class MatchController : MonoBehaviour
 
         #endregion Singleton boilerplate
 
+        if (rounds.Count == 0)
+        {
+            PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+        }
         playerFactory = FindObjectOfType<PlayerFactory>();
 
         // Makes shooting end quickly if testing with 1 player
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
             roundLength = 5f;
-        #endif
+#endif
 
         StartNextRound();
-
-
     }
 
     public void StartNextRound()
@@ -110,13 +118,14 @@ public class MatchController : MonoBehaviour
         onRoundStart?.Invoke();
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
         roundTimer.StartTimer(roundLength);
+        roundTimer.OnTimerUpdate += AdjustMusic;
         roundTimer.OnTimerUpdate += HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted += EndActiveRound;
     }
 
     public void StartNextBidding()
     {
-        ChangeInputMappings("Bidding");
+        PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
         onBiddingStart?.Invoke();
         // TODO: Add Destroy on match win
@@ -127,14 +136,13 @@ public class MatchController : MonoBehaviour
     public void EndActiveRound()
     {
         onRoundEnd?.Invoke();
+        roundTimer.OnTimerUpdate -= AdjustMusic;
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
         AssignRewards();
 
         if (!IsWin())
-        {
             StartCoroutine(WaitAndStartNextBidding());
-        }
     }
 
     public IEnumerator WaitAndStartNextBidding()
@@ -145,10 +153,10 @@ public class MatchController : MonoBehaviour
 
     public IEnumerator WaitAndStartNextRound()
     {
-        yield return new WaitForSeconds(roundEndDelay);
+        yield return new WaitForSeconds(biddingEndDelay);
         // This needs to be called after inputs are set at start the first time this is needed.
-        ChangeInputMappings("FPS");
-        SceneManager.LoadScene("DemoArena");
+        PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
+        SceneManager.LoadScene("CraterTown");
         StartNextRound();
     }
 
@@ -174,6 +182,14 @@ public class MatchController : MonoBehaviour
         }
     }
 
+    private void AdjustMusic()
+    {
+        if (roundTimer.ElapsedTime > roundLength * .7f)
+        {
+            MusicTrackManager.Singleton.IntensifyBattleTheme();
+        }
+    }
+
     private void HUDTimerUpdate()
     {
         globalHUDController.OnTimerUpdate(roundLength - roundTimer.ElapsedTime);
@@ -181,21 +197,14 @@ public class MatchController : MonoBehaviour
 
     private bool IsWin()
     {
-        var lastWinner = rounds.Last().Winner;
-        if (lastWinner == null) { return false; }
-        var wins = rounds.Where(round => round.IsWinner(lastWinner)).Count();
-        Debug.Log("Current winner (" + lastWinner.ToString() + ") has " + wins + " wins.");
+        var winner = rounds.Last().Winner;
+        if (winner == null) { return false; }
+        var wins = rounds.Where(round => round.IsWinner(winner)).Count();
+        Debug.Log($"Current winner ({winner}) has {wins} wins.");
         if (wins >= 3)
         {
             // We have a winner!
-            // TODO Go to victory scene
-            Debug.Log("Aaaaand the winner iiiiiiiis " + lastWinner.ToString());
-
-            // Update playerInputs in preperation for Menu scene
-            ChangeInputMappings("Menu");
-
-            MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
-            SceneManager.LoadSceneAsync("Menu");
+            StartCoroutine(DisplayWinScreenAndRestart(winner));
             return true;
         }
         else
@@ -204,17 +213,19 @@ public class MatchController : MonoBehaviour
         }
     }
 
-    private void ChangeInputMappings(string inputMapName)
+    private IEnumerator DisplayWinScreenAndRestart(PlayerIdentity winner)
     {
-        PlayerInputManagerController.Singleton.ChangeInputMaps(inputMapName);
-        foreach (InputManager inputs in PlayerInputManagerController.Singleton.playerInputs)
-        {
-            // Update listeners to new map
-            inputs.RemoveListeners();
-            inputs.AddListeners();
-            // Free the playerInputs from their mortail coils (Player prefab)
-            inputs.transform.parent = null;
-            DontDestroyOnLoad(inputs);
-        }
+        globalHUDController.DisplayWinScreen(winner);
+
+        yield return new WaitForSecondsRealtime(matchEndDelay);
+
+        // Update playerInputs in preperation for Menu scene
+        PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
+
+        MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
+        rounds = new List<Round>();
+        PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+        SceneManager.LoadSceneAsync("Menu");
+
     }
 }

@@ -27,6 +27,7 @@ public class GunController : MonoBehaviour
 
     public GunEvent onInitialize;
     public GunEvent onFire;
+    public GunEvent onReload;
 
     private void FixedUpdate()
     {
@@ -36,8 +37,23 @@ public class GunController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Expects a fraction of ammunition to be reloaded.
+    /// This fraction is normalized eg. min = 0, max = 1.
+    /// </summary>
+    /// <param name="fractionNormalized">Percentage of ammunition to be reloaded.</param>
+    public void Reload(float fractionNormalized)
+    {
+        int amount = Mathf.Max(1, Mathf.FloorToInt(stats.magazineSize * fractionNormalized));
+        onReload?.Invoke(stats);
+        stats.Ammo = Mathf.Min(stats.Ammo + amount, stats.magazineSize);
+    }
+
     private void FireGun()
     {
+        if (stats.Ammo <= 0)
+            return;
+        stats.Ammo--;
         onFire?.Invoke(stats);
         foreach (var output in outputs)
         {
@@ -48,11 +64,12 @@ public class GunController : MonoBehaviour
                 if (stats.ProjectileSpread > 0)
                 {
                     Vector2 rand = Random.insideUnitCircle * stats.ProjectileSpread;
-                    dir = dir * Quaternion.Euler(rand.x, rand.y, 0f);
+                    dir *= Quaternion.Euler(rand.x, rand.y, 0f);
                 }
                 // Makes projectile 
                 // TODO: generalize this so that different methods of "Creating" bullets can be used to save performance
-                var firedProjectile = Instantiate(projectile, output.position, dir);
+                var firedProjectile = Instantiate(projectile, output.position, dir, transform);
+                firedProjectile.GetComponent<ProjectileController>().OnClone(projectile.GetComponent<ProjectileController>());
                 firedProjectile.GetComponent<ProjectileDamageController>().player = player;
                 firedProjectile.SetActive(true);
             }

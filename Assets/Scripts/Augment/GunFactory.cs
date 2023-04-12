@@ -1,17 +1,21 @@
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(GunController))]
 public class GunFactory : MonoBehaviour
 {
-    public static GameObject InstantiateGun(GameObject bodyPrefab, GameObject barrelPrefab, GameObject extensionPrefab, Transform parent)
+    public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, Transform parent)
     {
         GameObject gun = Instantiate(new GameObject(), parent);
         GunFactory controller = gun.AddComponent<GunFactory>();
-        controller.bodyPrefab = bodyPrefab;
-        controller.barrelPrefab = barrelPrefab;
-        controller.extensionPrefab = extensionPrefab;
+        controller.Body = bodyPrefab;
+        controller.Barrel = barrelPrefab;
+        controller.Extension = extensionPrefab;
+
+        // Initialize everything
+        gun.GetComponent<GunFactory>().InitializeGun();
 
         return gun;
     }
@@ -19,39 +23,55 @@ public class GunFactory : MonoBehaviour
     public static GunStats GetGunStats(Item body, Item barrel, Item extension)
     {
         GunStats stats = body.augment.GetComponent<GunBody>().InstantiateBaseStats;
-        barrel.augment.GetComponent<GunBarrel>().Modify(stats);
-        extension.augment.GetComponent<GunExtension>().Modify(stats);
+        barrel.augment.GetComponent<GunBarrel>().BuildStats(stats);
+        extension?.augment.GetComponent<GunExtension>().BuildStats(stats);
         return stats;
+    }
+
+    public static string GetGunName(Item body, Item barrel, Item extension)
+    {
+        OverrideName result = StaticInfo.Singleton.SecretNames.Where(x => (x.Body == body && x.Barrel == barrel && x.Extension == extension)).FirstOrDefault();
+        if (!(result.Name is null)) { return result.Name; }
+        if (extension == null)
+            return $"The {body.secretName} {barrel.secretName}";
+        return $"The {body.secretName} {extension.secretName} {barrel.secretName}";
     }
 
     // Prefabs of the different parts
     [SerializeField]
-    public GameObject bodyPrefab;
+    public Item Body;
 
     [SerializeField]
-    public GameObject barrelPrefab;
+    public Item Barrel;
 
     [SerializeField]
-    public GameObject extensionPrefab;
+    public Item Extension;
 
     private GunController gunController;
 
+#if UNITY_EDITOR
     private void Start()
     {
-        InitializeGun();
+        if (SceneManager.GetActiveScene().name == "GunTest")
+        {
+            InitializeGun();
+        }
     }
+#endif
 
     // Builds the gun from parts
     public void InitializeGun()
     {
         gunController = GetComponent<GunController>();
 
+        List<ProjectileModifier> modifiers = new List<ProjectileModifier>();
+
         // Destroys gun child before construction
         for (int i = this.transform.childCount; i > 0; --i)
             DestroyImmediate(this.transform.GetChild(0).gameObject);
 
         // Instantiates the different parts
-        var gunBody = Instantiate(bodyPrefab, transform)
+        GunBody gunBody = Instantiate(Body.augment, transform)
             .GetComponent<GunBody>();
 
         // Stats is retrieved from gun body
@@ -59,30 +79,15 @@ public class GunFactory : MonoBehaviour
         // Seriously, i have no moral qualms with making your skulls into decorative ornaments
         gunController.stats = gunBody.InstantiateBaseStats;
 
-        var gunBarrel = Instantiate(barrelPrefab, gunBody.attachmentSite.position, gunBody.attachmentSite.rotation, transform)
+        GunBarrel gunBarrel = Instantiate(Barrel.augment, gunBody.attachmentSite.position, gunBody.attachmentSite.rotation, transform)
             .GetComponent<GunBarrel>();
 
         // Gets the projectile from the barrel
         // It is stored as an inactive object in the gun, which allows for modifications without changing the prefab
         gunController.projectile = gunBarrel.Projectile;
         gunController.projectile.transform.SetParent(transform);
-        gunController.projectile.GetComponent<ProjectileController>().stats = gunController.stats;
-
-        if (extensionPrefab != null)
-        {
-            // Instantiate extension itself *once*
-            var extension = Instantiate(extensionPrefab, gunBarrel.attachmentPoints[0].position, gunBarrel.attachmentPoints[0].rotation, transform)
-                .GetComponent<GunExtension>();
-            // Instantiate remaining outputs and models, and register all outputs
-            var outputs = new List<Transform>();
-            outputs.AddRange(extension.outputs);
-            outputs.AddRange(extension.AttachToTransforms(gunBarrel.attachmentPoints));
-            gunController.outputs = outputs.ToArray();
-        }
-        else
-        {
-            gunController.outputs = gunBarrel.outputs;
-        }
+        ProjectileController projectileController = gunController.projectile.GetComponent<ProjectileController>();
+        projectileController.stats = gunController.stats;
 
         // Sets firemode
 
@@ -102,13 +107,33 @@ public class GunFactory : MonoBehaviour
                 break;
         }
 
-        // Runs attach of all modifyers in ascending order
-        foreach (var modifier in GetComponentsInChildren<GunModifier>().OrderBy(x => x.priority))
+        modifiers.AddRange(gunBarrel.GetModifiers());
+        gunBarrel.BuildStats(gunController.stats);
+
+        if (Extension != null)
         {
-            modifier.Attach(gunController);
+            // Instantiate extension itself *once*
+            GunExtension gunExtension = Instantiate(Extension.augment, gunBarrel.attachmentPoints[0].position, gunBarrel.attachmentPoints[0].rotation, transform)
+                .GetComponent<GunExtension>();
+            // Instantiate remaining outputs and models, and register all outputs
+            var outputs = new List<Transform>();
+            outputs.AddRange(gunExtension.outputs);
+            outputs.AddRange(gunExtension.AttachToTransforms(gunBarrel.attachmentPoints));
+            gunController.outputs = outputs.ToArray();
+
+            modifiers.AddRange(gunExtension.GetModifiers());
+            gunExtension.BuildStats(gunController.stats);
         }
+        else
+        {
+            gunController.outputs = gunBarrel.outputs;
+        }
+
+        modifiers.OrderByDescending(modifier => (int) modifier.GetPriority()).ToList();
+        modifiers.ForEach(modifier => modifier.ModifyProjectile(ref projectileController));
 
         gunController.onInitialize?.Invoke(gunController.stats);
     }
+
 }
 

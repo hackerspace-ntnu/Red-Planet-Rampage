@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+using SecretName;
 
 public class PlayerStatUI : MonoBehaviour
 {
@@ -13,6 +15,9 @@ public class PlayerStatUI : MonoBehaviour
     private TMP_Text chipsText;
 
     [SerializeField]
+    private TMP_Text gunNameText;
+
+    [SerializeField]
     private StatBar damageBar;
 
     [SerializeField]
@@ -24,10 +29,13 @@ public class PlayerStatUI : MonoBehaviour
     [SerializeField]
     private StatBar projectileSpeedBar;
 
+    private Outline outline;
+
     public PlayerManager playerManager;
 
     void Start()
     {
+        outline = GetComponent<Outline>();
         OnEnable();
     }
 
@@ -41,9 +49,12 @@ public class PlayerStatUI : MonoBehaviour
         statContainer.alpha = 1;
 
         SetName(playerManager.identity.playerName);
+        SetColor(playerManager.identity.color);
 
         SetChips(playerManager.identity.chips);
         playerManager.identity.onChipChange += SetChips;
+
+        SetGunName(playerManager.GetGunName());
 
         // Set current stats
         OnInventoryChange(null);
@@ -83,6 +94,7 @@ public class PlayerStatUI : MonoBehaviour
         if (platform == null || platform.Item == null)
         {
             ResetNewGunStats();
+            SetGunName(playerManager.GetGunName());
             return;
         }
 
@@ -106,6 +118,7 @@ public class PlayerStatUI : MonoBehaviour
         }
         GunStats stats = GunFactory.GetGunStats(body, barrel, extension);
         SetNewGunStats(stats);
+        SetGunName(GunFactory.GetGunName(body, barrel, extension));
     }
 
     public void SetName(string name)
@@ -113,9 +126,19 @@ public class PlayerStatUI : MonoBehaviour
         playerNameText.SetText(name);
     }
 
+    public void SetColor(Color color)
+    {
+        outline.effectColor = color;
+    }
+
     public void SetChips(int amount)
     {
-        chipsText.SetText($"{amount.ToString()} chips");
+        chipsText.SetText(amount.ToString());
+    }
+
+    public void SetGunName(string name)
+    {
+        gunNameText.SetText(name);
     }
 
     public void SetBaseGunStats(GunStats gunStats)

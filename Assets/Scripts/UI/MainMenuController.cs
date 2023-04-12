@@ -30,22 +30,17 @@ public class MainMenuController : MonoBehaviour
 
     void Start()
     {
+
         playerInputManagerController = PlayerInputManagerController.Singleton;
         playerInputManagerController.playerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
         if (playerInputManagerController.playerInputs.Count > 0)
         {
-            // None of this works... yet
-            // When returned to the Menu scene, PlayerInputs will be transfered back to the scene, but are unable to interact with the UI despite having their input action remapped back to "Menu".
-            // This seems to be a problem with how the Unity UI natively subscribes to the first(And only the absolute first) newly joined playerInput and nothing else, but I've yet to 100% confirm this.
-            // We might have to use the multiplayer event system instead, but that would entail a lot of rebuilding in the menu scene
-            // The commented code below shows how one would interact with such a potential system:
-
-            //InputSystemUIInputModule inputSystem = GetComponent<InputSystemUIInputModule>();
-            //inputSystem.actionsAsset = playerInputManagerController.playerInputs[0].playerInput.actions;
-            //playerInputManagerController.playerInputs[0].playerInput.uiInputModule = inputSystem;
-            //playerInputManagerController.GetComponent<MultiplayerEventSystem>().playerRoot = defaultMenu;
             TransferExistingInputs();
+        }
+        else
+        {
+            DontDestroyOnLoad(EventSystem.current);
         }
 
         SelectControl(defaultButton);
@@ -81,9 +76,7 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.ChangeInputMaps("Menu");
         foreach (InputManager inputs in playerInputManagerController.playerInputs)
         {
-            inputs.RemoveListeners();
             AddPlayer(inputs);
-            inputs.AddListeners();
         }
     }
 

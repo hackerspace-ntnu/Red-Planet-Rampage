@@ -1,11 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GunExtension : GunModifier
+public class GunExtension : Augment
 {
-
-    public override int priority { get => 2; }
-
     [SerializeField]
     private GameObject model;
 

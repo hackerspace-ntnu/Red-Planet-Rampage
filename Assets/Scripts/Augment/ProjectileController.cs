@@ -76,6 +76,15 @@ public class ProjectileController : MonoBehaviour
 
     public float lifeTime = 2f;
 
+    // Transfer modifier functions to clones
+    public void OnClone(ProjectileController originalObject)
+    {
+        UpdateProjectileMovement = originalObject.UpdateProjectileMovement;
+        OnBulletTravel = originalObject.OnBulletTravel;
+        OnHitboxCollision = originalObject.OnHitboxCollision;
+        OnColliderHit = originalObject.OnColliderHit;
+    }
+
     public virtual void Start()
     {
         state = new ProjectileState(transform.position, transform.rotation, transform.forward, stats.ProjectileSpeed, stats.ProjectileGravityModifier);
