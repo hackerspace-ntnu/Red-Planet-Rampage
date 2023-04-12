@@ -43,7 +43,7 @@ public class HatBarrel : ProjectileController
     void Awake()
     {
         gunController = transform.parent.GetComponent<GunController>();
-        if (!gunController) 
+        if (!gunController)
         {
             Debug.Log("HatBarrel not attached to gun parent!");
             return;
@@ -100,13 +100,13 @@ public class HatBarrel : ProjectileController
             {
                 loadedProjectile.initializationTime = Time.fixedTime;
                 loadedProjectile.position = projectileOutput.position;
-                loadedProjectile.direction = projectileOutput.forward;
-                loadedProjectile.rotation = projectileOutput.rotation;
+                loadedProjectile.direction = projectileRotation * projectileOutput.forward;
+                loadedProjectile.rotation = projectileRotation * projectileOutput.rotation;
 
                 projectiles[currentStateIndex] = loadedProjectile;
                 // Sets initial position of the projectile
                 positionActiveTexture.setValue(i, loadedProjectile.position);
-                positionActiveTexture.setAlpha(i,  1f);
+                positionActiveTexture.setAlpha(i, 1f);
 
                 // Neccessary to update the actual texture, so the vfx gets the new info
                 positionActiveTexture.ApplyChanges();
@@ -114,7 +114,7 @@ public class HatBarrel : ProjectileController
                 currentStateIndex = (currentStateIndex + 1) % maxHatProjectiles;
                 loadedProjectile = null;
 
-                
+
                 return;
             }
             currentStateIndex = (currentStateIndex + 1) % maxHatProjectiles;
@@ -129,7 +129,7 @@ public class HatBarrel : ProjectileController
             {
                 UpdateProjectile(state);
                 positionActiveTexture.setValue(i, state.position);
-                
+
             }
             positionActiveTexture.setAlpha(i, state != null && state.active ? 1f : 0f);
         }
@@ -149,7 +149,7 @@ public class HatBarrel : ProjectileController
 
         var collisions = ProjectileMotions.GetPathCollisions(state, collisionLayers);
 
-        if(collisions.Length > 0)
+        if (collisions.Length > 0)
         {
             state.active = false;
             OnColliderHit?.Invoke(collisions[0], ref state);
