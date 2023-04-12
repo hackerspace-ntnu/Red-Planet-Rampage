@@ -147,7 +147,7 @@ public class PlayerStatUI : MonoBehaviour
         damageBar.BaseValue = gunStats.ProjectileDamage;
         fireRateBar.BaseValue = gunStats.Firerate;
         projectilesPerShotBar.BaseValue = gunStats.ProjectilesPerShot;
-        projectileSpeedBar.BaseValue = gunStats.ProjectileSpeed;
+        projectileSpeedBar.BaseValue = gunStats.ProjectileSpeedFactor;
     }
 
     public void SetNewGunStats(GunStats gunStats)
@@ -155,7 +155,7 @@ public class PlayerStatUI : MonoBehaviour
         damageBar.NewValue = gunStats.ProjectileDamage;
         fireRateBar.NewValue = gunStats.Firerate;
         projectilesPerShotBar.NewValue = gunStats.ProjectilesPerShot;
-        projectileSpeedBar.NewValue = gunStats.ProjectileSpeed;
+        projectileSpeedBar.NewValue = gunStats.ProjectileSpeedFactor;
     }
 
     public void ResetNewGunStats()

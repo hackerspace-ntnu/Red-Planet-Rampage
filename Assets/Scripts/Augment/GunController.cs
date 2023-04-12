@@ -5,7 +5,7 @@ using UnityEngine;
 public class GunController : MonoBehaviour
 {
     [HideInInspector]
-    public GameObject projectile;
+    public ProjectileController projectile;
 
     // Where the gun fires the bullets from
     // Is automatically set by barrel or extension (if one i available)
@@ -15,7 +15,10 @@ public class GunController : MonoBehaviour
     [HideInInspector]
     public FireRateController fireRateController;
 
+    [HideInInspector]
     public PlayerManager player;
+
+    public Transform projectileOutput;
 
     // All the stats of the gun and projectile
     public GunStats stats { get; set; }
@@ -25,9 +28,9 @@ public class GunController : MonoBehaviour
 
     public delegate void GunEvent(GunStats gunStats);
 
-    public GunEvent onInitialize;
-    public GunEvent onFire;
     public GunEvent onReload;
+    public GunEvent onFire;
+    public GunEvent onInitializeGun;
 
     private void FixedUpdate()
     {
@@ -36,7 +39,6 @@ public class GunController : MonoBehaviour
             FireGun();
         }
     }
-
     /// <summary>
     /// Expects a fraction of ammunition to be reloaded.
     /// This fraction is normalized eg. min = 0, max = 1.
@@ -45,34 +47,19 @@ public class GunController : MonoBehaviour
     public void Reload(float fractionNormalized)
     {
         int amount = Mathf.Max(1, Mathf.FloorToInt(stats.magazineSize * fractionNormalized));
-        onReload?.Invoke(stats);
         stats.Ammo = Mathf.Min(stats.Ammo + amount, stats.magazineSize);
+        onReload?.Invoke(stats);
     }
 
     private void FireGun()
     {
         if (stats.Ammo <= 0)
-            return;
-        stats.Ammo--;
-        onFire?.Invoke(stats);
-        foreach (var output in outputs)
         {
-            for (int i = 0; i < Mathf.Max((int)stats.ProjectilesPerShot.Value(), 1); i++)
-            {
-                // Adds spread
-                Quaternion dir = output.rotation;
-                if (stats.ProjectileSpread > 0)
-                {
-                    Vector2 rand = Random.insideUnitCircle * stats.ProjectileSpread;
-                    dir *= Quaternion.Euler(rand.x, rand.y, 0f);
-                }
-                // Makes projectile 
-                // TODO: generalize this so that different methods of "Creating" bullets can be used to save performance
-                var firedProjectile = Instantiate(projectile, output.position, dir, transform);
-                firedProjectile.GetComponent<ProjectileController>().OnClone(projectile.GetComponent<ProjectileController>());
-                firedProjectile.GetComponent<ProjectileDamageController>().player = player;
-                firedProjectile.SetActive(true);
-            }
+            Reload(1);
+            return;
         }
+        stats.Ammo--;
+
+        projectile.InitializeProjectile(stats);
     }
 }
