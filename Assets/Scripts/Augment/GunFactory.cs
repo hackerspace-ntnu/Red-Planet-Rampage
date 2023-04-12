@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(GunController))]
 public class GunFactory : MonoBehaviour
 {
-    public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, Transform parent)
+    public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, Transform parent)
     {
         GameObject gun = Instantiate(new GameObject(), parent);
         GunFactory controller = gun.AddComponent<GunFactory>();
@@ -15,7 +15,7 @@ public class GunFactory : MonoBehaviour
         controller.Extension = extensionPrefab;
 
         // Initialize everything
-        gun.GetComponent<GunFactory>().InitializeGun();
+        gun.GetComponent<GunFactory>().InitializeGun(owner);
 
         return gun;
     }
@@ -54,15 +54,17 @@ public class GunFactory : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "GunTest")
         {
-            InitializeGun();
+            InitializeGun(null);
         }
     }
 #endif
 
     // Builds the gun from parts
-    public void InitializeGun()
+    public void InitializeGun(PlayerManager owner = null)
     {
         gunController = GetComponent<GunController>();
+        // Make gun remember who shoots with it
+        gunController.player = owner;
 
         List<ProjectileModifier> modifiers = new List<ProjectileModifier>();
 
@@ -82,10 +84,12 @@ public class GunFactory : MonoBehaviour
         GunBarrel gunBarrel = Instantiate(Barrel.augment, gunBody.attachmentSite.position, gunBody.attachmentSite.rotation, transform)
             .GetComponent<GunBarrel>();
         gunController.projectile = gunBarrel.Projectile;
+        // And make projectile remember who shot it.
+        gunController.projectile.player = owner;
 
         // Gets the projectile from the barrel
         // It is stored as an inactive object in the gun, which allows for modifications without changing the prefab
-       
+
         if (Extension != null)
         {
             // Instantiate extension itself *once*
@@ -147,7 +151,7 @@ public class GunFactory : MonoBehaviour
             gunController.outputs = gunBarrel.outputs;
         }
 
-        modifiers.OrderByDescending(modifier => (int) modifier.GetPriority()).ToList();
+        modifiers.OrderByDescending(modifier => (int)modifier.GetPriority()).ToList();
         modifiers.ForEach(modifier => modifier.Attach(gunController.projectile));
 
         gunController.onInitializeGun?.Invoke(gunController.stats);
