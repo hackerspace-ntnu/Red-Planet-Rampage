@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
-using System.Threading;
 
 [System.Serializable]
 public struct Weapon
@@ -107,8 +106,9 @@ public class GalleryMenu : MonoBehaviour
             if (i < unlockedElements.Length)
             { 
                 Weapon weapon = unlockedElements[i];
-                GameObject gun = GunFactory.InstantiateGun(weapon.body, weapon.barrel, weapon.extension, gridElement, Vector3.one);
-
+                GameObject gun = GunFactory.InstantiateGun(weapon.body, weapon.barrel, weapon.extension, null);
+                gun.transform.localScale = Vector3.one;
+                gun.transform.SetParent(gridElement);
                 spawnedWeapons.Add(gun);
 
                 Bounds bounds = new Bounds();

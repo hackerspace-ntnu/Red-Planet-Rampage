@@ -21,23 +21,6 @@ public class GunFactory : MonoBehaviour
         return gun;
     }
 
-    public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, Transform parent, Vector3 scale)
-    {
-        GameObject gun = Instantiate(new GameObject());
-        gun.transform.localScale = scale;
-        gun.transform.parent = parent;
-        GunFactory controller = gun.AddComponent<GunFactory>();
-        controller.Body = bodyPrefab;
-        controller.Barrel = barrelPrefab;
-        controller.Extension = extensionPrefab;
-
-
-        // Initialize everything
-        gun.GetComponent<GunFactory>().InitializeGun();
-
-        return gun;
-    }
-
     public static GunStats GetGunStats(Item body, Item barrel, Item extension)
     {
         GunStats stats = body.augment.GetComponent<GunBody>().InstantiateBaseStats;

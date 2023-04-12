@@ -20,9 +20,9 @@ public class WeaponDrawer : PropertyDrawer
         EditorGUI.indentLevel = 0;
 
         // Calculate rects
-        var amountRect = new Rect(position.x, position.y, 30, position.height);
-        var unitRect = new Rect(position.x + 35, position.y, 50, position.height);
-        var nameRect = new Rect(position.x + 90, position.y, position.width - 90, position.height);
+        var amountRect = new Rect(position.x, position.y, position.width / 3, position.height);
+        var unitRect = new Rect(position.x + position.width / 3, position.y, position.width / 3, position.height);
+        var nameRect = new Rect(position.x + 2 * position.width / 3, position.y, position.width / 3, position.height);
 
         // Draw fields - pass GUIContent.none to each so they are drawn without labels
         EditorGUI.PropertyField(amountRect, property.FindPropertyRelative("body"), GUIContent.none);

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -21,6 +19,7 @@ public class MainMenuController : MonoBehaviour
     private List<TabGroup> tabGroups;
     [SerializeField]
     private Selectable defaultButton;
+    [SerializeField]
     public GameObject defaultMenu;
     [SerializeField]
     private GalleryMenu galleryMenu;
