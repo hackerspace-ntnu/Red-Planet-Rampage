@@ -90,26 +90,6 @@ public class GunFactory : MonoBehaviour
         // Gets the projectile from the barrel
         // It is stored as an inactive object in the gun, which allows for modifications without changing the prefab
 
-        if (Extension != null)
-        {
-            // Instantiate extension itself *once*
-            var extension = Instantiate(Extension.augment, gunBarrel.attachmentPoints[0].position, gunBarrel.attachmentPoints[0].rotation, transform)
-                .GetComponent<GunExtension>();
-            // Instantiate remaining outputs and models, and register all outputs
-            var outputs = new List<Transform>();
-            outputs.AddRange(extension.outputs);
-            outputs.AddRange(extension.AttachToTransforms(gunBarrel.attachmentPoints));
-            gunController.outputs = outputs.ToArray();
-        }
-        else
-        {
-            gunController.outputs = gunBarrel.outputs;
-        }
-        // TODO: The output system needs rework 
-        gunController.projectile.projectileOutput = gunController.outputs[0];
-
-        gunController.projectile.stats = gunController.stats;
-
 
         // Sets firemode
 
@@ -150,6 +130,11 @@ public class GunFactory : MonoBehaviour
         {
             gunController.outputs = gunBarrel.outputs;
         }
+
+        // TODO: The output system needs rework 
+        gunController.projectile.projectileOutput = gunController.outputs[0];
+
+        gunController.projectile.stats = gunController.stats;
 
         modifiers.OrderByDescending(modifier => (int)modifier.GetPriority()).ToList();
         modifiers.ForEach(modifier => modifier.Attach(gunController.projectile));
