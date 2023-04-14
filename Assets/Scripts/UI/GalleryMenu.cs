@@ -109,6 +109,7 @@ public class GalleryMenu : MonoBehaviour
                 GameObject gun = GunFactory.InstantiateGun(weapon.body, weapon.barrel, weapon.extension, null);
                 gun.transform.localScale = Vector3.one;
                 gun.transform.SetParent(gridElement);
+
                 spawnedWeapons.Add(gun);
 
                 Bounds bounds = new Bounds();
@@ -195,22 +196,22 @@ public class GalleryMenu : MonoBehaviour
     /// </summary>
     private Weapon[] CreateAllWeapons()
     {
-        StaticInfo sInfo = StaticInfo.Singleton;
+        StaticInfo staticInfo = StaticInfo.Singleton;
 
         List<Weapon> weaponList = new List<Weapon>();
-        for(int body = 0; body < sInfo.Bodies.Count; body++)
+        for(int body = 0; body < staticInfo.Bodies.Count; body++)
         {
-            for(int barrel = 0; barrel < sInfo.Barrels.Count; barrel++)
+            for(int barrel = 0; barrel < staticInfo.Barrels.Count; barrel++)
             {
-                for(int extension = -1; extension < sInfo.Extensions.Count; extension++)
+                for(int extension = -1; extension < staticInfo.Extensions.Count; extension++)
                 {
                     if(extension == -1)
                     {
-                        weaponList.Add(new Weapon(sInfo.Bodies[body], sInfo.Barrels[barrel]));
+                        weaponList.Add(new Weapon(staticInfo.Bodies[body], staticInfo.Barrels[barrel]));
                     }
                     else
                     {
-                        weaponList.Add(new Weapon(sInfo.Bodies[body], sInfo.Barrels[barrel], sInfo.Extensions[extension]));
+                        weaponList.Add(new Weapon(staticInfo.Bodies[body], staticInfo.Barrels[barrel], staticInfo.Extensions[extension]));
                     }
                 }
             }
