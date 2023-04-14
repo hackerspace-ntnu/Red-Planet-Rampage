@@ -187,8 +187,7 @@ public class GalleryMenu : MonoBehaviour
 
     public void Back(InputAction.CallbackContext ctx)
     {
-        mainMenuController.SwitchToMenu(mainMenuController.defaultMenu);
-        mainMenuController.SelectControl(mainMenuController.GetComponentInChildren<Button>());
+        mainMenuController.ReturnToMainMenu();
     }
 
     /// <summary>

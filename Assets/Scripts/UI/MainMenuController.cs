@@ -20,7 +20,7 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private Selectable defaultButton;
     [SerializeField]
-    public GameObject defaultMenu;
+    private GameObject defaultMenu;
     [SerializeField]
     private GalleryMenu galleryMenu;
 
@@ -131,6 +131,12 @@ public class MainMenuController : MonoBehaviour
             // Update the visual loadout controller
             playerBackgrounds[i].GetComponent<CharacterMenuLoadout>().SetupPreview(playerIdentity.playerName, playerIdentity.color);
         }
+    }
+
+    public void ReturnToMainMenu()
+    {
+        SwitchToMenu(defaultMenu);
+        SelectControl(defaultMenu.GetComponentInChildren<Button>());
     }
 
     public void Quit()
