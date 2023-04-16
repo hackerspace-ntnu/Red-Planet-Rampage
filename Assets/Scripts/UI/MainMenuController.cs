@@ -90,6 +90,7 @@ public class MainMenuController : MonoBehaviour
         currentMenu.SetActive(false);
         menu.SetActive(true);
         currentMenu = menu;
+        SelectControl(menu.GetComponentInChildren<Selectable>());
     }
 
     /// <summary>
@@ -136,7 +137,6 @@ public class MainMenuController : MonoBehaviour
     public void ReturnToMainMenu()
     {
         SwitchToMenu(defaultMenu);
-        SelectControl(defaultMenu.GetComponentInChildren<Button>());
     }
 
     public void Quit()
