@@ -9,6 +9,12 @@ public class PlayerManager : MonoBehaviour
     // Layers 12 through 15 are gun layers.
     private static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
+    // Only Default and HitBox layers can be hit
+    private static int hitMask = 1 | (1 << 3);
+
+    [SerializeField]
+    private float maxHitDistance = 100;
+
     // TODO add context when shooty system is done
     public delegate void HitEvent(PlayerManager killer, PlayerManager victim);
 
@@ -105,8 +111,26 @@ public class PlayerManager : MonoBehaviour
     {
         healthController.onDamageTaken -= OnDamageTaken;
         healthController.onDeath -= OnDeath;
-        //Remove the gun
-        if (gunController) Destroy(gunController.gameObject);
+        if (gunController)
+        {
+            gunController.onFire -= UpdateAimTarget;
+            //Remove the gun
+            Destroy(gunController.gameObject);
+        }
+    }
+
+    private void UpdateAimTarget(GunStats stats)
+    {
+        Vector3 cameraCenter = inputManager.transform.position;
+        Vector3 cameraDirection = inputManager.transform.forward;
+        if (Physics.Raycast(cameraCenter, cameraDirection, out RaycastHit hit, maxHitDistance, hitMask))
+        {
+            gunController.target = hit.point;
+        }
+        else
+        {
+            gunController.target = cameraCenter + cameraDirection * maxHitDistance;
+        }
     }
 
     private void OnFire(InputAction.CallbackContext ctx)
@@ -153,6 +177,7 @@ public class PlayerManager : MonoBehaviour
         gun.transform.localRotation = Quaternion.AngleAxis(0.5f, Vector3.up);
         // Remember gun controller
         gunController = gun.GetComponent<GunController>();
+        gunController.onFire += UpdateAimTarget;
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)
