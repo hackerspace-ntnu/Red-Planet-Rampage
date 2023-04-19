@@ -45,14 +45,14 @@ public class FlexibleGridLayout : LayoutGroup
             columns = Mathf.CeilToInt(transform.childCount / (float)rows);
 
         // Get width and height of container
-        float parentWidth = rectTransform.rect.width;
-        float parentHeight = rectTransform.rect.height;
+        float parentWidth = rectTransform.sizeDelta.x;
+        float parentHeight = rectTransform.sizeDelta.y;
 
         // Determine the child size
-        float cellWidth = (parentWidth / (float)columns) - (spacing.x / (float)columns) - (padding.left / (float)columns) - (padding.right / (float)columns);
+        float cellWidth = (parentWidth / (float)columns)  - (padding.left / (float)columns) - (padding.right / (float)columns);
         float cellHeight = (parentHeight / (float)rows) - (spacing.y / (float)rows) - (padding.top / (float)rows) - (padding.bottom / (float) rows);
 
-        cellSize.x = fitX ? cellWidth : cellSize.x;
+        cellSize.x = (fitX ? cellWidth : cellSize.x) - spacing.x;
         cellSize.y = fitY ? cellHeight : cellSize.y;
 
         int columnCount = 0;
@@ -83,7 +83,7 @@ public class FlexibleGridLayout : LayoutGroup
     
     public override void SetLayoutHorizontal()
     {
-
+        
     }
 
     public override void SetLayoutVertical()

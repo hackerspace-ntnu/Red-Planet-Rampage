@@ -11,6 +11,4 @@ public class ModifiableFloatDrawer : PropertyDrawer
         EditorGUI.PropertyField(position, baseValueProperty, label);
 
     }
-}
-
-  
+}  
