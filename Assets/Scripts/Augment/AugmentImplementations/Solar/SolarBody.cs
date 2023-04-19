@@ -1,11 +1,14 @@
 using System.Collections;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class SolarBody : GunBody
 {
+
     [SerializeField]
-    private Material solarPanelMat;
+    private MeshRenderer meshRenderer;
+
+    private Material solarPanelMaterial;
 
     [SerializeField, Range(0, 1)]
     protected float reloadEfficiencyPercentagen = 0.1f;
@@ -15,8 +18,13 @@ public class SolarBody : GunBody
     private const float coolDownSeconds = 0.5f;
     private bool isCooldown = false;
 
+    private const int solarPanelMaterialIndex = 3;
+
     public override void Start()
     {
+        meshRenderer.materials[solarPanelMaterialIndex] = Instantiate(meshRenderer.materials[solarPanelMaterialIndex]);
+        solarPanelMaterial = meshRenderer.materials[solarPanelMaterialIndex];
+
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
@@ -30,7 +38,7 @@ public class SolarBody : GunBody
     {
         if (isCooldown)
             return;
-        solarPanelMat.SetFloat("_On", 1);
+        solarPanelMaterial.SetFloat("_On", 1);
         gunController.Reload(reloadEfficiencyPercentagen);
         isCooldown = true;
         StartCoroutine(CoolDown());
@@ -50,7 +58,7 @@ public class SolarBody : GunBody
         }
         else
         {
-            solarPanelMat.SetFloat("_On", 0);
+            solarPanelMaterial.SetFloat("_On", 0);
         }
     }
 }
