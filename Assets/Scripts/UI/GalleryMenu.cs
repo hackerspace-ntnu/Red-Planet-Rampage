@@ -89,7 +89,7 @@ public class GalleryMenu : MonoBehaviour
         // Remove previous guns
         foreach (GameObject g in spawnedWeapons)
         {
-            GameObject.DestroyImmediate(g);
+            GameObject.Destroy(g);
         }
         spawnedWeapons.Clear();
 
@@ -126,8 +126,7 @@ public class GalleryMenu : MonoBehaviour
 
                 // Recalculate bounds
                 foreach (var renderer in gun.GetComponentsInChildren<Renderer>())
-                {
-                    renderer.gameObject.layer = LayerMask.NameToLayer("UI");
+                { 
                     bounds.Encapsulate(renderer.bounds);
                 }
 
@@ -141,7 +140,8 @@ public class GalleryMenu : MonoBehaviour
                 string name = GunFactory.GetGunName(weapon.body, weapon.barrel, weapon.extension);
                 gun.name = name;
                 gridElement.GetComponentInChildren<TMP_Text>().text = name;
-            } else
+            } 
+            else
             {
                 // We are out of displayable weapons, disable objects
                 gridElement.gameObject.SetActive(false);
@@ -202,16 +202,13 @@ public class GalleryMenu : MonoBehaviour
         {
             for(int barrel = 0; barrel < staticInfo.Barrels.Count; barrel++)
             {
-                for(int extension = -1; extension < staticInfo.Extensions.Count; extension++)
+                // Add the extensionless variant of the weapon
+                weaponList.Add(new Weapon(staticInfo.Bodies[body], staticInfo.Barrels[barrel]));
+
+                for (int extension = 0; extension < staticInfo.Extensions.Count; extension++)
                 {
-                    if(extension == -1)
-                    {
-                        weaponList.Add(new Weapon(staticInfo.Bodies[body], staticInfo.Barrels[barrel]));
-                    }
-                    else
-                    {
-                        weaponList.Add(new Weapon(staticInfo.Bodies[body], staticInfo.Barrels[barrel], staticInfo.Extensions[extension]));
-                    }
+                    // Add the weapon
+                    weaponList.Add(new Weapon(staticInfo.Bodies[body], staticInfo.Barrels[barrel], staticInfo.Extensions[extension]));
                 }
             }
         }

@@ -48,9 +48,6 @@ public class FlexibleGridLayout : LayoutGroup
         float parentWidth = rectTransform.sizeDelta.x;
         float parentHeight = rectTransform.sizeDelta.y;
 
-        if (parentHeight == 0) // TODO: This is cancer, figure out why sizeDelta returns 0 (TORE APPROVED (kinda))
-            parentHeight = 980;
-
         // Determine the child size
         float cellWidth = (parentWidth / (float)columns)  - (padding.left / (float)columns) - (padding.right / (float)columns);
         float cellHeight = (parentHeight / (float)rows) - (spacing.y / (float)rows) - (padding.top / (float)rows) - (padding.bottom / (float) rows);
