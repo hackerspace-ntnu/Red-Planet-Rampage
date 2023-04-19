@@ -7,36 +7,41 @@ public struct DamageInfo
 {
     public PlayerManager sourcePlayer;
 
-    public GunStats stats;
-    public ProjectileState projectileState;
+    public float damage;
 
-    public bool isCritical;
+    public Vector3 position;
 
-    public DamageInfo(PlayerManager source, GunStats stats, ProjectileState projectileState)
+    public Vector3 force;
+    public DamageInfo(PlayerManager source, float damage)
     {
         this.sourcePlayer = source;
-        this.stats = stats;
-        this.projectileState = projectileState;
-        this.isCritical = false;
+        this.damage = damage;
+
+        // Todo, re-implement this with actual damage position and force
+        this.position = Vector3.zero;
+        this.force = Vector3.zero;
     }
 }
 
-public class ProjectileDamageController : MonoBehaviour
+public class ProjectileDamageController : MonoBehaviour, ProjectileModifier
 {
     public PlayerManager player;
-
-    private HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
-    private void Start()
+    public void Attach(ProjectileController projectile)
     {
-        GetComponentInParent<ProjectileController>().OnHitboxCollision += DamageHitbox;
+        player = projectile.player;
+        projectile.OnHitboxCollision += DamageHitbox;
+    }
+    public void Detach(ProjectileController projectile)
+    {
+        projectile.OnHitboxCollision -= DamageHitbox;
     }
 
-    private void DamageHitbox(HitboxController controller, ref ProjectileState state, GunStats stats)
+    private void DamageHitbox(HitboxController controller, ref ProjectileState state)
     {
-        DamageInfo info = new DamageInfo(player, stats, state);
-        if (controller.health == null || !hitHealthControllers.Contains(controller.health))
+        DamageInfo info = new DamageInfo(player, state.damage);
+        if (controller.health == null || !state.hitHealthControllers.Contains(controller.health))
         {
-            hitHealthControllers.Add(controller.health);
+            state.hitHealthControllers.Add(controller.health);
             controller.DamageCollider(info);
         }
     }

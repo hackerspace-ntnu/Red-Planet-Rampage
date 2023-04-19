@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using SecretName;
 
 public class PlayerStatUI : MonoBehaviour
@@ -28,10 +29,13 @@ public class PlayerStatUI : MonoBehaviour
     [SerializeField]
     private StatBar projectileSpeedBar;
 
+    private Outline outline;
+
     public PlayerManager playerManager;
 
     void Start()
     {
+        outline = GetComponent<Outline>();
         OnEnable();
     }
 
@@ -45,6 +49,7 @@ public class PlayerStatUI : MonoBehaviour
         statContainer.alpha = 1;
 
         SetName(playerManager.identity.playerName);
+        SetColor(playerManager.identity.color);
 
         SetChips(playerManager.identity.chips);
         playerManager.identity.onChipChange += SetChips;
@@ -121,9 +126,14 @@ public class PlayerStatUI : MonoBehaviour
         playerNameText.SetText(name);
     }
 
+    public void SetColor(Color color)
+    {
+        outline.effectColor = color;
+    }
+
     public void SetChips(int amount)
     {
-        chipsText.SetText($"{amount.ToString()} chips");
+        chipsText.SetText(amount.ToString());
     }
 
     public void SetGunName(string name)
@@ -137,7 +147,7 @@ public class PlayerStatUI : MonoBehaviour
         damageBar.BaseValue = gunStats.ProjectileDamage;
         fireRateBar.BaseValue = gunStats.Firerate;
         projectilesPerShotBar.BaseValue = gunStats.ProjectilesPerShot;
-        projectileSpeedBar.BaseValue = gunStats.ProjectileSpeed;
+        projectileSpeedBar.BaseValue = gunStats.ProjectileSpeedFactor;
     }
 
     public void SetNewGunStats(GunStats gunStats)
@@ -145,7 +155,7 @@ public class PlayerStatUI : MonoBehaviour
         damageBar.NewValue = gunStats.ProjectileDamage;
         fireRateBar.NewValue = gunStats.Firerate;
         projectilesPerShotBar.NewValue = gunStats.ProjectilesPerShot;
-        projectileSpeedBar.NewValue = gunStats.ProjectileSpeed;
+        projectileSpeedBar.NewValue = gunStats.ProjectileSpeedFactor;
     }
 
     public void ResetNewGunStats()

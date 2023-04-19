@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(GunController))]
 public class GunFactory : MonoBehaviour
 {
-    public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, Transform parent)
+    public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, Transform parent)
     {
         GameObject gun = Instantiate(new GameObject(), parent);
         GunFactory controller = gun.AddComponent<GunFactory>();
@@ -16,7 +16,7 @@ public class GunFactory : MonoBehaviour
         
 
         // Initialize everything
-        gun.GetComponent<GunFactory>().InitializeGun();
+        gun.GetComponent<GunFactory>().InitializeGun(owner);
 
         return gun;
     }
@@ -55,15 +55,17 @@ public class GunFactory : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "GunTest")
         {
-            InitializeGun();
+            InitializeGun(null);
         }
     }
 #endif
 
     // Builds the gun from parts
-    public void InitializeGun()
+    public void InitializeGun(PlayerManager owner = null)
     {
         gunController = GetComponent<GunController>();
+        // Make gun remember who shoots with it
+        gunController.player = owner;
 
         List<ProjectileModifier> modifiers = new List<ProjectileModifier>();
 
@@ -82,13 +84,13 @@ public class GunFactory : MonoBehaviour
 
         GunBarrel gunBarrel = Instantiate(Barrel.augment, gunBody.attachmentSite.position, gunBody.attachmentSite.rotation, transform)
             .GetComponent<GunBarrel>();
+        gunController.projectile = gunBarrel.Projectile;
+        // And make projectile remember who shot it.
+        gunController.projectile.player = owner;
 
         // Gets the projectile from the barrel
         // It is stored as an inactive object in the gun, which allows for modifications without changing the prefab
-        gunController.projectile = gunBarrel.Projectile;
-        gunController.projectile.transform.SetParent(transform);
-        ProjectileController projectileController = gunController.projectile.GetComponent<ProjectileController>();
-        projectileController.stats = gunController.stats;
+
 
         // Sets firemode
 
@@ -130,9 +132,14 @@ public class GunFactory : MonoBehaviour
             gunController.outputs = gunBarrel.outputs;
         }
 
-        modifiers.OrderByDescending(modifier => (int) modifier.GetPriority()).ToList();
-        modifiers.ForEach(modifier => modifier.ModifyProjectile(ref projectileController));
-        gunController.onInitialize?.Invoke(gunController.stats);
+        // TODO: The output system needs rework 
+        gunController.projectile.projectileOutput = gunController.outputs[0];
+
+        gunController.projectile.stats = gunController.stats;
+
+        modifiers.OrderByDescending(modifier => (int)modifier.GetPriority()).ToList();
+        modifiers.ForEach(modifier => modifier.Attach(gunController.projectile));
+        gunController.onInitializeGun?.Invoke(gunController.stats);
     }    
 }
 

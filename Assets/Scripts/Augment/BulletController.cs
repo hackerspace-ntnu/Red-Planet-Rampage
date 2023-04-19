@@ -1,68 +1,132 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
+using UnityEngine.VFX;
+
 public class BulletController : ProjectileController
 {
-    
-    public static void MoveWithGravity(float distance, ref ProjectileState state, GunStats stats)
-    {
-        //Update the position of the projectile
-        state.position += state.direction * distance;
+    [SerializeField]
+    private LayerMask collisionLayers;
 
-        //Update the velocity of the projectile
-        float time = distance / state.speed;
-        Vector3 velocity = state.direction * state.speed;
-        velocity += Vector3.up * state.gravity * time;
-        state.speed = velocity.magnitude;
-        state.direction = velocity.normalized;
-        
+    [SerializeField]
+    private float maxDistance = 20;
+
+    [SerializeField]
+    private int collisionSamples = 30;
+
+    private int vfxPositionsPerSample = 3;
+
+    private float bulletSpeed = 50f;
+
+    private VFXTextureFormatter trailPosTexture;
+    //private Texture2D trailPosTexture;
+    //private float[] trailPositions;
+
+    [SerializeField]
+    private VisualEffect trail;
+
+    [SerializeField]
+    private VisualEffect flash;
+
+    private ProjectileState projectile = new ProjectileState();
+
+
+    public void Awake()
+    {
+        UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
+        //trailPositions = new float[vfxPositionsPerSample * collisionSamples * 3];
+        trailPosTexture = new VFXTextureFormatter(vfxPositionsPerSample * collisionSamples);
+        trail.SetTexture("Position", this.trailPosTexture.Texture);
     }
-
-    public override void Start()
+    private void Start()
     {
-        base.Start();
-        UpdateProjectileMovement += MoveWithGravity;
+        flash.transform.position = projectileOutput.position;
     }
-
-    private void FixedUpdate()
+    public override void InitializeProjectile(GunStats stats)
     {
-        state.lastUpdateTime = Time.time;
-        state.olderPosition = state.oldPosition;
-        state.oldPosition = state.position;
 
-        Collider[] collisions;
+        // TODO: Possibly standardize this better
 
-        UpdateProjectileMovement?.Invoke(state.speed * Time.fixedDeltaTime, ref state, stats);
+        projectile.active = true;
+        projectile.distanceTraveled = 0f;
+        projectile.damage = stats.ProjectileDamage;
+        projectile.position = projectileOutput.position;
+        projectile.oldPosition = projectileOutput.position;
+        projectile.direction = projectileRotation * projectileOutput.forward;
+        projectile.maxDistance = this.maxDistance;
+        projectile.rotation = projectileRotation * projectileOutput.rotation;
+        projectile.initializationTime = Time.fixedTime;
+        projectile.speedFactor = stats.ProjectileSpeedFactor;
+        projectile.gravity = stats.ProjectileGravityModifier * 9.81f;
+        projectile.additionalProperties.Clear();
+        projectile.hitHealthControllers.Clear();
 
-        var direction = state.position - state.oldPosition;
-        RaycastHit[] rayCasts;
-        if (stats.ProjectileSize > 0)
+        OnProjectileInit?.Invoke(ref projectile, stats);
+
+        projectile.speed = bulletSpeed * stats.ProjectileSpeedFactor;
+
+        int sampleNum = 0;
+
+        while (sampleNum < collisionSamples && projectile.active)
         {
-            rayCasts = Physics.SphereCastAll(transform.position, stats.ProjectileSize, direction, direction.magnitude);
-        }
-        else
-        {
-            rayCasts = Physics.RaycastAll(transform.position, direction, direction.magnitude);
-        }
-        // Ordered by distance along path hit, so that things are hit in the correct order
-        collisions = rayCasts.OrderBy(x => x.distance).Select(x => x.collider).ToArray();
-        foreach(var collision in collisions)
-        {
-            OnColliderHit?.Invoke(collision, ref state, stats);
-            HitboxController hitbox = collision.GetComponent<HitboxController>();
 
-            if (hitbox != null){
-                OnHitboxCollision?.Invoke(hitbox, ref state, stats);
+            projectile.oldPosition = projectile.position;
+            projectile.lastUpdateTime = Time.time;
+
+
+            for (int j = 0; j < vfxPositionsPerSample; j++)
+            {
+                trailPosTexture.setValue(sampleNum * vfxPositionsPerSample + j, projectile.position);
+                UpdateProjectileMovement?.Invoke(maxDistance / (collisionSamples * vfxPositionsPerSample), ref projectile);
+            }
+
+            Collider[] collisions = ProjectileMotions.GetPathCollisions(projectile, collisionLayers);
+
+            if (collisions.Length > 0)
+            {
+                OnColliderHit?.Invoke(collisions[0], ref projectile);
+                HitboxController hitbox = collisions[0].GetComponent<HitboxController>();
+
+                if (hitbox != null)
+                {
+                    OnHitboxCollision?.Invoke(hitbox, ref projectile);
+                }
+                projectile.active = false;
+                sampleNum += 1;
+                trailPosTexture.setValue(sampleNum * vfxPositionsPerSample, projectile.position);
+
+            }
+            else
+            {
+                sampleNum += 1;
             }
         }
-        
-    }
-    public void Update()
-    {
-        transform.position = LerpPos();
-        transform.rotation = state.rotation;
+
+        for (int i = sampleNum * vfxPositionsPerSample + 1; i < collisionSamples * vfxPositionsPerSample; i++)
+        {
+            trailPosTexture.setValue(i, projectile.position);
+        }
+
+        trailPosTexture.ApplyChanges();
+
+        // Play the flash and trail
+        trail.SendEvent("OnPlay");
+        flash.SendEvent("OnPlay");
     }
 
+    public Vector3 LerpPos(ProjectileState state)
+    {
+        var diff = (Time.time - state.lastUpdateTime) / Time.fixedDeltaTime;
+        return Vector3.Lerp(state.oldPosition, state.position, diff);
+    }
+
+    // Not currently used by anything, and looks ugly as hell, but if we need a quadratic interpolator, here
+    // Math is probably a bit fuzzy, hence ugly
+
+    //public Vector3 QerpPos()
+    //{
+    //    var diff = (Time.time - state.lastUpdateTime) / Time.fixedDeltaTime;
+    //
+    //    return ((state.olderPosition + state.position) * 0.5f - state.oldPosition) * diff * diff +
+    //        (state.position - state.olderPosition) * diff + state.oldPosition;
+    //}
 }
 

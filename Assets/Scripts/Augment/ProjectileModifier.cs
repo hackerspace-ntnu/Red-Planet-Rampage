@@ -20,8 +20,9 @@ public enum Priority
 /// </summary>
 public interface ProjectileModifier 
 {
-    public ref ProjectileController ModifyProjectile(ref ProjectileController projectile);
 
+    public abstract void Attach(ProjectileController projectile);
+    public abstract void Detach(ProjectileController projectile);
     public Priority GetPriority() 
     {
         return Priority.ARBITRARY;

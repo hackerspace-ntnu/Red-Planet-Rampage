@@ -12,7 +12,10 @@ public class HatBarrelModel : MonoBehaviour
     [SerializeField]
     private GameObject bullet;
     [SerializeField]
-    private float bulletHeigth = 0.05f; 
+    private float bulletHeigth = 0.05f;
+
+    [SerializeField]
+    private HatBarrel barrel;
 
     [SerializeField]
     private Transform ammunitionHolder;
@@ -54,5 +57,9 @@ public class HatBarrelModel : MonoBehaviour
     public void ToggleBullet()
     {
         bullet.SetActive(!bullet.activeInHierarchy);
+        if (!bullet.activeInHierarchy)
+        {
+            barrel.ReleaseLoadedHat();
+        }
     }
 }

@@ -24,13 +24,7 @@ public class RotationModifier : MonoBehaviour, ProjectileModifier
         return priority;
     }
 
-    public ref ProjectileController ModifyProjectile(ref ProjectileController projectile)
-    {
-        projectile.UpdateProjectileMovement += Rotate;
-        return ref projectile;
-    }
-
-    public void Rotate(float distance, ref ProjectileState state, GunStats stats)
+    public void Rotate(float distance, ref ProjectileState state)
     {
         if (distance > 0) {
             state.rotation *= Quaternion.Euler(rotationPerUpdate * distance);
@@ -39,6 +33,16 @@ public class RotationModifier : MonoBehaviour, ProjectileModifier
         {
             state.rotation = Quaternion.Euler(randomStartAngleX ? Random.Range(0,360) : 0, randomStartAngleY ? Random.Range(0, 360) : 0, randomStartAngleZ ? Random.Range(0, 360) : 0);
         }
+
     }
 
+    public void Attach(ProjectileController projectile)
+    {
+        projectile.UpdateProjectileMovement += Rotate;
+    }
+
+    public void Detach(ProjectileController projectile)
+    {
+        projectile.UpdateProjectileMovement -= Rotate;
+    }
 }

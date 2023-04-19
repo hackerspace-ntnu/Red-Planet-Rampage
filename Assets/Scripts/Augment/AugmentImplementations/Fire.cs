@@ -17,7 +17,7 @@ public class Fire : GunExtension
             Debug.Log("Fire not attached to gun parent!");
             return;
         }
-        gunController.onInitialize += AddFireToProjectile;
+        gunController.onInitializeGun += AddFireToProjectile;
     }
 
     private void AddFireToProjectile(GunStats gunstats)

@@ -9,6 +9,12 @@ public class PlayerManager : MonoBehaviour
     // Layers 12 through 15 are gun layers.
     private static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
+    // Only Default and HitBox layers can be hit
+    private static int hitMask = 1 | (1 << 3);
+
+    [SerializeField]
+    private float maxHitDistance = 100;
+
     // TODO add context when shooty system is done
     public delegate void HitEvent(PlayerManager killer, PlayerManager victim);
 
@@ -43,7 +49,7 @@ public class PlayerManager : MonoBehaviour
     private HealthController healthController;
 
     [SerializeField]
-    private HUDController hudController;
+    private PlayerHUDController hudController;
 
     void Start()
     {
@@ -54,13 +60,13 @@ public class PlayerManager : MonoBehaviour
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
-        hudController.UpdateHealthBar(healthController.CurrentHealth, healthController.MaxHealth);
+        hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
     }
 
     void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
         onDeath?.Invoke(info.sourcePlayer, this);
-        TurnIntoRagdoll(info.projectileState.position, info.projectileState.direction);
+        TurnIntoRagdoll(info.position, info.force);
         hudController.DisplayDeathScreen(info.sourcePlayer.identity);
     }
 
@@ -96,7 +102,7 @@ public class PlayerManager : MonoBehaviour
         var canvas = hudController.GetComponent<Canvas>();
         canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
         canvas.planeDistance = 0.11f;
-        
+
         // Set player color
         var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
     }
@@ -105,8 +111,26 @@ public class PlayerManager : MonoBehaviour
     {
         healthController.onDamageTaken -= OnDamageTaken;
         healthController.onDeath -= OnDeath;
-        //Remove the gun
-        Destroy(gunController.gameObject);
+        if (gunController)
+        {
+            gunController.onFire -= UpdateAimTarget;
+            //Remove the gun
+            Destroy(gunController.gameObject);
+        }
+    }
+
+    private void UpdateAimTarget(GunStats stats)
+    {
+        Vector3 cameraCenter = inputManager.transform.position;
+        Vector3 cameraDirection = inputManager.transform.forward;
+        if (Physics.Raycast(cameraCenter, cameraDirection, out RaycastHit hit, maxHitDistance, hitMask))
+        {
+            gunController.target = hit.point;
+        }
+        else
+        {
+            gunController.target = cameraCenter + cameraDirection * maxHitDistance;
+        }
     }
 
     private void OnFire(InputAction.CallbackContext ctx)
@@ -147,14 +171,13 @@ public class PlayerManager : MonoBehaviour
 
     private void SetGun(Transform offset)
     {
-        var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, offset);
+        var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, this, offset);
         // Set specific local transform
         gun.transform.localPosition = new Vector3(0.39f, -0.34f, 0.5f);
         gun.transform.localRotation = Quaternion.AngleAxis(0.5f, Vector3.up);
         // Remember gun controller
         gunController = gun.GetComponent<GunController>();
-        // Make gun remember who shoots with it
-        gunController.player = this;
+        gunController.onFire += UpdateAimTarget;
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)
