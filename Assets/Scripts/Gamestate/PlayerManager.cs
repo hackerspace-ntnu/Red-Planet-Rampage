@@ -195,7 +195,7 @@ public class PlayerManager : MonoBehaviour
 
     public void Pause(InputAction.CallbackContext ctx)
     {
-        matchController.TogglePause();
+        matchController.TogglePause(inputManager);
     }
 
 

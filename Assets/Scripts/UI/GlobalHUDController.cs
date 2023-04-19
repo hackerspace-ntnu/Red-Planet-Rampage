@@ -15,16 +15,19 @@ public class GlobalHUDController : MonoBehaviour
 
     [SerializeField]
     private GameObject winScreen;
+
+    [SerializeField] 
+    private PauseMenu pauseMenuUI;
     
     private int nextPlayerStatIndex = 0;
     private MatchController matchController;
+    private bool gameIsPaused = false;
 
-    private PauseMenu pauseMenu;
+    
     
 
     void Start()
     {
-        pauseMenu = GetComponent<PauseMenu>();
         // Places the roundTimer at appropriate place on split screen
         if (PlayerInputManagerController.Singleton.playerInputs.Count > 2)
         {
@@ -78,8 +81,12 @@ public class GlobalHUDController : MonoBehaviour
         matchController = mc;
     }
 
-    public void TogglePause()
+    public void TogglePause(InputManager input)
     {
-        pauseMenu.TogglePause();
+        Debug.Log(gameIsPaused);
+        gameIsPaused = !gameIsPaused;
+        Time.timeScale = gameIsPaused ? 0 : 1;
+        pauseMenuUI.gameObject.SetActive(gameIsPaused);
+        pauseMenuUI.SetPlayerInput(input);
     }
 }

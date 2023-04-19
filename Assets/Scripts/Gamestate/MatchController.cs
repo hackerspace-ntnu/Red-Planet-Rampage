@@ -216,9 +216,9 @@ public class MatchController : MonoBehaviour
         }
     }
 
-    public void TogglePause()
+    public void TogglePause(InputManager input)
     {
-        globalHUDController.TogglePause();
+        globalHUDController.TogglePause(input);
     }
 
 

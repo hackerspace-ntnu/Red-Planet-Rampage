@@ -1,25 +1,17 @@
-﻿using UnityEngine.EventSystems;
+﻿using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 public class PauseMenu : MonoBehaviour
 {
-    public bool gameIsPaused = false;
 
     [SerializeField] 
-    private GameObject pauseMenuUI;
+    private GameObject selectedGameObject;
     
-    private void Start()
+    public void SetPlayerInput(InputManager input)
     {
-        gameIsPaused = false;
-        pauseMenuUI.SetActive(false);
+        PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
+        EventSystem.current.SetSelectedGameObject(selectedGameObject);
     }
-    
-    public void TogglePause()
-    {
-        Debug.Log(gameIsPaused);
-        gameIsPaused = !gameIsPaused;
-        Time.timeScale = gameIsPaused ? 0 : 1;
-        pauseMenuUI.SetActive(gameIsPaused);
-    }
+
 }
