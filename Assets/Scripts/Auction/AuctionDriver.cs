@@ -25,6 +25,7 @@ public class AuctionDriver : MonoBehaviour
     [SerializeField]
     private RandomisedAuctionStage[] availableAuctionStages;
 
+    private BiddingPlatform prioritizedAuction;
 
 #if UNITY_EDITOR
     // USING THIS PATTERN TO SHOW PROPERTIES IN EDITOR, UPON BUILD COMPILATION THIS OVERHEAD IS REMOVED
@@ -100,13 +101,33 @@ public class AuctionDriver : MonoBehaviour
             Debug.Log("Not enough available auctionStages or biddingPlatforms!");
         }
 
+        prioritizedAuction = biddingPlatforms[0];
+        prioritizedAuction.onBiddingEnd += EndAuction;
+
         for (int i = 0; i < biddingPlatforms.Length; i++)
         {
             availableAuctionStages[i].Promote(out BiddingRound biddingRound);
             biddingPlatforms[i].ActiveBiddingRound = biddingRound;
             biddingPlatforms[i].SetItem(biddingRound.items[0]);
+            biddingPlatforms[i].onBiddingExtended += SetPrioritizedPlatform;
         }
     }
+
+    private void SetPrioritizedPlatform(BiddingPlatform biddingPlatform)
+    {
+        prioritizedAuction.onBiddingEnd = null;
+        prioritizedAuction = biddingPlatform;
+        prioritizedAuction.onBiddingEnd += EndAuction;
+    }
+
+    private void EndAuction(BiddingPlatform biddingPlatform)
+    {
+
+        prioritizedAuction.onBiddingEnd = null;
+        StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
+        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
+    }
+
 
     private bool TryPlaceBid(PlayerManager player, int slot)
     {
