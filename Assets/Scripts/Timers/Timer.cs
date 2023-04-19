@@ -43,6 +43,10 @@ public class Timer : MonoBehaviour
     /// </summary>
     public event Action OnTimerUpdate;
 
+    public event Action OnTimerPaused;
+
+    public event Action OnTimerResumed;
+
     public void StartTimer(float baseWaitTime, bool repeating = false)
     {
         if (IsRunning)
@@ -61,6 +65,30 @@ public class Timer : MonoBehaviour
     public void AddTime(float addedTime)
     {
         additionalWaitTime += addedTime;
+    }
+
+    public void PauseTimer()
+    {
+        if (!IsRunning)
+        {
+            Debug.LogWarning("Timer paused though it's not active!");
+            return;
+        }
+
+        running = false;
+        OnTimerPaused?.Invoke();
+    }
+
+    public void ResumeTimer()
+    {
+        if (!IsRunning)
+        {
+            Debug.LogWarning("Timer resumed though it's already active!");
+            return;
+        }
+
+        running = true;
+        OnTimerResumed?.Invoke();
     }
 
     public void StopTimer()

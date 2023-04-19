@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GlobalHUDController : MonoBehaviour
 {
@@ -14,11 +15,16 @@ public class GlobalHUDController : MonoBehaviour
 
     [SerializeField]
     private GameObject winScreen;
-
+    
     private int nextPlayerStatIndex = 0;
+    private MatchController matchController;
+
+    private PauseMenu pauseMenu;
+    
 
     void Start()
     {
+        pauseMenu = GetComponent<PauseMenu>();
         // Places the roundTimer at appropriate place on split screen
         if (PlayerInputManagerController.Singleton.playerInputs.Count > 2)
         {
@@ -59,11 +65,21 @@ public class GlobalHUDController : MonoBehaviour
             roundTimer.text = Mathf.FloorToInt(time / 60) + ":" + (seconds < 10 ? "0" : "") + seconds;
         }
     }
-
+    
     public void DisplayWinScreen(PlayerIdentity winner)
     {
         winText.text = winner.playerName;
         winText.color = winner.color;
         winScreen.SetActive(true);
+    }
+
+    public void SetMatchManager(MatchController mc)
+    {
+        matchController = mc;
+    }
+
+    public void TogglePause()
+    {
+        pauseMenu.TogglePause();
     }
 }

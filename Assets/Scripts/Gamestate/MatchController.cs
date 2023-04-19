@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,6 +66,8 @@ public class MatchController : MonoBehaviour
 
     private List<Player> players = new List<Player>();
     private static List<Round> rounds = new List<Round>();
+    private PauseMenu pauseMenu;
+    public bool isPaused = false;
 
     void Start()
     {
@@ -213,6 +216,12 @@ public class MatchController : MonoBehaviour
         }
     }
 
+    public void TogglePause()
+    {
+        globalHUDController.TogglePause();
+    }
+
+
     private IEnumerator DisplayWinScreenAndRestart(PlayerIdentity winner)
     {
         globalHUDController.DisplayWinScreen(winner);
@@ -228,4 +237,6 @@ public class MatchController : MonoBehaviour
         SceneManager.LoadSceneAsync("Menu");
 
     }
+
+
 }

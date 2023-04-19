@@ -51,11 +51,14 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private PlayerHUDController hudController;
 
+    private MatchController matchController;
+    
     void Start()
     {
         healthController = GetComponent<HealthController>();
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
+        matchController = FindObjectOfType<MatchController>();
     }
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
@@ -98,6 +101,7 @@ public class PlayerManager : MonoBehaviour
         SetGun(inputManager.transform);
         inputManager.onFirePerformed += OnFire;
         inputManager.onFireCanceled += OnFireEnd;
+        inputManager.onPausePerformed += Pause;
         // Set camera on canvas
         var canvas = hudController.GetComponent<Canvas>();
         canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
@@ -188,6 +192,12 @@ public class PlayerManager : MonoBehaviour
             SetLayerOnSubtree(child.gameObject, layer);
         }
     }
+
+    public void Pause(InputAction.CallbackContext ctx)
+    {
+        matchController.TogglePause();
+    }
+
 
     new public string ToString()
     {

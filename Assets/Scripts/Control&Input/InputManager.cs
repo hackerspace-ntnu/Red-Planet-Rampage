@@ -21,6 +21,8 @@ public class InputManager : MonoBehaviour
     public InputEvent onCancel;
     public InputEvent onLeftTab;
     public InputEvent onRightTab;
+    public InputEvent onPausePerformed;
+    public InputEvent onPauseCanceled;
     // FPS-related
     public InputEvent onFirePerformed;
     public InputEvent onFireCanceled;
@@ -75,6 +77,8 @@ public class InputManager : MonoBehaviour
         playerInput.actions["Fire"].canceled += Fire;
         playerInput.actions["Look"].performed += Look;
         playerInput.actions["Look"].canceled += Look;
+        playerInput.actions["Pause"].performed += Pause;
+        playerInput.actions["Pause"].canceled += Pause;
 
         // Imprison mouse
         if (playerInput.currentControlScheme == "MouseAndKeyboard")
@@ -148,6 +152,8 @@ public class InputManager : MonoBehaviour
         onFireCanceled = null;
         onLookPerformed = null;
         onLookCanceled = null;
+        onPausePerformed = null;
+        onPauseCanceled = null;
 
         // Free the mouse
         if (isMouseAndKeyboard)
@@ -193,6 +199,17 @@ public class InputManager : MonoBehaviour
     {
         if (ctx.performed) { onLookPerformed?.Invoke(ctx); return; }
         onLookCanceled?.Invoke(ctx);
+    }
+
+    private void Pause(InputAction.CallbackContext ctx)
+    {
+        if (ctx.performed)
+        {
+            onPausePerformed?.Invoke(ctx);
+            return;
+        }
+
+        onPauseCanceled?.Invoke(ctx);
     }
     #endregion
 }
