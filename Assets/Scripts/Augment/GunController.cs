@@ -54,10 +54,10 @@ public class GunController : MonoBehaviour
     {
         if (stats.Ammo <= 0)
         {
-            Reload(1);
             return;
         }
-        stats.Ammo--;
+
+        stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.magazineSize);
 
         onFire?.Invoke(stats);
 
