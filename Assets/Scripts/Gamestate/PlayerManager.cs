@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(PlayerMovement))]
+[RequireComponent(typeof(AudioSource))]
 public class PlayerManager : MonoBehaviour
 {
     // Layers 12 through 15 are gun layers.
@@ -51,16 +52,26 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private PlayerHUDController hudController;
 
+    [SerializeField]
+    private AudioSource audioSource;
+
+    [SerializeField]
+    private AudioGroup hitSounds;
+    [SerializeField]
+    private AudioGroup extraHitSounds;
+
     void Start()
     {
         healthController = GetComponent<HealthController>();
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
+        audioSource = GetComponent<AudioSource>();
     }
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
         hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
+        PlayOnHit();
     }
 
     void OnDeath(HealthController healthController, float damage, DamageInfo info)
@@ -192,5 +203,17 @@ public class PlayerManager : MonoBehaviour
     new public string ToString()
     {
         return "Player " + inputManager.playerInput.playerIndex;
+    }
+
+    private void PlayOnHit()
+    {
+        if(Random.Range(0, 100) > 5)
+        {
+            hitSounds.Play(audioSource);
+        }
+        else
+        {
+            extraHitSounds.Play(audioSource);
+        }
     }
 }
