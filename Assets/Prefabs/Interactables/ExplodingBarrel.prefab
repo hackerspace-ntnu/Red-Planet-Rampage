@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 361553924310506290}
   - component: {fileID: 6962600573563359998}
   m_Layer: 0
-  m_Name: ExpolingBarrel
+  m_Name: ExplodingBarrel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -63,7 +63,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cab246ee1d4ad25498887ea1df8ef6f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxhHealth: 50
+  maxhHealth: 40
   currentHealth: 0
 --- !u!114 &6165050060944093848
 MonoBehaviour:
@@ -77,8 +77,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b22ca88c45a479a8e575277a8b08035, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 60
-  radius: 5
+  damage: 80
+  damageCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0.0057768826
+      outSlope: 0.0057768826
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.29999998
+      value: 1.0017331
+      inSlope: -0.02294453
+      outSlope: -0.02294453
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.31515294
+      outWeight: 0.37579486
+    - serializedVersion: 3
+      time: 0.34804383
+      value: 0.9963641
+      inSlope: -0.48425463
+      outSlope: -0.48425463
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.17262037
+    - serializedVersion: 3
+      time: 1
+      value: 0.14839554
+      inSlope: -3.2136357
+      outSlope: -3.2136357
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.07093081
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  radius: 6
   hitBoxLayers:
     serializedVersion: 2
     m_Bits: 8
@@ -95,6 +137,7 @@ VisualEffect:
   m_InitialEventNameOverriden: 1
   m_StartSeed: 0
   m_ResetSeedOnPlay: 1
+  m_AllowInstancing: 1
   m_ResourceVersion: 1
   m_PropertySheet:
     m_Float:
@@ -214,8 +257,17 @@ CapsuleCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8758859795712859037}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
+  serializedVersion: 2
   m_Radius: 0.76584923
   m_Height: 1.9919109
   m_Direction: 1
@@ -225,7 +277,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TransformParent: {fileID: 7135334762222197563}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: f6e1bb639c17a22468752a985cab2f28, type: 3}
@@ -285,7 +337,9 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f6e1bb639c17a22468752a985cab2f28, type: 3}
 --- !u!23 &7045085310151368037 stripped
 MeshRenderer:

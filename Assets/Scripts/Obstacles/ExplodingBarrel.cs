@@ -8,7 +8,7 @@ public class ExplodingBarrel : MonoBehaviour
 
     [SerializeField]
     private MeshRenderer barrelMesh;
-    
+
     void Start()
     {
         GetComponent<HealthController>().onDeath += Explode;
@@ -19,10 +19,6 @@ public class ExplodingBarrel : MonoBehaviour
         barrelMesh.enabled = false;
         GetComponentInChildren<CapsuleCollider>().enabled = false;
         GetComponent<ExplosionController>().Explode(info.sourcePlayer);
-        Destroy(gameObject,4);
-
+        Destroy(gameObject, 4);
     }
 }
-
-//Husk hvem som gjorde skade og send det videre
-//ikke tilate selvmord(ikke barnevennlig)
