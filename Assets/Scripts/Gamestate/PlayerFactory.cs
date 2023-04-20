@@ -99,5 +99,6 @@ public class PlayerFactory : MonoBehaviour
         playerManager.SetPlayerInput(inputManager);
         // Add player UI to globalUI
         globalHUDController.SetPlayer(playerManager);
+        player.GetComponent<HealthController>().enabled = false;
     }
 }

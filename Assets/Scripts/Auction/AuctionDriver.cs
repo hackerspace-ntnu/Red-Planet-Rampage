@@ -25,6 +25,7 @@ public class AuctionDriver : MonoBehaviour
     [SerializeField]
     private RandomisedAuctionStage[] availableAuctionStages;
 
+    private BiddingPlatform lastExtendedAuction;
 
 #if UNITY_EDITOR
     // USING THIS PATTERN TO SHOW PROPERTIES IN EDITOR, UPON BUILD COMPILATION THIS OVERHEAD IS REMOVED
@@ -84,13 +85,6 @@ public class AuctionDriver : MonoBehaviour
 
         // TODO: Make AuctionDriver instantiate bidding platforms instead of finding them?
         PopulatePlatforms();
-
-        // TODO:
-        // - Rewrite AuctionDriver to be a manager of bidding rounds on BiddingPlatforms 
-        // - We /can/ use biddingRound to store relevant values (If we want to show a summary for bidding at the end or something), but it seems a bit out of scope atm
-        // - AuctionDriver should be the class responsible for handling all AuctionStage-related tasks
-        // - AuctionDriver should be responsible for detecting when all auctions are done and then trigger needed responses (preferably by calling MatchManager).
-        
     }
 
     private void PopulatePlatforms()
@@ -100,13 +94,33 @@ public class AuctionDriver : MonoBehaviour
             Debug.Log("Not enough available auctionStages or biddingPlatforms!");
         }
 
+        lastExtendedAuction = biddingPlatforms[0];
+        lastExtendedAuction.onBiddingEnd += EndAuction;
+
         for (int i = 0; i < biddingPlatforms.Length; i++)
         {
             availableAuctionStages[i].Promote(out BiddingRound biddingRound);
             biddingPlatforms[i].ActiveBiddingRound = biddingRound;
             biddingPlatforms[i].SetItem(biddingRound.items[0]);
+            biddingPlatforms[i].onBiddingExtended += SetPrioritizedPlatform;
         }
     }
+
+    private void SetPrioritizedPlatform(BiddingPlatform biddingPlatform)
+    {
+        lastExtendedAuction.onBiddingEnd -= EndAuction;
+        lastExtendedAuction = biddingPlatform;
+        lastExtendedAuction.onBiddingEnd += EndAuction;
+    }
+
+    private void EndAuction(BiddingPlatform biddingPlatform)
+    {
+
+        lastExtendedAuction.onBiddingEnd = null;
+        StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
+        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
+    }
+
 
     private bool TryPlaceBid(PlayerManager player, int slot)
     {
