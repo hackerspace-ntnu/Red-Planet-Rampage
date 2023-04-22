@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TransformExtensions;
 
 /// <summary>
 /// A modifier to stick a gameObject (stuckObject) to a target after hitting said target.
@@ -39,7 +40,8 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
 
     public void StickToTarget(Collider collider, ref ProjectileState state)
     {
-        var stuck = Instantiate(stuckObject, state.position, state.rotation, collider.transform);
+        var stuck = Instantiate(stuckObject, state.position, state.rotation, null);
+        stuck.transform.ParentUnscaled(collider.transform);
         Destroy(stuck, stuckLifeTime);
     }
 }
