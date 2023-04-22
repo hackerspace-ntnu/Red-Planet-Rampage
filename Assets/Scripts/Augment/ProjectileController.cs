@@ -146,11 +146,12 @@ public class ProjectileMotions
         //Update the velocity of the projectile
         float time = distance / state.speed;
         Vector3 velocity = state.direction * state.speed;
-        velocity += Vector3.up * state.gravity * time;
+        velocity += Vector3.down * state.gravity * time;
         state.speed = velocity.magnitude;
         state.direction = velocity.normalized;
         state.distanceTraveled += distance;
     }
+
     public static Collider[] GetPathCollisions(ProjectileState state, LayerMask collisionLayers)
     {
         var direction = state.position - state.oldPosition;
