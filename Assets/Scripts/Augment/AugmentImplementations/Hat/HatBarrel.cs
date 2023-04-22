@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -25,12 +23,12 @@ public class HatBarrel : ProjectileController
     [SerializeField]
     private float hatSpeed = 10f;
 
+    [SerializeField]
+    private float hatSize = .2f;
+
     private ProjectileState[] projectiles;
 
     private ProjectileState loadedProjectile;
-
-    [SerializeField]
-    private LayerMask collisionLayers;
 
     //index of last initialized state in array
     private int currentStateIndex = 0;
@@ -40,8 +38,10 @@ public class HatBarrel : ProjectileController
 
     [SerializeField]
     private VisualEffect hatVfx;
-    void Awake()
+
+    protected override void Awake()
     {
+        base.Awake();
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
@@ -78,6 +78,7 @@ public class HatBarrel : ProjectileController
         gunController.onInitializeGun -= OnInitialize;
         gunController.onReload -= OnReload;
     }
+
     public override void InitializeProjectile(GunStats stats)
     {
         loadedProjectile = new ProjectileState(stats, projectileOutput);
@@ -102,6 +103,7 @@ public class HatBarrel : ProjectileController
                 loadedProjectile.position = projectileOutput.position;
                 loadedProjectile.direction = projectileRotation * projectileOutput.forward;
                 loadedProjectile.rotation = projectileRotation * projectileOutput.rotation;
+                loadedProjectile.size = hatSize;
 
                 projectiles[currentStateIndex] = loadedProjectile;
                 // Sets initial position of the projectile
@@ -120,6 +122,7 @@ public class HatBarrel : ProjectileController
             currentStateIndex = (currentStateIndex + 1) % maxHatProjectiles;
         }
     }
+
     private void FixedUpdate()
     {
         if (!gunController)
@@ -139,6 +142,7 @@ public class HatBarrel : ProjectileController
         }
         positionActiveTexture.ApplyChanges();
     }
+
     private void UpdateProjectile(ProjectileState state)
     {
         state.oldPosition = state.position;

@@ -84,6 +84,9 @@ public abstract class ProjectileController : MonoBehaviour
     // Used for muzzle-flashes and other effects, is not where the projectile path actually starts
     protected Transform effectOutput;
 
+    // Projectiles should hit Default and HitBox
+    protected LayerMask collisionLayers;
+
     [HideInInspector]
     public GunStats stats;
     // Delegates and Events
@@ -120,6 +123,10 @@ public abstract class ProjectileController : MonoBehaviour
     public delegate void CollisionEvent(Collider other, ref ProjectileState state);
     public CollisionEvent OnColliderHit;
 
+    protected virtual void Awake()
+    {
+        collisionLayers = LayerMask.GetMask("Default", "HitBox");
+    }
 
     // The meat and potatoes of the gun, this is what initializes a "bullet", whatever the fuck that is supposed to mean
     // Again, subclasses decide for themselves what initializing a bullet does
@@ -139,11 +146,12 @@ public class ProjectileMotions
         //Update the velocity of the projectile
         float time = distance / state.speed;
         Vector3 velocity = state.direction * state.speed;
-        velocity += Vector3.up * state.gravity * time;
+        velocity += Vector3.down * state.gravity * time;
         state.speed = velocity.magnitude;
         state.direction = velocity.normalized;
         state.distanceTraveled += distance;
     }
+
     public static Collider[] GetPathCollisions(ProjectileState state, LayerMask collisionLayers)
     {
         var direction = state.position - state.oldPosition;

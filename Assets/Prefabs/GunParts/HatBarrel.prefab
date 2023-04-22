@@ -385,8 +385,9 @@ GameObject:
   - component: {fileID: 1607281845865317333}
   - component: {fileID: -936091643483276450}
   - component: {fileID: -8445443159102885784}
+  - component: {fileID: 4878415339882279067}
   m_Layer: 0
-  m_Name: hat_barrel
+  m_Name: HatBarrel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -452,9 +453,6 @@ MonoBehaviour:
   maxHatProjectiles: 300
   hatMaxDistance: 20
   hatSpeed: 7
-  collisionLayers:
-    serializedVersion: 2
-    m_Bits: 9
   hatVfx: {fileID: 1746704752495276340}
 --- !u!114 &1607281845865317333
 MonoBehaviour:
@@ -578,6 +576,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firingSound: {fileID: 11400000, guid: 5ea7ce643d8497641b43ff044754f3ee, type: 2}
+--- !u!114 &4878415339882279067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5374020728950191348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b0ba1bb34e28d142b759ea886c785ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stuckObject: {fileID: 7671496889312377090, guid: 1e110d118e8e32e4f952f3bbf08a3976, type: 3}
+  stuckLifeTime: 5
+  triggerOnHit: 1
+  onHitInterval: 1
+  priority: 4
 --- !u!1 &5891994160488146896
 GameObject:
   m_ObjectHideFlags: 0

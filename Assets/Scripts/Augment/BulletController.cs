@@ -4,9 +4,6 @@ using UnityEngine.VFX;
 public class BulletController : ProjectileController
 {
     [SerializeField]
-    private LayerMask collisionLayers;
-
-    [SerializeField]
     private float maxDistance = 20;
 
     [SerializeField]
@@ -29,17 +26,20 @@ public class BulletController : ProjectileController
     private ProjectileState projectile = new ProjectileState();
 
 
-    public void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
         //trailPositions = new float[vfxPositionsPerSample * collisionSamples * 3];
         trailPosTexture = new VFXTextureFormatter(vfxPositionsPerSample * collisionSamples);
         trail.SetTexture("Position", this.trailPosTexture.Texture);
     }
+
     private void Start()
     {
         flash.transform.position = projectileOutput.position;
     }
+
     public override void InitializeProjectile(GunStats stats)
     {
 
