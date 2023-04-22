@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -29,9 +30,16 @@ public class GlobalHUDController : MonoBehaviour
             roundTimer.alignment = TextAlignmentOptions.Top;
         }
 
-        foreach (PlayerStatUI playerStatUI in playerStatPanels)
+        StartCoroutine(DisableUnusedStatUIs());
+    }
+
+    private IEnumerator DisableUnusedStatUIs()
+    {
+        // Wait one frame before disabling stat blocks
+        yield return null;
+        for (int i = nextPlayerStatIndex; i < playerStatPanels.Length; i++)
         {
-            playerStatUI.enabled = false;
+            playerStatPanels[i].enabled = false;
         }
     }
 
@@ -43,7 +51,6 @@ public class GlobalHUDController : MonoBehaviour
             return;
         }
         playerStatPanels[nextPlayerStatIndex].playerManager = playerManager;
-        playerStatPanels[nextPlayerStatIndex].enabled = true;
         nextPlayerStatIndex++;
     }
 
