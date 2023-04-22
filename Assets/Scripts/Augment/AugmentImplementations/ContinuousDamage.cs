@@ -15,7 +15,7 @@ public class ContinuousDamage : MonoBehaviour
 
     private HitboxController hitbox;
 
-    void Awake()
+    void Start()
     {
         hitbox = transform.parent.GetComponent<HitboxController>();
         if (hitbox && hitbox.health)
