@@ -28,9 +28,9 @@ public class HealthController : MonoBehaviour
         currentHealth = maxhHealth;
     }
 
-    public void dealDamage(DamageInfo info)
+    public void DealDamage(DamageInfo info)
     {
-        
+
         currentHealth -= info.damage;
         onDamageTaken?.Invoke(this, info.damage, info);
         if (currentHealth <= 0)

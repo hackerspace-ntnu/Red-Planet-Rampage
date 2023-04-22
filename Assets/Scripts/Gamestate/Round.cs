@@ -95,7 +95,6 @@ public class Round
 #if DEBUG
         Debug.Assert(kills.ContainsKey(killer), "killer not registered in start of round!", killer);
 #endif
-        kills[killer].Add(victim);
         livingPlayers.Remove(victim);
 
         if (livingPlayers.Count == 2)
@@ -103,14 +102,24 @@ public class Round
             MusicTrackManager.Singleton.IntensifyBattleTheme();
         }
 
-        CheckWinCondition(killer);
+        // Only register a kill if it wasn't a suicide
+        if (killer != victim)
+        {
+            kills[killer].Add(victim);
+            CheckWinCondition(killer);
+        }
+        // If it was a suicide, we should give the surviving player the win if there's only one
+        else if (livingPlayers.Count < 2)
+        {
+            CheckWinCondition(livingPlayers.First());
+        }
     }
 
     private void CheckWinCondition(PlayerManager lastKiller)
     {
         if (livingPlayers.Count < 2)
         {
-            winner = lastKiller.identity;
+            winner = lastKiller?.identity;
             MatchController.Singleton.EndActiveRound();
         }
     }
