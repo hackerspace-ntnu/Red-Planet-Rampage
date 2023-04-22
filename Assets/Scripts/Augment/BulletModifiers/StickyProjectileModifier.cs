@@ -23,6 +23,8 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
     [SerializeField]
     private Priority priority = Priority.ARBITRARY;
 
+    private PlayerManager source;
+
     public Priority GetPriority()
     {
         return priority;
@@ -31,6 +33,7 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
     public void Attach(ProjectileController projectile)
     {
         projectile.OnColliderHit += StickToTarget;
+        source = projectile.player;
     }
 
     public void Detach(ProjectileController projectile)
@@ -42,6 +45,10 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
     {
         var stuck = Instantiate(stuckObject, state.position, state.rotation, null);
         stuck.transform.ParentUnscaled(collider.transform);
+        if (stuck.TryGetComponent<ContinuousDamage>(out var continuousDamage))
+        {
+            continuousDamage.source = source;
+        }
         Destroy(stuck, stuckLifeTime);
     }
 }
