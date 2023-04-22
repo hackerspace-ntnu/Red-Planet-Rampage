@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -29,9 +27,6 @@ public class HatBarrel : ProjectileController
 
     private ProjectileState loadedProjectile;
 
-    [SerializeField]
-    private LayerMask collisionLayers;
-
     //index of last initialized state in array
     private int currentStateIndex = 0;
 
@@ -40,8 +35,10 @@ public class HatBarrel : ProjectileController
 
     [SerializeField]
     private VisualEffect hatVfx;
-    void Awake()
+
+    protected override void Awake()
     {
+        base.Awake();
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
