@@ -50,7 +50,7 @@ public class GlobalHUDController : MonoBehaviour
             Debug.LogWarning("Too many player inputs!");
             return;
         }
-        playerStatPanels[nextPlayerStatIndex].playerManager = playerManager;
+        playerStatPanels[nextPlayerStatIndex].PlayerManager = playerManager;
         nextPlayerStatIndex++;
     }
 
