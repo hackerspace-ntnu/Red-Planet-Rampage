@@ -151,6 +151,9 @@ public class GalleryMenu : MonoBehaviour
 
     public void NextPage(InputAction.CallbackContext ctx)
     {
+        if (!gameObject.activeInHierarchy)
+            return;
+
         if(pageIndex == maxPages - 1)
         {
             pageIndex = 0;
@@ -169,6 +172,9 @@ public class GalleryMenu : MonoBehaviour
 
     public void PrevPage(InputAction.CallbackContext ctx)
     {
+        if (!gameObject.activeInHierarchy)
+            return;
+
         if (pageIndex == 0)
         {
             pageIndex = maxPages - 1;
@@ -187,6 +193,9 @@ public class GalleryMenu : MonoBehaviour
 
     public void Back(InputAction.CallbackContext ctx)
     {
+        if (!gameObject.activeInHierarchy)
+            return;
+
         mainMenuController.ReturnToMainMenu();
     }
 
