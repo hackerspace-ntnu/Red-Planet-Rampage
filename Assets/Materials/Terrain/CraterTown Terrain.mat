@@ -8,10 +8,13 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: CraterTown Terrain
-  m_Shader: {fileID: -6465566751694194690, guid: 68198cfbef88ac34481747978a1af114, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: f8ec4cafbe9538b4aa600770a5a8bf02, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - MAIN_LIGHT_CALCULATE_SHADOWS
+  - _MAIN_LIGHT_SHADOWS_CASCADE
+  - _SHADOWS_SOFT
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -69,6 +72,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Mask:
+        m_Texture: {fileID: 10300, guid: 0000000000000000f000000000000000, type: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Mask0:
@@ -139,6 +146,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Texture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -153,6 +164,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - MAIN_LIGHT_CALCULATE_SHADOWS: 1
     - _AlphaClip: 0
     - _Blend: 0
     - _BlendOp: 0
@@ -171,6 +183,7 @@ Material:
     - _HeightTransition: 0
     - _Hill_Border: 0
     - _Hill_Threshold: 0.35
+    - _MAIN_LIGHT_SHADOWS_CASCADE: 1
     - _Metallic: 0.04
     - _Metallic0: 0
     - _Metallic1: 0
@@ -183,6 +196,7 @@ Material:
     - _Parallax: 0.02
     - _QueueControl: 0
     - _QueueOffset: 0
+    - _SHADOWS_SOFT: 1
     - _SampleGI: 0
     - _Slope_Border: 0.2
     - _Smoothness: 0.01
@@ -203,7 +217,7 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Blue: {r: 0, g: 0.043137312, b: 1, a: 0}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0.9056604, g: 0.5632869, b: 0.2691349, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Flatland_Color: {r: 1, g: 0, b: 0, a: 0}
     - _Green: {r: 0.039215565, g: 1, b: 0, a: 0}
