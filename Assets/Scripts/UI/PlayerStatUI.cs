@@ -31,15 +31,24 @@ public class PlayerStatUI : MonoBehaviour
 
     private Outline outline;
 
-    public PlayerManager playerManager;
+    private PlayerManager playerManager;
 
-    void Start()
+    public PlayerManager PlayerManager
     {
-        outline = GetComponent<Outline>();
-        OnEnable();
+        get => playerManager;
+        set
+        {
+            playerManager = value;
+            Init();
+        }
     }
 
-    void OnEnable()
+    private void Start()
+    {
+        outline = GetComponent<Outline>();
+    }
+
+    private void Init()
     {
         if (!playerManager)
         {

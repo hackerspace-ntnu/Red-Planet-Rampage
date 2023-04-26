@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -23,6 +21,8 @@ public class MainMenuController : MonoBehaviour
     private Selectable defaultButton;
     [SerializeField]
     private GameObject defaultMenu;
+    [SerializeField]
+    private GalleryMenu galleryMenu;
 
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
@@ -90,6 +90,7 @@ public class MainMenuController : MonoBehaviour
         currentMenu.SetActive(false);
         menu.SetActive(true);
         currentMenu = menu;
+        SelectControl(menu.GetComponentInChildren<Selectable>());
     }
 
     /// <summary>
@@ -118,6 +119,8 @@ public class MainMenuController : MonoBehaviour
             t.SetPlayerInput(inputManager);
         }
 
+        galleryMenu.SetPlayerInput(inputManager);
+
         GameObject panel = Instantiate(playerBackgroundPanel, characterView);
         playerBackgrounds.Add(panel);
 
@@ -129,6 +132,11 @@ public class MainMenuController : MonoBehaviour
             // Update the visual loadout controller
             playerBackgrounds[i].GetComponent<CharacterMenuLoadout>().SetupPreview(playerIdentity.playerName, playerIdentity.color);
         }
+    }
+
+    public void ReturnToMainMenu()
+    {
+        SwitchToMenu(defaultMenu);
     }
 
     public void Quit()

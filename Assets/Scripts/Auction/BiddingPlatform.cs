@@ -28,6 +28,9 @@ public class BiddingPlatform : MonoBehaviour
     private TMP_Text timerText;
 
     [SerializeField]
+    private GameObject modelHolder;
+
+    [SerializeField]
     private float baseWaitTime;
 
     [SerializeField]
@@ -42,6 +45,11 @@ public class BiddingPlatform : MonoBehaviour
     private float borderTweenDuration = 0.2f;
 
     private Material material;
+
+    public delegate void BiddingEvent(BiddingPlatform biddingPlatform);
+
+    public BiddingEvent onBiddingExtended;
+    public BiddingEvent onBiddingEnd;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -98,7 +106,11 @@ public class BiddingPlatform : MonoBehaviour
             material.SetColor("_BidderColor", playerIdentity.color);
             LeanTween.value(gameObject, UpdateBorder, 0f, 1f, borderTweenDuration);
 
-            if ((auctionTimer.WaitTime - auctionTimer.ElapsedTime) < bumpTime) { auctionTimer.AddTime(bumpTime); }
+            if ((auctionTimer.WaitTime - auctionTimer.ElapsedTime) < bumpTime)
+            {
+                auctionTimer.AddTime(bumpTime);
+                onBiddingExtended(this);
+            }
 
             return true;
         }
@@ -122,10 +134,7 @@ public class BiddingPlatform : MonoBehaviour
             leadingBidder.PerformTransaction(item);
             LeanTween.value(gameObject, UpdateBorder, 1f, 0f, borderTweenDuration);
         }
-
-        //TODO: Remove this, call from auction driver or matchmanager
-        StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
+        onBiddingEnd?.Invoke(this);
     }
 
     public void SetItem(Item item)
@@ -134,6 +143,11 @@ public class BiddingPlatform : MonoBehaviour
         itemNameText.text = item.displayName;
         itemDescriptionText.text = item.displayDescription;
         itemCostText.text = chips.ToString();
+        GameObject model = Instantiate(item.augment, modelHolder.transform);
+        model.transform.Rotate(new Vector3(0f, 90f));
+        model.LeanScale(new Vector3(100f,100f,100f), 0.5f);
+        
+
 #if UNITY_EDITOR
         auctionTimer.StartTimer(10);
 #else

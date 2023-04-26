@@ -4,15 +4,24 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(PlayerMovement))]
+[RequireComponent(typeof(AudioSource))]
 public class PlayerManager : MonoBehaviour
 {
     // Layers 12 through 15 are gun layers.
     private static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
+    // Only Default and HitBox layers can be hit
+    private static int hitMask = 1 | (1 << 3);
+
+    [SerializeField]
+    private float maxHitDistance = 100;
+
     // TODO add context when shooty system is done
     public delegate void HitEvent(PlayerManager killer, PlayerManager victim);
 
     public HitEvent onDeath;
+
+    private PlayerManager lastPlayerThatHitMe;
 
     public delegate void BiddingPlatformEvent(BiddingPlatform platform);
     public BiddingPlatformEvent onSelectedBiddingPlatformChange;
@@ -45,26 +54,45 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private PlayerHUDController hudController;
 
+    [SerializeField]
+    private AudioSource audioSource;
+
+    [SerializeField]
+    private AudioGroup hitSounds;
+    [SerializeField]
+    private AudioGroup extraHitSounds;
+
     void Start()
     {
         healthController = GetComponent<HealthController>();
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
+        audioSource = GetComponent<AudioSource>();
     }
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
         hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
+        PlayOnHit();
+        if (info.sourcePlayer != this)
+        {
+            lastPlayerThatHitMe = info.sourcePlayer;
+        }
     }
 
     void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
-        onDeath?.Invoke(info.sourcePlayer, this);
-        TurnIntoRagdoll(info.position, info.force);
-        hudController.DisplayDeathScreen(info.sourcePlayer.identity);
+        var killer = info.sourcePlayer;
+        if (info.sourcePlayer == this && lastPlayerThatHitMe)
+        {
+            killer = lastPlayerThatHitMe;
+        }
+        onDeath?.Invoke(killer, this);
+        TurnIntoRagdoll();
+        hudController.DisplayDeathScreen(killer.identity);
     }
 
-    void TurnIntoRagdoll(Vector3 impactSite, Vector3 impactDirection)
+    void TurnIntoRagdoll()
     {
         // Disable components
         GetComponent<PlayerMovement>().enabled = false;
@@ -105,8 +133,26 @@ public class PlayerManager : MonoBehaviour
     {
         healthController.onDamageTaken -= OnDamageTaken;
         healthController.onDeath -= OnDeath;
-        //Remove the gun
-        if (gunController) Destroy(gunController.gameObject);
+        if (gunController)
+        {
+            gunController.onFire -= UpdateAimTarget;
+            //Remove the gun
+            Destroy(gunController.gameObject);
+        }
+    }
+
+    private void UpdateAimTarget(GunStats stats)
+    {
+        Vector3 cameraCenter = inputManager.transform.position;
+        Vector3 cameraDirection = inputManager.transform.forward;
+        if (Physics.Raycast(cameraCenter, cameraDirection, out RaycastHit hit, maxHitDistance, hitMask))
+        {
+            gunController.target = hit.point;
+        }
+        else
+        {
+            gunController.target = cameraCenter + cameraDirection * maxHitDistance;
+        }
     }
 
     private void OnFire(InputAction.CallbackContext ctx)
@@ -153,6 +199,7 @@ public class PlayerManager : MonoBehaviour
         gun.transform.localRotation = Quaternion.AngleAxis(0.5f, Vector3.up);
         // Remember gun controller
         gunController = gun.GetComponent<GunController>();
+        gunController.onFire += UpdateAimTarget;
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)
@@ -167,5 +214,17 @@ public class PlayerManager : MonoBehaviour
     new public string ToString()
     {
         return "Player " + inputManager.playerInput.playerIndex;
+    }
+
+    private void PlayOnHit()
+    {
+        if (Random.Range(0, 100) > 5)
+        {
+            hitSounds.Play(audioSource);
+        }
+        else
+        {
+            extraHitSounds.Play(audioSource);
+        }
     }
 }
