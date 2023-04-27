@@ -106,9 +106,9 @@ public class GalleryMenu : MonoBehaviour
             if (i < unlockedElements.Length)
             { 
                 Weapon weapon = unlockedElements[i];
-                GameObject gun = GunFactory.InstantiateGun(weapon.body, weapon.barrel, weapon.extension, null, null);
-                gun.transform.localScale = Vector3.one;
-                gun.transform.SetParent(gridElement);
+                GameObject gun = GunFactory.InstantiateGun(weapon.body, weapon.barrel, weapon.extension, null, gridElement);
+                //gun.transform.localScale = Vector3.one;
+                //gun.transform.SetParent(gridElement);
 
                 spawnedWeapons.Add(gun);
 
@@ -121,8 +121,7 @@ public class GalleryMenu : MonoBehaviour
 
                 // Scale the weapon so it fits within the UI 
                 float scaleFactor = gridCellSize.x / bounds.size.z;
-
-                gun.transform.localScale = new Vector3(scaleFactor / gun.transform.lossyScale.x, scaleFactor / gun.transform.lossyScale.y, scaleFactor / gun.transform.lossyScale.z);
+                gun.LeanScale(new Vector3(scaleFactor, scaleFactor, scaleFactor), 0.2f);
 
                 // Recalculate bounds
                 foreach (var renderer in gun.GetComponentsInChildren<Renderer>())

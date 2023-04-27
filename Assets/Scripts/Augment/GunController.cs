@@ -33,6 +33,11 @@ public class GunController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (fireRateController == null)
+        {
+            // No fireratecontroller exists
+            return;
+        }
         if (fireRateController.shouldFire(triggerPressed, triggerHeld))
         {
             FireGun();
