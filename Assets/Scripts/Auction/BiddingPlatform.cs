@@ -85,7 +85,7 @@ public class BiddingPlatform : MonoBehaviour
 
     public bool TryPlaceBid(PlayerIdentity playerIdentity)
     {
-        if (ActiveBiddingRound == null)
+        if (ActiveBiddingRound == null || item == null || Mathf.Round(auctionTimer.WaitTime - auctionTimer.ElapsedTime) == 0)
         {
             Debug.Log("No active biddingRound on biddingPlatform!");
             return false;
@@ -143,10 +143,11 @@ public class BiddingPlatform : MonoBehaviour
         itemNameText.text = item.displayName;
         itemDescriptionText.text = item.displayDescription;
         itemCostText.text = chips.ToString();
+        Debug.Log(modelHolder.GetComponentInParent<RectTransform>().sizeDelta);
         GameObject model = Instantiate(item.augment, modelHolder.transform);
         model.transform.Rotate(new Vector3(0f, 90f));
         model.LeanScale(new Vector3(100f,100f,100f), 0.5f);
-        
+
 
 #if UNITY_EDITOR
         auctionTimer.StartTimer(10);

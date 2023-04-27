@@ -14,8 +14,12 @@ public class PlayerStatUI : MonoBehaviour
     [SerializeField]
     private TMP_Text chipsText;
 
+    public string gunNameText { get; private set; }
+
     [SerializeField]
-    private TMP_Text gunNameText;
+    private RectTransform gunPreviewPanel;
+
+    private GameObject gunPreviewGameObject;
 
     [SerializeField]
     private StatBar damageBar;
@@ -32,6 +36,11 @@ public class PlayerStatUI : MonoBehaviour
     private Outline outline;
 
     private PlayerManager playerManager;
+
+    [SerializeField]
+    private float gunPreviewScale;
+
+    private float gunPreviewPositionZ = -1f;
 
     public PlayerManager PlayerManager
     {
@@ -64,6 +73,10 @@ public class PlayerStatUI : MonoBehaviour
         playerManager.identity.onChipChange += SetChips;
 
         SetGunName(playerManager.GetGunName());
+        gunPreviewGameObject = GunFactory.InstantiateGun(playerManager.identity.Body, playerManager.identity.Barrel, playerManager.identity.Extension, null, gunPreviewPanel);
+        gunPreviewGameObject.transform.Rotate(new Vector3(0f, 90f));
+        gunPreviewGameObject.transform.localScale = new Vector3(gunPreviewScale, gunPreviewScale, gunPreviewScale);
+        gunPreviewGameObject.transform.Translate(new Vector3(0f, 0f, gunPreviewPositionZ));
 
         // Set current stats
         OnInventoryChange(null);
@@ -100,16 +113,18 @@ public class PlayerStatUI : MonoBehaviour
 
     private void OnBiddingPlatformChange(BiddingPlatform platform)
     {
+        Item body = playerManager.identity.Body;
+        Item barrel = playerManager.identity.Barrel;
+        Item extension = playerManager.identity.Extension;
+
         if (platform == null || platform.Item == null)
         {
             ResetNewGunStats();
             SetGunName(playerManager.GetGunName());
+            SetGunPreview(body, barrel, extension);
             return;
         }
 
-        Item body = playerManager.identity.Body;
-        Item barrel = playerManager.identity.Barrel;
-        Item extension = playerManager.identity.Extension;
         switch (platform.Item.augmentType)
         {
             case AugmentType.Body:
@@ -128,6 +143,7 @@ public class PlayerStatUI : MonoBehaviour
         GunStats stats = GunFactory.GetGunStats(body, barrel, extension);
         SetNewGunStats(stats);
         SetGunName(GunFactory.GetGunName(body, barrel, extension));
+        SetGunPreview(body, barrel, extension);
     }
 
     public void SetName(string name)
@@ -147,7 +163,16 @@ public class PlayerStatUI : MonoBehaviour
 
     public void SetGunName(string name)
     {
-        gunNameText.SetText(name);
+        gunNameText = name;
+    }
+
+    public void SetGunPreview(Item body, Item barrel, Item extension)
+    {
+        GunFactory gunFactory = gunPreviewGameObject.GetComponent<GunFactory>();
+        gunFactory.Body = body;
+        gunFactory.Barrel = barrel;
+        gunFactory.Extension = extension;
+        gunFactory.InitializeGun();
     }
 
     public void SetBaseGunStats(GunStats gunStats)
