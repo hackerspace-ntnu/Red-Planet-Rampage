@@ -14,14 +14,15 @@ public class BulletController : ProjectileController
     private float bulletSpeed = 50f;
 
     private VFXTextureFormatter trailPosTexture;
-    //private Texture2D trailPosTexture;
-    //private float[] trailPositions;
 
     [SerializeField]
     private VisualEffect trail;
 
     [SerializeField]
     private VisualEffect flash;
+
+    [SerializeField]
+    private BarrelAnimator animator;
 
     private ProjectileState projectile = new ProjectileState();
 
@@ -30,7 +31,6 @@ public class BulletController : ProjectileController
     {
         base.Awake();
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
-        //trailPositions = new float[vfxPositionsPerSample * collisionSamples * 3];
         trailPosTexture = new VFXTextureFormatter(vfxPositionsPerSample * collisionSamples);
         trail.SetTexture("Position", this.trailPosTexture.Texture);
     }
@@ -40,8 +40,19 @@ public class BulletController : ProjectileController
         flash.transform.position = projectileOutput.position;
     }
 
+    protected override void OnInitialize(GunStats gunstats)
+    {
+        animator.OnInitialize(gunstats);
+    }
+
+    protected override void OnReload(GunStats gunstats)
+    {
+        animator.OnReload(gunstats.Ammo);
+    }
+
     public override void InitializeProjectile(GunStats stats)
     {
+        animator.OnFire(stats.Ammo);
 
         // TODO: Possibly standardize this better
 

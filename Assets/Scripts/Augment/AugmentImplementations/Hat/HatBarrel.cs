@@ -6,13 +6,8 @@ using UnityEngine.VFX;
 /// </summary>
 public class HatBarrel : ProjectileController
 {
-    private GunController gunController;
-
     [SerializeField]
-    private Animator animator;
-
-    [SerializeField]
-    private HatBarrelModel hatBarrelModel;
+    private BarrelAnimator animator;
 
     [SerializeField]
     private int maxHatProjectiles = 300;
@@ -42,15 +37,6 @@ public class HatBarrel : ProjectileController
     protected override void Awake()
     {
         base.Awake();
-        gunController = transform.parent.GetComponent<GunController>();
-        if (!gunController)
-        {
-            Debug.Log("HatBarrel not attached to gun parent!");
-            return;
-        }
-        gunController.onInitializeGun += OnInitialize;
-        //gunController.onFire += OnFire;
-        gunController.onReload += OnReload;
         projectiles = new ProjectileState[maxHatProjectiles];
 
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
@@ -62,21 +48,14 @@ public class HatBarrel : ProjectileController
         hatVfx.SendEvent("OnPlay");
     }
 
-    private void OnInitialize(GunStats gunstats)
+    protected override void OnInitialize(GunStats gunstats)
     {
-        animator.speed = Mathf.Max(gunstats.Firerate, 1f);
-        hatBarrelModel.OnInitialize(gunstats.magazineSize);
+        animator.OnInitialize(gunstats);
     }
 
-    private void OnReload(GunStats gunstats)
+    protected override void OnReload(GunStats gunstats)
     {
-        hatBarrelModel.OnReload(gunstats.Ammo);
-    }
-
-    private void OnDestroy()
-    {
-        gunController.onInitializeGun -= OnInitialize;
-        gunController.onReload -= OnReload;
+        animator.OnReload(gunstats.Ammo);
     }
 
     public override void InitializeProjectile(GunStats stats)
@@ -84,8 +63,7 @@ public class HatBarrel : ProjectileController
         loadedProjectile = new ProjectileState(stats, projectileOutput);
         loadedProjectile.maxDistance = this.hatMaxDistance;
 
-        animator.SetTrigger("Fire");
-        hatBarrelModel.OnFire(stats.Ammo);
+        animator.OnFire(stats.Ammo);
     }
 
     public void ReleaseLoadedHat()
@@ -115,7 +93,6 @@ public class HatBarrel : ProjectileController
 
                 currentStateIndex = (currentStateIndex + 1) % maxHatProjectiles;
                 loadedProjectile = null;
-
 
                 return;
             }
