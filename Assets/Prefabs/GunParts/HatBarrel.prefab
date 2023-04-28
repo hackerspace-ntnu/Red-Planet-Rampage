@@ -448,11 +448,11 @@ MonoBehaviour:
   projectileRotation: {x: 0, y: 0, z: 0, w: 1}
   stats: {fileID: 0}
   player: {fileID: 0}
-  animator: {fileID: 4279124024988096572}
-  hatBarrelModel: {fileID: 1708190655687500582}
+  animator: {fileID: 5376405389655812532}
   maxHatProjectiles: 300
   hatMaxDistance: 20
   hatSpeed: 7
+  hatSize: 0.2
   hatVfx: {fileID: 1746704752495276340}
 --- !u!114 &1607281845865317333
 MonoBehaviour:
@@ -793,7 +793,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8198676354693484638}
   - component: {fileID: 4279124024988096572}
-  - component: {fileID: 1708190655687500582}
+  - component: {fileID: 5376405389655812532}
   m_Layer: 0
   m_Name: barrel_hatClamper
   m_TagString: Untagged
@@ -839,7 +839,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &1708190655687500582
+--- !u!114 &5376405389655812532
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -851,6 +851,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d243b197fbb25094abb3543cf4bbd340, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  animator: {fileID: 4279124024988096572}
   hatPrefab: {fileID: 7671496889312377090, guid: 3a3baf8f14610324db1197776333cba3, type: 3}
   bullet: {fileID: 3020309704562934005}
   bulletHeigth: 0.05

@@ -123,15 +123,37 @@ public abstract class ProjectileController : MonoBehaviour
     public delegate void CollisionEvent(Collider other, ref ProjectileState state);
     public CollisionEvent OnColliderHit;
 
+    private GunController gunController;
+
     protected virtual void Awake()
     {
         collisionLayers = LayerMask.GetMask("Default", "HitBox");
+
+        gunController = transform.parent.GetComponent<GunController>();
+        if (!gunController)
+        {
+            Debug.Log("Barrel not attached to gun parent!");
+            return;
+        }
+        gunController.onInitializeGun += OnInitialize;
+        gunController.onReload += OnReload;
     }
+
+    protected virtual void OnDestroy()
+    {
+        if (!gunController) return;
+        gunController.onInitializeGun -= OnInitialize;
+        gunController.onReload -= OnReload;
+    }
+
+
+    protected abstract void OnInitialize(GunStats stats);
+
+    protected abstract void OnReload(GunStats stats);
 
     // The meat and potatoes of the gun, this is what initializes a "bullet", whatever the fuck that is supposed to mean
     // Again, subclasses decide for themselves what initializing a bullet does
     public abstract void InitializeProjectile(GunStats stats);
-
 }
 
 
