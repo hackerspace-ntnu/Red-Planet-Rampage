@@ -6,8 +6,6 @@ using UnityEngine.VFX;
 /// </summary>
 public class HatBarrel : ProjectileController
 {
-    private GunController gunController;
-
     [SerializeField]
     private BarrelAnimator animator;
 

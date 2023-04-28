@@ -123,7 +123,7 @@ public abstract class ProjectileController : MonoBehaviour
     public delegate void CollisionEvent(Collider other, ref ProjectileState state);
     public CollisionEvent OnColliderHit;
 
-    private GunController gunController;
+    protected GunController gunController;
 
     protected virtual void Awake()
     {
