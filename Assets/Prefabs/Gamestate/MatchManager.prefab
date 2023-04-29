@@ -49,11 +49,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   roundLength: 180
   roundEndDelay: 5
+  biddingEndDelay: 1
   matchEndDelay: 5
-  startAmount: 5
-  rewardWin: 1
-  rewardKill: 1
-  rewardBase: 2
+  rewards:
+  - name: Start Amount
+    value: 5
+  - name: Base
+    value: 2
+  - name: Kill
+    value: 1
+  - name: Win
+    value: 1
   roundTimer: {fileID: 7042748633319679116}
   globalHUDController: {fileID: 1760732758}
 --- !u!114 &7042748633319679116
@@ -91,7 +97,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TransformParent: {fileID: 7583196319734858555}
     m_Modifications:
     - target: {fileID: 1381118347005466384, guid: d21a0a379f6981f4496cadc44b0a33b9, type: 3}
@@ -231,7 +237,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d21a0a379f6981f4496cadc44b0a33b9, type: 3}
 --- !u!224 &1760732757 stripped
 RectTransform:

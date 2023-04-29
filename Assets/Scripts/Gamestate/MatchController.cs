@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine;
+using System;
 
 /// <summary>
 /// Wrapper struct for tying refference to Player class with the in-game player.
@@ -18,6 +19,36 @@ public struct Player
     public PlayerIdentity playerIdentity;
     // Reference to in-match player
     public PlayerManager playerManager;
+
+    public static bool operator==(Player lhs, Player rhs)
+    {
+        return lhs.playerIdentity == rhs.playerIdentity;
+    }
+
+    public static bool operator!=(Player lhs, Player rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return playerIdentity.GetHashCode();
+    }
+}
+
+[Serializable]
+public struct Reward
+{
+    public string name;
+    public int value;
 }
 
 [RequireComponent(typeof(PlayerFactory))]
@@ -50,13 +81,8 @@ public class MatchController : MonoBehaviour
 
     [Header("Chip rewards")]
     [SerializeField]
-    private int startAmount = 5;
-    [SerializeField]
-    private int rewardWin = 1;
-    [SerializeField]
-    private int rewardKill = 1;
-    [SerializeField]
-    private int rewardBase = 2;
+    private Reward[] rewards;
+    public Reward[] Rewards{ get { return rewards; } }
 
     public Timer roundTimer;
 
@@ -64,7 +90,13 @@ public class MatchController : MonoBehaviour
     private GlobalHUDController globalHUDController;
 
     private List<Player> players = new List<Player>();
+    public List<Player> Players 
+    { 
+        get { return players;} 
+    }
+
     private static List<Round> rounds = new List<Round>();
+    public Round GetLastRound() { return rounds.Last(); }
 
     void Start()
     {
@@ -109,7 +141,7 @@ public class MatchController : MonoBehaviour
         {
             var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
             var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
-            players.Add(new Player(playerIdentity, playerStateController, startAmount));
+            players.Add(new Player(playerIdentity, playerStateController, rewards[0].value));
         });
 
         // TODO do something else funky wunky
@@ -173,12 +205,12 @@ public class MatchController : MonoBehaviour
         foreach (Player player in players)
         {
             // Base reward and kill bonus
-            var reward = rewardBase + lastRound.KillCount(player.playerManager) * rewardKill;
+            //var reward = rewardBase + lastRound.KillCount(player.playerManager) * rewardKill;
             // Win bonus
-            if (lastRound.IsWinner(player.playerManager.identity))
-                reward += rewardWin;
+            if (lastRound.IsWinner(player.playerManager.identity)) { }
+                //reward += rewardWin;
 
-            player.playerManager.identity.UpdateChip(reward);
+            //player.playerManager.identity.UpdateChip(reward);
         }
     }
 
