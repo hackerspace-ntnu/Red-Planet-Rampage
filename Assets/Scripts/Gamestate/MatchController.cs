@@ -112,8 +112,6 @@ public class MatchController : MonoBehaviour
             players.Add(new Player(playerIdentity, playerStateController, startAmount));
         });
 
-        // TODO do something else funky wunky
-
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
         onRoundStart?.Invoke();
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
