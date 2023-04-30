@@ -44,6 +44,8 @@ public class BiddingPlatform : MonoBehaviour
     [SerializeField]
     private float borderTweenDuration = 0.2f;
 
+    private GameObject augmentModel; 
+
     private Material material;
 
     public delegate void BiddingEvent(BiddingPlatform biddingPlatform);
@@ -132,7 +134,17 @@ public class BiddingPlatform : MonoBehaviour
         if (leadingBidder)
         {
             leadingBidder.PerformTransaction(item);
+
+            // Animate weapon flying towards winner
             LeanTween.value(gameObject, UpdateBorder, 1f, 0f, borderTweenDuration);
+            augmentModel.LeanScale(new Vector3(40f, 40f, 40f), 0.2f);
+            LeanTween.followLinear(augmentModel.transform, leadingBidder.transform, LeanProp.position, 20f);
+            Destroy(augmentModel, 0.6f);
+        }
+        else
+        {
+            augmentModel.LeanScale(new Vector3(0f, 0f), 0.3f);
+            Destroy(augmentModel, 0.5f);
         }
         onBiddingEnd?.Invoke(this);
     }
@@ -143,9 +155,9 @@ public class BiddingPlatform : MonoBehaviour
         itemNameText.text = item.displayName;
         itemDescriptionText.text = item.displayDescription;
         itemCostText.text = chips.ToString();
-        GameObject model = Instantiate(item.augment, modelHolder.transform);
-        model.transform.Rotate(new Vector3(0f, 90f));
-        model.LeanScale(new Vector3(100f,100f,100f), 0.5f);
+        augmentModel = Instantiate(item.augment, modelHolder.transform);
+        augmentModel.transform.Rotate(new Vector3(0f, 90f));
+        augmentModel.LeanScale(new Vector3(100f,100f,100f), 0.5f);
 
 
 #if UNITY_EDITOR
