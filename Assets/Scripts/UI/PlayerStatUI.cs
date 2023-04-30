@@ -22,6 +22,9 @@ public class PlayerStatUI : MonoBehaviour
     private GameObject gunPreviewGameObject;
 
     [SerializeField]
+    private Chip chip;
+
+    [SerializeField]
     private StatBar damageBar;
 
     [SerializeField]
@@ -71,6 +74,8 @@ public class PlayerStatUI : MonoBehaviour
 
         SetChips(playerManager.identity.chips);
         playerManager.identity.onChipChange += SetChips;
+        playerManager.identity.onChipSpent += AnimateTransaction;
+        playerManager.identity.onChipGain += AnimateTransaction;
 
         SetGunName(playerManager.GetGunName());
         gunPreviewGameObject = GunFactory.InstantiateGun(playerManager.identity.Body, playerManager.identity.Barrel, playerManager.identity.Extension, null, gunPreviewPanel);
@@ -100,10 +105,18 @@ public class PlayerStatUI : MonoBehaviour
             return;
         }
 
-
         playerManager.identity.onChipChange -= SetChips;
+        playerManager.identity.onChipSpent -= AnimateTransaction;
+        playerManager.identity.onChipGain -= AnimateTransaction;
         playerManager.identity.onInventoryChange -= OnInventoryChange;
         playerManager.onSelectedBiddingPlatformChange -= OnBiddingPlatformChange;
+    }
+
+    private void AnimateTransaction(int amount)
+    {
+        if (chip == null)
+            return;
+        chip.AnimateTransaction(amount, playerManager.SelectedBiddingPlatform.transform);
     }
 
     private void OnInventoryChange(Item item)
