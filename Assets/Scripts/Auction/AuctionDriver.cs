@@ -56,6 +56,8 @@ public class AuctionDriver : MonoBehaviour
     private Timer auctionTimer;
     [SerializeField]
     private PlayerFactory playerFactory;
+    [SerializeField]
+    private RectTransform[] gunConstructionPanels;
 
 #if UNITY_EDITOR
     private void OnValidate()
@@ -129,17 +131,16 @@ public class AuctionDriver : MonoBehaviour
 
     private void EndAuction(BiddingPlatform biddingPlatform)
     {
-
         lastExtendedAuction.onBiddingEnd = null;
+
+        for (int i = 0; i < playersInAuction.Count; i++)
+        {
+            StartCoroutine(AnimateGunConstruction(playersInAuction.ElementAt(i), gunConstructionPanels[i]));
+        }
+
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
         PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
     }
-
-    private void AnimateRewards()
-    {
-
-    }
-
 
     private bool TryPlaceBid(PlayerManager player, int slot)
     {
@@ -173,6 +174,32 @@ public class AuctionDriver : MonoBehaviour
         ActiveBiddingRound.chips[slot] = cost;
         ActiveBiddingRound.players[slot] = player;
         return true;
+    }
+
+    private IEnumerator AnimateGunConstruction(PlayerManager playerManager, RectTransform parent)
+    {
+        // TODO: Play construction fanfare music
+        yield return new WaitForSeconds(1);
+        GameObject body = Instantiate(playerManager.identity.Body.augment, parent);
+        body.LeanScale(new Vector3 (10f,10f,10f), 0.5f);
+        body.LeanRotateY(90f, 2f);
+
+        // TODO: Put non-body augments on attachPoints
+        yield return new WaitForSeconds(1);
+        GameObject barrel = Instantiate(playerManager.identity.Barrel.augment, parent);
+        barrel.LeanScale(new Vector3(10f, 10f, 10f), 0.5f);
+        barrel.LeanRotateY(90f, 2f);
+
+        if (playerManager.identity.Extension)
+        {
+            yield return new WaitForSeconds(1);
+            GameObject extension = Instantiate(playerManager.identity.Extension.augment, parent);
+            extension.LeanScale(new Vector3(10f, 10f, 10f), 0.5f);
+            extension.LeanRotateY(90f, 2f);
+        }
+        // TODO: Display gunName
+
+        yield return null;
     }
 
     private void YieldFromAuction(PlayerManager player)

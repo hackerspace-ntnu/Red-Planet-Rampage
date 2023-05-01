@@ -42,7 +42,7 @@ public class MatchController : MonoBehaviour
     private float roundEndDelay;
 
     [SerializeField]
-    private float biddingEndDelay = 1;
+    private float biddingEndDelay = 10;
 
     [SerializeField]
     private float matchEndDelay = 5;
