@@ -20,8 +20,10 @@ public class Fire : GunExtension
         gunController.onInitializeGun += AddFireToProjectile;
     }
 
+
     private void AddFireToProjectile(GunStats gunstats)
     {
-        Instantiate(fire, gunController.projectile.transform);
+        GameObject fireObject = Instantiate(fire, gunController.projectile.transform);
+        fireObject.SetActive(false);
     }
 }

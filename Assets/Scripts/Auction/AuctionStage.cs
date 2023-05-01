@@ -11,6 +11,10 @@ public class AuctionStage : ScriptableObject
     [SerializeField] 
     protected Item[] items;
 
+    /// <summary>
+    /// This method should ONLY be called by staticInfo.
+    /// </summary>
+    /// <param name="items">Which items exists in this AuctionStage</param>
     public void SetItems(Item[] items)
     {
         this.items = items;

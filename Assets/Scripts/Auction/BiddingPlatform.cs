@@ -156,6 +156,13 @@ public class BiddingPlatform : MonoBehaviour
         itemDescriptionText.text = item.displayDescription;
         itemCostText.text = chips.ToString();
         augmentModel = Instantiate(item.augment, modelHolder.transform);
+
+        // All barrels have their origins skewed by design, this is the best solution to center barrels as long as that is the case.
+        if (item.augmentType == AugmentType.Barrel)
+        {
+            augmentModel.transform.Translate(new Vector3(-1f, 0f, 0f));
+        }
+
         augmentModel.transform.Rotate(new Vector3(0f, 90f));
         augmentModel.LeanScale(new Vector3(100f,100f,100f), 0.5f);
 
