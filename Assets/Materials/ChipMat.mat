@@ -11,7 +11,10 @@ Material:
   m_Shader: {fileID: -6465566751694194690, guid: f8ec4cafbe9538b4aa600770a5a8bf02, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - MAIN_LIGHT_CALCULATE_SHADOWS
+  - _MAIN_LIGHT_SHADOWS_CASCADE
+  - _SHADOWS_SOFT
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -85,7 +88,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - MAIN_LIGHT_CALCULATE_SHADOWS: 0
+    - MAIN_LIGHT_CALCULATE_SHADOWS: 1
     - _AlphaClip: 0
     - _AlphaToMask: 0
     - _Blend: 0
@@ -103,7 +106,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.2522936
     - _GlossyReflections: 1
-    - _MAIN_LIGHT_SHADOWS_CASCADE: 0
+    - _MAIN_LIGHT_SHADOWS_CASCADE: 1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -111,7 +114,7 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _SHADOWS_SOFT: 0
+    - _SHADOWS_SOFT: 1
     - _Smoothness: 0.2522936
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -127,7 +130,7 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &4883106357382376246
+--- !u!114 &992717937072896396
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
