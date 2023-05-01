@@ -28,9 +28,6 @@ public class AuctionDriver : MonoBehaviour
     private BiddingPlatform[] biddingPlatforms;
     [SerializeField]
     private RandomisedAuctionStage[] availableAuctionStages;
-    [SerializeField]
-    private AudioClip constructionFanfare;
-    private AudioSource audioSource;
 
     private BiddingPlatform lastExtendedAuction;
 
@@ -97,8 +94,6 @@ public class AuctionDriver : MonoBehaviour
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
         playersInAuctionRound = new HashSet<PlayerManager>(playersInAuction);
 
-        audioSource = GetComponent<AudioSource>();
-
         AnimateAuctionStart();
         // TODO: Make AuctionDriver instantiate bidding platforms instead of finding them?
         StartCoroutine(PopulatePlatforms());
@@ -142,8 +137,8 @@ public class AuctionDriver : MonoBehaviour
         lastExtendedAuction.onBiddingEnd = null;
 
         LeanTween.alpha(gunConstructionPanels[0].parent.GetComponent<RectTransform>(), 1f, 1f).setEase(LeanTweenType.linear);
-        audioSource.clip = constructionFanfare;
-        audioSource.Play();
+        MusicTrackManager.Singleton.SwitchTo(MusicType.FANFARE);
+        
         for (int i = 0; i < playersInAuction.Count; i++)
         {
             StartCoroutine(AnimateGunConstruction(playersInAuction.ElementAt(playersInAuction.Count-i-1), gunConstructionPanels[i]));
