@@ -2,6 +2,7 @@ using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 
 // TODO
@@ -27,6 +28,9 @@ public class AuctionDriver : MonoBehaviour
     private BiddingPlatform[] biddingPlatforms;
     [SerializeField]
     private RandomisedAuctionStage[] availableAuctionStages;
+    [SerializeField]
+    private AudioClip constructionFanfare;
+    private AudioSource audioSource;
 
     private BiddingPlatform lastExtendedAuction;
 
@@ -56,8 +60,10 @@ public class AuctionDriver : MonoBehaviour
     private Timer auctionTimer;
     [SerializeField]
     private PlayerFactory playerFactory;
+    
     [SerializeField]
     private RectTransform[] gunConstructionPanels;
+    private float gunConstructionScale = 8f;
 
 #if UNITY_EDITOR
     private void OnValidate()
@@ -90,6 +96,8 @@ public class AuctionDriver : MonoBehaviour
         playerFactory.InstantiatePlayersBidding();
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
         playersInAuctionRound = new HashSet<PlayerManager>(playersInAuction);
+
+        audioSource = GetComponent<AudioSource>();
 
         AnimateAuctionStart();
         // TODO: Make AuctionDriver instantiate bidding platforms instead of finding them?
@@ -133,9 +141,12 @@ public class AuctionDriver : MonoBehaviour
     {
         lastExtendedAuction.onBiddingEnd = null;
 
+        LeanTween.alpha(gunConstructionPanels[0].parent.GetComponent<RectTransform>(), 1f, 1f).setEase(LeanTweenType.linear);
+        audioSource.clip = constructionFanfare;
+        audioSource.Play();
         for (int i = 0; i < playersInAuction.Count; i++)
         {
-            StartCoroutine(AnimateGunConstruction(playersInAuction.ElementAt(i), gunConstructionPanels[i]));
+            StartCoroutine(AnimateGunConstruction(playersInAuction.ElementAt(playersInAuction.Count-i-1), gunConstructionPanels[i]));
         }
 
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
@@ -178,27 +189,31 @@ public class AuctionDriver : MonoBehaviour
 
     private IEnumerator AnimateGunConstruction(PlayerManager playerManager, RectTransform parent)
     {
-        // TODO: Play construction fanfare music
         yield return new WaitForSeconds(1);
         GameObject body = Instantiate(playerManager.identity.Body.augment, parent);
-        body.LeanScale(new Vector3 (10f,10f,10f), 0.5f);
+        body.LeanScale(new Vector3 (gunConstructionScale, gunConstructionScale, gunConstructionScale), 0.5f);
         body.LeanRotateY(90f, 2f);
+        GunBody gunBody = body.GetComponent<GunBody>();
 
-        // TODO: Put non-body augments on attachPoints
         yield return new WaitForSeconds(1);
-        GameObject barrel = Instantiate(playerManager.identity.Barrel.augment, parent);
-        barrel.LeanScale(new Vector3(10f, 10f, 10f), 0.5f);
+        GameObject barrel = Instantiate(playerManager.identity.Barrel.augment, gunBody.attachmentSite.position, gunBody.attachmentSite.rotation, parent);
+        barrel.LeanScale(new Vector3(gunConstructionScale, gunConstructionScale, gunConstructionScale), 0.5f);
         barrel.LeanRotateY(90f, 2f);
+        GunBarrel gunBarrel = barrel.GetComponent<GunBarrel>();
 
         if (playerManager.identity.Extension)
         {
             yield return new WaitForSeconds(1);
-            GameObject extension = Instantiate(playerManager.identity.Extension.augment, parent);
-            extension.LeanScale(new Vector3(10f, 10f, 10f), 0.5f);
+            GameObject extension = Instantiate(playerManager.identity.Extension.augment, gunBarrel.attachmentPoints[0].position, gunBarrel.attachmentPoints[0].rotation, parent);
+            GunExtension gunExtension = extension.GetComponent<GunExtension>();
+            var outputs = new List<Transform>();
+            outputs.AddRange(gunExtension.outputs);
+            outputs.AddRange(gunExtension.AttachToTransforms(gunBarrel.attachmentPoints));
+            extension.LeanScale(new Vector3(gunConstructionScale, gunConstructionScale, gunConstructionScale), 0.5f);
             extension.LeanRotateY(90f, 2f);
         }
-        // TODO: Display gunName
-
+        TMP_Text name = parent.GetComponentInChildren<TMP_Text>();
+        name.text = GunFactory.GetGunName(playerManager.identity.Body, playerManager.identity.Barrel, playerManager.identity.Extension);
         yield return null;
     }
 
