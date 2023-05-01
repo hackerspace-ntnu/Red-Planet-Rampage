@@ -11,6 +11,11 @@ public class AuctionStage : ScriptableObject
     [SerializeField] 
     protected Item[] items;
 
+    public void SetItems(Item[] items)
+    {
+        this.items = items;
+    }
+
     public virtual bool Promote(out BiddingRound round)
     {
         if (items.Length == 0)

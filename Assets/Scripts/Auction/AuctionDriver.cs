@@ -26,7 +26,6 @@ public class AuctionDriver : MonoBehaviour
 
     [SerializeField]
     private BiddingPlatform[] biddingPlatforms;
-    [SerializeField]
     private RandomisedAuctionStage[] availableAuctionStages;
 
     private BiddingPlatform lastExtendedAuction;
@@ -89,6 +88,7 @@ public class AuctionDriver : MonoBehaviour
 //#if UNITY_EDITOR
 //        biddingBeginDelay = 0f;
 //#endif
+        availableAuctionStages = new RandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction };
         playerFactory = GetComponent<PlayerFactory>();
         playerFactory.InstantiatePlayersBidding();
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
