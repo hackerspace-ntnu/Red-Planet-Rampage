@@ -73,34 +73,23 @@ public class TownScoreboard : MonoBehaviour
     public void UpdateScoreboard()
     {
         var lastRound = matchController.GetLastRound();
-        Reward[] rewards = matchController.Rewards;
         
         foreach (var player in players)
         {
-            AddPosterCrime(player, rewards[1].name, rewards[1].value);
-            AddPosterCrime(player, rewards[2].name, rewards[2].value * lastRound.KillCount(player.playerManager));
-
-            int score = rewards[1].value + lastRound.KillCount(player.playerManager) * rewards[2].value;
+            AddPosterCrime(player, "Base reward", matchController.ChipBaseReward);
+            AddPosterCrime(player, "Kills", matchController.ChipKillReward * lastRound.KillCount(player.playerManager));
 
             if(lastRound.IsWinner(player.playerIdentity))
             {
-                score += rewards[3].value;
-                AddPosterCrime(player, rewards[3].name, rewards[3].value);
+                AddPosterCrime(player, "Victor", matchController.ChipWinReward);
             }
-
-            player.playerIdentity.UpdateChip(score);
 
             GetPlayerPoster(player).wantedPoster.TotalValue.text = player.playerIdentity.chips.ToString();
 
-            // Base reward and kill bonus
-            //var reward = rewardBase + lastRound.KillCount(player.playerManager) * rewardKill;
-            // Win bonus
-            //if (lastRound.IsWinner(player.playerManager.identity)) { }
-            //reward += rewardWin;
-
-            //player.playerManager.identity.UpdateChip(reward);
-
+            // Animate the after battle scene
             Camera.main.GetComponent<Animator>().SetTrigger("ScoreboardZoom");
+
+            player.playerManager.inputManager.GetComponent<Camera>().enabled = false;
         }
     }
 }

@@ -44,13 +44,6 @@ public struct Player
     }
 }
 
-[Serializable]
-public struct Reward
-{
-    public string name;
-    public int value;
-}
-
 [RequireComponent(typeof(PlayerFactory))]
 public class MatchController : MonoBehaviour
 {
@@ -81,8 +74,20 @@ public class MatchController : MonoBehaviour
 
     [Header("Chip rewards")]
     [SerializeField]
-    private Reward[] rewards;
-    public Reward[] Rewards{ get { return rewards; } }
+    private int chipStartAmount;
+    public int ChipStartAmount => chipStartAmount;
+
+    [SerializeField]
+    private int chipBaseReward;
+    public int ChipBaseReward => chipBaseReward;
+
+    [SerializeField]
+    private int chipKillReward;
+    public int ChipKillReward => chipKillReward;
+
+    [SerializeField]
+    private int chipWinReward;
+    public int ChipWinReward => chipWinReward;
 
     public Timer roundTimer;
 
@@ -141,7 +146,7 @@ public class MatchController : MonoBehaviour
         {
             var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
             var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
-            players.Add(new Player(playerIdentity, playerStateController, rewards[0].value));
+            players.Add(new Player(playerIdentity, playerStateController, chipBaseReward));
         });
 
         // TODO do something else funky wunky
@@ -205,12 +210,13 @@ public class MatchController : MonoBehaviour
         foreach (Player player in players)
         {
             // Base reward and kill bonus
-            //var reward = rewardBase + lastRound.KillCount(player.playerManager) * rewardKill;
+            var reward = chipBaseReward + lastRound.KillCount(player.playerManager) * chipKillReward;
             // Win bonus
-            if (lastRound.IsWinner(player.playerManager.identity)) { }
-                //reward += rewardWin;
+            if (lastRound.IsWinner(player.playerManager.identity)) {
+                reward += chipWinReward;
 
-            //player.playerManager.identity.UpdateChip(reward);
+                player.playerManager.identity.UpdateChip(reward);
+            }
         }
     }
 
