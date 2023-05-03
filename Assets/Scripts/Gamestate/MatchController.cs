@@ -64,6 +64,7 @@ public class MatchController : MonoBehaviour
 
     [SerializeField]
     private float roundEndDelay;
+    public float RoundEndDelay { get => roundEndDelay;}
 
     [SerializeField]
     private float biddingEndDelay = 1;
