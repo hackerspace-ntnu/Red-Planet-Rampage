@@ -75,7 +75,6 @@ public class GlobalHUDController : MonoBehaviour
         var colorTransparent = startText.color;
         var color = colorTransparent;
         color.a = 1f;
-        //startText
         LeanTween.value(startText.gameObject, TMPFade, colorTransparent, color, 1.5f);
         startText.gameObject.LeanScale(new Vector3(1.1f, 1.1f, 1.1f), 1f).setEaseOutBounce();
         yield return new WaitForSeconds(seconds);

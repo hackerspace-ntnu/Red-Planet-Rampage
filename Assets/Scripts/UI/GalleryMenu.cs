@@ -107,8 +107,6 @@ public class GalleryMenu : MonoBehaviour
             { 
                 Weapon weapon = unlockedElements[i];
                 GameObject gun = GunFactory.InstantiateGun(weapon.body, weapon.barrel, weapon.extension, null, gridElement);
-                //gun.transform.localScale = Vector3.one;
-                //gun.transform.SetParent(gridElement);
 
                 spawnedWeapons.Add(gun);
 

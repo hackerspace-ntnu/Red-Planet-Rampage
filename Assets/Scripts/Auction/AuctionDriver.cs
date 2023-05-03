@@ -85,9 +85,9 @@ public class AuctionDriver : MonoBehaviour
 
     private void Start()
     {
-//#if UNITY_EDITOR
-//        biddingBeginDelay = 0f;
-//#endif
+#if UNITY_EDITOR
+        biddingBeginDelay = 2f;
+#endif
         availableAuctionStages = new RandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction };
         playerFactory = GetComponent<PlayerFactory>();
         playerFactory.InstantiatePlayersBidding();
@@ -95,7 +95,6 @@ public class AuctionDriver : MonoBehaviour
         playersInAuctionRound = new HashSet<PlayerManager>(playersInAuction);
 
         AnimateAuctionStart();
-        // TODO: Make AuctionDriver instantiate bidding platforms instead of finding them?
         StartCoroutine(PopulatePlatforms());
     }
 
@@ -137,7 +136,7 @@ public class AuctionDriver : MonoBehaviour
         lastExtendedAuction.onBiddingEnd = null;
 
         LeanTween.alpha(gunConstructionPanels[0].parent.GetComponent<RectTransform>(), 1f, 1f).setEase(LeanTweenType.linear);
-        MusicTrackManager.Singleton.SwitchTo(MusicType.FANFARE);
+        MusicTrackManager.Singleton.SwitchTo(MusicType.CONSTRUCTION_FANFARE);
         
         for (int i = 0; i < playersInAuction.Count; i++)
         {
@@ -186,14 +185,12 @@ public class AuctionDriver : MonoBehaviour
     {
         yield return new WaitForSeconds(1);
         GameObject body = Instantiate(playerManager.identity.Body.augment, parent);
-        body.LeanScale(new Vector3 (gunConstructionScale, gunConstructionScale, gunConstructionScale), 0.5f);
-        body.LeanRotateY(90f, 2f);
+        AnimatePopUp(body);
         GunBody gunBody = body.GetComponent<GunBody>();
-
+        
         yield return new WaitForSeconds(1);
         GameObject barrel = Instantiate(playerManager.identity.Barrel.augment, gunBody.attachmentSite.position, gunBody.attachmentSite.rotation, parent);
-        barrel.LeanScale(new Vector3(gunConstructionScale, gunConstructionScale, gunConstructionScale), 0.5f);
-        barrel.LeanRotateY(90f, 2f);
+        AnimatePopUp(barrel);
         GunBarrel gunBarrel = barrel.GetComponent<GunBarrel>();
 
         if (playerManager.identity.Extension)
@@ -204,12 +201,17 @@ public class AuctionDriver : MonoBehaviour
             var outputs = new List<Transform>();
             outputs.AddRange(gunExtension.outputs);
             outputs.AddRange(gunExtension.AttachToTransforms(gunBarrel.attachmentPoints));
-            extension.LeanScale(new Vector3(gunConstructionScale, gunConstructionScale, gunConstructionScale), 0.5f);
-            extension.LeanRotateY(90f, 2f);
+            AnimatePopUp(extension);
         }
         TMP_Text name = parent.GetComponentInChildren<TMP_Text>();
         name.text = GunFactory.GetGunName(playerManager.identity.Body, playerManager.identity.Barrel, playerManager.identity.Extension);
         yield return null;
+    }
+
+    private void AnimatePopUp(GameObject gameObject)
+    {
+        gameObject.LeanScale(new Vector3(gunConstructionScale, gunConstructionScale, gunConstructionScale), 0.5f);
+        gameObject.LeanRotateY(90f, 2f);
     }
 
     private void YieldFromAuction(PlayerManager player)

@@ -6,7 +6,7 @@ using UnityEngine.Audio;
 public enum MusicType
 {
     MENU,
-    FANFARE,
+    CONSTRUCTION_FANFARE,
     BATTLE,
     BIDDING,
 }
@@ -67,7 +67,7 @@ public class MusicTrackManager : MonoBehaviour
         {
             case MusicType.BATTLE:
                 return battleTheme;
-            case MusicType.FANFARE:
+            case MusicType.CONSTRUCTION_FANFARE:
                 return constructionFanfare;
             case MusicType.BIDDING:
             case MusicType.MENU:

@@ -14,7 +14,7 @@ public class AuctionStage : ScriptableObject
     /// <summary>
     /// This method should ONLY be called by staticInfo.
     /// </summary>
-    /// <param name="items">Which items exists in this AuctionStage</param>
+    /// <param name="items">Which items exist in this AuctionStage</param>
     public void SetItems(Item[] items)
     {
         this.items = items;

@@ -19,7 +19,7 @@ e.g. `feature/main-menu` or `bugfix/wall-glitch`.
 ### Development
 
 The development process is a variant of scrum structured as follows:
-- 2 Week long sprints
+- 2 week long sprints
 - Milestones containing 1 to 2 sprints
 - Short retrospectives at the end of milestones
 - Public issue-, and github-boards
