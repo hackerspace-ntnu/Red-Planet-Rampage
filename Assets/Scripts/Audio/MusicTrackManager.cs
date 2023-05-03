@@ -6,6 +6,7 @@ using UnityEngine.Audio;
 public enum MusicType
 {
     MENU,
+    CONSTRUCTION_FANFARE,
     BATTLE,
     BIDDING,
 }
@@ -30,6 +31,9 @@ public class MusicTrackManager : MonoBehaviour
 
     [SerializeField]
     private MusicTrack battleTheme;
+
+    [SerializeField]
+    private MusicTrack constructionFanfare;
 
     private Coroutine trackSwitchingRoutine;
 
@@ -63,6 +67,8 @@ public class MusicTrackManager : MonoBehaviour
         {
             case MusicType.BATTLE:
                 return battleTheme;
+            case MusicType.CONSTRUCTION_FANFARE:
+                return constructionFanfare;
             case MusicType.BIDDING:
             case MusicType.MENU:
             default:

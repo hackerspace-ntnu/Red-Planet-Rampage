@@ -1,6 +1,8 @@
 using CollectionExtensions;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 
 // TODO
@@ -16,13 +18,14 @@ public class AuctionDriver : MonoBehaviour
     private int numberOfItems;
     [SerializeField]
     private float baseWaitTime;
+    [SerializeField]
+    private float biddingBeginDelay = 5f;
     [SerializeField] 
     private AuctionSequence sequence;
     private IEnumerator<BiddingRound> enumerator;
 
     [SerializeField]
     private BiddingPlatform[] biddingPlatforms;
-    [SerializeField]
     private RandomisedAuctionStage[] availableAuctionStages;
 
     private BiddingPlatform lastExtendedAuction;
@@ -53,6 +56,10 @@ public class AuctionDriver : MonoBehaviour
     private Timer auctionTimer;
     [SerializeField]
     private PlayerFactory playerFactory;
+    
+    [SerializeField]
+    private RectTransform[] gunConstructionPanels;
+    private float gunConstructionScale = 8f;
 
 #if UNITY_EDITOR
     private void OnValidate()
@@ -78,17 +85,28 @@ public class AuctionDriver : MonoBehaviour
 
     private void Start()
     {
+#if UNITY_EDITOR
+        biddingBeginDelay = 2f;
+#endif
+        availableAuctionStages = new RandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction };
         playerFactory = GetComponent<PlayerFactory>();
         playerFactory.InstantiatePlayersBidding();
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
         playersInAuctionRound = new HashSet<PlayerManager>(playersInAuction);
 
-        // TODO: Make AuctionDriver instantiate bidding platforms instead of finding them?
-        PopulatePlatforms();
+        AnimateAuctionStart();
+        StartCoroutine(PopulatePlatforms());
     }
 
-    private void PopulatePlatforms()
+    private void AnimateAuctionStart()
     {
+        GlobalHUDController globalHUD = GetComponentInChildren<GlobalHUDController>();
+        StartCoroutine(globalHUD.DisplayStartScreen(biddingBeginDelay));
+    }
+
+    private IEnumerator PopulatePlatforms()
+    {
+        yield return new WaitForSeconds(biddingBeginDelay);
         if (!(availableAuctionStages.Length == biddingPlatforms.Length))
         {
             Debug.Log("Not enough available auctionStages or biddingPlatforms!");
@@ -115,12 +133,19 @@ public class AuctionDriver : MonoBehaviour
 
     private void EndAuction(BiddingPlatform biddingPlatform)
     {
-
         lastExtendedAuction.onBiddingEnd = null;
+
+        LeanTween.alpha(gunConstructionPanels[0].parent.GetComponent<RectTransform>(), 1f, 1f).setEase(LeanTweenType.linear);
+        MusicTrackManager.Singleton.SwitchTo(MusicType.CONSTRUCTION_FANFARE);
+        
+        for (int i = 0; i < playersInAuction.Count; i++)
+        {
+            StartCoroutine(AnimateGunConstruction(playersInAuction.ElementAt(playersInAuction.Count-i-1), gunConstructionPanels[i]));
+        }
+
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
         PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
     }
-
 
     private bool TryPlaceBid(PlayerManager player, int slot)
     {
@@ -154,6 +179,39 @@ public class AuctionDriver : MonoBehaviour
         ActiveBiddingRound.chips[slot] = cost;
         ActiveBiddingRound.players[slot] = player;
         return true;
+    }
+
+    private IEnumerator AnimateGunConstruction(PlayerManager playerManager, RectTransform parent)
+    {
+        yield return new WaitForSeconds(1);
+        GameObject body = Instantiate(playerManager.identity.Body.augment, parent);
+        AnimatePopUp(body);
+        GunBody gunBody = body.GetComponent<GunBody>();
+        
+        yield return new WaitForSeconds(1);
+        GameObject barrel = Instantiate(playerManager.identity.Barrel.augment, gunBody.attachmentSite.position, gunBody.attachmentSite.rotation, parent);
+        AnimatePopUp(barrel);
+        GunBarrel gunBarrel = barrel.GetComponent<GunBarrel>();
+
+        if (playerManager.identity.Extension)
+        {
+            yield return new WaitForSeconds(1);
+            GameObject extension = Instantiate(playerManager.identity.Extension.augment, gunBarrel.attachmentPoints[0].position, gunBarrel.attachmentPoints[0].rotation, parent);
+            GunExtension gunExtension = extension.GetComponent<GunExtension>();
+            var outputs = new List<Transform>();
+            outputs.AddRange(gunExtension.outputs);
+            outputs.AddRange(gunExtension.AttachToTransforms(gunBarrel.attachmentPoints));
+            AnimatePopUp(extension);
+        }
+        TMP_Text name = parent.GetComponentInChildren<TMP_Text>();
+        name.text = GunFactory.GetGunName(playerManager.identity.Body, playerManager.identity.Barrel, playerManager.identity.Extension);
+        yield return null;
+    }
+
+    private void AnimatePopUp(GameObject gameObject)
+    {
+        gameObject.LeanScale(new Vector3(gunConstructionScale, gunConstructionScale, gunConstructionScale), 0.5f);
+        gameObject.LeanRotateY(90f, 2f);
     }
 
     private void YieldFromAuction(PlayerManager player)
