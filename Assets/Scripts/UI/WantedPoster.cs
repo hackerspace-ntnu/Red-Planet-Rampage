@@ -5,6 +5,7 @@ using TMPro;
 using System.Collections;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 public class WantedPoster : MonoBehaviour
 {
@@ -34,7 +35,9 @@ public class WantedPoster : MonoBehaviour
     private float roundEndDelay;
     private int totalSteps;
     private int currentStep;
-    private List<RectTransform> animatedCrimes = new List<RectTransform>();
+
+    private List<(string, string)> crimeData = new List<(string, string)>();
+    private List<(TMP_Text, TMP_Text)> crimeTextComponents = new List<(TMP_Text, TMP_Text)>();
 
     public void SetupPoster(Player player, MatchController matchController, string subtitle)
     {
@@ -42,18 +45,16 @@ public class WantedPoster : MonoBehaviour
         this.matchController = matchController;
         this.subtitle.text = subtitle;
         this.roundEndDelay = matchController.RoundEndDelay;
+        GetComponent<Image>().color = player.playerIdentity.color;
     }
 
-    private void AddPosterCrime(string Crime, int Value)
+    private void AddPosterCrime(string crimeLabel, int Value)
     {
         GameObject crime = Instantiate(crimeTextPrefab, crimeContent);
         TMP_Text[] texts = crime.GetComponentsInChildren<TMP_Text>();
 
-        texts[0].text = Crime;
-        texts[1].text = Value.ToString();
-
-        animatedCrimes.Add(crime.GetComponent<RectTransform>());
-        crime.SetActive(false);
+        crimeTextComponents.Add((texts[0], texts[1]));
+        crimeData.Add((crimeLabel, Value.ToString()));
     }
 
     public void UpdatePosterValues()
@@ -90,10 +91,10 @@ public class WantedPoster : MonoBehaviour
         AddPosterCrime("Total", roundSpoils);
 
         // Animate the crimes
-        totalSteps = animatedCrimes.Count;
+        totalSteps = crimeData.Count;
         currentStep = 0;
         float secondsPerStep = matchController.RoundEndDelay / totalSteps;
-        StartCoroutine(Animate(cameraEndRoundPan.length, secondsPerStep));
+        StartCoroutine(StartCrimeAnimation(cameraEndRoundPan.length, secondsPerStep));
 
         // Add player input
         player.playerManager.inputManager.onSelect += NextStep;
@@ -111,21 +112,29 @@ public class WantedPoster : MonoBehaviour
 
     private void DisplayCrime(int index)
     {
-         animatedCrimes[index].gameObject.SetActive(true);
+        if(index <= crimeData.Count - 1)
+        {
+            crimeTextComponents[index].Item1.text = crimeData[index].Item1;
+            crimeTextComponents[index].Item2.text = crimeData[index].Item2;
+        }         
     }
 
-    private IEnumerator Animate(float startDelay, float secondsPerStep)
+    private IEnumerator StartCrimeAnimation(float startDelay, float secondsPerStep)
     {
         yield return new WaitForSeconds(startDelay);
-
-        for(int i = 0; i < totalSteps; i++)
+        StartCoroutine(AnimateCrimes(secondsPerStep));
+    }
+    private IEnumerator AnimateCrimes(float secondsPerStep)
+    {
+        if (currentStep == totalSteps - 1)
         {
-            if(i == totalSteps - 1)
-            {
-                matchController.StartNextBidding();
-            }
+            matchController.StartNextBidding();
+        }
+        else
+        {
             NextStep();
             yield return new WaitForSeconds(secondsPerStep);
+            StartCoroutine(AnimateCrimes(secondsPerStep));
         }
     }
 }
