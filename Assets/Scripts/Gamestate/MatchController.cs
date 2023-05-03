@@ -163,6 +163,7 @@ public class MatchController : MonoBehaviour
 
     public void StartNextBidding()
     {
+        Debug.Log("Startnextbidding");
         PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
         onBiddingStart?.Invoke();
@@ -178,15 +179,6 @@ public class MatchController : MonoBehaviour
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
         AssignRewards();
-
-        if (!IsWin())
-            StartCoroutine(WaitAndStartNextBidding());
-    }
-
-    public IEnumerator WaitAndStartNextBidding()
-    {
-        yield return new WaitForSeconds(roundEndDelay);
-        StartNextBidding();
     }
 
     public IEnumerator WaitAndStartNextRound()
@@ -212,12 +204,13 @@ public class MatchController : MonoBehaviour
         {
             // Base reward and kill bonus
             var reward = chipBaseReward + lastRound.KillCount(player.playerManager) * chipKillReward;
+            
             // Win bonus
             if (lastRound.IsWinner(player.playerManager.identity)) {
                 reward += chipWinReward;
-
-                player.playerManager.identity.UpdateChip(reward);
             }
+
+            player.playerManager.identity.UpdateChip(reward);
         }
     }
 
