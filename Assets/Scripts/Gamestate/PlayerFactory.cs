@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,7 +20,12 @@ public class PlayerFactory : MonoBehaviour
 
     private void Awake()
     {
-
+        if(PlayerInputManagerController.Singleton == null)
+        {
+            // We most likely started the game in the game scene, reload menu instead
+            SceneManager.LoadSceneAsync("Menu");
+            return;
+        }
         playerInputManagerController = PlayerInputManagerController.Singleton;
 
         // Enable splitscreen
