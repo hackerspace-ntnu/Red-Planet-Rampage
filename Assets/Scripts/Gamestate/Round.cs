@@ -111,7 +111,7 @@ public class Round
         // If it was a suicide, we should give the surviving player the win if there's only one
         else if (livingPlayers.Count < 2)
         {
-            CheckWinCondition(livingPlayers.First());
+            CheckWinCondition(livingPlayers.FirstOrDefault(null));
         }
     }
 
