@@ -21,6 +21,11 @@ public class ExplosionController : MonoBehaviour
 
     private void Start()
     {
+        if (!visualEffect) Init();
+    }
+
+    public void Init()
+    {
         visualEffect = GetComponent<VisualEffect>();
         visualEffect.enabled = false;
     }
@@ -41,6 +46,7 @@ public class ExplosionController : MonoBehaviour
         {
             DealDamage(collider, sourcePlayer);
         }
+        Destroy(gameObject, 4);
     }
 
     private void DealDamage(Collider collider, PlayerManager sourcePlayer)

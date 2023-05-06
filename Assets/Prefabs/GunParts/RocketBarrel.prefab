@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 1607281845865317333}
   - component: {fileID: -936091643483276450}
   - component: {fileID: -8445443159102885784}
+  - component: {fileID: 422075005749308628}
   m_Layer: 0
   m_Name: RocketBarrel
   m_TagString: Untagged
@@ -173,6 +174,14 @@ MonoBehaviour:
     addition: 30
     multiplier: 0
     exponential: 1
+  - name: FireRate
+    addition: 0
+    multiplier: 0
+    exponential: 0.25
+  - name: ProjectileSpeed
+    addition: 1
+    multiplier: 0
+    exponential: 2
   outputs:
   - {fileID: 2006913084140856218}
   attachmentPoints:
@@ -321,6 +330,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firingSound: {fileID: 11400000, guid: 5ea7ce643d8497641b43ff044754f3ee, type: 2}
+--- !u!114 &422075005749308628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5374020728950191348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 498b88c813b1d51279ca47d990940097, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  explosion: {fileID: 5787286264620752909, guid: b15597bb7c9b9fafbbc104298564d1d5, type: 3}
 --- !u!1 &7379426489693316019
 GameObject:
   m_ObjectHideFlags: 0

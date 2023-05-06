@@ -46,6 +46,8 @@ public class HatBarrel : ProjectileController
         hatVfx.SetTexture("Positions", positionActiveTexture.Texture);
         hatVfx.SetInt("MaxParticleCount", maxHatProjectiles);
         hatVfx.SendEvent("OnPlay");
+
+        animator.OnFireAnimationEnd += ReleaseLoadedHat;
     }
 
     protected override void OnInitialize(GunStats gunstats)

@@ -19,6 +19,5 @@ public class ExplodingBarrel : MonoBehaviour
         barrelMesh.enabled = false;
         GetComponentInChildren<CapsuleCollider>().enabled = false;
         GetComponent<ExplosionController>().Explode(info.sourcePlayer);
-        Destroy(gameObject, 4);
     }
 }
