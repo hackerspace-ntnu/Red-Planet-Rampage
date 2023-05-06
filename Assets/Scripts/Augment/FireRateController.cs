@@ -11,7 +11,7 @@ public class SemiAutoFirerateController : FireRateController
 
     public SemiAutoFirerateController(float fireRate)
     {
-        this.fireDelay = 1 / fireRate;
+        this.fireDelay = 1f / fireRate;
     }
     public override bool shouldFire(bool triggerPressed, bool triggerHeld)
     {
@@ -30,7 +30,7 @@ public class FullAutoFirerateController : FireRateController
 
     public FullAutoFirerateController(float fireRate)
     {
-        fireDelay = 1 / fireRate;
+        fireDelay = 1f / fireRate;
         lastFired = Time.fixedTime;
     }
     public override bool shouldFire(bool triggerPressed, bool triggerHeld)
