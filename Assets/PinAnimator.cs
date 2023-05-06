@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class PinAnimator : MonoBehaviour
+public class PinAnimator : BarrelAnimator
 {
-    // Start is called before the first frame update
     [SerializeField]
     private float maxDist;
 
@@ -15,15 +12,15 @@ public class PinAnimator : MonoBehaviour
 
     [SerializeField]
     private AnimationCurve easeCurve;
-    void Start()
-    {
-        var projectileController = GetComponentInParent<GunController>();
 
-        projectileController.onFire += (GunStats stats) => recoil();
-        time = 1 / projectileController.stats.Firerate.Value();
+    public override void OnInitialize(GunStats stats)
+    {
+        time = 1 / stats.Firerate.Value();
     }
 
-    private void recoil()
+    public override void OnReload(int ammo) { }
+
+    public override void OnFire(int remainingAmmo)
     {
         transform.localPosition = Vector3.zero;
         LeanTween.moveLocalZ(gameObject, maxDist, time * (1 - delay))
