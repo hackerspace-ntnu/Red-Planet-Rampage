@@ -1,0 +1,30 @@
+using UnityEngine;
+
+public class PinAnimator : BarrelAnimator
+{
+    [SerializeField]
+    private float maxDist;
+
+    private float time;
+
+    [SerializeField]
+    private float delay = 0f;
+
+    [SerializeField]
+    private AnimationCurve easeCurve;
+
+    public override void OnInitialize(GunStats stats)
+    {
+        time = 1 / stats.Firerate.Value();
+    }
+
+    public override void OnReload(int ammo) { }
+
+    public override void OnFire(int remainingAmmo)
+    {
+        transform.localPosition = Vector3.zero;
+        LeanTween.moveLocalZ(gameObject, maxDist, time * (1 - delay))
+            .setDelay(delay * time)
+            .setEase(easeCurve);
+    }
+}
