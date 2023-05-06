@@ -91,16 +91,25 @@ public class GunFactory : MonoBehaviour
         }
 
         // Instantiates the different parts
+#if UNITY_EDITOR
         GunBody gunBody = ((GameObject)PrefabUtility.InstantiatePrefab(Body.augment, transform))
             .GetComponent<GunBody>();
-
+#else
+        GunBody gunBody = Instantiate(Body.augment, transform)
+            .GetComponent<GunBody>();
+#endif
         // Stats is retrieved from gun body
         // NEVER REFERENCE THE GUNSTAT PREFAB DIRECTLY, GUNBODY AUTOMATICALLY INSTANTIATES IT
         // Seriously, i have no moral qualms with making your skulls into decorative ornaments
         gunController.stats = gunBody.InstantiateBaseStats;
 
+#if UNITY_EDITOR
         GunBarrel gunBarrel = ((GameObject)PrefabUtility.InstantiatePrefab(Barrel.augment, transform))
             .GetComponent<GunBarrel>();
+#else
+        GunBarrel gunBarrel = Instantiate(Barrel.augment, transform)
+            .GetComponent<GunBarrel>();
+#endif
 
         gunBarrel.transform.position = gunBody.attachmentSite.position;
         gunBarrel.transform.rotation = gunBody.attachmentSite.rotation;
@@ -121,9 +130,13 @@ public class GunFactory : MonoBehaviour
         if (Extension != null)
         {
             // Instantiate extension itself *once*
+#if UNITY_EDITOR
             GunExtension gunExtension = ((GameObject)PrefabUtility.InstantiatePrefab(Extension.augment, transform))
                 .GetComponent<GunExtension>();
-
+#else
+            GunExtension gunExtension = Instantiate(Extension.augment, transform)
+                .GetComponent<GunExtension>();
+#endif
             gunExtension.transform.position = gunBarrel.attachmentPoints[0].position;
             gunExtension.transform.rotation = gunBarrel.attachmentPoints[0].rotation;
 
