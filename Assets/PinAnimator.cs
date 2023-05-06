@@ -17,9 +17,9 @@ public class PinAnimator : MonoBehaviour
     private AnimationCurve easeCurve;
     void Start()
     {
-        var projectileController = GetComponentInParent<ProjectileController>();
+        var projectileController = GetComponentInParent<GunController>();
 
-        projectileController.OnProjectileInit += (ref ProjectileState state, GunStats stats) => recoil();
+        projectileController.onFire += (GunStats stats) => recoil();
         time = 1 / projectileController.stats.Firerate.Value();
     }
 
