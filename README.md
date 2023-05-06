@@ -2,8 +2,11 @@
 
 ## Project Description
 
-- Unity version 2022.1.19f1
+- Unity version 2022.2.15f1
 - Unity URP
+
+A game in the arena-FPS genre, where you construct weapons from weapon parts.
+The weapon parts are obtained from bidding wars between players.
 
 ## Conventions
 
@@ -12,6 +15,23 @@
 Branch naming: `kebab-case`.
 Prefix the branch name with a one-word description of the purpose of the branch,
 e.g. `feature/main-menu` or `bugfix/wall-glitch`.
+
+### Development
+
+The development process is a variant of scrum structured as follows:
+- 2 week long sprints
+- Milestones containing 1 to 2 sprints
+- Short retrospectives at the end of milestones
+- Public issue-, and github-boards
+- All planned tasks are converted github issues and assigned to a team member
+- Public demos after ended milestones, preferably at public events
+- Official releases are made after ended milestones
+
+### Assets
+
+Developers should strive to only use self-made assets.
+This rule is in place to encourage team members to learn all aspects of game development.
+The second reasoning is to keep the repository as open source as possible.
 
 ## Troubleshooting
 

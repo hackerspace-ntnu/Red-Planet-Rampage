@@ -24,6 +24,16 @@ public class StaticInfo : MonoBehaviour
     private Item[] extensions;
 
     [SerializeField]
+    private RandomisedAuctionStage bodyAuction;
+    public RandomisedAuctionStage BodyAuction => bodyAuction;
+    [SerializeField]
+    private RandomisedAuctionStage barrelAuction;
+    public RandomisedAuctionStage BarrelAuction => barrelAuction;
+    [SerializeField]
+    private RandomisedAuctionStage extensionAuction;
+    public RandomisedAuctionStage ExtensionAuction => extensionAuction;
+
+    [SerializeField]
     private Item startingBody;
     public Item StartingBody => startingBody;
     [SerializeField]
@@ -62,6 +72,9 @@ public class StaticInfo : MonoBehaviour
         Barrels = new ReadOnlyArray<Item>(barrels);
         Extensions = new ReadOnlyArray<Item>(extensions);
         SecretNames = new ReadOnlyArray<OverrideName>(secretNames.Overrides);
+        bodyAuction.SetItems(bodies);
+        barrelAuction.SetItems(barrels);
+        extensionAuction.SetItems(extensions);
     }
 
 }

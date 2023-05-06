@@ -46,7 +46,6 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-
     private GunController gunController;
 
     private HealthController healthController;
@@ -118,8 +117,11 @@ public class PlayerManager : MonoBehaviour
         identity = inputManager.GetComponent<PlayerIdentity>();
         GetComponent<PlayerMovement>().SetPlayerInput(inputManager);
         SetGun(inputManager.transform);
-        inputManager.onFirePerformed += OnFire;
-        inputManager.onFireCanceled += OnFireEnd;
+        // Subscribe relevant input events
+        inputManager.onFirePerformed += Fire;
+        inputManager.onFireCanceled += FireEnd;
+        inputManager.onSelect += TryPlaceBid;
+        inputManager.onFirePerformed += TryPlaceBid;
         // Set camera on canvas
         var canvas = hudController.GetComponent<Canvas>();
         canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
@@ -155,12 +157,15 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    private void OnFire(InputAction.CallbackContext ctx)
+    private void Fire(InputAction.CallbackContext ctx)
     {
         gunController.triggerHeld = true;
         gunController.triggerPressed = true;
         StartCoroutine(UnpressTrigger());
+    }
 
+    private void TryPlaceBid(InputAction.CallbackContext ctx)
+    {
         if (!selectedBiddingPlatform) return;
         selectedBiddingPlatform.TryPlaceBid(identity);
     }
@@ -171,7 +176,7 @@ public class PlayerManager : MonoBehaviour
         gunController.triggerPressed = false;
     }
 
-    private void OnFireEnd(InputAction.CallbackContext ctx)
+    private void FireEnd(InputAction.CallbackContext ctx)
     {
         gunController.triggerHeld = false;
     }

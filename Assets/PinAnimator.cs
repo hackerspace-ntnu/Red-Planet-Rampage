@@ -25,6 +25,7 @@ public class PinAnimator : MonoBehaviour
 
     private void recoil()
     {
+        transform.localPosition = Vector3.zero;
         LeanTween.moveLocalZ(gameObject, maxDist, time * (1 - delay))
             .setDelay(delay * time)
             .setEase(easeCurve);

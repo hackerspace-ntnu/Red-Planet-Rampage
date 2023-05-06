@@ -14,11 +14,25 @@ public class GunFactory : MonoBehaviour
         controller.Body = bodyPrefab;
         controller.Barrel = barrelPrefab;
         controller.Extension = extensionPrefab;
-        
 
         // Initialize everything
         gun.GetComponent<GunFactory>().InitializeGun(owner);
 
+        return gun;
+    }
+
+    public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, RectTransform parent)
+    {
+        GameObject gun = Instantiate(new GameObject());
+        GunFactory controller = gun.AddComponent<GunFactory>();
+        controller.Body = bodyPrefab;
+        controller.Barrel = barrelPrefab;
+        controller.Extension = extensionPrefab;
+
+        // Initialize everything
+        gun.GetComponent<GunFactory>().InitializeGun(owner);
+        gun.transform.SetParent(parent);
+        gun.transform.position = parent.position;
         return gun;
     }
 
@@ -71,8 +85,10 @@ public class GunFactory : MonoBehaviour
         List<ProjectileModifier> modifiers = new List<ProjectileModifier>();
 
         // Destroys gun child before construction
-        for (int i = this.transform.childCount; i > 0; --i)
-            DestroyImmediate(this.transform.GetChild(0).gameObject);
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
 
         // Instantiates the different parts
         GunBody gunBody = ((GameObject)PrefabUtility.InstantiatePrefab(Body.augment, transform))
@@ -83,7 +99,7 @@ public class GunFactory : MonoBehaviour
         // Seriously, i have no moral qualms with making your skulls into decorative ornaments
         gunController.stats = gunBody.InstantiateBaseStats;
 
-        GunBarrel gunBarrel = ((GameObject)PrefabUtility.InstantiatePrefab(Barrel.augment,  transform))
+        GunBarrel gunBarrel = ((GameObject)PrefabUtility.InstantiatePrefab(Barrel.augment, transform))
             .GetComponent<GunBarrel>();
 
         gunBarrel.transform.position = gunBody.attachmentSite.position;
