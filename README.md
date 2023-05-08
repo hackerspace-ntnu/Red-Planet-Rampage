@@ -38,3 +38,14 @@ The second reasoning is to keep the repository as open source as possible.
 ### URP on Linux
 
 Add `-force-vulkan` to command line arguments to avoid glitched scene view due to URP.
+
+### Building the game
+
+There is a bug in this Unity version that gives build errors for missing 
+"System.Diagnostics.Tracing". This is resolved by manually downgrading 
+the version in "bcl.exe.config" The dependency should be replaced with 
+the following:
+<assemblyIdentity name="System.Diagnostics.Tracing" publicKeyToken="b03f5f7f11d50a3a" culture="neutral" />
+<bindingRedirect oldVersion="0.0.0.0-4.0.0.0" newVersion="4.0.0.0" />
+</dependentAssembly>
+
