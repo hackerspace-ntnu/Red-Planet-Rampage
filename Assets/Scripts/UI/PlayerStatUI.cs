@@ -55,11 +55,6 @@ public class PlayerStatUI : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        outline = GetComponent<Outline>();
-    }
-
     private void Init()
     {
         if (!playerManager)
@@ -68,6 +63,7 @@ public class PlayerStatUI : MonoBehaviour
         }
 
         statContainer.alpha = 1;
+        outline = GetComponent<Outline>();
 
         SetName(playerManager.identity.playerName);
         SetColor(playerManager.identity.color);
