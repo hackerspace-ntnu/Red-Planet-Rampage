@@ -174,7 +174,7 @@ public class ProjectileMotions
         state.distanceTraveled += distance;
     }
 
-    public static Collider[] GetPathCollisions(ProjectileState state, LayerMask collisionLayers)
+    public static RaycastHit[] GetPathCollisions(ProjectileState state, LayerMask collisionLayers)
     {
         var direction = state.position - state.oldPosition;
         RaycastHit[] rayCasts;
@@ -188,7 +188,7 @@ public class ProjectileMotions
             rayCasts = Physics.RaycastAll(state.oldPosition, direction, direction.magnitude, collisionLayers);
         }
 
-        return rayCasts.OrderBy(x => x.distance).Select(x => x.collider).ToArray();
+        return rayCasts.OrderBy(x => x.distance).ToArray();
     }
 
 }
