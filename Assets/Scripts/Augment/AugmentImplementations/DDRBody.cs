@@ -20,6 +20,9 @@ public class DDRBody : GunBody
     [SerializeField]
     private TMP_Text precisionText;
 
+    [SerializeField]
+    private AugmentAnimator animator;
+
     private Material ddrMaterial;
 
     private const int screenMaterialIndex = 2;
@@ -58,13 +61,19 @@ public class DDRBody : GunBody
 
         if (gunController.player)
         {
+            gunController.player.inputManager.onFirePerformed += Fire;
             gunController.player.inputManager.onMovePerformed += ArrowSelect;
             arrowMover = LeanTween.value(gameObject, SetArrowHeigth, 0, screenHeigth, secondPerArrow)
                 .setRepeat(-1)
                 .setOnComplete(ResetArrow);
 
             LeanTween.value(gameObject, SetBackgroundZoom, 0.5f, 1.5f, musicPaces)
-                .setLoopPingPong();
+                .setLoopPingPong()
+                .setOnComplete(
+                () => animator.OnFire(0));
+
+            animator.OnInitialize(gunController.stats);
+            
         }
 
     }
@@ -96,6 +105,12 @@ public class DDRBody : GunBody
         LeanTween.value(gameObject, SetFlashFactor, 0, 20f, 0.5f).setEasePunch();
 
         gunController.Reload(reloadEfficiencyPercentage*precision.Value.awardFactor);
+        animator.OnReload(1);
+    }
+
+    private void Fire(InputAction.CallbackContext ctx)
+    {
+        animator.OnFire(gunController.stats.Ammo);
     }
 
     private void ArrowSelect(InputAction.CallbackContext ctx)

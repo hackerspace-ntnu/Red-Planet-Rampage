@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PinAnimator : BarrelAnimator
+public class PinAnimator : AugmentAnimator
 {
     [SerializeField]
     private float maxDist;

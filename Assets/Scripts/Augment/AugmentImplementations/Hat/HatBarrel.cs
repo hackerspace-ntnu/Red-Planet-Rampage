@@ -7,7 +7,7 @@ using UnityEngine.VFX;
 public class HatBarrel : ProjectileController
 {
     [SerializeField]
-    private BarrelAnimator animator;
+    private AugmentAnimator animator;
 
     [SerializeField]
     private int maxHatProjectiles = 300;

@@ -25,7 +25,7 @@ public class BulletController : ProjectileController
     private VisualEffect flash;
 
     [SerializeField]
-    private BarrelAnimator animator;
+    private AugmentAnimator animator;
 
     private ProjectileState projectile = new ProjectileState();
 

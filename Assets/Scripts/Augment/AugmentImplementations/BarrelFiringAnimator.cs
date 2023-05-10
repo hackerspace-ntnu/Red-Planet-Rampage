@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// Class for starting a firing animation.
 /// </summary>
-public class BarrelFiringAnimator : BarrelAnimator
+public class BarrelFiringAnimator : AugmentAnimator
 {
     [SerializeField]
     private Animator animator;
