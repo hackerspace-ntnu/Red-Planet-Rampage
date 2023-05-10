@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.VFX;
-
+using System.Linq;
 /// <summary>
 /// Class that ties the functions and properties of the completed gun to the animations of the hat barrel
 /// </summary>
@@ -132,7 +132,7 @@ public class HatBarrel : ProjectileController
             state.active = false;
         }
 
-        var collisions = ProjectileMotions.GetPathCollisions(state, collisionLayers);
+        var collisions = ProjectileMotions.GetPathCollisions(state, collisionLayers).Select(x => x.collider).ToArray();
 
         if (collisions.Length > 0)
         {

@@ -99,13 +99,14 @@ public class BulletController : ProjectileController
                     UpdateProjectileMovement?.Invoke(maxDistance / (collisionSamples * vfxPositionsPerSample), ref projectile);
                 }
 
-                Collider[] collisions = ProjectileMotions.GetPathCollisions(projectile, collisionLayers);
+                RaycastHit[] collisions = ProjectileMotions.GetPathCollisions(projectile, collisionLayers);
 
                 if (collisions.Length > 0)
                 {
-                    OnColliderHit?.Invoke(collisions[0], ref projectile);
-                    HitboxController hitbox = collisions[0].GetComponent<HitboxController>();
-
+                    var collider = collisions[0].collider;
+                    OnColliderHit?.Invoke(collider, ref projectile);
+                    HitboxController hitbox = collider.GetComponent<HitboxController>();
+                    projectile.position = collisions[0].point;
                     if (hitbox != null)
                     {
                         OnHitboxCollision?.Invoke(hitbox, ref projectile);
