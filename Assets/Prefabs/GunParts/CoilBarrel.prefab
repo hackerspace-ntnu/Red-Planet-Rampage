@@ -299,6 +299,7 @@ GameObject:
   - component: {fileID: 7327065496144923300}
   - component: {fileID: 5073592139580318145}
   - component: {fileID: 1897810737203425439}
+  - component: {fileID: 3975746179230621477}
   m_Layer: 0
   m_Name: CoilBarrel
   m_TagString: Untagged
@@ -363,7 +364,7 @@ MonoBehaviour:
   stats: {fileID: 0}
   player: {fileID: 0}
   maxDistance: 40
-  collisionSamples: 6
+  collisionSamples: 80
   bulletsPerShot: 1
   trail: {fileID: 6753720039035056053}
   flash: {fileID: 261841362781268065}
@@ -490,6 +491,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firingSound: {fileID: 11400000, guid: b1c2515828913ba4d80a8799b82dab79, type: 2}
+--- !u!114 &3975746179230621477
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6861618831928518119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8a5ed8580116e36d976d061ef0db232, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interval: 0.15
+  radius: 0.1
 --- !u!1001 &1492273253223761825
 PrefabInstance:
   m_ObjectHideFlags: 0
