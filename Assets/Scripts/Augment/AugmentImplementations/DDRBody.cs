@@ -12,6 +12,13 @@ public struct Precision
     public Color color;
     public float awardFactor;
 }
+public enum ArrowDirection
+{
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST
+}
 public class DDRBody : GunBody
 {
     [SerializeField]
@@ -28,8 +35,7 @@ public class DDRBody : GunBody
     private const int screenMaterialIndex = 2;
 
     private float arrowHeigth = 0;
-
-    private int arrowDirectionQuadrant = 0;
+    private ArrowDirection arrowDirection = ArrowDirection.NORTH;
 
     private const float screenHeigth = 3.5f;
     private const float errorMarginInput = 0.1f;
@@ -43,7 +49,7 @@ public class DDRBody : GunBody
 
     [SerializeField]
     private float secondPerArrow = 1;
-    private float musicPaces = 0.4285714f;
+    private float musicPace = 0.4285714f;
 
 
     public override void Start()
@@ -67,7 +73,7 @@ public class DDRBody : GunBody
                 .setRepeat(-1)
                 .setOnComplete(ResetArrow);
 
-            LeanTween.value(gameObject, SetBackgroundZoom, 0.5f, 1.5f, musicPaces)
+            LeanTween.value(gameObject, SetBackgroundZoom, 0.5f, 1.5f, musicPace)
                 .setLoopPingPong()
                 .setOnComplete(
                 () => animator.OnFire(0));
@@ -115,21 +121,21 @@ public class DDRBody : GunBody
 
     private void ArrowSelect(InputAction.CallbackContext ctx)
     {
-        switch (arrowDirectionQuadrant)
+        switch (arrowDirection)
         {
-            case 0:
+            case ArrowDirection.NORTH:
                 if (!(gunController.player.inputManager.moveInput.y > 1 - errorMarginInput))
                     return;
                 break;
-            case 1:
+            case ArrowDirection.EAST:
                 if (!(gunController.player.inputManager.moveInput.x > 1 - errorMarginInput))
                     return;
                 break;
-            case 2:
+            case ArrowDirection.SOUTH:
                 if (!(gunController.player.inputManager.moveInput.y < -1 + errorMarginInput))
                     return;
                 break;
-            case 3:
+            case ArrowDirection.WEST:
                 if (!(gunController.player.inputManager.moveInput.x < -1 + errorMarginInput))
                     return;
                 break;
@@ -173,8 +179,8 @@ public class DDRBody : GunBody
     private void ResetArrow()
     {
         arrowHeigth = 0;
-        arrowDirectionQuadrant = Random.Range(0,4);
-        ddrMaterial.SetFloat("_ArrowRotationDegrees", ArrowDirectionToDegrees(arrowDirectionQuadrant));
+        arrowDirection = (ArrowDirection) Random.Range(0,4);
+        ddrMaterial.SetFloat("_ArrowRotationDegrees", ArrowDirectionToDegrees((int) arrowDirection));
     }
 
     private void OnDestroy()

@@ -7,7 +7,7 @@ public class DDRBodyAnimator : AugmentAnimator
     private Animator animator;
     public override void OnFire(int remainingAmmo)
     {
-        animator.SetTrigger("Fire");
+        animator.SetTrigger("Vibrate");
     }
 
     public override void OnInitialize(GunStats stats)
@@ -19,6 +19,6 @@ public class DDRBodyAnimator : AugmentAnimator
 
     public override void OnReload(int ammo)
     {
-        animator.SetTrigger("Fire");
+        animator.SetTrigger("Vibrate");
     }
 }
