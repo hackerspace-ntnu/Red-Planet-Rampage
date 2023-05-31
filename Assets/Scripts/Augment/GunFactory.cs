@@ -85,9 +85,14 @@ public class GunFactory : MonoBehaviour
         List<ProjectileModifier> modifiers = new List<ProjectileModifier>();
 
         // Destroys gun child before construction
-        foreach (Transform child in transform)
+        // Don't refactor this to a simple foreach, we're destroying each element!
+        for (int i = transform.childCount - 1; i >= 0; i--)
         {
-            Destroy(child.gameObject);
+#if UNITY_EDITOR
+            DestroyImmediate(transform.GetChild(i).gameObject);
+#else
+            Destroy(transform.GetChild(i).gameObject);
+#endif
         }
 
         // Instantiates the different parts
@@ -113,7 +118,7 @@ public class GunFactory : MonoBehaviour
 
         gunBarrel.transform.position = gunBody.attachmentSite.position;
         gunBarrel.transform.rotation = gunBody.attachmentSite.rotation;
-       
+
         gunController.projectile = gunBarrel.Projectile;
         // And make projectile remember who shot it.
         gunController.projectile.player = owner;
@@ -180,6 +185,6 @@ public class GunFactory : MonoBehaviour
                 gunController.fireRateController = new FullAutoFirerateController(gunController.stats.Firerate);
                 break;
         }
-    }    
+    }
 }
 
