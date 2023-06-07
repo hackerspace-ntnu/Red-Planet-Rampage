@@ -7,7 +7,7 @@ using System.Linq;
 public class HatBarrel : ProjectileController
 {
     [SerializeField]
-    private BarrelAnimator animator;
+    private AugmentAnimator animator;
 
     [SerializeField]
     private int maxHatProjectiles = 300;

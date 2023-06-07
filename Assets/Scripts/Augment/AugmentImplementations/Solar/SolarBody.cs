@@ -28,7 +28,7 @@ public class SolarBody : GunBody
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
-            Debug.Log("HatBarrel not attached to gun parent!");
+            Debug.Log("SolarBody not attached to gun parent!");
             return;
         }
     }

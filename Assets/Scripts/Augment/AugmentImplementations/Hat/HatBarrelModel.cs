@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// Class for moving individual parts of the model that can't be controlled by the normal animation controller.
 /// </summary>
-public class HatBarrelModel : BarrelAnimator
+public class HatBarrelModel : AugmentAnimator
 {
     [SerializeField]
     private Animator animator;
