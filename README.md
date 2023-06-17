@@ -8,6 +8,12 @@
 A game in the arena-FPS genre, where you construct weapons from weapon parts.
 The weapon parts are obtained from bidding wars between players.
 
+![Image of 2 players during a shooting round](https://github.com/hackerspace-ntnu/Prosjekt-Spill-H22/assets/54811121/2443d0ed-79b9-4849-a741-e0fca838a0fa)
+
+![Image of an auction for gun parts](https://github.com/hackerspace-ntnu/Prosjekt-Spill-H22/assets/54811121/f4a3fe60-33b9-467e-aced-a66a253da04a)
+
+
+
 ## Conventions
 
 ### Git
