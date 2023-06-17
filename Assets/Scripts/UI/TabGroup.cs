@@ -12,6 +12,7 @@ public class TabGroup : MonoBehaviour
 
     public TabsButton selectedTab;
 
+    private MainMenuController mainMenuController;
     public void SetPlayerInput(InputManager inputManager)
     {
         inputManager.onLeftTab += OnLeftButton;
@@ -21,6 +22,7 @@ public class TabGroup : MonoBehaviour
     private void Awake()
     {
         tabButtons = GetComponentsInChildren<TabsButton>().ToList();
+        mainMenuController = GetComponentInParent<MainMenuController>();
         ResetTabs();
     }
 
@@ -51,7 +53,6 @@ public class TabGroup : MonoBehaviour
         ResetTabs();
 
         // Select the first element
-        MainMenuController mainMenuController = GetComponentInParent<MainMenuController>();
         mainMenuController.SelectControl(selectedTab.firstItem);
     }
 

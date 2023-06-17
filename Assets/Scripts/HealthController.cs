@@ -28,14 +28,14 @@ public class HealthController : MonoBehaviour
         currentHealth = maxhHealth;
     }
 
-    public void dealDamage(DamageInfo info)
+    public void DealDamage(DamageInfo info)
     {
-        float damage = info.stats.ProjectileDamage.Value() * (info.isCritical ? info.stats.CriticalMultiplier.Value() : 1);
-        currentHealth -= damage;
-        onDamageTaken?.Invoke(this, damage, info);
+
+        currentHealth -= info.damage;
+        onDamageTaken?.Invoke(this, info.damage, info);
         if (currentHealth <= 0)
         {
-            onDeath?.Invoke(this, damage, info);
+            onDeath?.Invoke(this, info.damage, info);
         }
     }
 }

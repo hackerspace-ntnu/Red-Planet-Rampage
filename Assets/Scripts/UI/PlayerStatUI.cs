@@ -14,8 +14,15 @@ public class PlayerStatUI : MonoBehaviour
     [SerializeField]
     private TMP_Text chipsText;
 
+    public string gunNameText { get; private set; }
+
     [SerializeField]
-    private TMP_Text gunNameText;
+    private RectTransform gunPreviewPanel;
+
+    private GameObject gunPreviewGameObject;
+
+    [SerializeField]
+    private Chip chip;
 
     [SerializeField]
     private StatBar damageBar;
@@ -31,15 +38,24 @@ public class PlayerStatUI : MonoBehaviour
 
     private Outline outline;
 
-    public PlayerManager playerManager;
+    private PlayerManager playerManager;
 
-    void Start()
+    [SerializeField]
+    private float gunPreviewScale;
+
+    private float gunPreviewPositionZ = -1f;
+
+    public PlayerManager PlayerManager
     {
-        outline = GetComponent<Outline>();
-        OnEnable();
+        get => playerManager;
+        set
+        {
+            playerManager = value;
+            Init();
+        }
     }
 
-    void OnEnable()
+    private void Init()
     {
         if (!playerManager)
         {
@@ -47,14 +63,21 @@ public class PlayerStatUI : MonoBehaviour
         }
 
         statContainer.alpha = 1;
+        outline = GetComponent<Outline>();
 
         SetName(playerManager.identity.playerName);
         SetColor(playerManager.identity.color);
 
         SetChips(playerManager.identity.chips);
         playerManager.identity.onChipChange += SetChips;
+        playerManager.identity.onChipSpent += AnimateTransaction;
+        playerManager.identity.onChipGain += AnimateTransaction;
 
         SetGunName(playerManager.GetGunName());
+        gunPreviewGameObject = GunFactory.InstantiateGun(playerManager.identity.Body, playerManager.identity.Barrel, playerManager.identity.Extension, null, gunPreviewPanel);
+        gunPreviewGameObject.transform.Rotate(new Vector3(0f, 90f));
+        gunPreviewGameObject.transform.localScale = new Vector3(gunPreviewScale, gunPreviewScale, gunPreviewScale);
+        gunPreviewGameObject.transform.Translate(new Vector3(0f, 0f, gunPreviewPositionZ));
 
         // Set current stats
         OnInventoryChange(null);
@@ -78,10 +101,18 @@ public class PlayerStatUI : MonoBehaviour
             return;
         }
 
-
         playerManager.identity.onChipChange -= SetChips;
+        playerManager.identity.onChipSpent -= AnimateTransaction;
+        playerManager.identity.onChipGain -= AnimateTransaction;
         playerManager.identity.onInventoryChange -= OnInventoryChange;
         playerManager.onSelectedBiddingPlatformChange -= OnBiddingPlatformChange;
+    }
+
+    private void AnimateTransaction(int amount)
+    {
+        if (chip == null)
+            return;
+        chip.AnimateTransaction(amount, playerManager.SelectedBiddingPlatform.transform);
     }
 
     private void OnInventoryChange(Item item)
@@ -91,16 +122,18 @@ public class PlayerStatUI : MonoBehaviour
 
     private void OnBiddingPlatformChange(BiddingPlatform platform)
     {
+        Item body = playerManager.identity.Body;
+        Item barrel = playerManager.identity.Barrel;
+        Item extension = playerManager.identity.Extension;
+
         if (platform == null || platform.Item == null)
         {
             ResetNewGunStats();
             SetGunName(playerManager.GetGunName());
+            SetGunPreview(body, barrel, extension);
             return;
         }
 
-        Item body = playerManager.identity.Body;
-        Item barrel = playerManager.identity.Barrel;
-        Item extension = playerManager.identity.Extension;
         switch (platform.Item.augmentType)
         {
             case AugmentType.Body:
@@ -119,6 +152,7 @@ public class PlayerStatUI : MonoBehaviour
         GunStats stats = GunFactory.GetGunStats(body, barrel, extension);
         SetNewGunStats(stats);
         SetGunName(GunFactory.GetGunName(body, barrel, extension));
+        SetGunPreview(body, barrel, extension);
     }
 
     public void SetName(string name)
@@ -138,7 +172,16 @@ public class PlayerStatUI : MonoBehaviour
 
     public void SetGunName(string name)
     {
-        gunNameText.SetText(name);
+        gunNameText = name;
+    }
+
+    public void SetGunPreview(Item body, Item barrel, Item extension)
+    {
+        GunFactory gunFactory = gunPreviewGameObject.GetComponent<GunFactory>();
+        gunFactory.Body = body;
+        gunFactory.Barrel = barrel;
+        gunFactory.Extension = extension;
+        gunFactory.InitializeGun();
     }
 
     public void SetBaseGunStats(GunStats gunStats)
@@ -147,7 +190,7 @@ public class PlayerStatUI : MonoBehaviour
         damageBar.BaseValue = gunStats.ProjectileDamage;
         fireRateBar.BaseValue = gunStats.Firerate;
         projectilesPerShotBar.BaseValue = gunStats.ProjectilesPerShot;
-        projectileSpeedBar.BaseValue = gunStats.ProjectileSpeed;
+        projectileSpeedBar.BaseValue = gunStats.ProjectileSpeedFactor;
     }
 
     public void SetNewGunStats(GunStats gunStats)
@@ -155,7 +198,7 @@ public class PlayerStatUI : MonoBehaviour
         damageBar.NewValue = gunStats.ProjectileDamage;
         fireRateBar.NewValue = gunStats.Firerate;
         projectilesPerShotBar.NewValue = gunStats.ProjectilesPerShot;
-        projectileSpeedBar.NewValue = gunStats.ProjectileSpeed;
+        projectileSpeedBar.NewValue = gunStats.ProjectileSpeedFactor;
     }
 
     public void ResetNewGunStats()

@@ -10,7 +10,8 @@ public class HitboxController : MonoBehaviour
 
     public void DamageCollider(DamageInfo info)
     {
-        info.isCritical = isCritical;
-        health?.dealDamage(info);
+        if (!health.enabled)
+            return;
+        health?.DealDamage(info);
     }
 }

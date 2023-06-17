@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TransformExtensions;
 
 /// <summary>
 /// A modifier to stick a gameObject (stuckObject) to a target after hitting said target.
@@ -22,20 +23,32 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
     [SerializeField]
     private Priority priority = Priority.ARBITRARY;
 
+    private PlayerManager source;
+
     public Priority GetPriority()
     {
         return priority;
     }
 
-    public ref ProjectileController ModifyProjectile(ref ProjectileController projectile)
+    public void Attach(ProjectileController projectile)
     {
-        projectile.OnHitboxCollision += StickToTarget;
-        return ref projectile;
+        projectile.OnColliderHit += StickToTarget;
+        source = projectile.player;
     }
 
-    public void StickToTarget(HitboxController hitboxController, ref ProjectileState state, GunStats stats)
+    public void Detach(ProjectileController projectile)
     {
-        var stuck = Instantiate(stuckObject, state.olderPosition, state.rotation, hitboxController.transform);
+        projectile.OnColliderHit -= StickToTarget;
+    }
+
+    public void StickToTarget(Collider collider, ref ProjectileState state)
+    {
+        var stuck = Instantiate(stuckObject, state.position, state.rotation, null);
+        stuck.transform.ParentUnscaled(collider.transform);
+        if (stuck.TryGetComponent<ContinuousDamage>(out var continuousDamage))
+        {
+            continuousDamage.source = source;
+        }
         Destroy(stuck, stuckLifeTime);
     }
 }
