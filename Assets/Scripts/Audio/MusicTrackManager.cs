@@ -2,6 +2,7 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Audio;
+using CollectionExtensions;
 
 public enum MusicType
 {
@@ -23,6 +24,11 @@ public class MusicTrackManager : MonoBehaviour
 
     [SerializeField]
     private float fadeDuration = 0.5f;
+    public float TrackOffset => fadeDuration;
+
+    private MusicTrack track;
+    public float BeatsPerMinute => track ? track.BeatsPerMinute : 100;
+    public float BeatsPerBar => track ? track.BeatsPerBar : 4;
 
     private float exponentialReductionFactor = 20;
 
@@ -30,7 +36,7 @@ public class MusicTrackManager : MonoBehaviour
     private MusicTrack menuTheme;
 
     [SerializeField]
-    private MusicTrack battleTheme;
+    private MusicTrack[] battleThemes;
 
     [SerializeField]
     private MusicTrack constructionFanfare;
@@ -66,7 +72,7 @@ public class MusicTrackManager : MonoBehaviour
         switch (type)
         {
             case MusicType.BATTLE:
-                return battleTheme;
+                return battleThemes.RandomElement();
             case MusicType.CONSTRUCTION_FANFARE:
                 return constructionFanfare;
             case MusicType.BIDDING:
@@ -117,7 +123,7 @@ public class MusicTrackManager : MonoBehaviour
 
     public void SwitchTo(MusicType type)
     {
-        MusicTrack track = GetTrack(type);
+        track = GetTrack(type);
         StartCoroutine(FadeOutThenSwitchTo(track));
         if (trackSwitchingRoutine != null) StopCoroutine(trackSwitchingRoutine);
         if (track.LoopLayers.Length > 0)
