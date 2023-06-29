@@ -8,13 +8,20 @@ public class SolarBody : GunBody
     [SerializeField]
     private MeshRenderer meshRenderer;
 
+    [SerializeField]
+    private Transform rayCastOrigin;
+
+    [SerializeField]
+    private LayerMask obscuringLayers;
+
     private Material solarPanelMaterial;
 
     [SerializeField, Range(0, 1)]
     protected float reloadEfficiencyPercentagen = 0.1f;
 
-    private const float sunDirection = 90f;
-    private const float sunDirectionSpan = 45f;
+    private Quaternion globalLightDirection;
+
+    private const float maxObscuringCheckDistance = 15f;
     private const float coolDownSeconds = 0.5f;
     private bool isCooldown = false;
 
@@ -24,6 +31,8 @@ public class SolarBody : GunBody
     {
         meshRenderer.materials[solarPanelMaterialIndex] = Instantiate(meshRenderer.materials[solarPanelMaterialIndex]);
         solarPanelMaterial = meshRenderer.materials[solarPanelMaterialIndex];
+        // The main directional light in the scene (the sun) should ideally be tagged as such, but this works for now
+        globalLightDirection = FindFirstObjectByType<Light>().transform.rotation;
 
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
@@ -50,9 +59,11 @@ public class SolarBody : GunBody
         isCooldown = false;
     }
 
-    void Update()
+    void FixedUpdate()
     {
-        if (transform.parent.rotation.eulerAngles.y < sunDirection + sunDirectionSpan && transform.parent.rotation.eulerAngles.y > sunDirection - sunDirectionSpan)
+        Vector3 relativeRotationSolarpanel = rayCastOrigin.transform.TransformDirection(Vector3.up);
+        float cosineSimularity = Vector3.Dot(relativeRotationSolarpanel, globalLightDirection.eulerAngles);
+        if ((!Physics.Raycast(rayCastOrigin.position, globalLightDirection.eulerAngles, maxObscuringCheckDistance, obscuringLayers.value)) && cosineSimularity > 0)
         {
             Reload(gunController.stats);
         }
