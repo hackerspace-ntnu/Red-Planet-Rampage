@@ -30,6 +30,7 @@ public class HatBarrel : ProjectileController
 
     // texture used to update the vfx position and alive-state of particles, RGB is used for position A for alive/dead
     private VFXTextureFormatter positionActiveTexture;
+    private VFXTextureFormatter directionActiveTexture;
 
     [SerializeField]
     private VisualEffect hatVfx;
@@ -42,8 +43,10 @@ public class HatBarrel : ProjectileController
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
 
         positionActiveTexture = new VFXTextureFormatter(maxHatProjectiles);
+        directionActiveTexture = new VFXTextureFormatter(maxHatProjectiles);
 
         hatVfx.SetTexture("Positions", positionActiveTexture.Texture);
+        hatVfx.SetTexture("Directions", directionActiveTexture.Texture);
         hatVfx.SetInt("MaxParticleCount", maxHatProjectiles);
         hatVfx.SendEvent("OnPlay");
 
@@ -89,9 +92,11 @@ public class HatBarrel : ProjectileController
                 // Sets initial position of the projectile
                 positionActiveTexture.setValue(i, loadedProjectile.position);
                 positionActiveTexture.setAlpha(i, 1f);
+                directionActiveTexture.setValue(i, loadedProjectile.direction);
 
                 // Neccessary to update the actual texture, so the vfx gets the new info
                 positionActiveTexture.ApplyChanges();
+                directionActiveTexture.ApplyChanges();
 
                 currentStateIndex = (currentStateIndex + 1) % maxHatProjectiles;
                 loadedProjectile = null;
@@ -115,11 +120,13 @@ public class HatBarrel : ProjectileController
             {
                 UpdateProjectile(state);
                 positionActiveTexture.setValue(i, state.position);
+                directionActiveTexture.setValue(i, state.direction);
 
             }
             positionActiveTexture.setAlpha(i, state != null && state.active ? 1f : 0f);
         }
         positionActiveTexture.ApplyChanges();
+        directionActiveTexture.ApplyChanges();
     }
 
     private void UpdateProjectile(ProjectileState state)
