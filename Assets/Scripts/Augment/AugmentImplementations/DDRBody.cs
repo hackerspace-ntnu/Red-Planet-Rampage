@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -34,22 +32,22 @@ public class DDRBody : GunBody
 
     private const int screenMaterialIndex = 2;
 
-    private float arrowHeigth = 0;
+    private float arrowHeight = 0;
     private ArrowDirection arrowDirection = ArrowDirection.NORTH;
 
-    private const float screenHeigth = 3.5f;
+    private const float screenHeight = 3.5f;
     private const float errorMarginInput = 0.1f;
 
-    private const float targetPoint = 3;
+    private const float targetHeight = 3;
+    private const float startHeight = targetHeight - screenHeight;
 
     [SerializeField]
     private Precision[] precisionsGoodToBad;
 
     LTDescr arrowMover;
 
-    [SerializeField]
-    private float secondPerArrow = 1;
-    private float musicPace = 0.4285714f;
+    private float secondsPerUnitHeight;
+    private float musicPace;
 
 
     public override void Start()
@@ -57,6 +55,10 @@ public class DDRBody : GunBody
         meshRenderer.materials[screenMaterialIndex] = Instantiate(meshRenderer.materials[screenMaterialIndex]);
         ddrMaterial = meshRenderer.materials[screenMaterialIndex];
         precisionText.enabled = false;
+
+        musicPace = 60f / MusicTrackManager.Singleton.BeatsPerMinute;
+        var secondsPerArrow = MusicTrackManager.Singleton.BeatsPerBar * musicPace;
+        secondsPerUnitHeight = secondsPerArrow / (targetHeight - startHeight);
 
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
@@ -69,17 +71,20 @@ public class DDRBody : GunBody
         {
             gunController.player.inputManager.onFirePerformed += Fire;
             gunController.player.inputManager.onMovePerformed += ArrowSelect;
-            arrowMover = LeanTween.value(gameObject, SetArrowHeigth, 0, screenHeigth, secondPerArrow)
+
+            arrowMover = LeanTween.value(gameObject, SetArrowHeigth, startHeight, screenHeight, secondsPerUnitHeight * (screenHeight - startHeight))
+                .setDelay(MusicTrackManager.Singleton.TrackOffset)
                 .setRepeat(-1)
                 .setOnComplete(ResetArrow);
 
             LeanTween.value(gameObject, SetBackgroundZoom, 0.5f, 1.5f, musicPace)
+                .setDelay(MusicTrackManager.Singleton.TrackOffset)
                 .setLoopPingPong()
                 .setOnComplete(
                 () => animator.OnFire(0));
 
             animator.OnInitialize(gunController.stats);
-            
+
         }
 
     }
@@ -88,13 +93,13 @@ public class DDRBody : GunBody
     {
         Precision? precision = null;
 
-        if (Mathf.Abs(arrowHeigth - targetPoint) <= precisionsGoodToBad[0].range)
+        if (Mathf.Abs(arrowHeight - targetHeight) <= precisionsGoodToBad[0].range)
             precision = precisionsGoodToBad[0];
-        else if (Mathf.Abs(arrowHeigth - targetPoint) <= precisionsGoodToBad[1].range)
+        else if (Mathf.Abs(arrowHeight - targetHeight) <= precisionsGoodToBad[1].range)
             precision = precisionsGoodToBad[1];
-        else if (Mathf.Abs(arrowHeigth - targetPoint) <= precisionsGoodToBad[2].range)
+        else if (Mathf.Abs(arrowHeight - targetHeight) <= precisionsGoodToBad[2].range)
             precision = precisionsGoodToBad[2];
-        else if (Mathf.Abs(arrowHeigth - targetPoint) <= precisionsGoodToBad[3].range)
+        else if (Mathf.Abs(arrowHeight - targetHeight) <= precisionsGoodToBad[3].range)
             precision = precisionsGoodToBad[3];
 
         if (!precision.HasValue)
@@ -107,10 +112,10 @@ public class DDRBody : GunBody
             .setEasePunch()
             .setOnComplete(
             () => precisionText.enabled = false);
-            
+
         LeanTween.value(gameObject, SetFlashFactor, 0, 20f, 0.5f).setEasePunch();
 
-        gunController.Reload(reloadEfficiencyPercentage*precision.Value.awardFactor);
+        gunController.Reload(reloadEfficiencyPercentage * precision.Value.awardFactor);
         animator.OnReload(1);
     }
 
@@ -149,7 +154,7 @@ public class DDRBody : GunBody
     {
         LeanTween.cancel(arrowMover.id);
         ResetArrow();
-        arrowMover = LeanTween.value(gameObject, SetArrowHeigth, 0, screenHeigth, secondPerArrow)
+        arrowMover = LeanTween.value(gameObject, SetArrowHeigth, arrowHeight, screenHeight, secondsPerUnitHeight * (screenHeight - arrowHeight))
             .setRepeat(-1)
             .setOnComplete(ResetArrow);
     }
@@ -157,7 +162,7 @@ public class DDRBody : GunBody
     private void SetArrowHeigth(float heigth)
     {
         ddrMaterial.SetFloat("_ArrowYPos", heigth);
-        arrowHeigth = heigth;
+        arrowHeight = heigth;
     }
 
     private void SetFlashFactor(float factor)
@@ -167,20 +172,23 @@ public class DDRBody : GunBody
 
     private void SetBackgroundZoom(float zoom)
     {
-        ddrMaterial.SetVector("_BackgroundZoom",new Vector4(zoom, zoom, 0, 0));
+        ddrMaterial.SetVector("_BackgroundZoom", new Vector4(zoom, zoom, 0, 0));
     }
 
     private float ArrowDirectionToDegrees(int direction)
     {
         // Default orientation (0 degrees) = 12 O' clock
-        return direction*90;
+        return direction * 90;
     }
 
     private void ResetArrow()
     {
-        arrowHeigth = 0;
-        arrowDirection = (ArrowDirection) Random.Range(0,4);
-        ddrMaterial.SetFloat("_ArrowRotationDegrees", ArrowDirectionToDegrees((int) arrowDirection));
+        // Should be 0 when the arrow passes the top of the screen
+        // and -0.5 when the arrow hits the mark
+        // and less than -0.5 when the arrow was too early
+        arrowHeight = arrowHeight - targetHeight - Mathf.Abs(startHeight);
+        arrowDirection = (ArrowDirection)Random.Range(0, 4);
+        ddrMaterial.SetFloat("_ArrowRotationDegrees", ArrowDirectionToDegrees((int)arrowDirection));
     }
 
     private void OnDestroy()
