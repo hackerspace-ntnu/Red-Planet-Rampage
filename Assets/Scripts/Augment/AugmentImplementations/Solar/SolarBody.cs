@@ -61,9 +61,9 @@ public class SolarBody : GunBody
 
     void FixedUpdate()
     {
-        Vector3 relativeRotationSolarpanel = rayCastOrigin.transform.TransformDirection(Vector3.up);
-        float cosineSimularity = Vector3.Dot(relativeRotationSolarpanel, globalLightDirection.eulerAngles);
-        if ((!Physics.Raycast(rayCastOrigin.position, globalLightDirection.eulerAngles, maxObscuringCheckDistance, obscuringLayers.value)) && cosineSimularity > 0)
+        Vector3 solarPanelPlaneRotation = rayCastOrigin.transform.TransformDirection(Vector3.up);
+        float orientationOverlap = Vector3.Dot(solarPanelPlaneRotation, globalLightDirection.eulerAngles);
+        if ((!Physics.Raycast(rayCastOrigin.position, globalLightDirection.eulerAngles, maxObscuringCheckDistance, obscuringLayers.value)) && orientationOverlap > 0)
         {
             Reload(gunController.stats);
         }
