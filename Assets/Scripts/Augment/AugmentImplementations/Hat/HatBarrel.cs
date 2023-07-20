@@ -1,8 +1,9 @@
 using UnityEngine;
 using UnityEngine.VFX;
 using System.Linq;
+
 /// <summary>
-/// Class that ties the functions and properties of the completed gun to the animations of the hat barrel
+/// Class that processes and renders mesh projectiles
 /// </summary>
 public class HatBarrel : ProjectileController
 {
@@ -10,20 +11,29 @@ public class HatBarrel : ProjectileController
     private AugmentAnimator animator;
 
     [SerializeField]
-    private int maxHatProjectiles = 300;
+    private int maxProjectiles = 300;
 
     [SerializeField]
-    private float hatMaxDistance = 20f;
+    private float maxDistance = 20f;
 
     [SerializeField]
-    private float hatSpeed = 10f;
+    private float speed = 10f;
 
     [SerializeField]
-    private float hatSize = .2f;
+    private float size = .2f;
 
     private ProjectileState[] projectiles;
 
     private ProjectileState loadedProjectile;
+
+    [SerializeField]
+    private VisualEffect trail;
+
+    [SerializeField]
+    private Mesh mesh;
+
+    [SerializeField]
+    private Material material;
 
     //index of last initialized state in array
     private int currentStateIndex = 0;
@@ -32,23 +42,23 @@ public class HatBarrel : ProjectileController
     private VFXTextureFormatter positionActiveTexture;
     private VFXTextureFormatter directionActiveTexture;
 
-    [SerializeField]
-    private VisualEffect hatVfx;
-
     protected override void Awake()
     {
         base.Awake();
-        projectiles = new ProjectileState[maxHatProjectiles];
+        projectiles = new ProjectileState[maxProjectiles];
 
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
 
-        positionActiveTexture = new VFXTextureFormatter(maxHatProjectiles);
-        directionActiveTexture = new VFXTextureFormatter(maxHatProjectiles);
+        positionActiveTexture = new VFXTextureFormatter(maxProjectiles);
+        directionActiveTexture = new VFXTextureFormatter(maxProjectiles);
 
-        hatVfx.SetTexture("Positions", positionActiveTexture.Texture);
-        hatVfx.SetTexture("Directions", directionActiveTexture.Texture);
-        hatVfx.SetInt("MaxParticleCount", maxHatProjectiles);
-        hatVfx.SendEvent("OnPlay");
+        if (trail)
+        {
+            trail.SetTexture("Positions", positionActiveTexture.Texture);
+            trail.SetTexture("Directions", directionActiveTexture.Texture);
+            trail.SetInt("MaxParticleCount", maxProjectiles);
+            trail.SendEvent("OnPlay");
+        }
 
         animator.OnFireAnimationEnd += ReleaseLoadedHat;
     }
@@ -66,7 +76,7 @@ public class HatBarrel : ProjectileController
     public override void InitializeProjectile(GunStats stats)
     {
         loadedProjectile = new ProjectileState(stats, projectileOutput);
-        loadedProjectile.maxDistance = this.hatMaxDistance;
+        loadedProjectile.maxDistance = this.maxDistance;
 
         animator.OnFire(stats.Ammo);
     }
@@ -76,9 +86,9 @@ public class HatBarrel : ProjectileController
         if (loadedProjectile == null) return;
 
         loadedProjectile.active = true;
-        loadedProjectile.speed = hatSpeed;
+        loadedProjectile.speed = speed;
         OnProjectileInit?.Invoke(ref loadedProjectile, stats);
-        for (int i = 0; i < maxHatProjectiles; i++)
+        for (int i = 0; i < maxProjectiles; i++)
         {
             if (projectiles[currentStateIndex] == null || !projectiles[currentStateIndex].active)
             {
@@ -86,7 +96,7 @@ public class HatBarrel : ProjectileController
                 loadedProjectile.position = projectileOutput.position;
                 loadedProjectile.direction = projectileRotation * projectileOutput.forward;
                 loadedProjectile.rotation = projectileRotation * projectileOutput.rotation;
-                loadedProjectile.size = hatSize;
+                loadedProjectile.size = size;
 
                 projectiles[currentStateIndex] = loadedProjectile;
                 // Sets initial position of the projectile
@@ -98,12 +108,12 @@ public class HatBarrel : ProjectileController
                 positionActiveTexture.ApplyChanges();
                 directionActiveTexture.ApplyChanges();
 
-                currentStateIndex = (currentStateIndex + 1) % maxHatProjectiles;
+                currentStateIndex = (currentStateIndex + 1) % maxProjectiles;
                 loadedProjectile = null;
 
                 return;
             }
-            currentStateIndex = (currentStateIndex + 1) % maxHatProjectiles;
+            currentStateIndex = (currentStateIndex + 1) % maxProjectiles;
         }
     }
 
@@ -113,7 +123,7 @@ public class HatBarrel : ProjectileController
         {
             return;
         }
-        for (int i = 0; i < maxHatProjectiles; i++)
+        for (int i = 0; i < maxProjectiles; i++)
         {
             var state = projectiles[i];
             if (state != null && state.active)
@@ -125,6 +135,8 @@ public class HatBarrel : ProjectileController
             }
             positionActiveTexture.setAlpha(i, state != null && state.active ? 1f : 0f);
         }
+        // render instanced meshes (TODO clean up)
+        Graphics.RenderMeshInstanced(new RenderParams(material), mesh, 0, projectiles.Where(p => p != null).Select(p => Matrix4x4.Translate(p.position) * Matrix4x4.Rotate(p.rotation)).ToArray());
         positionActiveTexture.ApplyChanges();
         directionActiveTexture.ApplyChanges();
     }
