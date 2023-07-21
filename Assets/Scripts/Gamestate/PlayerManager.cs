@@ -159,6 +159,7 @@ public class PlayerManager : MonoBehaviour
 
     private void Fire(InputAction.CallbackContext ctx)
     {
+        hudController.RotateChamber();
         gunController.triggerHeld = true;
         gunController.triggerPressed = true;
         StartCoroutine(UnpressTrigger());

@@ -8,6 +8,9 @@ public class PlayerHUDController : MonoBehaviour
     private RectTransform healthBar;
 
     [SerializeField]
+    private RectTransform ammoHud;
+
+    [SerializeField]
     private GameObject deathScreen;
 
     [SerializeField]
@@ -40,6 +43,12 @@ public class PlayerHUDController : MonoBehaviour
         LeanTween.value(gameObject, UpdateDamageBorder, 0f, 1f, damageBorderFlashDuration);
         // Leave a persistent red border at low health, softly increasing as the player inches closer to death
         persistentDamageBorder = Mathf.Clamp01(Mathf.Log10(1.2f * maxHealth / (currentHealth + maxHealth * .01f)));
+    }
+
+    public void RotateChamber()
+    {
+        LeanTween.cancel(ammoHud.gameObject);
+        ammoHud.gameObject.LeanRotateAroundLocal(Vector3.forward, 30, 0.5f).setEaseSpring();
     }
 
     public void UpdateHealthBar(float currentHealth, float maxHealth)
