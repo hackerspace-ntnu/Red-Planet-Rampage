@@ -23,6 +23,7 @@ public class SolarBody : GunBody
 
     private const float maxObscuringCheckDistance = 15f;
     private const float coolDownSeconds = 0.5f;
+    private const float chargeUpSeconds = 1; 
     private bool isCooldown = false;
 
     private const int solarPanelMaterialIndex = 3;
@@ -47,6 +48,10 @@ public class SolarBody : GunBody
     {
         if (isCooldown)
             return;
+        if (solarPanelMaterial.GetFloat("_On") == 0)
+        {
+            LeanTween.value(gameObject, SetEmissionStrength, 0, 1, chargeUpSeconds);
+        }
         solarPanelMaterial.SetFloat("_On", 1);
         gunController.Reload(reloadEfficiencyPercentagen);
         isCooldown = true;
@@ -59,16 +64,21 @@ public class SolarBody : GunBody
         isCooldown = false;
     }
 
+    private void SetEmissionStrength(float strength)
+    {
+        solarPanelMaterial.SetFloat("_EmissionStrength", strength);
+    }
+
     void FixedUpdate()
     {
-        Vector3 solarPanelPlaneRotation = rayCastOrigin.transform.TransformDirection(Vector3.up);
-        float orientationOverlap = Vector3.Dot(solarPanelPlaneRotation, globalLightDirection.eulerAngles);
+        float orientationOverlap = Vector3.Dot(rayCastOrigin.transform.up, globalLightDirection.eulerAngles);
         if ((!Physics.Raycast(rayCastOrigin.position, globalLightDirection.eulerAngles, maxObscuringCheckDistance, obscuringLayers.value)) && orientationOverlap > 0)
         {
             Reload(gunController.stats);
         }
         else
         {
+            SetEmissionStrength(0);
             solarPanelMaterial.SetFloat("_On", 0);
         }
     }
