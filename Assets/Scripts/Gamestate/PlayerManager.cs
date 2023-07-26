@@ -138,6 +138,8 @@ public class PlayerManager : MonoBehaviour
         if (gunController)
         {
             gunController.onFire -= UpdateAimTarget;
+            gunController.onFire -= UpdateHudFire;
+            gunController.onReload -= UpdateHudReload;
             //Remove the gun
             Destroy(gunController.gameObject);
         }
@@ -159,10 +161,32 @@ public class PlayerManager : MonoBehaviour
 
     private void Fire(InputAction.CallbackContext ctx)
     {
-        hudController.RotateChamber();
+        /*
+        float ammo = gunController.stats.Ammo;
+        float magazine = gunController.stats.magazineSize;
+        Debug.Log("Ammo: " + ammo);
+        Debug.Log("Magazine: " + magazine);
+        Debug.Log("Ammo divided by magazine:" + ammo/ magazine);
+        hudController.RotateChamber(ammo/magazine);
+        */
         gunController.triggerHeld = true;
         gunController.triggerPressed = true;
         StartCoroutine(UnpressTrigger());
+    }
+
+    private void UpdateHudFire(GunStats stats)
+    {
+        // stats variables must be dereferenced
+        float ammo = stats.Ammo;
+        float magazine = stats.magazineSize;
+        hudController.UpdateOnFire(ammo / magazine);
+    }
+
+    private void UpdateHudReload(GunStats stats)
+    {
+        float ammo = stats.Ammo;
+        float magazine = stats.magazineSize;
+        hudController.UpdateOnReload(ammo / magazine);
     }
 
     private void TryPlaceBid(InputAction.CallbackContext ctx)
@@ -206,6 +230,8 @@ public class PlayerManager : MonoBehaviour
         // Remember gun controller
         gunController = gun.GetComponent<GunController>();
         gunController.onFire += UpdateAimTarget;
+        gunController.onFire += UpdateHudFire;
+        gunController.onReload += UpdateHudReload;
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)
