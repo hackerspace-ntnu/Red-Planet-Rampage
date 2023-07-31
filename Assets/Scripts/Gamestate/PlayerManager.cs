@@ -161,14 +161,6 @@ public class PlayerManager : MonoBehaviour
 
     private void Fire(InputAction.CallbackContext ctx)
     {
-        /*
-        float ammo = gunController.stats.Ammo;
-        float magazine = gunController.stats.magazineSize;
-        Debug.Log("Ammo: " + ammo);
-        Debug.Log("Magazine: " + magazine);
-        Debug.Log("Ammo divided by magazine:" + ammo/ magazine);
-        hudController.RotateChamber(ammo/magazine);
-        */
         gunController.triggerHeld = true;
         gunController.triggerPressed = true;
         StartCoroutine(UnpressTrigger());

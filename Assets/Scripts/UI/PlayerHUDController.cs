@@ -35,6 +35,8 @@ public class PlayerHUDController : MonoBehaviour
 
     private Material damageBorder;
 
+    private const float ammoSpinDegrees = 30;
+
     void Start()
     {
         var image = GetComponent<RawImage>();
@@ -67,9 +69,9 @@ public class PlayerHUDController : MonoBehaviour
         }
         
         ammoCapacityMaterial.SetFloat("_Arc2", (1-ammoPercent)*360);
-        ammoHud.gameObject.LeanRotateAroundLocal(Vector3.forward, 30, 0.5f).setEaseSpring()
+        ammoHud.gameObject.LeanRotateAroundLocal(Vector3.forward, ammoSpinDegrees, 0.5f).setEaseSpring()
             .setOnStart(
-            () => ammoBar.gameObject.transform.Rotate(new Vector3(0, 0, -30)));
+            () => ammoBar.gameObject.transform.Rotate(new Vector3(0, 0, -ammoSpinDegrees)));
     }
 
     public void UpdateOnReload(float ammoPercent)
