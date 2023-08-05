@@ -27,7 +27,7 @@ public class PlayerMovement : MonoBehaviour
     private float maxVelocity = 10;
 
     [SerializeField]
-    private float strafeForce = 50;
+    private float strafeForce = 60;
 
     [SerializeField]
     private float inAirStrafeForce = 16;
@@ -43,6 +43,8 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField]
     private float jumpTimeout = 0.5f;
+
+    private const float marsGravity = 3.72076f;
 
     private bool canJump = true;
 
@@ -109,6 +111,7 @@ public class PlayerMovement : MonoBehaviour
                     // Strafe slightly with less drag.
                     body.drag = airDrag;
                     body.AddForce(input * inAirStrafeForce, ForceMode.VelocityChange);
+                    body.AddForce(Vector3.down * marsGravity, ForceMode.Acceleration);
                     if (!IsInAir()) state = PlayerState.GROUNDED;
                     break;
                 }
@@ -158,7 +161,9 @@ public class PlayerMovement : MonoBehaviour
     {
         var positionInput = new Vector3(inputManager.moveInput.x, 0, inputManager.moveInput.y);
         UpdatePosition(positionInput * Time.deltaTime);
-        // Limit velocity
+        // Limit velocity when not grounded
+        if (state == PlayerState.GROUNDED)
+            return;
         body.velocity = new Vector3(Mathf.Clamp(body.velocity.x, -maxVelocity, maxVelocity), body.velocity.y, Mathf.Clamp(body.velocity.z, -maxVelocity, maxVelocity));
     }
 
