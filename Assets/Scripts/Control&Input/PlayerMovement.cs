@@ -74,6 +74,8 @@ public class PlayerMovement : MonoBehaviour
     {
         inputManager = player;
         inputManager.onSelect += OnJump;
+        inputManager.onCrouchPerformed += SetCrouch;
+        inputManager.onCrouchCanceled += SetCrouch;
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
@@ -83,6 +85,14 @@ public class PlayerMovement : MonoBehaviour
             body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
             StartCoroutine(JumpTimeout());
         }
+    }
+
+    private void SetCrouch(InputAction.CallbackContext ctx)
+    {
+        if (ctx.performed)
+            animator.SetBool("Crouching", true);
+        if (ctx.canceled)
+            animator.SetBool("Crouching", false);
     }
 
     private IEnumerator JumpTimeout()
