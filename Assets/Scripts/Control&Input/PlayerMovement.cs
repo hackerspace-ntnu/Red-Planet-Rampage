@@ -26,11 +26,16 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private float maxVelocity = 10;
 
-    [SerializeField]
-    private float strafeForce = 60;
+    private float strafeForce;
 
     [SerializeField]
-    private float inAirStrafeForce = 16;
+    private float strafeForceGrounded = 60;
+
+    [SerializeField]
+    private float strafeForceCrouched = 30;
+
+    [SerializeField]
+    private float strafeForceInAir = 16;
 
     [SerializeField]
     private float drag = 6f;
@@ -64,6 +69,7 @@ public class PlayerMovement : MonoBehaviour
     {
         body = GetComponent<Rigidbody>();
         hitbox = GetComponent<BoxCollider>();
+        strafeForce = strafeForceGrounded;
     }
 
     /// <summary>
@@ -90,9 +96,17 @@ public class PlayerMovement : MonoBehaviour
     private void SetCrouch(InputAction.CallbackContext ctx)
     {
         if (ctx.performed)
+        {
             animator.SetBool("Crouching", true);
+            strafeForce = strafeForceCrouched;
+        }
+            
         if (ctx.canceled)
+        {
             animator.SetBool("Crouching", false);
+            strafeForce = strafeForceGrounded;
+        }
+            
     }
 
     private IEnumerator JumpTimeout()
@@ -120,7 +134,7 @@ public class PlayerMovement : MonoBehaviour
                 {
                     // Strafe slightly with less drag.
                     body.drag = airDrag;
-                    body.AddForce(input * inAirStrafeForce, ForceMode.VelocityChange);
+                    body.AddForce(input * strafeForceInAir, ForceMode.VelocityChange);
                     body.AddForce(Vector3.down * marsGravity, ForceMode.Acceleration);
                     if (!IsInAir()) state = PlayerState.GROUNDED;
                     break;
