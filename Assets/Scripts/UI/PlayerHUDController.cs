@@ -36,6 +36,7 @@ public class PlayerHUDController : MonoBehaviour
     private Material damageBorder;
 
     private const float ammoSpinDegrees = 30;
+    private const float availableDegrees = 270;
 
     void Start()
     {
@@ -68,7 +69,7 @@ public class PlayerHUDController : MonoBehaviour
             ammoBar.gameObject.transform.eulerAngles = new Vector3(ammoBar.gameObject.transform.eulerAngles.x, ammoBar.gameObject.transform.eulerAngles.y, 0);
         }
         
-        ammoCapacityMaterial.SetFloat("_Arc2", (1-ammoPercent)*360);
+        ammoCapacityMaterial.SetFloat("_Arc2", (1-ammoPercent)* availableDegrees);
         ammoHud.gameObject.LeanRotateAroundLocal(Vector3.forward, ammoSpinDegrees, 0.5f).setEaseSpring()
             .setOnStart(
             () => ammoBar.gameObject.transform.Rotate(new Vector3(0, 0, -ammoSpinDegrees)));
@@ -76,7 +77,7 @@ public class PlayerHUDController : MonoBehaviour
 
     public void UpdateOnReload(float ammoPercent)
     {
-        ammoCapacityMaterial.SetFloat("_Arc2", (1 - ammoPercent) * 360);
+        ammoCapacityMaterial.SetFloat("_Arc2", (1 - ammoPercent) * availableDegrees);
     }
 
     public void UpdateHealthBar(float currentHealth, float maxHealth)
