@@ -47,11 +47,22 @@ public class PlayerMovement : MonoBehaviour
     private float jumpForce = 10;
 
     [SerializeField]
+    private float jumpForceLeap = 12.5f;
+
+    [SerializeField]
     private float jumpTimeout = 0.5f;
+
+    [SerializeField]
+    private float jumpTimeoutLeap = 0.875f;
 
     private const float marsGravity = 3.72076f;
 
     private bool canJump = true;
+
+    [SerializeField]
+    private float crouchedCameraHeigthOffset = 0.3f;
+
+    private float localHeigthInputManager;
 
     [SerializeField]
     private float airThreshold = 0.4f;
@@ -63,9 +74,6 @@ public class PlayerMovement : MonoBehaviour
     private Animator animator;
 
     private Vector2 aimAngle = Vector2.zero;
-
-    private float localHeigthInputManager;
-
 
     void Start()
     {
@@ -89,11 +97,23 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext ctx)
     {
-        if (canJump && state == PlayerState.GROUNDED)
+        if (!(canJump && state == PlayerState.GROUNDED))
+            return;
+
+        // Leap jump
+        if (animator.GetBool("Crouching"))
         {
-            body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
-            StartCoroutine(JumpTimeout());
+            body.AddForce(Vector3.up * jumpForceLeap, ForceMode.VelocityChange);
+            Vector3 forwardDirection = new Vector3(inputManager.transform.forward.x, 0, inputManager.transform.forward.z);
+            body.AddForce(forwardDirection * jumpForceLeap, ForceMode.VelocityChange);
+            animator.SetTrigger("Leap");
+            StartCoroutine(JumpTimeout(jumpTimeoutLeap));
+            return;
         }
+        
+        // Normal jump
+        body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
+        StartCoroutine(JumpTimeout(jumpTimeout));
     }
 
     private void SetCrouch(InputAction.CallbackContext ctx)
@@ -110,7 +130,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Crouching", true);
             strafeForce = strafeForceCrouched;
             if (!IsInAir())
-                inputManager.gameObject.LeanMoveLocalY(localHeigthInputManager - 0.2f, 0.2f);
+                inputManager.gameObject.LeanMoveLocalY(localHeigthInputManager - crouchedCameraHeigthOffset, 0.2f);
         }
             
         if (ctx.canceled)
@@ -118,15 +138,15 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Crouching", false);
             strafeForce = strafeForceGrounded;
             if (!IsInAir())
-                inputManager.gameObject.LeanMoveLocalY(localHeigthInputManager + 0.2f, 0.2f);
+                inputManager.gameObject.LeanMoveLocalY(localHeigthInputManager + crouchedCameraHeigthOffset, 0.2f);
         }
             
     }
 
-    private IEnumerator JumpTimeout()
+    private IEnumerator JumpTimeout(float time)
     {
         canJump = false;
-        yield return new WaitForSeconds(jumpTimeout);
+        yield return new WaitForSeconds(time);
         canJump = true;
     }
 
