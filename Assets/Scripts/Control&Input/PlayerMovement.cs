@@ -60,9 +60,9 @@ public class PlayerMovement : MonoBehaviour
     private bool canJump = true;
 
     [SerializeField]
-    private float crouchedCameraHeigthOffset = 0.3f;
+    private float crouchedCameraHeightOffset = 0.3f;
 
-    private float localHeigthInputManager;
+    private float localHeightInputManager;
 
     [SerializeField]
     private float airThreshold = 0.4f;
@@ -92,7 +92,7 @@ public class PlayerMovement : MonoBehaviour
         inputManager.onSelect += OnJump;
         inputManager.onCrouchPerformed += SetCrouch;
         inputManager.onCrouchCanceled += SetCrouch;
-        localHeigthInputManager = inputManager.transform.localPosition.y;
+        localHeightInputManager = inputManager.transform.localPosition.y;
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
@@ -121,7 +121,7 @@ public class PlayerMovement : MonoBehaviour
         if (LeanTween.isTweening(inputManager.gameObject))
         {
             LeanTween.cancel(inputManager.gameObject);
-            inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localHeigthInputManager, inputManager.transform.localPosition.z);
+            inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localHeightInputManager, inputManager.transform.localPosition.z);
         }
 
 
@@ -130,7 +130,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Crouching", true);
             strafeForce = strafeForceCrouched;
             if (!IsInAir())
-                inputManager.gameObject.LeanMoveLocalY(localHeigthInputManager - crouchedCameraHeigthOffset, 0.2f);
+                inputManager.gameObject.LeanMoveLocalY(localHeightInputManager - crouchedCameraHeightOffset, 0.2f);
         }
             
         if (ctx.canceled)
@@ -138,7 +138,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Crouching", false);
             strafeForce = strafeForceGrounded;
             if (!IsInAir())
-                inputManager.gameObject.LeanMoveLocalY(localHeigthInputManager + crouchedCameraHeigthOffset, 0.2f);
+                inputManager.gameObject.LeanMoveLocalY(localHeightInputManager + crouchedCameraHeightOffset, 0.2f);
         }
             
     }
