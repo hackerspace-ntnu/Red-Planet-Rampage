@@ -64,6 +64,8 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector2 aimAngle = Vector2.zero;
 
+    private float localHeigthInputManager;
+
 
     void Start()
     {
@@ -82,6 +84,7 @@ public class PlayerMovement : MonoBehaviour
         inputManager.onSelect += OnJump;
         inputManager.onCrouchPerformed += SetCrouch;
         inputManager.onCrouchCanceled += SetCrouch;
+        localHeigthInputManager = inputManager.transform.localPosition.y;
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
@@ -95,16 +98,27 @@ public class PlayerMovement : MonoBehaviour
 
     private void SetCrouch(InputAction.CallbackContext ctx)
     {
+        if (LeanTween.isTweening(inputManager.gameObject))
+        {
+            LeanTween.cancel(inputManager.gameObject);
+            inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localHeigthInputManager, inputManager.transform.localPosition.z);
+        }
+
+
         if (ctx.performed)
         {
             animator.SetBool("Crouching", true);
             strafeForce = strafeForceCrouched;
+            if (!IsInAir())
+                inputManager.gameObject.LeanMoveLocalY(localHeigthInputManager - 0.2f, 0.2f);
         }
             
         if (ctx.canceled)
         {
             animator.SetBool("Crouching", false);
             strafeForce = strafeForceGrounded;
+            if (!IsInAir())
+                inputManager.gameObject.LeanMoveLocalY(localHeigthInputManager + 0.2f, 0.2f);
         }
             
     }
