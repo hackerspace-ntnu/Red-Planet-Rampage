@@ -47,22 +47,22 @@ public class PlayerMovement : MonoBehaviour
     private float jumpForce = 10;
 
     [SerializeField]
-    private float jumpForceLeap = 12.5f;
+    private float leapForce = 12.5f;
 
     [SerializeField]
     private float jumpTimeout = 0.5f;
 
     [SerializeField]
-    private float jumpTimeoutLeap = 0.875f;
+    private float leapTimeout = 0.875f;
 
     private const float marsGravity = 3.72076f;
 
     private bool canJump = true;
 
     [SerializeField]
-    private float crouchedCameraHeightOffset = 0.3f;
+    private float crouchedHeightOffset = 0.3f;
 
-    private float localHeightInputManager;
+    private float localCameraHeight;
 
     [SerializeField]
     private float airThreshold = 0.4f;
@@ -92,7 +92,7 @@ public class PlayerMovement : MonoBehaviour
         inputManager.onSelect += OnJump;
         inputManager.onCrouchPerformed += SetCrouch;
         inputManager.onCrouchCanceled += SetCrouch;
-        localHeightInputManager = inputManager.transform.localPosition.y;
+        localCameraHeight = inputManager.transform.localPosition.y;
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
@@ -103,11 +103,11 @@ public class PlayerMovement : MonoBehaviour
         // Leap jump
         if (animator.GetBool("Crouching"))
         {
-            body.AddForce(Vector3.up * jumpForceLeap, ForceMode.VelocityChange);
+            body.AddForce(Vector3.up * leapForce, ForceMode.VelocityChange);
             Vector3 forwardDirection = new Vector3(inputManager.transform.forward.x, 0, inputManager.transform.forward.z);
-            body.AddForce(forwardDirection * jumpForceLeap, ForceMode.VelocityChange);
+            body.AddForce(forwardDirection * leapForce, ForceMode.VelocityChange);
             animator.SetTrigger("Leap");
-            StartCoroutine(JumpTimeout(jumpTimeoutLeap));
+            StartCoroutine(JumpTimeout(leapTimeout));
             return;
         }
         
@@ -121,7 +121,7 @@ public class PlayerMovement : MonoBehaviour
         if (LeanTween.isTweening(inputManager.gameObject))
         {
             LeanTween.cancel(inputManager.gameObject);
-            inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localHeightInputManager, inputManager.transform.localPosition.z);
+            inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localCameraHeight, inputManager.transform.localPosition.z);
         }
 
 
@@ -130,7 +130,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Crouching", true);
             strafeForce = strafeForceCrouched;
             if (!IsInAir())
-                inputManager.gameObject.LeanMoveLocalY(localHeightInputManager - crouchedCameraHeightOffset, 0.2f);
+                inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
         }
             
         if (ctx.canceled)
@@ -138,7 +138,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Crouching", false);
             strafeForce = strafeForceGrounded;
             if (!IsInAir())
-                inputManager.gameObject.LeanMoveLocalY(localHeightInputManager + crouchedCameraHeightOffset, 0.2f);
+                inputManager.gameObject.LeanMoveLocalY(localCameraHeight + crouchedHeightOffset, 0.2f);
         }
             
     }
