@@ -61,6 +61,9 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private AudioGroup extraHitSounds;
 
+    [SerializeField]
+    private PlayerIK playerIK;
+
     void Start()
     {
         healthController = GetComponent<HealthController>();
@@ -96,6 +99,7 @@ public class PlayerManager : MonoBehaviour
         // Disable components
         GetComponent<PlayerMovement>().enabled = false;
         healthController.enabled = false;
+        playerIK.enabled = false;
         // TODO display guns falling to the floor
         gunController.gameObject.SetActive(false);
         // Disable all colliders and physics
@@ -224,6 +228,10 @@ public class PlayerManager : MonoBehaviour
         gunController.onFire += UpdateAimTarget;
         gunController.onFire += UpdateHudFire;
         gunController.onReload += UpdateHudReload;
+
+        // TODO: Attach to handles instead
+        playerIK.LeftHandIKTarget = gun.transform;
+        playerIK.RightHandIKTarget = gun.transform;
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)
