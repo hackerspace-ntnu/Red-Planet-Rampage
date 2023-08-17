@@ -16,6 +16,9 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private float maxHitDistance = 100;
 
+    [SerializeField]
+    private float targetStartOffset = 0.28f;
+
     // TODO add context when shooty system is done
     public delegate void HitEvent(PlayerManager killer, PlayerManager victim);
 
@@ -61,6 +64,9 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private AudioGroup extraHitSounds;
 
+    [SerializeField]
+    private PlayerIK playerIK;
+
     void Start()
     {
         healthController = GetComponent<HealthController>();
@@ -96,6 +102,7 @@ public class PlayerManager : MonoBehaviour
         // Disable components
         GetComponent<PlayerMovement>().enabled = false;
         healthController.enabled = false;
+        playerIK.enabled = false;
         // TODO display guns falling to the floor
         gunController.gameObject.SetActive(false);
         // Disable all colliders and physics
@@ -149,7 +156,8 @@ public class PlayerManager : MonoBehaviour
     {
         Vector3 cameraCenter = inputManager.transform.position;
         Vector3 cameraDirection = inputManager.transform.forward;
-        if (Physics.Raycast(cameraCenter, cameraDirection, out RaycastHit hit, maxHitDistance, hitMask))
+        Vector3 startPoint = cameraCenter + cameraDirection * targetStartOffset;
+        if (Physics.Raycast(startPoint, cameraDirection, out RaycastHit hit, maxHitDistance, hitMask))
         {
             gunController.target = hit.point;
         }
@@ -224,6 +232,9 @@ public class PlayerManager : MonoBehaviour
         gunController.onFire += UpdateAimTarget;
         gunController.onFire += UpdateHudFire;
         gunController.onReload += UpdateHudReload;
+
+        playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
+        playerIK.RightHandIKTarget = gunController.RightHandTarget;
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)

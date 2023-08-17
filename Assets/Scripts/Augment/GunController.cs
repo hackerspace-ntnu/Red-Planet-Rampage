@@ -11,6 +11,10 @@ public class GunController : MonoBehaviour
     // Is automatically set by barrel or extension (if one i available)
     public Transform[] outputs;
 
+    // Where players will hold the gun
+    public Transform RightHandTarget;
+    public Transform LeftHandTarget;
+
     // Keeps track of when gun should be fired
     [HideInInspector]
     public FireRateController fireRateController;

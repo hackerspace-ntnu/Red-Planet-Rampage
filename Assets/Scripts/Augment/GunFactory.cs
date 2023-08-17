@@ -108,6 +108,9 @@ public class GunFactory : MonoBehaviour
         // Seriously, i have no moral qualms with making your skulls into decorative ornaments
         gunController.stats = gunBody.InstantiateBaseStats;
 
+        gunController.RightHandTarget = gunBody.RightHandTarget;
+        gunController.LeftHandTarget = gunBody.LeftHandTarget;
+
 #if UNITY_EDITOR
         GunBarrel gunBarrel = ((GameObject)PrefabUtility.InstantiatePrefab(Barrel.augment, transform))
             .GetComponent<GunBarrel>();

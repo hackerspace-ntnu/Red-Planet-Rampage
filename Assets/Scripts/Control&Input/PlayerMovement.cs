@@ -138,7 +138,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Crouching", false);
             strafeForce = strafeForceGrounded;
             if (!IsInAir())
-                inputManager.gameObject.LeanMoveLocalY(localCameraHeight + crouchedHeightOffset, 0.2f);
+                inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f);
         }
             
     }
