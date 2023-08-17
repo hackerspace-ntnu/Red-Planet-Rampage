@@ -233,9 +233,8 @@ public class PlayerManager : MonoBehaviour
         gunController.onFire += UpdateHudFire;
         gunController.onReload += UpdateHudReload;
 
-        // TODO: Attach to handles instead
-        playerIK.LeftHandIKTarget = gun.transform;
-        playerIK.RightHandIKTarget = gun.transform;
+        playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
+        playerIK.RightHandIKTarget = gunController.RightHandTarget;
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)
