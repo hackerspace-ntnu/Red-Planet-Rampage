@@ -16,6 +16,9 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private float maxHitDistance = 100;
 
+    [SerializeField]
+    private float targetStartOffset = 0.28f;
+
     // TODO add context when shooty system is done
     public delegate void HitEvent(PlayerManager killer, PlayerManager victim);
 
@@ -153,7 +156,8 @@ public class PlayerManager : MonoBehaviour
     {
         Vector3 cameraCenter = inputManager.transform.position;
         Vector3 cameraDirection = inputManager.transform.forward;
-        if (Physics.Raycast(cameraCenter, cameraDirection, out RaycastHit hit, maxHitDistance, hitMask))
+        Vector3 startPoint = cameraCenter + cameraDirection * targetStartOffset;
+        if (Physics.Raycast(startPoint, cameraDirection, out RaycastHit hit, maxHitDistance, hitMask))
         {
             gunController.target = hit.point;
         }
