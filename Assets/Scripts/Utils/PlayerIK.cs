@@ -31,6 +31,8 @@ public class PlayerIK : MonoBehaviour
     private float rightArmElbowOffset = 1.6f;
     [SerializeField]
     private Transform rightArmHand;
+    [SerializeField]
+    private Vector3 rightArmHandOffset;
     // Which pole (direction) elbow bends towards
     [SerializeField]
     private Transform rightHandIKPole;
@@ -43,7 +45,13 @@ public class PlayerIK : MonoBehaviour
     {
         if (LeftHandIKTarget)
             GenericTwoBodyIK.AnimateTransforms(leftArmRoot, leftArmElbow, leftArmHand, leftHandIKPole, LeftHandIKTarget, leftArmRootOffset, leftArmElbowOffset, modelScaleOffset);
+        
         if (RightHandIKTarget)
+        {
             GenericTwoBodyIK.AnimateTransforms(rightArmRoot, rightArmElbow, rightArmHand, rightHandIKPole, RightHandIKTarget, rightArmRootOffset, rightArmElbowOffset, modelScaleOffset);
+            rightArmHand.rotation = Quaternion.LookRotation(RightHandIKTarget.transform.forward);
+            rightArmHand.Rotate(rightArmHandOffset);
+        }
+
     }
 }
