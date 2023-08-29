@@ -36,6 +36,9 @@ public class MusicTrackManager : MonoBehaviour
     private MusicTrack menuTheme;
 
     [SerializeField]
+    private MusicTrack biddingTheme;
+
+    [SerializeField]
     private MusicTrack[] battleThemes;
 
     [SerializeField]
@@ -76,6 +79,7 @@ public class MusicTrackManager : MonoBehaviour
             case MusicType.CONSTRUCTION_FANFARE:
                 return constructionFanfare;
             case MusicType.BIDDING:
+                return biddingTheme;
             case MusicType.MENU:
             default:
                 return menuTheme;
