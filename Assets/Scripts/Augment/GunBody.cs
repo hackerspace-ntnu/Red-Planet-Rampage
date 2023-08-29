@@ -13,6 +13,10 @@ public class GunBody : MonoBehaviour
     // Where to attach barrel
     public Transform attachmentSite;
 
+    // Where to attach player hands
+    public Transform RightHandTarget;
+    public Transform LeftHandTarget;
+
     [SerializeField, Range(0, 1)]
     protected float reloadEfficiencyPercentage = 1f;
 

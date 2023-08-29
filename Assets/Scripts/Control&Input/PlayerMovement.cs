@@ -26,11 +26,16 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private float maxVelocity = 10;
 
-    [SerializeField]
-    private float strafeForce = 50;
+    private float strafeForce;
 
     [SerializeField]
-    private float inAirStrafeForce = 16;
+    private float strafeForceGrounded = 60;
+
+    [SerializeField]
+    private float strafeForceCrouched = 30;
+
+    [SerializeField]
+    private float strafeForceInAir = 16;
 
     [SerializeField]
     private float drag = 6f;
@@ -42,9 +47,22 @@ public class PlayerMovement : MonoBehaviour
     private float jumpForce = 10;
 
     [SerializeField]
+    private float leapForce = 12.5f;
+
+    [SerializeField]
     private float jumpTimeout = 0.5f;
 
+    [SerializeField]
+    private float leapTimeout = 0.875f;
+
+    private const float marsGravity = 3.72076f;
+
     private bool canJump = true;
+
+    [SerializeField]
+    private float crouchedHeightOffset = 0.3f;
+
+    private float localCameraHeight;
 
     [SerializeField]
     private float airThreshold = 0.4f;
@@ -57,11 +75,11 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector2 aimAngle = Vector2.zero;
 
-
     void Start()
     {
         body = GetComponent<Rigidbody>();
         hitbox = GetComponent<BoxCollider>();
+        strafeForce = strafeForceGrounded;
     }
 
     /// <summary>
@@ -72,21 +90,63 @@ public class PlayerMovement : MonoBehaviour
     {
         inputManager = player;
         inputManager.onSelect += OnJump;
+        inputManager.onCrouchPerformed += SetCrouch;
+        inputManager.onCrouchCanceled += SetCrouch;
+        localCameraHeight = inputManager.transform.localPosition.y;
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
     {
-        if (canJump && state == PlayerState.GROUNDED)
+        if (!(canJump && state == PlayerState.GROUNDED))
+            return;
+
+        // Leap jump
+        if (animator.GetBool("Crouching"))
         {
-            body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
-            StartCoroutine(JumpTimeout());
+            body.AddForce(Vector3.up * leapForce, ForceMode.VelocityChange);
+            Vector3 forwardDirection = new Vector3(inputManager.transform.forward.x, 0, inputManager.transform.forward.z);
+            body.AddForce(forwardDirection * leapForce, ForceMode.VelocityChange);
+            animator.SetTrigger("Leap");
+            StartCoroutine(JumpTimeout(leapTimeout));
+            return;
         }
+        
+        // Normal jump
+        body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
+        StartCoroutine(JumpTimeout(jumpTimeout));
     }
 
-    private IEnumerator JumpTimeout()
+    private void SetCrouch(InputAction.CallbackContext ctx)
+    {
+        if (LeanTween.isTweening(inputManager.gameObject))
+        {
+            LeanTween.cancel(inputManager.gameObject);
+            inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localCameraHeight, inputManager.transform.localPosition.z);
+        }
+
+
+        if (ctx.performed)
+        {
+            animator.SetBool("Crouching", true);
+            strafeForce = strafeForceCrouched;
+            if (!IsInAir())
+                inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
+        }
+            
+        if (ctx.canceled)
+        {
+            animator.SetBool("Crouching", false);
+            strafeForce = strafeForceGrounded;
+            if (!IsInAir())
+                inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f);
+        }
+            
+    }
+
+    private IEnumerator JumpTimeout(float time)
     {
         canJump = false;
-        yield return new WaitForSeconds(jumpTimeout);
+        yield return new WaitForSeconds(time);
         canJump = true;
     }
 
@@ -108,7 +168,8 @@ public class PlayerMovement : MonoBehaviour
                 {
                     // Strafe slightly with less drag.
                     body.drag = airDrag;
-                    body.AddForce(input * inAirStrafeForce, ForceMode.VelocityChange);
+                    body.AddForce(input * strafeForceInAir, ForceMode.VelocityChange);
+                    body.AddForce(Vector3.down * marsGravity, ForceMode.Acceleration);
                     if (!IsInAir()) state = PlayerState.GROUNDED;
                     break;
                 }
@@ -158,7 +219,9 @@ public class PlayerMovement : MonoBehaviour
     {
         var positionInput = new Vector3(inputManager.moveInput.x, 0, inputManager.moveInput.y);
         UpdatePosition(positionInput * Time.deltaTime);
-        // Limit velocity
+        // Limit velocity when not grounded
+        if (state == PlayerState.GROUNDED)
+            return;
         body.velocity = new Vector3(Mathf.Clamp(body.velocity.x, -maxVelocity, maxVelocity), body.velocity.y, Mathf.Clamp(body.velocity.z, -maxVelocity, maxVelocity));
     }
 
