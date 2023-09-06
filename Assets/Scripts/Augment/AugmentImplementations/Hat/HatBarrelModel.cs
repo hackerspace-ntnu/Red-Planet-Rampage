@@ -1,12 +1,14 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
 /// Class for moving individual parts of the model that can't be controlled by the normal animation controller.
 /// </summary>
-public class HatBarrelModel : MonoBehaviour
+public class HatBarrelModel : AugmentAnimator
 {
+    [SerializeField]
+    private Animator animator;
+
     [SerializeField]
     private GameObject hatPrefab;
     [SerializeField]
@@ -23,9 +25,10 @@ public class HatBarrelModel : MonoBehaviour
 
     private int magazineSize = 5;
 
-    public void OnInitialize(int magazine)
+    public override void OnInitialize(GunStats stats)
     {
-        magazineSize = magazine;
+        animator.speed = Mathf.Max(stats.Firerate, 1f);
+        magazineSize = stats.magazineSize;
         for (int i = 0; i < magazineSize; i++)
         {
             ammunition.Add(Instantiate(hatPrefab, ammunitionHolder.transform));
@@ -33,7 +36,7 @@ public class HatBarrelModel : MonoBehaviour
         }
     }
 
-    public void OnReload(int ammo)
+    public override void OnReload(int ammo)
     {
         bullet.SetActive(true);
         for (int i = 0; i < ammo; i++)
@@ -42,18 +45,20 @@ public class HatBarrelModel : MonoBehaviour
         }
     }
 
-    public void OnFire(int remainingAmmo)
+    public override void OnFire(int remainingAmmo)
     {
+        animator.SetTrigger("Fire");
         for (int i = remainingAmmo; i < magazineSize; i++)
         {
             ammunition[i].SetActive(false);
         }
-        if(remainingAmmo == 0)
+        if (remainingAmmo == 0)
         {
             ToggleBullet();
         }
     }
 
+    // Called by animator!
     public void ToggleBullet()
     {
         bullet.SetActive(!bullet.activeInHierarchy);

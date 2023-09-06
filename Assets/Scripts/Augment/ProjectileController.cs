@@ -123,15 +123,37 @@ public abstract class ProjectileController : MonoBehaviour
     public delegate void CollisionEvent(Collider other, ref ProjectileState state);
     public CollisionEvent OnColliderHit;
 
+    protected GunController gunController;
+
     protected virtual void Awake()
     {
         collisionLayers = LayerMask.GetMask("Default", "HitBox");
+
+        gunController = transform.parent.GetComponent<GunController>();
+        if (!gunController)
+        {
+            Debug.Log("Barrel not attached to gun parent!");
+            return;
+        }
+        gunController.onInitializeGun += OnInitialize;
+        gunController.onReload += OnReload;
     }
+
+    protected virtual void OnDestroy()
+    {
+        if (!gunController) return;
+        gunController.onInitializeGun -= OnInitialize;
+        gunController.onReload -= OnReload;
+    }
+
+
+    protected abstract void OnInitialize(GunStats stats);
+
+    protected abstract void OnReload(GunStats stats);
 
     // The meat and potatoes of the gun, this is what initializes a "bullet", whatever the fuck that is supposed to mean
     // Again, subclasses decide for themselves what initializing a bullet does
     public abstract void InitializeProjectile(GunStats stats);
-
 }
 
 
@@ -152,7 +174,7 @@ public class ProjectileMotions
         state.distanceTraveled += distance;
     }
 
-    public static Collider[] GetPathCollisions(ProjectileState state, LayerMask collisionLayers)
+    public static RaycastHit[] GetPathCollisions(ProjectileState state, LayerMask collisionLayers)
     {
         var direction = state.position - state.oldPosition;
         RaycastHit[] rayCasts;
@@ -166,7 +188,7 @@ public class ProjectileMotions
             rayCasts = Physics.RaycastAll(state.oldPosition, direction, direction.magnitude, collisionLayers);
         }
 
-        return rayCasts.OrderBy(x => x.distance).Select(x => x.collider).ToArray();
+        return rayCasts.OrderBy(x => x.distance).ToArray();
     }
 
 }

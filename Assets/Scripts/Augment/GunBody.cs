@@ -13,7 +13,11 @@ public class GunBody : MonoBehaviour
     // Where to attach barrel
     public Transform attachmentSite;
 
-    [SerializeField, Range(0,1)]
+    // Where to attach player hands
+    public Transform RightHandTarget;
+    public Transform LeftHandTarget;
+
+    [SerializeField, Range(0, 1)]
     protected float reloadEfficiencyPercentage = 1f;
 
     //TODO: Modifier refactor
@@ -39,6 +43,7 @@ public class GunBody : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (!gunController) return;
         gunController.onFire -= Reload;
     }
 }

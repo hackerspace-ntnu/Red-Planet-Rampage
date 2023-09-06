@@ -13,15 +13,19 @@ public class BulletController : ProjectileController
 
     private float bulletSpeed = 50f;
 
+    [SerializeField]
+    private int bulletsPerShot = 1;
+
     private VFXTextureFormatter trailPosTexture;
-    //private Texture2D trailPosTexture;
-    //private float[] trailPositions;
 
     [SerializeField]
     private VisualEffect trail;
 
     [SerializeField]
     private VisualEffect flash;
+
+    [SerializeField]
+    private AugmentAnimator animator;
 
     private ProjectileState projectile = new ProjectileState();
 
@@ -30,84 +34,102 @@ public class BulletController : ProjectileController
     {
         base.Awake();
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
-        //trailPositions = new float[vfxPositionsPerSample * collisionSamples * 3];
-        trailPosTexture = new VFXTextureFormatter(vfxPositionsPerSample * collisionSamples);
-        trail.SetTexture("Position", this.trailPosTexture.Texture);
     }
 
     private void Start()
     {
         flash.transform.position = projectileOutput.position;
+        trailPosTexture = new VFXTextureFormatter(vfxPositionsPerSample * collisionSamples * bulletsPerShot);
+        trail.SetTexture("Position", this.trailPosTexture.Texture);
+        trail.SetInt("StripLength", vfxPositionsPerSample * collisionSamples);
+        trail.SetInt("TextureSize", vfxPositionsPerSample * collisionSamples * bulletsPerShot);
+        trail.SetInt("TrailsPerEvent", bulletsPerShot);
+    }
+
+    protected override void OnInitialize(GunStats gunstats)
+    {
+        animator.OnInitialize(gunstats);
+    }
+
+    protected override void OnReload(GunStats gunstats)
+    {
+        animator.OnReload(gunstats.Ammo);
     }
 
     public override void InitializeProjectile(GunStats stats)
     {
+        animator.OnFire(stats.Ammo);
 
         // TODO: Possibly standardize this better
-
-        projectile.active = true;
-        projectile.distanceTraveled = 0f;
-        projectile.damage = stats.ProjectileDamage;
-        projectile.position = projectileOutput.position;
-        projectile.oldPosition = projectileOutput.position;
-        projectile.direction = projectileRotation * projectileOutput.forward;
-        projectile.maxDistance = this.maxDistance;
-        projectile.rotation = projectileRotation * projectileOutput.rotation;
-        projectile.initializationTime = Time.fixedTime;
-        projectile.speedFactor = stats.ProjectileSpeedFactor;
-        projectile.gravity = stats.ProjectileGravityModifier * 9.81f;
-        projectile.additionalProperties.Clear();
-        projectile.hitHealthControllers.Clear();
-
-        OnProjectileInit?.Invoke(ref projectile, stats);
-
-        projectile.speed = bulletSpeed * stats.ProjectileSpeedFactor;
-
-        int sampleNum = 0;
-
-        while (sampleNum < collisionSamples && projectile.active)
+        for (int k = 0; k < bulletsPerShot; k++)
         {
 
-            projectile.oldPosition = projectile.position;
-            projectile.lastUpdateTime = Time.time;
+            Quaternion randomSpread = Quaternion.Lerp(Quaternion.identity, Random.rotation, stats.ProjectileSpread);
 
+            projectile.active = true;
+            projectile.distanceTraveled = 0f;
+            projectile.damage = stats.ProjectileDamage;
+            projectile.position = projectileOutput.position;
+            projectile.oldPosition = projectileOutput.position;
+            projectile.direction = randomSpread * projectileRotation * projectileOutput.forward;
+            projectile.maxDistance = this.maxDistance;
+            projectile.rotation = randomSpread * projectileRotation * projectileOutput.rotation;
+            projectile.initializationTime = Time.fixedTime;
+            projectile.speedFactor = stats.ProjectileSpeedFactor;
+            projectile.gravity = stats.ProjectileGravityModifier * 9.81f;
+            projectile.additionalProperties.Clear();
+            projectile.hitHealthControllers.Clear();
 
-            for (int j = 0; j < vfxPositionsPerSample; j++)
+            OnProjectileInit?.Invoke(ref projectile, stats);
+
+            projectile.speed = bulletSpeed * stats.ProjectileSpeedFactor;
+
+            int sampleNum = 0;
+
+            while (sampleNum < collisionSamples && projectile.active)
             {
-                trailPosTexture.setValue(sampleNum * vfxPositionsPerSample + j, projectile.position);
-                UpdateProjectileMovement?.Invoke(maxDistance / (collisionSamples * vfxPositionsPerSample), ref projectile);
-            }
 
-            Collider[] collisions = ProjectileMotions.GetPathCollisions(projectile, collisionLayers);
+                projectile.oldPosition = projectile.position;
+                projectile.lastUpdateTime = Time.time;
 
-            if (collisions.Length > 0)
-            {
-                OnColliderHit?.Invoke(collisions[0], ref projectile);
-                HitboxController hitbox = collisions[0].GetComponent<HitboxController>();
 
-                if (hitbox != null)
+                for (int j = 0; j < vfxPositionsPerSample; j++)
                 {
-                    OnHitboxCollision?.Invoke(hitbox, ref projectile);
+                    trailPosTexture.setValue(sampleNum * vfxPositionsPerSample + j + k * vfxPositionsPerSample * collisionSamples, projectile.position);
+                    UpdateProjectileMovement?.Invoke(maxDistance / (collisionSamples * vfxPositionsPerSample), ref projectile);
                 }
-                projectile.active = false;
-                sampleNum += 1;
-                trailPosTexture.setValue(sampleNum * vfxPositionsPerSample, projectile.position);
 
+                RaycastHit[] collisions = ProjectileMotions.GetPathCollisions(projectile, collisionLayers);
+
+                if (collisions.Length > 0)
+                {
+                    var collider = collisions[0].collider;
+                    OnColliderHit?.Invoke(collider, ref projectile);
+                    HitboxController hitbox = collider.GetComponent<HitboxController>();
+                    projectile.position = collisions[0].point;
+                    if (hitbox != null)
+                    {
+                        OnHitboxCollision?.Invoke(hitbox, ref projectile);
+                    }
+                    projectile.active = false;
+                    sampleNum += 1;
+                    trailPosTexture.setValue(sampleNum * vfxPositionsPerSample + k * vfxPositionsPerSample * collisionSamples, projectile.position);
+
+                }
+                else
+                {
+                    sampleNum += 1;
+                }
             }
-            else
+
+            for (int i = sampleNum * vfxPositionsPerSample + 1; i < collisionSamples * vfxPositionsPerSample; i++)
             {
-                sampleNum += 1;
+                trailPosTexture.setValue(i + k * vfxPositionsPerSample * collisionSamples, projectile.position);
             }
+
+            trailPosTexture.ApplyChanges();
+            // Play the flash and trail
         }
-
-        for (int i = sampleNum * vfxPositionsPerSample + 1; i < collisionSamples * vfxPositionsPerSample; i++)
-        {
-            trailPosTexture.setValue(i, projectile.position);
-        }
-
-        trailPosTexture.ApplyChanges();
-
-        // Play the flash and trail
         trail.SendEvent("OnPlay");
         flash.SendEvent("OnPlay");
     }

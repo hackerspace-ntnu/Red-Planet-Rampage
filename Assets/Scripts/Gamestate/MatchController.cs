@@ -67,7 +67,7 @@ public class MatchController : MonoBehaviour
     public float RoundEndDelay { get => roundEndDelay;}
 
     [SerializeField]
-    private float biddingEndDelay = 1;
+    private float biddingEndDelay = 10;
 
     [SerializeField]
     private float matchEndDelay = 5;
@@ -149,8 +149,6 @@ public class MatchController : MonoBehaviour
             var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
             players.Add(new Player(playerIdentity, playerStateController, chipBaseReward));
         });
-
-        // TODO do something else funky wunky
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
         onRoundStart?.Invoke();

@@ -428,6 +428,10 @@ MonoBehaviour:
     addition: 1
     multiplier: 0
     exponential: 0.1
+  - name: ProjectileDamage
+    addition: 25
+    multiplier: 0
+    exponential: 1
   outputs:
   - {fileID: 2006913084140856218}
   attachmentPoints:
@@ -448,11 +452,11 @@ MonoBehaviour:
   projectileRotation: {x: 0, y: 0, z: 0, w: 1}
   stats: {fileID: 0}
   player: {fileID: 0}
-  animator: {fileID: 4279124024988096572}
-  hatBarrelModel: {fileID: 1708190655687500582}
+  animator: {fileID: 5376405389655812532}
   maxHatProjectiles: 300
   hatMaxDistance: 20
   hatSpeed: 7
+  hatSize: 0.2
   hatVfx: {fileID: 1746704752495276340}
 --- !u!114 &1607281845865317333
 MonoBehaviour:
@@ -649,7 +653,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7379426489693316019}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.28}
   m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -793,7 +797,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8198676354693484638}
   - component: {fileID: 4279124024988096572}
-  - component: {fileID: 1708190655687500582}
+  - component: {fileID: 5376405389655812532}
   m_Layer: 0
   m_Name: barrel_hatClamper
   m_TagString: Untagged
@@ -839,7 +843,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &1708190655687500582
+--- !u!114 &5376405389655812532
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -851,6 +855,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d243b197fbb25094abb3543cf4bbd340, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  animator: {fileID: 4279124024988096572}
   hatPrefab: {fileID: 7671496889312377090, guid: 3a3baf8f14610324db1197776333cba3, type: 3}
   bullet: {fileID: 3020309704562934005}
   bulletHeigth: 0.05
@@ -896,7 +901,7 @@ SkinnedMeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9061618782800774609}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -908,7 +913,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -6478536213147159724, guid: fd093b90786854b47a9766e0a6e6580a, type: 3}
+  - {fileID: 2100000, guid: 6786cce554114bb4fbd4a86907c7acfc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -12,6 +12,14 @@ public class MusicTrack : ScriptableObject
     public string Composer => composer;
 
     [SerializeField]
+    private float beatsPerMinute;
+    public float BeatsPerMinute => beatsPerMinute;
+
+    [SerializeField]
+    private float beatsPerBar;
+    public float BeatsPerBar => beatsPerBar;
+
+    [SerializeField]
     private bool[] enabledLayers;
     public bool[] EnabledLayers => enabledLayers;
 

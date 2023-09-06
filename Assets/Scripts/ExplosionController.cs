@@ -50,7 +50,6 @@ public class ExplosionController : MonoBehaviour
         {
             hitHealthControllers.Add(controller.health);
             float scaledDamage = damage * damageCurve.Evaluate(Vector3.Distance(collider.transform.position, transform.position) / radius);
-            Debug.Log($"Damage at {Vector3.Distance(collider.transform.position, transform.position) / radius} becomes {scaledDamage}");
             controller.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage));
         }
     }

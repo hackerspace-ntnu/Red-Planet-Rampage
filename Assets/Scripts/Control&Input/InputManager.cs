@@ -24,6 +24,8 @@ public class InputManager : MonoBehaviour
     // FPS-related
     public InputEvent onFirePerformed;
     public InputEvent onFireCanceled;
+    public InputEvent onCrouchPerformed;
+    public InputEvent onCrouchCanceled;
     private InputEvent onLookPerformed;
     private InputEvent onLookCanceled;
 
@@ -73,6 +75,8 @@ public class InputManager : MonoBehaviour
         playerInput.actions["RightTab"].performed += RightTab;
         playerInput.actions["Fire"].performed += Fire;
         playerInput.actions["Fire"].canceled += Fire;
+        playerInput.actions["Crouch"].performed += Crouch;
+        playerInput.actions["Crouch"].canceled += Crouch;
         playerInput.actions["Look"].performed += Look;
         playerInput.actions["Look"].canceled += Look;
 
@@ -146,6 +150,8 @@ public class InputManager : MonoBehaviour
         onRightTab = null;
         onFirePerformed = null;
         onFireCanceled = null;
+        onCrouchPerformed = null;
+        onCrouchCanceled = null;
         onLookPerformed = null;
         onLookCanceled = null;
 
@@ -187,6 +193,12 @@ public class InputManager : MonoBehaviour
     {
         if (ctx.performed) { onFirePerformed?.Invoke(ctx); return; }
         onFireCanceled?.Invoke(ctx);
+    }
+
+    private void Crouch(InputAction.CallbackContext ctx)
+    {
+        if (ctx.performed) { onCrouchPerformed?.Invoke(ctx); return; }
+        onCrouchCanceled?.Invoke(ctx);
     }
 
     private void Look(InputAction.CallbackContext ctx)

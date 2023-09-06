@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEditor;
 
 [RequireComponent(typeof(GunController))]
 public class GunFactory : MonoBehaviour
@@ -13,11 +14,25 @@ public class GunFactory : MonoBehaviour
         controller.Body = bodyPrefab;
         controller.Barrel = barrelPrefab;
         controller.Extension = extensionPrefab;
-        
 
         // Initialize everything
         gun.GetComponent<GunFactory>().InitializeGun(owner);
 
+        return gun;
+    }
+
+    public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, RectTransform parent)
+    {
+        GameObject gun = Instantiate(new GameObject());
+        GunFactory controller = gun.AddComponent<GunFactory>();
+        controller.Body = bodyPrefab;
+        controller.Barrel = barrelPrefab;
+        controller.Extension = extensionPrefab;
+
+        // Initialize everything
+        gun.GetComponent<GunFactory>().InitializeGun(owner);
+        gun.transform.SetParent(parent);
+        gun.transform.position = parent.position;
         return gun;
     }
 
@@ -70,20 +85,43 @@ public class GunFactory : MonoBehaviour
         List<ProjectileModifier> modifiers = new List<ProjectileModifier>();
 
         // Destroys gun child before construction
-        for (int i = this.transform.childCount; i > 0; --i)
-            DestroyImmediate(this.transform.GetChild(0).gameObject);
+        // Don't refactor this to a simple foreach, we're destroying each element!
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+#if UNITY_EDITOR
+            DestroyImmediate(transform.GetChild(i).gameObject);
+#else
+            Destroy(transform.GetChild(i).gameObject);
+#endif
+        }
 
         // Instantiates the different parts
+#if UNITY_EDITOR
+        GunBody gunBody = ((GameObject)PrefabUtility.InstantiatePrefab(Body.augment, transform))
+            .GetComponent<GunBody>();
+#else
         GunBody gunBody = Instantiate(Body.augment, transform)
             .GetComponent<GunBody>();
-
+#endif
         // Stats is retrieved from gun body
         // NEVER REFERENCE THE GUNSTAT PREFAB DIRECTLY, GUNBODY AUTOMATICALLY INSTANTIATES IT
         // Seriously, i have no moral qualms with making your skulls into decorative ornaments
         gunController.stats = gunBody.InstantiateBaseStats;
 
-        GunBarrel gunBarrel = Instantiate(Barrel.augment, gunBody.attachmentSite.position, gunBody.attachmentSite.rotation, transform)
+        gunController.RightHandTarget = gunBody.RightHandTarget;
+        gunController.LeftHandTarget = gunBody.LeftHandTarget;
+
+#if UNITY_EDITOR
+        GunBarrel gunBarrel = ((GameObject)PrefabUtility.InstantiatePrefab(Barrel.augment, transform))
             .GetComponent<GunBarrel>();
+#else
+        GunBarrel gunBarrel = Instantiate(Barrel.augment, transform)
+            .GetComponent<GunBarrel>();
+#endif
+
+        gunBarrel.transform.position = gunBody.attachmentSite.position;
+        gunBarrel.transform.rotation = gunBody.attachmentSite.rotation;
+
         gunController.projectile = gunBarrel.Projectile;
         // And make projectile remember who shot it.
         gunController.projectile.player = owner;
@@ -94,30 +132,22 @@ public class GunFactory : MonoBehaviour
 
         // Sets firemode
 
-        switch (gunController.stats.fireMode)
-        {
-            case GunStats.FireModes.semiAuto:
-                gunController.fireRateController = new SemiAutoFirerateController(gunController.stats.Firerate);
-                break;
-            case GunStats.FireModes.burst:
-                gunController.fireRateController = new BurstFirerateController(gunController.stats.Firerate, gunController.stats.burstNum);
-                break;
-            case GunStats.FireModes.fullAuto:
-                gunController.fireRateController = new FullAutoFirerateController(gunController.stats.Firerate);
-                break;
-            default:
-                gunController.fireRateController = new FullAutoFirerateController(gunController.stats.Firerate);
-                break;
-        }
-
         modifiers.AddRange(gunBarrel.GetModifiers());
         gunBarrel.BuildStats(gunController.stats);
 
         if (Extension != null)
         {
             // Instantiate extension itself *once*
-            GunExtension gunExtension = Instantiate(Extension.augment, gunBarrel.attachmentPoints[0].position, gunBarrel.attachmentPoints[0].rotation, transform)
+#if UNITY_EDITOR
+            GunExtension gunExtension = ((GameObject)PrefabUtility.InstantiatePrefab(Extension.augment, transform))
                 .GetComponent<GunExtension>();
+#else
+            GunExtension gunExtension = Instantiate(Extension.augment, transform)
+                .GetComponent<GunExtension>();
+#endif
+            gunExtension.transform.position = gunBarrel.attachmentPoints[0].position;
+            gunExtension.transform.rotation = gunBarrel.attachmentPoints[0].rotation;
+
             // Instantiate remaining outputs and models, and register all outputs
             var outputs = new List<Transform>();
             outputs.AddRange(gunExtension.outputs);
@@ -140,6 +170,24 @@ public class GunFactory : MonoBehaviour
         modifiers.OrderByDescending(modifier => (int)modifier.GetPriority()).ToList();
         modifiers.ForEach(modifier => modifier.Attach(gunController.projectile));
         gunController.onInitializeGun?.Invoke(gunController.stats);
-    }    
+
+        // Moved it below the stat changes so the stats actually, yknow, affect the firerate.
+        // Will be removed anyways when the firemode system is updated to accomodate a wider variety of guns
+        switch (gunController.stats.fireMode)
+        {
+            case GunStats.FireModes.semiAuto:
+                gunController.fireRateController = new SemiAutoFirerateController(gunController.stats.Firerate);
+                break;
+            case GunStats.FireModes.burst:
+                gunController.fireRateController = new BurstFirerateController(gunController.stats.Firerate, gunController.stats.burstNum);
+                break;
+            case GunStats.FireModes.fullAuto:
+                gunController.fireRateController = new FullAutoFirerateController(gunController.stats.Firerate);
+                break;
+            default:
+                gunController.fireRateController = new FullAutoFirerateController(gunController.stats.Firerate);
+                break;
+        }
+    }
 }
 

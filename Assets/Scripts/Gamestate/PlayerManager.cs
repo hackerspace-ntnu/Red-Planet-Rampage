@@ -16,6 +16,9 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private float maxHitDistance = 100;
 
+    [SerializeField]
+    private float targetStartOffset = 0.28f;
+
     // TODO add context when shooty system is done
     public delegate void HitEvent(PlayerManager killer, PlayerManager victim);
 
@@ -46,7 +49,6 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-
     private GunController gunController;
 
     private HealthController healthController;
@@ -61,6 +63,9 @@ public class PlayerManager : MonoBehaviour
     private AudioGroup hitSounds;
     [SerializeField]
     private AudioGroup extraHitSounds;
+
+    [SerializeField]
+    private PlayerIK playerIK;
 
     void Start()
     {
@@ -97,6 +102,7 @@ public class PlayerManager : MonoBehaviour
         // Disable components
         GetComponent<PlayerMovement>().enabled = false;
         healthController.enabled = false;
+        playerIK.enabled = false;
         // TODO display guns falling to the floor
         gunController.gameObject.SetActive(false);
         // Disable all colliders and physics
@@ -118,8 +124,11 @@ public class PlayerManager : MonoBehaviour
         identity = inputManager.GetComponent<PlayerIdentity>();
         GetComponent<PlayerMovement>().SetPlayerInput(inputManager);
         SetGun(inputManager.transform);
-        inputManager.onFirePerformed += OnFire;
-        inputManager.onFireCanceled += OnFireEnd;
+        // Subscribe relevant input events
+        inputManager.onFirePerformed += Fire;
+        inputManager.onFireCanceled += FireEnd;
+        inputManager.onSelect += TryPlaceBid;
+        inputManager.onFirePerformed += TryPlaceBid;
         // Set camera on canvas
         var canvas = hudController.GetComponent<Canvas>();
         canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
@@ -136,6 +145,8 @@ public class PlayerManager : MonoBehaviour
         if (gunController)
         {
             gunController.onFire -= UpdateAimTarget;
+            gunController.onFire -= UpdateHudFire;
+            gunController.onReload -= UpdateHudReload;
             //Remove the gun
             Destroy(gunController.gameObject);
         }
@@ -145,7 +156,8 @@ public class PlayerManager : MonoBehaviour
     {
         Vector3 cameraCenter = inputManager.transform.position;
         Vector3 cameraDirection = inputManager.transform.forward;
-        if (Physics.Raycast(cameraCenter, cameraDirection, out RaycastHit hit, maxHitDistance, hitMask))
+        Vector3 startPoint = cameraCenter + cameraDirection * targetStartOffset;
+        if (Physics.Raycast(startPoint, cameraDirection, out RaycastHit hit, maxHitDistance, hitMask))
         {
             gunController.target = hit.point;
         }
@@ -155,12 +167,30 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    private void OnFire(InputAction.CallbackContext ctx)
+    private void Fire(InputAction.CallbackContext ctx)
     {
         gunController.triggerHeld = true;
         gunController.triggerPressed = true;
         StartCoroutine(UnpressTrigger());
+    }
 
+    private void UpdateHudFire(GunStats stats)
+    {
+        // stats variables must be dereferenced
+        float ammo = stats.Ammo;
+        float magazine = stats.magazineSize;
+        hudController.UpdateOnFire(ammo / magazine);
+    }
+
+    private void UpdateHudReload(GunStats stats)
+    {
+        float ammo = stats.Ammo;
+        float magazine = stats.magazineSize;
+        hudController.UpdateOnReload(ammo / magazine);
+    }
+
+    private void TryPlaceBid(InputAction.CallbackContext ctx)
+    {
         if (!selectedBiddingPlatform) return;
         selectedBiddingPlatform.TryPlaceBid(identity);
     }
@@ -171,7 +201,7 @@ public class PlayerManager : MonoBehaviour
         gunController.triggerPressed = false;
     }
 
-    private void OnFireEnd(InputAction.CallbackContext ctx)
+    private void FireEnd(InputAction.CallbackContext ctx)
     {
         gunController.triggerHeld = false;
     }
@@ -200,6 +230,11 @@ public class PlayerManager : MonoBehaviour
         // Remember gun controller
         gunController = gun.GetComponent<GunController>();
         gunController.onFire += UpdateAimTarget;
+        gunController.onFire += UpdateHudFire;
+        gunController.onReload += UpdateHudReload;
+
+        playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
+        playerIK.RightHandIKTarget = gunController.RightHandTarget;
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)
