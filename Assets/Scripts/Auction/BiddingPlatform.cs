@@ -52,6 +52,7 @@ public class BiddingPlatform : MonoBehaviour
 
     public BiddingEvent onBiddingExtended;
     public BiddingEvent onBiddingEnd;
+    public BiddingEvent onBidPlaced;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -113,7 +114,7 @@ public class BiddingPlatform : MonoBehaviour
                 auctionTimer.AddTime(bumpTime);
                 onBiddingExtended(this);
             }
-
+            onBidPlaced(this);
             return true;
         }
         return false;

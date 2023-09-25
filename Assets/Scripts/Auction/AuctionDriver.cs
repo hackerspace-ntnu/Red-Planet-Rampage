@@ -21,6 +21,9 @@ public class AuctionDriver : MonoBehaviour
     private BiddingPlatform[] biddingPlatforms;
     private RandomisedAuctionStage[] availableAuctionStages;
 
+    [SerializeField]
+    private Auctioneer auctioneer;
+
     private BiddingPlatform lastExtendedAuction;
 
     private HashSet<PlayerManager> playersInAuction;
@@ -50,6 +53,16 @@ public class AuctionDriver : MonoBehaviour
         StartCoroutine(PopulatePlatforms());
     }
 
+    private void OnDestroy()
+    {
+        for (int i = 0; i < biddingPlatforms.Length; i++)
+        {
+            biddingPlatforms[i].onBiddingExtended -= SetPrioritizedPlatform;
+            biddingPlatforms[i].onBidPlaced -= ActivateAuctioneerBid;
+            biddingPlatforms[i].onBiddingEnd -= ActivateAuctioneerSell;
+        }
+    }
+
     private void AnimateAuctionStart()
     {
         GlobalHUDController globalHUD = GetComponentInChildren<GlobalHUDController>();
@@ -73,6 +86,8 @@ public class AuctionDriver : MonoBehaviour
             biddingPlatforms[i].ActiveBiddingRound = biddingRound;
             biddingPlatforms[i].SetItem(biddingRound.items[0]);
             biddingPlatforms[i].onBiddingExtended += SetPrioritizedPlatform;
+            biddingPlatforms[i].onBidPlaced += ActivateAuctioneerBid;
+            biddingPlatforms[i].onBiddingEnd += ActivateAuctioneerSell;
         }
     }
 
@@ -132,4 +147,14 @@ public class AuctionDriver : MonoBehaviour
         gameObject.LeanRotateY(90f, 2f);
     }
 
+    private void ActivateAuctioneerBid(BiddingPlatform platform)
+    {
+        // TODO: Refactor this
+        auctioneer.BidOn(biddingPlatforms.ToList().IndexOf(platform));
+    }
+
+    private void ActivateAuctioneerSell(BiddingPlatform biddingPlatform)
+    {
+        auctioneer.Sell();
+    }
 }
