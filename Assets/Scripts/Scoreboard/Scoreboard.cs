@@ -3,13 +3,15 @@ using UnityEngine;
 using TMPro;
 using System;
 using System.Collections;
+using System.Linq.Expressions;
+using System.Linq;
 
 [RequireComponent(typeof(AudioSource))]
-public class TownScoreboard : MonoBehaviour
+public class Scoreboard : MonoBehaviour
 {
     [Header("Variables")]
     [SerializeField]
-    private List<string> wantedSubtitles = new List<string>();
+    private List<string> wantedSubtitles = new();
 
     [SerializeField]
     private float startBiddingDelay = 3;
@@ -22,6 +24,7 @@ public class TownScoreboard : MonoBehaviour
     private Transform content;
 
     private MatchController matchController;
+
     private List<Player> players;
 
     private AudioSource audioSource;
@@ -38,23 +41,43 @@ public class TownScoreboard : MonoBehaviour
     void Start()
     {
         matchController = MatchController.Singleton;
-        players = matchController.Players;
-        posters = new WantedPoster[players.Count];
-        audioSource = GetComponent<AudioSource>();
+        audioSource = GetComponent<AudioSource>();        
 
-        for (int i = 0; i < players.Count; i++)
-        {
-            posters[i] = Instantiate(wantedPosterPrefab, content).GetComponentInChildren<WantedPoster>();
-            posters[i].SetupPoster(players[i], matchController, wantedSubtitles[UnityEngine.Random.Range(0, wantedSubtitles.Count - 1)]);
-            posters[i].gameObject.SetActive(false);
-        }
-
-        matchController.onRoundEnd += UpdateScoreboard;
-        ShowNextCrime += PlayCrimeSound;
+        matchController.onRoundStart += CreateMostWanted;
+        //matchController.onRoundEnd += CreateMatchResults;
     }
 
-    public void UpdateScoreboard()
+    private void OnDestroy()
     {
+    }
+
+    private void CreateMostWanted()
+    {
+        // Initiate posters
+        InitiatePosters();
+        
+        // Check for current score amongst players
+        Dictionary<PlayerIdentity, int> bounties = matchController.GetSortedBounties();
+
+        // Display bounties!
+        for (int i = 0; i < bounties.Count; i++)
+        {
+            posters[i].SetupWantedPoster(bounties.ElementAt(i).Key);
+        }
+    }
+
+    private void CreateMatchResults()
+    {
+        InitiatePosters();
+
+        // Order the relevant poster to update
+        for (int i = 0; i < posters.Length; i++)
+        {
+            posters[i].UpdatePosterValues();
+        }
+        // Assign main camera
+        Camera.main.transform.parent = transform;
+
         // Animate the after battle scene
         Camera.main.GetComponent<Animator>().SetTrigger("ScoreboardZoom");
 
@@ -72,6 +95,7 @@ public class TownScoreboard : MonoBehaviour
         float delay = Camera.main.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length;
         StartCoroutine(DelayDisplayCrimes(delay));
     }
+
     public void TryToStartBidding()
     {
         // Check that all posters have finished displaying
@@ -105,5 +129,25 @@ public class TownScoreboard : MonoBehaviour
     private void PlayCrimeSound()
     {
         audioSource.PlayOneShot(nextCrimeSound);
+    }
+
+    private void InitiatePosters (){
+        if (posters != null)
+        {
+            foreach (var poster in posters)
+                Destroy(poster.gameObject);
+        }
+
+        players = matchController.Players;
+        posters = new WantedPoster[players.Count];
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            posters[i] = Instantiate(wantedPosterPrefab, content).GetComponentInChildren<WantedPoster>();
+            posters[i].SetupPoster(players[i], wantedSubtitles[UnityEngine.Random.Range(0, wantedSubtitles.Count - 1)]);
+            posters[i].gameObject.SetActive(false);
+        }
+
+        ShowNextCrime += PlayCrimeSound;
     }
 }

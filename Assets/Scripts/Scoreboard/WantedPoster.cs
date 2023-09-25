@@ -8,6 +8,7 @@ public class WantedPoster : MonoBehaviour
     [Header("Variables")]
 
     private Player player;
+    private PlayerIdentity playerIdentity;
     private MatchController matchController;
     private int roundSpoils;
 
@@ -28,6 +29,9 @@ public class WantedPoster : MonoBehaviour
     public Image photo;
 
     [SerializeField]
+    private Image background;
+
+    [SerializeField]
     private Transform crimeContent;
 
     [SerializeField]
@@ -37,19 +41,30 @@ public class WantedPoster : MonoBehaviour
     private int currentStep;
     public int CurrentStep { get => currentStep; }
 
-    private List<(string, string)> crimeData = new List<(string, string)>();
-    private List<(TMP_Text, TMP_Text)> crimeTextComponents = new List<(TMP_Text, TMP_Text)>();
+    private List<(string, string)> crimeData = new();
+    private List<(TMP_Text, TMP_Text)> crimeTextComponents = new();
 
-    private TownScoreboard townScoreboard;
+    private Scoreboard scoreboard;
 
-    public void SetupPoster(Player player, MatchController matchController, string subtitle)
+    public void SetupPoster(Player player, string subtitle)
     {
         this.player = player;
-        this.matchController = matchController;
+        playerIdentity = player.playerIdentity;
+        background.color = player.playerIdentity.color;
         this.subtitle.text = subtitle;
+        scoreboard = GetComponentInParent<Scoreboard>();
+    }
+    public void SetupWantedPoster(PlayerIdentity playerIdentity)
+    {
+        this.playerIdentity = playerIdentity;
 
-        GetComponent<Image>().color = player.playerIdentity.color;
-        townScoreboard = GetComponentInParent<TownScoreboard>();
+        background.color = playerIdentity.color;
+        scoreboard = GetComponentInParent<Scoreboard>();
+        
+        gameObject.SetActive(true);
+
+        AddPosterCrime("Value", playerIdentity.bounty);
+        DisplayCrime(0);
     }
 
     private void AddPosterCrime(string crimeLabel, int Value)
@@ -71,7 +86,7 @@ public class WantedPoster : MonoBehaviour
         // Add the different crimes players can gain money from
 
         // Previous savings
-        AddPosterCrime("Savings", player.playerIdentity.chips);
+        AddPosterCrime("Savings", playerIdentity.chips);
 
         // Participation award
         AddPosterCrime("Base", matchController.ChipBaseReward);
@@ -83,19 +98,19 @@ public class WantedPoster : MonoBehaviour
         }
 
         // Round winner award
-        if (lastRound.IsWinner(player.playerIdentity)) {
+        if (lastRound.IsWinner(playerIdentity)) {
             AddPosterCrime("Victor", matchController.ChipWinReward);
         }
 
         // New total
         roundSpoils = matchController.ChipBaseReward
             + matchController.ChipKillReward * lastRound.KillCount(player.playerManager)
-            + (lastRound.IsWinner(player.playerIdentity) ? matchController.ChipWinReward : 0);
+            + (lastRound.IsWinner(playerIdentity) ? matchController.ChipWinReward : 0);
 
         AddPosterCrime("Total", roundSpoils);
 
         // Animate the crimes
-        townScoreboard.ShowNextCrime += NextStep;
+        scoreboard.ShowNextCrime += NextStep;
     }
 
     private void NextStep()
@@ -105,7 +120,7 @@ public class WantedPoster : MonoBehaviour
 
         if (currentStep > totalSteps)
         {
-            townScoreboard.TryToStartBidding();
+            scoreboard.TryToStartBidding();
         }
     }
 

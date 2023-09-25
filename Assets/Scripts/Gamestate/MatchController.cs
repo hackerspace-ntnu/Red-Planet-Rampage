@@ -6,7 +6,7 @@ using UnityEngine;
 using System;
 
 /// <summary>
-/// Wrapper struct for tying refference to Player class with the in-game player.
+/// Wrapper struct for tying refrence to Player class with the in-game player.
 /// </summary>
 public struct Player
 {
@@ -104,7 +104,23 @@ public class MatchController : MonoBehaviour
     private static List<Round> rounds = new List<Round>();
     public Round GetLastRound() { return rounds.Last(); }
 
-    void Start()
+    public Dictionary<PlayerIdentity,int> GetSortedBounties()
+    {
+        Dictionary<PlayerIdentity, int> bounties = new();
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            if (players[i].playerIdentity.bounty != 0)
+                bounties.Add(players[i].playerIdentity, players[i].playerIdentity.bounty);
+        }
+
+        // Sort the dictionary from highest to lowest bounty:
+        bounties = bounties.OrderByDescending(pair => pair.Value).ToDictionary(pair => pair.Key, pair => pair.Value);
+
+        return bounties;
+    }
+
+    private void Awake()
     {
         #region Singleton boilerplate
 
@@ -122,7 +138,10 @@ public class MatchController : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
+    }
 
+    void Start()
+    {
         if (rounds.Count == 0)
         {
             PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
@@ -151,12 +170,19 @@ public class MatchController : MonoBehaviour
         });
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
-        onRoundStart?.Invoke();
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
         roundTimer.StartTimer(roundLength);
         roundTimer.OnTimerUpdate += AdjustMusic;
         roundTimer.OnTimerUpdate += HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted += EndActiveRound;
+        
+        StartCoroutine(WaitForNextFrame());
+    }
+
+    IEnumerator WaitForNextFrame()
+    {
+        yield return new WaitForEndOfFrame();
+        onRoundStart?.Invoke();
     }
 
     public void StartNextBidding()
@@ -256,6 +282,5 @@ public class MatchController : MonoBehaviour
         rounds = new List<Round>();
         PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         SceneManager.LoadSceneAsync("Menu");
-
     }
 }
