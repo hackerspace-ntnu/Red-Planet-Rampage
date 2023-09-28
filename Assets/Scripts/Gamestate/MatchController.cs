@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine;
-using System;
 
 /// <summary>
-/// Wrapper struct for tying refrence to Player class with the in-game player.
+/// Wrapper struct for tying refference to Player class with the in-game player.
 /// </summary>
 public struct Player
 {
@@ -19,29 +18,6 @@ public struct Player
     public PlayerIdentity playerIdentity;
     // Reference to in-match player
     public PlayerManager playerManager;
-
-    public static bool operator==(Player lhs, Player rhs)
-    {
-        return lhs.playerIdentity == rhs.playerIdentity;
-    }
-
-    public static bool operator!=(Player lhs, Player rhs)
-    {
-        return !(lhs == rhs);
-    }
-
-    public override bool Equals(object obj)
-    {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
-        return Equals(obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return playerIdentity.GetHashCode();
-    }
 }
 
 [RequireComponent(typeof(PlayerFactory))]
@@ -64,7 +40,6 @@ public class MatchController : MonoBehaviour
 
     [SerializeField]
     private float roundEndDelay;
-    public float RoundEndDelay { get => roundEndDelay;}
 
     [SerializeField]
     private float biddingEndDelay = 10;
@@ -75,20 +50,13 @@ public class MatchController : MonoBehaviour
 
     [Header("Chip rewards")]
     [SerializeField]
-    private int chipStartAmount;
-    public int ChipStartAmount => chipStartAmount;
-
+    private int startAmount = 5;
     [SerializeField]
-    private int chipBaseReward;
-    public int ChipBaseReward => chipBaseReward;
-
+    private int rewardWin = 1;
     [SerializeField]
-    private int chipKillReward;
-    public int ChipKillReward => chipKillReward;
-
+    private int rewardKill = 1;
     [SerializeField]
-    private int chipWinReward;
-    public int ChipWinReward => chipWinReward;
+    private int rewardBase = 2;
 
     public Timer roundTimer;
 
@@ -96,31 +64,11 @@ public class MatchController : MonoBehaviour
     private GlobalHUDController globalHUDController;
 
     private List<Player> players = new List<Player>();
-    public List<Player> Players 
-    { 
-        get { return players;} 
-    }
+    public List<Player> Players { get { return players; } }
 
     private static List<Round> rounds = new List<Round>();
-    public Round GetLastRound() { return rounds.Last(); }
 
-    public Dictionary<PlayerIdentity,int> GetSortedBounties()
-    {
-        Dictionary<PlayerIdentity, int> bounties = new();
-
-        for (int i = 0; i < players.Count; i++)
-        {
-            if (players[i].playerIdentity.bounty != 0)
-                bounties.Add(players[i].playerIdentity, players[i].playerIdentity.bounty);
-        }
-
-        // Sort the dictionary from highest to lowest bounty:
-        bounties = bounties.OrderByDescending(pair => pair.Value).ToDictionary(pair => pair.Key, pair => pair.Value);
-
-        return bounties;
-    }
-
-    private void Awake()
+    void Start()
     {
         #region Singleton boilerplate
 
@@ -138,10 +86,7 @@ public class MatchController : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
-    }
 
-    void Start()
-    {
         if (rounds.Count == 0)
         {
             PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
@@ -166,28 +111,20 @@ public class MatchController : MonoBehaviour
         {
             var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
             var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
-            players.Add(new Player(playerIdentity, playerStateController, chipBaseReward));
+            players.Add(new Player(playerIdentity, playerStateController, startAmount));
         });
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
+        onRoundStart?.Invoke();
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
         roundTimer.StartTimer(roundLength);
         roundTimer.OnTimerUpdate += AdjustMusic;
         roundTimer.OnTimerUpdate += HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted += EndActiveRound;
-        
-        StartCoroutine(WaitForNextFrame());
-    }
-
-    IEnumerator WaitForNextFrame()
-    {
-        yield return new WaitForEndOfFrame();
-        onRoundStart?.Invoke();
     }
 
     public void StartNextBidding()
     {
-        Debug.Log("Startnextbidding");
         PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
         onBiddingStart?.Invoke();
@@ -203,6 +140,15 @@ public class MatchController : MonoBehaviour
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
         AssignRewards();
+
+        if (!IsWin())
+            StartCoroutine(WaitAndStartNextBidding());
+    }
+
+    public IEnumerator WaitAndStartNextBidding()
+    {
+        yield return new WaitForSeconds(roundEndDelay);
+        StartNextBidding();
     }
 
     public IEnumerator WaitAndStartNextRound()
@@ -227,12 +173,10 @@ public class MatchController : MonoBehaviour
         foreach (Player player in players)
         {
             // Base reward and kill bonus
-            var reward = chipBaseReward + lastRound.KillCount(player.playerManager) * chipKillReward;
-            
+            var reward = rewardBase + lastRound.KillCount(player.playerManager) * rewardKill;
             // Win bonus
-            if (lastRound.IsWinner(player.playerManager.identity)) {
-                reward += chipWinReward;
-            }
+            if (lastRound.IsWinner(player.playerManager.identity))
+                reward += rewardWin;
 
             player.playerManager.identity.UpdateChip(reward);
         }
@@ -282,5 +226,6 @@ public class MatchController : MonoBehaviour
         rounds = new List<Round>();
         PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         SceneManager.LoadSceneAsync("Menu");
+
     }
 }

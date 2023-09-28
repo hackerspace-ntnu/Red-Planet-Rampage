@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Linq.Expressions;
 using System.Linq;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(AudioSource))]
 public class Scoreboard : MonoBehaviour
@@ -44,11 +45,12 @@ public class Scoreboard : MonoBehaviour
         audioSource = GetComponent<AudioSource>();        
 
         matchController.onRoundStart += CreateMostWanted;
-        //matchController.onRoundEnd += CreateMatchResults;
+        matchController.onRoundEnd += CreateMatchResults;
     }
 
     private void OnDestroy()
     {
+
     }
 
     private void CreateMostWanted()
@@ -66,7 +68,7 @@ public class Scoreboard : MonoBehaviour
         }
     }
 
-    private void CreateMatchResults()
+    private async void CreateMatchResults()
     {
         InitiatePosters();
 
@@ -93,7 +95,7 @@ public class Scoreboard : MonoBehaviour
         }
 
         float delay = Camera.main.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length;
-        StartCoroutine(DelayDisplayCrimes(delay));
+        await DelayDisplayCrimes(delay);
     }
 
     public void TryToStartBidding()
@@ -111,7 +113,7 @@ public class Scoreboard : MonoBehaviour
     private IEnumerator StartBiddingCountDown()
     {
         yield return new WaitForSeconds(startBiddingDelay);
-        matchController.StartNextBidding();
+        
     }
 
     private IEnumerator DelayDisplayCrimes(float delay)
@@ -138,7 +140,7 @@ public class Scoreboard : MonoBehaviour
                 Destroy(poster.gameObject);
         }
 
-        players = matchController.Players;
+        players = PlayerInputManagerController.Singleton.playerInputs;
         posters = new WantedPoster[players.Count];
 
         for (int i = 0; i < players.Count; i++)
