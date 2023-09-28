@@ -94,7 +94,7 @@ public class MatchController : MonoBehaviour
         // Makes shooting end quickly if testing with 1 player
 #if UNITY_EDITOR
         if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
-            roundLength = 5f;
+            roundLength = 180f;
 #endif
 
         StartNextRound();
@@ -154,7 +154,7 @@ public class MatchController : MonoBehaviour
         yield return new WaitForSeconds(biddingEndDelay);
         // This needs to be called after inputs are set at start the first time this is needed.
         PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
-        SceneManager.LoadScene("CraterTown");
+        SceneManager.LoadScene("GrandCanyon");
         StartNextRound();
     }
 
