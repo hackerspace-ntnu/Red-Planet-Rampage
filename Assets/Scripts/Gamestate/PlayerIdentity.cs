@@ -34,6 +34,7 @@ public class PlayerIdentity : MonoBehaviour
     public ChipEvent onChipChange;
     public ItemEvent onInventoryChange;
 
+
     void Start()
     {
         if (Bodies.Count == 0)
