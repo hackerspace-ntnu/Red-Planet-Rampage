@@ -66,6 +66,8 @@ public class MatchController : MonoBehaviour
     private List<Player> players = new List<Player>();
     private static List<Round> rounds = new List<Round>();
 
+    public int RoundCount { get => rounds.Count(); }
+
     void Start()
     {
         #region Singleton boilerplate

@@ -10,7 +10,6 @@ public class Auctioneer : MonoBehaviour
 
     public void BidOn(int platformIndex)
     {
-        Debug.Log("Bid at "+platformIndex);
         switch (platformIndex)
         {
             case 0:

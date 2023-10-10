@@ -44,7 +44,15 @@ public class AuctionDriver : MonoBehaviour
 #if UNITY_EDITOR
         biddingBeginDelay = 2f;
 #endif
-        availableAuctionStages = new RandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction };
+        if (MatchController.Singleton.RoundCount == 1)
+            availableAuctionStages = new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction };
+        if (MatchController.Singleton.RoundCount == 2)
+            availableAuctionStages = new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BarrelAuction };
+        if (MatchController.Singleton.RoundCount == 3)
+            availableAuctionStages = new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction };
+        if (MatchController.Singleton.RoundCount > 3)
+            availableAuctionStages = new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction };
+
         playerFactory = GetComponent<PlayerFactory>();
         playerFactory.InstantiatePlayersBidding();
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
@@ -72,19 +80,22 @@ public class AuctionDriver : MonoBehaviour
     private IEnumerator PopulatePlatforms()
     {
         yield return new WaitForSeconds(biddingBeginDelay);
-        if (!(availableAuctionStages.Length == biddingPlatforms.Length))
-        {
-            Debug.Log("Not enough available auctionStages or biddingPlatforms!");
-        }
 
         lastExtendedAuction = biddingPlatforms[0];
         lastExtendedAuction.onBiddingEnd += EndAuction;
 
-        for (int i = 0; i < biddingPlatforms.Length; i++)
+        List<BiddingRound> biddingRounds = new List<BiddingRound>();
+        for (int i = 0; i < availableAuctionStages.Length; i++)
         {
             availableAuctionStages[i].Promote(out BiddingRound biddingRound);
-            biddingPlatforms[i].ActiveBiddingRound = biddingRound;
-            biddingPlatforms[i].SetItem(biddingRound.items[0]);
+            biddingRounds.Add(biddingRound);
+        }
+        bool isMultiple = availableAuctionStages.Length >= biddingPlatforms.Length;
+
+        for (int i = 0; i < biddingPlatforms.Length; i++)
+        {
+            biddingPlatforms[i].ActiveBiddingRound = biddingRounds[isMultiple ? i : 0];
+            biddingPlatforms[i].SetItem(biddingRounds[isMultiple ? i : 0].items[isMultiple ? 0 : i]);
             biddingPlatforms[i].onBiddingExtended += SetPrioritizedPlatform;
             biddingPlatforms[i].onBidPlaced += ActivateAuctioneerBid;
             biddingPlatforms[i].onBiddingEnd += ActivateAuctioneerSell;
