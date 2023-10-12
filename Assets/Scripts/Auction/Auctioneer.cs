@@ -51,4 +51,18 @@ public class Auctioneer : MonoBehaviour
         audioSource.clip = sold.RandomElement();
         audioSource.Play();
     }
+
+    public void Haste()
+    {
+        audioSource.Stop();
+        audioSource.clip = haste.RandomElement();
+        audioSource.Play();
+    }
+
+    public void Missing()
+    {
+        audioSource.Stop();
+        audioSource.clip = missingChips.RandomElement();
+        audioSource.Play();
+    }
 }

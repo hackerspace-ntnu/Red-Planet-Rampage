@@ -53,6 +53,7 @@ public class BiddingPlatform : MonoBehaviour
     public BiddingEvent onBiddingExtended;
     public BiddingEvent onBiddingEnd;
     public BiddingEvent onBidPlaced;
+    public BiddingEvent onBidDenied;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -94,29 +95,29 @@ public class BiddingPlatform : MonoBehaviour
             return false;
         }
 
-        if (playerIdentity.chips > chips && playerIdentity != leadingBidder)
+        if (playerIdentity.chips > chips)
         {
             // Refund
             if (leadingBidder)
             {
                 leadingBidder.UpdateChip(chips);
             }
-            //activeBiddingRound.chips[0] = chips++;
             chips++;
             playerIdentity.UpdateChip(-chips);
             itemCostText.text = chips.ToString();
             leadingBidder = playerIdentity;
             material.SetColor("_BidderColor", playerIdentity.color);
             LeanTween.value(gameObject, UpdateBorder, 0f, 1f, borderTweenDuration);
+            onBidPlaced(this);
 
             if ((auctionTimer.WaitTime - auctionTimer.ElapsedTime) < bumpTime)
             {
                 auctionTimer.AddTime(bumpTime);
                 onBiddingExtended(this);
             }
-            onBidPlaced(this);
             return true;
         }
+        onBidDenied(this);
         return false;
     }
 

@@ -68,6 +68,8 @@ public class AuctionDriver : MonoBehaviour
             biddingPlatforms[i].onBiddingExtended -= SetPrioritizedPlatform;
             biddingPlatforms[i].onBidPlaced -= ActivateAuctioneerBid;
             biddingPlatforms[i].onBiddingEnd -= ActivateAuctioneerSell;
+            biddingPlatforms[i].onBiddingExtended -= ActivateAuctioneerHaste;
+            biddingPlatforms[i].onBidDenied -= ActivateAuctioneerMissing;
         }
     }
 
@@ -99,6 +101,8 @@ public class AuctionDriver : MonoBehaviour
             biddingPlatforms[i].onBiddingExtended += SetPrioritizedPlatform;
             biddingPlatforms[i].onBidPlaced += ActivateAuctioneerBid;
             biddingPlatforms[i].onBiddingEnd += ActivateAuctioneerSell;
+            biddingPlatforms[i].onBiddingExtended += ActivateAuctioneerHaste;
+            biddingPlatforms[i].onBidDenied += ActivateAuctioneerMissing;
         }
     }
 
@@ -167,5 +171,15 @@ public class AuctionDriver : MonoBehaviour
     private void ActivateAuctioneerSell(BiddingPlatform biddingPlatform)
     {
         auctioneer.Sell();
+    }
+
+    private void ActivateAuctioneerHaste(BiddingPlatform platform)
+    {
+        auctioneer.Haste();
+    }
+
+    private void ActivateAuctioneerMissing(BiddingPlatform platform)
+    {
+        auctioneer.Missing();
     }
 }
