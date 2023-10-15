@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using CollectionExtensions;
 
 public class MainMenuController : MonoBehaviour
 {
@@ -23,6 +24,9 @@ public class MainMenuController : MonoBehaviour
     private GameObject defaultMenu;
     [SerializeField]
     private GalleryMenu galleryMenu;
+
+    [SerializeField]
+    private string[] mapnames;
 
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
@@ -98,10 +102,10 @@ public class MainMenuController : MonoBehaviour
     /// Function to be called as an onclick event from a button
     /// </summary>
     /// <param name="sceneName"></param>
-    public void ChangeScene(string sceneName)
+    public void ChangeScene()
     {
         playerInputManagerController.RemoveListeners();
-        SceneManager.LoadSceneAsync(sceneName);
+        SceneManager.LoadSceneAsync(mapnames.RandomElement());
     }
 
     /// <summary>
