@@ -8,14 +8,8 @@ public List<Transform> routepoints;
 [SerializeField] private float moveSpeed = 5f;
 private int nextRoutepointIndex;
 private float travelDistance;
-private Collider sphereCollider;
-private Collider meshCollider;
-
 private void Start()
 {
-    sphereCollider = GetComponent<SphereCollider>();
-    meshCollider = GetComponent<MeshCollider>();
-
     nextRoutepointIndex = 0;
 
     travelDistance = Vector3.Distance(routepoints[nextRoutepointIndex + 1].transform.position, transform.position);
@@ -63,4 +57,4 @@ private void MovePlatform()
             other.transform.SetParent(null);
         }
     }
-}
+} 
