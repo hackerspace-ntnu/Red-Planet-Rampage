@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public class PlatformCollision: MonoBehaviour
+public class SquishCollisionHandler: MonoBehaviour
 {
     [SerializeField] 
     private PlatformMovement platformMovement;
