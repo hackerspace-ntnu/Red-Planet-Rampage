@@ -46,8 +46,8 @@ public class PlatformMovement : MonoBehaviour
 
         if (nextRoutepointIndex != routepoints.Count) return;
         
-            routepoints.Reverse();
-            nextRoutepointIndex = 0;
+        routepoints.Reverse();
+        nextRoutepointIndex = 0;
     }
 
     private void OnTriggerEnter(Collider other) {
