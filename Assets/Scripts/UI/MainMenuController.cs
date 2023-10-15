@@ -26,7 +26,7 @@ public class MainMenuController : MonoBehaviour
     private GalleryMenu galleryMenu;
 
     [SerializeField]
-    private string[] mapnames;
+    private string[] mapNames;
 
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
@@ -105,7 +105,7 @@ public class MainMenuController : MonoBehaviour
     public void ChangeScene()
     {
         playerInputManagerController.RemoveListeners();
-        SceneManager.LoadSceneAsync(mapnames.RandomElement());
+        SceneManager.LoadSceneAsync(mapNames.RandomElement());
     }
 
     /// <summary>

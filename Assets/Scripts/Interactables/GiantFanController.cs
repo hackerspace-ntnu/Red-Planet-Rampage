@@ -9,7 +9,6 @@ public class GiantFanController : MonoBehaviour
     {
         if (other.gameObject.TryGetComponent<Rigidbody>(out Rigidbody rigidbodyPlayer))
         {
-            rigidbodyPlayer = other.gameObject.GetComponent<Rigidbody>();
             rigidbodyPlayer.AddForce(Vector3.up * airForce, ForceMode.Acceleration);
         }
 

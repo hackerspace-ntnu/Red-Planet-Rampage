@@ -99,7 +99,7 @@ public class MatchController : MonoBehaviour
         // Makes shooting end quickly if testing with 1 player
 #if UNITY_EDITOR
         if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
-            roundLength = 5f;
+            roundLength = 60f;
 #endif
 
         StartNextRound();
