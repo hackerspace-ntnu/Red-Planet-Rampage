@@ -134,21 +134,11 @@ public class BiddingPlatform : MonoBehaviour
     private void EndAuction()
     {
         if (leadingBidder)
-        {
             leadingBidder.PerformTransaction(item);
 
-            // Animate weapon flying towards winner
-            LeanTween.value(gameObject, UpdateBorder, 1f, 0f, borderTweenDuration);
-            augmentModel.LeanScale(40 * Vector3.one, 0.2f);
-            LeanTween.followLinear(augmentModel.transform, leadingBidder.transform, LeanProp.position, 20f);
-            Destroy(augmentModel, 0.6f);
-        }
-        else
-        {
-            augmentModel.LeanScale(Vector3.zero, 0.3f);
-            Destroy(augmentModel, 0.5f);
-        }
+        Destroy(augmentModel, 0.5f);
         onBiddingEnd?.Invoke(this);
+        gameObject.LeanScale(Vector3.zero, 0.5f).setEaseInOutExpo();
     }
 
     public void SetItem(Item item)
@@ -158,6 +148,7 @@ public class BiddingPlatform : MonoBehaviour
         itemDescriptionText.text = item.displayDescription;
         itemCostText.text = chips.ToString();
         augmentModel = Instantiate(item.augment, modelHolder.transform);
+        augmentModel.transform.localScale = Vector3.one / 20.0f;
 
         // All barrels have their origins skewed by design, this is the best solution to center barrels as long as that is the case.
         if (item.augmentType == AugmentType.Barrel)
@@ -165,8 +156,10 @@ public class BiddingPlatform : MonoBehaviour
             augmentModel.transform.Translate(new Vector3(-1f, 0f, 0f));
         }
 
-        augmentModel.transform.Rotate(new Vector3(0f, 90f));
-        augmentModel.LeanScale(100 * Vector3.one, 0.5f);
+        modelHolder.transform.Rotate(new Vector3(90f, 0f));
+        LeanTween.sequence()
+        .append(LeanTween.rotateAroundLocal(augmentModel, Vector3.up, 360, 2.5f).setLoopCount(-1))
+        .append(LeanTween.moveLocalY(augmentModel, 0.01f, 3.0f).setLoopPingPong().setEaseInOutSine());
 
 
 #if UNITY_EDITOR

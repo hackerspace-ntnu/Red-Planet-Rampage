@@ -36,6 +36,9 @@ public class AuctionDriver : MonoBehaviour
     private RectTransform[] gunConstructionPanels;
     private float gunConstructionScale = 8f;
 
+    [SerializeField]
+    private Animator cameraAnimator;
+
     // Stages
     // BiddingStage contains a list of items (scriptableobjects)
     private void Start()
@@ -58,6 +61,7 @@ public class AuctionDriver : MonoBehaviour
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
 
         AnimateAuctionStart();
+        StartCoroutine(WaitAndStartCameraAnimation());
         StartCoroutine(PopulatePlatforms());
     }
 
@@ -75,8 +79,15 @@ public class AuctionDriver : MonoBehaviour
 
     private void AnimateAuctionStart()
     {
+        //TODO: Animate auctioneer presenting items instead, meanwhile this functionality should still be here
         GlobalHUDController globalHUD = GetComponentInChildren<GlobalHUDController>();
-        StartCoroutine(globalHUD.DisplayStartScreen(biddingBeginDelay));
+        StartCoroutine(globalHUD.DisplayStartScreen(biddingBeginDelay+2));
+    }
+
+    private IEnumerator WaitAndStartCameraAnimation()
+    {
+        yield return new WaitForSeconds(biddingBeginDelay);
+        cameraAnimator.SetTrigger("start");
     }
 
     private IEnumerator PopulatePlatforms()
@@ -117,13 +128,16 @@ public class AuctionDriver : MonoBehaviour
     {
         lastExtendedAuction.onBiddingEnd = null;
 
-        LeanTween.alpha(gunConstructionPanels[0].parent.GetComponent<RectTransform>(), 1f, 1f).setEase(LeanTweenType.linear);
-        MusicTrackManager.Singleton.SwitchTo(MusicType.CONSTRUCTION_FANFARE);
+        // TODO: Reuse and upgrade for new gun construction in the future
+        //LeanTween.alpha(gunConstructionPanels[0].parent.GetComponent<RectTransform>(), 1f, 1f).setEase(LeanTweenType.linear);
+        //MusicTrackManager.Singleton.SwitchTo(MusicType.CONSTRUCTION_FANFARE);
         
+        /*
         for (int i = 0; i < playersInAuction.Count; i++)
         {
             StartCoroutine(AnimateGunConstruction(playersInAuction.ElementAt(playersInAuction.Count-i-1), gunConstructionPanels[i]));
         }
+        */
 
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
         PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
