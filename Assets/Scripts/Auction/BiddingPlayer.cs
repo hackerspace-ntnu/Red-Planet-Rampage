@@ -44,7 +44,7 @@ public class BiddingPlayer : MonoBehaviour
 
         LeanTween.sequence()
             .append(LeanTween.rotateAroundLocal(signMesh.gameObject, Vector3.right, 90, 0.15f))
-            .insert(LeanTween.rotateAroundLocal(signMesh.gameObject, Vector3.right, -90, 0.4f));
+            .append(LeanTween.rotateAroundLocal(signMesh.gameObject, Vector3.right, -90, 0.4f));
     }
 
     private void AnimateChipStatus(BiddingPlatform platform)

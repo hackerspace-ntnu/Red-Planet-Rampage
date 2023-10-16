@@ -95,7 +95,7 @@ public class BiddingPlatform : MonoBehaviour
             return false;
         }
 
-        if (playerIdentity.chips > chips)
+        if (playerIdentity.chips > chips || (playerIdentity == leadingBidder && playerIdentity.chips > 0))
         {
             // Refund
             if (leadingBidder)
@@ -149,17 +149,12 @@ public class BiddingPlatform : MonoBehaviour
         itemCostText.text = chips.ToString();
         augmentModel = Instantiate(item.augment, modelHolder.transform);
         augmentModel.transform.localScale = Vector3.one / 20.0f;
-
-        // All barrels have their origins skewed by design, this is the best solution to center barrels as long as that is the case.
-        if (item.augmentType == AugmentType.Barrel)
-        {
-            augmentModel.transform.Translate(new Vector3(-1f, 0f, 0f));
-        }
+        augmentModel.transform.localPosition = Vector3.zero;
 
         modelHolder.transform.Rotate(new Vector3(90f, 0f));
         LeanTween.sequence()
-        .append(LeanTween.rotateAroundLocal(augmentModel, Vector3.up, 360, 2.5f).setLoopCount(-1))
-        .append(LeanTween.moveLocalY(augmentModel, 0.01f, 3.0f).setLoopPingPong().setEaseInOutSine());
+            .append(LeanTween.rotateAroundLocal(augmentModel, Vector3.up, 360, 2.5f).setLoopCount(-1))
+            .append(LeanTween.moveLocalY(augmentModel, 0.01f, 3.0f).setLoopPingPong().setEaseInOutSine());
 
 
 #if UNITY_EDITOR
