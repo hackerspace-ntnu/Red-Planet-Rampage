@@ -47,14 +47,13 @@ public class AuctionDriver : MonoBehaviour
 #if UNITY_EDITOR
         biddingBeginDelay = 2f;
 #endif
-        if (MatchController.Singleton.RoundCount == 1)
-            availableAuctionStages = new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction };
-        if (MatchController.Singleton.RoundCount == 2)
-            availableAuctionStages = new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BarrelAuction };
-        if (MatchController.Singleton.RoundCount == 3)
-            availableAuctionStages = new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction };
-        if (MatchController.Singleton.RoundCount > 3)
-            availableAuctionStages = new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction };
+        availableAuctionStages = MatchController.Singleton.RoundCount switch
+        {
+            1 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction },
+            2 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BarrelAuction },
+            3 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction},
+            _ => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction }
+        };
 
         playerFactory = GetComponent<PlayerFactory>();
         playerFactory.InstantiatePlayersBidding();
