@@ -24,14 +24,14 @@ public class StaticInfo : MonoBehaviour
     private Item[] extensions;
 
     [SerializeField]
-    private RandomisedAuctionStage bodyAuction;
-    public RandomisedAuctionStage BodyAuction => bodyAuction;
+    private WeightedRandomisedAuctionStage bodyAuction;
+    public WeightedRandomisedAuctionStage BodyAuction => bodyAuction;
     [SerializeField]
-    private RandomisedAuctionStage barrelAuction;
-    public RandomisedAuctionStage BarrelAuction => barrelAuction;
+    private WeightedRandomisedAuctionStage barrelAuction;
+    public WeightedRandomisedAuctionStage BarrelAuction => barrelAuction;
     [SerializeField]
-    private RandomisedAuctionStage extensionAuction;
-    public RandomisedAuctionStage ExtensionAuction => extensionAuction;
+    private WeightedRandomisedAuctionStage extensionAuction;
+    public WeightedRandomisedAuctionStage ExtensionAuction => extensionAuction;
 
     [SerializeField]
     private Item startingBody;

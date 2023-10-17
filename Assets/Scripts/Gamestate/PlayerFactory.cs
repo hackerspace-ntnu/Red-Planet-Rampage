@@ -78,6 +78,7 @@ public class PlayerFactory : MonoBehaviour
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
         playerManager.SetPlayerInput(inputManager);
+        playerManager.SetGun(inputManager.transform);
         // Set unique layer for player
         playerManager.SetLayer(inputManager.playerInput.playerIndex);
     }
