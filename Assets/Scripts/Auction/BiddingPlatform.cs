@@ -94,8 +94,8 @@ public class BiddingPlatform : MonoBehaviour
             Debug.Log("No active biddingRound on biddingPlatform!");
             return false;
         }
-
-        if (playerIdentity.chips > chips || (playerIdentity == leadingBidder && playerIdentity.chips > 0))
+        bool leadingPlayerCanIncrement = playerIdentity == leadingBidder && playerIdentity.chips > 0;
+        if (playerIdentity.chips > chips || leadingPlayerCanIncrement)
         {
             // Refund
             if (leadingBidder)
