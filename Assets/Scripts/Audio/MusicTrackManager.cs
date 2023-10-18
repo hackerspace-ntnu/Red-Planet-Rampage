@@ -46,6 +46,8 @@ public class MusicTrackManager : MonoBehaviour
 
     private Coroutine trackSwitchingRoutine;
 
+    private readonly float LOGARITHMIC_MUTE = -90f;
+
     void Awake()
     {
         #region Singleton boilerplate
@@ -160,14 +162,14 @@ public class MusicTrackManager : MonoBehaviour
     {
         // Get intended end point from current volume setting
         mixer.GetFloat("musicVolume", out float endVolume);
-        yield return Fade(0, endVolume, channel);
+        yield return Fade(LOGARITHMIC_MUTE, endVolume, channel);
     }
 
     private IEnumerator FadeOut(string channel = "musicVolume")
     {
         // Remember the volume we started with so we can reset it!
         mixer.GetFloat(channel, out float startVolume);
-        yield return Fade(startVolume, 0, channel);
+        yield return Fade(startVolume, LOGARITHMIC_MUTE, channel);
     }
 
     private IEnumerator FadeOutThenSwitchTo(MusicTrack track)

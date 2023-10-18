@@ -20,6 +20,11 @@ public class Auctioneer : MonoBehaviour
     [SerializeField]
     private AudioClip[] sold;
 
+    private void Start()
+    {
+        // TODO: Replace with queue after initial auctioneer greet animation once that is implemented
+        StartCoroutine(TryQueueVoice(2.5f, bid));
+    }
 
     public void BidOn(int platformIndex)
     {
@@ -28,20 +33,30 @@ public class Auctioneer : MonoBehaviour
         {
             case 0:
                 animator.SetTrigger("Auction1Bid");
-                audioSource.clip = bid.RandomElement();
                 break;
             case 1:
                 animator.SetTrigger("Auction2Bid");
-                audioSource.clip = bid.RandomElement();
                 break;
             case 2:
                 animator.SetTrigger("Auction3Bid");
-                audioSource.clip = bid.RandomElement();
                 break;
             default:
                 throw new ArgumentException("No auctioneer animation for given platform index");
         }
+        audioSource.clip = bid.RandomElement();
         audioSource.Play();
+        StartCoroutine(TryQueueVoice(audioSource.clip.length, haste));
+    }
+
+    private IEnumerator TryQueueVoice(float time, AudioClip[] audioClips)
+    {
+        yield return new WaitForSeconds(time+1);
+        if (!audioSource.isPlaying)
+        {
+            audioSource.clip = audioClips.RandomElement();
+            audioSource.Play();
+        }
+            
     }
 
     public void Sell()
@@ -57,6 +72,7 @@ public class Auctioneer : MonoBehaviour
         audioSource.Stop();
         audioSource.clip = haste.RandomElement();
         audioSource.Play();
+        StartCoroutine(TryQueueVoice(audioSource.clip.length, haste));
     }
 
     public void Missing()
@@ -64,5 +80,6 @@ public class Auctioneer : MonoBehaviour
         audioSource.Stop();
         audioSource.clip = missingChips.RandomElement();
         audioSource.Play();
+        StartCoroutine(TryQueueVoice(audioSource.clip.length, bid));
     }
 }
