@@ -1,5 +1,38 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!243 &-7677010254649928164
+AudioMixerGroupController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: VoiceLines
+  m_AudioMixer: {fileID: 24100000}
+  m_GroupID: de50e7a68b544614f892f567b79a96b6
+  m_Children: []
+  m_Volume: 0b49479f93763f94890331bcfe29dfe4
+  m_Pitch: 2be3b2aa5963d834981c51181d37c8c6
+  m_Send: 00000000000000000000000000000000
+  m_Effects:
+  - {fileID: -7078595059564997209}
+  m_UserColorIndex: 0
+  m_Mute: 0
+  m_Solo: 0
+  m_BypassEffects: 0
+--- !u!244 &-7078595059564997209
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_EffectID: 79e37f7b5648b7a4fa017aac6c0d8786
+  m_EffectName: Attenuation
+  m_MixLevel: 1fdc51280a4cf244bb5f6f681ab06b06
+  m_Parameters: []
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 0
 --- !u!243 &-4526622472270999318
 AudioMixerGroupController:
   m_ObjectHideFlags: 0
@@ -164,6 +197,7 @@ AudioMixerController:
     - 8ca2de57f27f07b36a965e74b23fe90e
     - 62275be6a96026d399d6d2c9991767aa
     - 37475af897eefe6ca981bc3554836356
+    - de50e7a68b544614f892f567b79a96b6
     name: View
   m_CurrentViewIndex: 0
   m_TargetSnapshot: {fileID: 24500006}
@@ -213,6 +247,7 @@ AudioMixerSnapshotController:
   m_SnapshotID: ab2c8b8a9b137634babc4603e5f74203
   m_FloatValues:
     64190992203dc2a44b81bf8adbdb61de: 0
+    0b49479f93763f94890331bcfe29dfe4: 4.5
   m_TransitionOverrides: {}
 --- !u!243 &894316070289458082
 AudioMixerGroupController:
@@ -270,7 +305,8 @@ AudioMixerGroupController:
   m_Name: Sound Effects
   m_AudioMixer: {fileID: 24100000}
   m_GroupID: 10f6546e7d54e064085d0ff7ca40f57d
-  m_Children: []
+  m_Children:
+  - {fileID: -7677010254649928164}
   m_Volume: 64190992203dc2a44b81bf8adbdb61de
   m_Pitch: 08150f24d4397eb448b1f702167ee2d0
   m_Send: 00000000000000000000000000000000

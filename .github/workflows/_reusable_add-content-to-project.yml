@@ -33,6 +33,13 @@ on:
         description: "The name of one of the values of the project's (single select) 'Status' field, to set for the added project item"
         required: true
         type: string
+    secrets:
+      HACKERSPACE_BOT_APP_ID:
+        description: "The App ID of a GitHub organization app with read and write access to repository contents, issues and pull requests, and organization projects"
+        required: true
+      HACKERSPACE_BOT_APP_PEM:
+        description: "A private key for the app with ID HACKERSPACE_BOT_APP_ID"
+        required: true
 
 jobs:
   add_content:
@@ -41,7 +48,7 @@ jobs:
     steps:
       - name: Generate token
         id: generate_token
-        uses: tibdex/github-app-token@b62528385c34dbc9f38e5f4225ac829252d1ea92 # v1.8.0
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
         with:
           app_id: ${{ secrets.HACKERSPACE_BOT_APP_ID }}
           private_key: ${{ secrets.HACKERSPACE_BOT_APP_PEM }}
