@@ -40,6 +40,7 @@ public class DDRBody : GunBody
 
     private const float targetHeight = 3;
     private const float startHeight = targetHeight - screenHeight;
+    private const float lowestCheckHeight = 2.5f;
 
     [SerializeField]
     private Precision[] precisionsGoodToBad;
@@ -126,6 +127,9 @@ public class DDRBody : GunBody
 
     private void ArrowSelect(InputAction.CallbackContext ctx)
     {
+        if (arrowHeight < lowestCheckHeight)
+            return;
+
         switch (arrowDirection)
         {
             case ArrowDirection.NORTH:
@@ -193,7 +197,12 @@ public class DDRBody : GunBody
 
     private void OnDestroy()
     {
-        if (gunController)
-            gunController.player.inputManager.onMovePerformed -= ArrowSelect;
+        if (!gunController)
+            return;
+        if (!gunController.player)
+            return;
+
+        gunController.player.inputManager.onFirePerformed -= Fire;
+        gunController.player.inputManager.onMovePerformed -= ArrowSelect;
     }
 }

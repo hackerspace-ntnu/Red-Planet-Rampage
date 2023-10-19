@@ -123,7 +123,6 @@ public class PlayerManager : MonoBehaviour
         inputManager = playerInput;
         identity = inputManager.GetComponent<PlayerIdentity>();
         GetComponent<PlayerMovement>().SetPlayerInput(inputManager);
-        SetGun(inputManager.transform);
         // Subscribe relevant input events
         inputManager.onFirePerformed += Fire;
         inputManager.onFireCanceled += FireEnd;
@@ -169,6 +168,8 @@ public class PlayerManager : MonoBehaviour
 
     private void Fire(InputAction.CallbackContext ctx)
     {
+        if (!gunController)
+            return;
         gunController.triggerHeld = true;
         gunController.triggerPressed = true;
         StartCoroutine(UnpressTrigger());
@@ -221,7 +222,7 @@ public class PlayerManager : MonoBehaviour
         SetLayerOnSubtree(meshBase, playerLayer);
     }
 
-    private void SetGun(Transform offset)
+    public void SetGun(Transform offset)
     {
         var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, this, offset);
         // Set specific local transform
