@@ -1948,6 +1948,10 @@ PrefabInstance:
       propertyPath: health
       value: 
       objectReference: {fileID: 6717855691676836013}
+    - target: {fileID: 8983373830836251913, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 9215478358269548825, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
       propertyPath: health
       value: 
@@ -1955,7 +1959,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 931328339146624900, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3368115432064643175}
   m_SourcePrefab: {fileID: 100100000, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
 --- !u!114 &142658303258642700 stripped
 MonoBehaviour:
@@ -1978,6 +1985,50 @@ Animator:
   m_CorrespondingSourceObject: {fileID: 3000042688875756406, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
   m_PrefabInstance: {fileID: 3287810421515891185}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2399319193097797237 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 931328339146624900, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
+  m_PrefabInstance: {fileID: 3287810421515891185}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3368115432064643175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2399319193097797237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84d69c7fde56e354080e082e1314d474, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wobbleInterpolationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  jiggleCoefficient: 20
+  maxPositionDelta: 0.1
+  maxRotationDegrees: 100
 --- !u!136 &2815208169435112715 stripped
 CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 770404444716995834, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}

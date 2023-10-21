@@ -48,4 +48,18 @@ public class JiggleBone : MonoBehaviour
         var currentRotation = transform.rotation;
         StartCoroutine(InterpolateTransform(previousPosition, currentPosition, previousRotation, currentRotation, jiggleCoefficient*Time.deltaTime));
     }
+
+    /*
+     //Mesh has just been animated
+        animatedBoneWorldPosition = transform.position;
+        animatedBoneWorldRotation = transform.rotation;
+        goalPosition = Vector3.Slerp(oldBoneWorldPosition, transform.position, Time.deltaTime * bounceFactor);
+        goalRotation = Quaternion.Slerp(oldBoneWorldRotation, transform.rotation, Time.deltaTime * wobbleFactor);
+ 
+        transform.rotation = Quaternion.RotateTowards(animatedBoneWorldRotation, goalRotation, maxRotationDegrees);
+        transform.position = Vector3.MoveTowards(animatedBoneWorldPosition, goalPosition, maxTranslation);
+ 
+        oldBoneWorldPosition = transform.position;
+        oldBoneWorldRotation = transform.rotation;
+        */
 }
