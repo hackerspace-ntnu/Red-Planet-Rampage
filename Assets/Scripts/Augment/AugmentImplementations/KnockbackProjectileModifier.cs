@@ -20,7 +20,6 @@ public class KnockbackProjectileModifier : MonoBehaviour, ProjectileModifier
     public void Attach(ProjectileController projectile)
     {
         projectile.OnColliderHit += KnockAwayTarget;
-        source = projectile.player;
     }
 
     public void Detach(ProjectileController projectile)
@@ -32,11 +31,7 @@ public class KnockbackProjectileModifier : MonoBehaviour, ProjectileModifier
     {
         var stuck = Instantiate(stuckObject, state.position, state.rotation, null);
         stuck.transform.ParentUnscaled(collider.transform);
-        //if (collider.gameObject.TryGetComponent<Rigidbody>(out Rigidbody rigidbody))
-        //{
-        //    rigidbody.AddForce(Vector3.up * pushPower, ForceMode.Impulse);
-        //}
-        source.gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * pushPower, ForceMode.Impulse);
+        stuck.gameObject.GetComponent<KnockbackEffect>().KnockAwayTargets(pushPower, knockbackRadius);
         Destroy(stuck, 0.1f);
     }
 }
