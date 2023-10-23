@@ -11,6 +11,7 @@ public class WobbleMesh : MonoBehaviour
     private float elasticity = 4f;
 
     private Vector3 previousPosition;
+    private Vector3 momentum = Vector3.zero;
 
     private void Start()
     {
@@ -18,7 +19,8 @@ public class WobbleMesh : MonoBehaviour
     }
     private void LateUpdate()
     {
-        Vector3 target = Vector3.Slerp(previousPosition, transform.position, Time.fixedDeltaTime * elasticity);
+        Vector3 target = Vector3.Slerp(previousPosition, transform.position - momentum, Time.fixedDeltaTime * elasticity);
+        momentum = (target - transform.position);
         var distance = target - transform.position;
         JiggleMat.SetVector("_Distance", distance);
         previousPosition = target;
