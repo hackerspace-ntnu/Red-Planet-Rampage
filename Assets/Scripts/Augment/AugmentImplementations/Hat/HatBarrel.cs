@@ -134,7 +134,7 @@ public class HatBarrel : ProjectileController
 
         var collisions = ProjectileMotions.GetPathCollisions(state, collisionLayers).Select(x => x.collider).ToArray();
 
-        if (collisions.Length > 0 && !collisions[0].gameObject.CompareTag("IgnoreCollider"))
+        if (collisions.Length > 0)
         {
             state.active = false;
             OnColliderHit?.Invoke(collisions[0], ref state);

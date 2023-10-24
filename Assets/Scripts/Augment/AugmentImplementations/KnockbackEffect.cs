@@ -10,9 +10,10 @@ public class KnockbackEffect : MonoBehaviour
 
         foreach (Collider collider in colliders)
         {
-            if (collider.gameObject.TryGetComponent<Rigidbody>(out Rigidbody rigidbody))
+            if (collider.gameObject.TryGetComponent<PlayerManager>(out PlayerManager manager))
             {
-                rigidbody.AddForce(Vector3.MoveTowards(transform.position, rigidbody.position, 5f) * pushPower, ForceMode.Impulse);
+                var rigidbody = manager.gameObject.GetComponent<Rigidbody>();
+                rigidbody.AddExplosionForce(pushPower, transform.position, radius, 0f, ForceMode.Impulse);
             }
         }
     }

@@ -170,7 +170,6 @@ public class PlayerMovement : MonoBehaviour
                     body.drag = airDrag;
                     body.AddForce(input * strafeForceInAir, ForceMode.VelocityChange);
                     body.AddForce(Vector3.down * marsGravity * 3.5f, ForceMode.Acceleration);
-                    Debug.Log(body.velocity);
                     if (!IsInAir()) state = PlayerState.GROUNDED;
                     break;
                 }
