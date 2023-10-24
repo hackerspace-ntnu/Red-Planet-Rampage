@@ -12,7 +12,7 @@ public class KnockbackEffect : MonoBehaviour
         {
             if (collider.gameObject.TryGetComponent<Rigidbody>(out Rigidbody rigidbody))
             {
-                rigidbody.AddExplosionForce(pushPower, transform.position, radius, 0.1f, ForceMode.Impulse);
+                rigidbody.AddForce(Vector3.MoveTowards(transform.position, rigidbody.position, 5f) * pushPower, ForceMode.Impulse);
             }
         }
     }

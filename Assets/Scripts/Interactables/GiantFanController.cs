@@ -3,7 +3,7 @@ using UnityEngine;
 public class GiantFanController : MonoBehaviour
 {
     [SerializeField]
-    private float airForce = 35f;
+    private float airForce = 50f;
 
     private void OnTriggerStay(Collider other)
     {
