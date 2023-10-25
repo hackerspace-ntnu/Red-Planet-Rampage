@@ -8,21 +8,34 @@ using UnityEngine;
 public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
 {
     [SerializeField]
-    private GameObject knockbackSourceObject;
-
-    [SerializeField]
     private float pushPower;
 
     [SerializeField]
     private float radius;
 
+    [SerializeField]
+    private KnockbackEffect knockBackScript;
+
+    private float bulletAmount = 1f;
+
+    [SerializeField]
+    private Transform[] knockbackNormal;
+
     private PlayerManager source;
 
-    private Item barrelPrefab;
 
     public void Attach(ProjectileController projectile)
     {
         projectile.OnProjectileInit += KnockAwayOnShot;
+
+        var bulletController = projectile.gameObject.GetComponent<BulletController>();
+        bulletAmount = bulletController == null ? 1f : bulletController.bulletsPerShot;
+        
+        if (bulletAmount >= 5)
+        {
+            bulletAmount -= 4;
+        }
+
         source = projectile.player;
     }
 
@@ -33,9 +46,10 @@ public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
 
     public void KnockAwayOnShot(ref ProjectileState state, GunStats stats)
     {
+        Vector3 ab = knockbackNormal[0].transform.position - transform.position;
+        Vector3 ac = knockbackNormal[1].transform.position - transform.position;
+        Vector3 normal = Vector3.Cross(ab, ac);
 
-        var knockObject = Instantiate(knockbackSourceObject, state.position, state.rotation, null);    
-        knockObject.gameObject.GetComponent<KnockbackEffect>().KnockAwayTargets(pushPower, radius);
-        Destroy(knockObject, 0.2f);
+        knockBackScript.KnockAwayTargetsDirectional(pushPower / bulletAmount, normal, source, radius);
     }
 }

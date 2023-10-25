@@ -31,7 +31,7 @@ public class KnockbackProjectileModifier : MonoBehaviour, ProjectileModifier
     {
         var stuck = Instantiate(stuckObject, state.position, state.rotation, null);
         stuck.transform.ParentUnscaled(collider.transform);
-        stuck.gameObject.GetComponent<KnockbackEffect>().KnockAwayTargets(pushPower, knockbackRadius);
+        stuck.gameObject.GetComponent<KnockbackEffect>().KnockAwayTargets(pushPower, knockbackRadius, stuck.transform.position);
         Destroy(stuck, 0.1f);
     }
 }
