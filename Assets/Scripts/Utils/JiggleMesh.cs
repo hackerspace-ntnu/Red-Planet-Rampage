@@ -38,7 +38,7 @@ public class JiggleMesh : MonoBehaviour
         }
         else
         {
-            deltaAnimationTarget = transform.up - deltaPosition;
+            deltaAnimationTarget = oldPosition;
             animationTarget = deltaAnimationTarget.normalized;
             reflectedAnimationTarget = Vector3.Reflect(animationTarget, Vector3.Cross(Vector3.Cross(deltaPosition, previousPosition), transform.up)).normalized;
         }
@@ -47,7 +47,7 @@ public class JiggleMesh : MonoBehaviour
         Vector3 animatedPosition = Vector3.Slerp(previousPosition, animationTarget, Time.deltaTime * elasticity);
 
         // Pass state variables
-        jiggleMat.SetVector("_Distance", Quaternion.Inverse(transform.rotation) * -animatedPosition);
+        jiggleMat.SetVector("_Distance", Quaternion.Inverse(transform.rotation) * -animatedPosition.normalized);
         previousPosition = animatedPosition;
         oldPosition = transform.position;
         oldDeltaPosition = deltaPosition;
