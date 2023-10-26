@@ -49,9 +49,9 @@ public class AuctionDriver : MonoBehaviour
 #endif
         availableAuctionStages = MatchController.Singleton.RoundCount switch
         {
-            3 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction },
+            1 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction },
             2 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BarrelAuction },
-            1 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction},
+            3 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction},
             _ => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction }
         };
 
