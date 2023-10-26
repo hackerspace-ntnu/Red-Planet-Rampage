@@ -21,7 +21,7 @@ public class JiggleMesh : MonoBehaviour
         oldPosition = transform.position;
         animationTarget = transform.position;
     }
-    private void LateUpdate()
+    private void Update()
     {
         // Momentum
         Vector3 deltaPosition = (oldPosition - transform.position) * 100;
