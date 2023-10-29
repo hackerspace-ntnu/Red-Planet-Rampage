@@ -29,8 +29,8 @@ public class HackingModifier : MonoBehaviour, ProjectileModifier
     {
         if (!collider.TryGetComponent<HitboxController>(out var hitboxController))
             return;
-        if (!hitboxController.health.TryGetComponent<PopupSpammer>(out var spammer))
+        if (!hitboxController.health.TryGetComponent<PlayerManager>(out var playerManager))
             return;
-        spammer.Spam(Mathf.FloorToInt(state.damage / damageToSpamAmount));
+        playerManager.HUDController.PopupSpammer.Spam(Mathf.FloorToInt(state.damage / damageToSpamAmount));
     }
 }

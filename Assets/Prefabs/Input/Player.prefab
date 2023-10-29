@@ -17,7 +17,6 @@ GameObject:
   - component: {fileID: 6717855691676836013}
   - component: {fileID: 3252978923923797766}
   - component: {fileID: 7607358150439154286}
-  - component: {fileID: 8083311792859455116}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -338,23 +337,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &8083311792859455116
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 71015680234268067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 054f8241b622aff439e7b31758f43d23, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  popup: {fileID: 2749458525383876187, guid: 8f8cc66de768a2f48801942cf6b2988c, type: 3}
-  spamTarget: {fileID: 3484089900029681523}
-  hud: {fileID: 3570743071879246586}
-  minSpamDelay: 0.05
-  maxSpamDelay: 0.2
 --- !u!1 &345906872987025452
 GameObject:
   m_ObjectHideFlags: 0
@@ -365,6 +347,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3484089900029681523}
   - component: {fileID: 5813241806607806329}
+  - component: {fileID: 6535424167945181997}
   m_Layer: 5
   m_Name: SpamTarget
   m_TagString: Untagged
@@ -404,6 +387,23 @@ SortingGroup:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_SortAtRoot: 0
+--- !u!114 &6535424167945181997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 345906872987025452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 054f8241b622aff439e7b31758f43d23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  popup: {fileID: 2749458525383876187, guid: 8f8cc66de768a2f48801942cf6b2988c, type: 3}
+  spamTarget: {fileID: 3484089900029681523}
+  hud: {fileID: 3570743071879246586}
+  minSpamDelay: 0.05
+  maxSpamDelay: 0.2
 --- !u!1 &650044701630506088
 GameObject:
   m_ObjectHideFlags: 0
@@ -1093,10 +1093,11 @@ MonoBehaviour:
   healthBar: {fileID: 8281853296856510176}
   ammoHud: {fileID: 6629533919243205533}
   ammoBar: {fileID: 4001729099187883475}
+  tweenDuration: 0.07
   deathScreen: {fileID: 1029316632486890240}
   deathText: {fileID: 9172283963218471322}
-  tweenDuration: 0.07
   damageBorderFlashDuration: 0.2
+  popupSpammer: {fileID: 6535424167945181997}
 --- !u!222 &1470896919934443344
 CanvasRenderer:
   m_ObjectHideFlags: 0
