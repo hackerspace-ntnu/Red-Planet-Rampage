@@ -1,16 +1,15 @@
 using System.Collections;
-using CollectionExtensions;
 using UnityEngine;
 
 public class PopupSpammer : MonoBehaviour
 {
-    [SerializeField] private Popup[] popups;
+    [SerializeField] private Popup popup;
 
     [SerializeField] private RectTransform spamTarget;
     [SerializeField] private RectTransform hud;
 
-    [SerializeField] private float minSpamDelay = .1f;
-    [SerializeField] private float maxSpamDelay = .3f;
+    [SerializeField] private float minSpamDelay = .05f;
+    [SerializeField] private float maxSpamDelay = .2f;
 
     private int spamRemaining = 0;
 
@@ -23,8 +22,7 @@ public class PopupSpammer : MonoBehaviour
         var position = new Vector2(
             Random.Range(-halfWidth, halfWidth),
             Random.Range(-halfHeight, halfHeight));
-  
-        var popup = popups.RandomElement();
+
         var instance = Instantiate(popup, spamTarget.transform.position, spamTarget.transform.rotation, spamTarget);
         instance.GetComponent<RectTransform>().anchoredPosition = position;
     }
