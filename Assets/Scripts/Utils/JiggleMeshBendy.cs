@@ -3,8 +3,7 @@ using UnityEngine;
 public class JiggleMesh : MonoBehaviour
 {
     [SerializeField]
-    private Material jiggleMat;
-
+    private int jiggleMaterialIndex;
     [SerializeField]
     private float elasticity = 4f;
 
@@ -14,9 +13,16 @@ public class JiggleMesh : MonoBehaviour
     private Vector3 animationTarget;
     private Vector3 reflectedAnimationTarget;
     private Vector3 deltaAnimationTarget;
+    private MeshRenderer meshRenderer;
+    private Material jiggleMaterial;
 
     private void Start()
     {
+        // Intantitate JiggleMaterial
+        meshRenderer = GetComponent<MeshRenderer>();
+        meshRenderer.materials[jiggleMaterialIndex] = Instantiate(meshRenderer.materials[jiggleMaterialIndex]);
+        jiggleMaterial = meshRenderer.materials[jiggleMaterialIndex];
+        // Set initial values
         previousPosition = transform.position;
         oldPosition = transform.position;
         animationTarget = transform.position;
@@ -47,7 +53,7 @@ public class JiggleMesh : MonoBehaviour
         Vector3 animatedPosition = Vector3.Slerp(previousPosition, animationTarget, Time.deltaTime * elasticity);
 
         // Pass state variables
-        jiggleMat.SetVector("_Distance", Quaternion.Inverse(transform.rotation) * -animatedPosition.normalized);
+        jiggleMaterial.SetVector("_Distance", Quaternion.Inverse(transform.rotation) * -animatedPosition.normalized);
         previousPosition = animatedPosition;
         oldPosition = transform.position;
         oldDeltaPosition = deltaPosition;

@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(MeshRenderer))]
 public class JiggleMeshSimple : MonoBehaviour
 {
     [SerializeField]
-    private Material jiggleMat;
+    private int jiggleMaterialIndex;
     [SerializeField]
     private Vector3 jiggleForwardDirection = Vector3.up;
     [SerializeField]
@@ -17,8 +18,16 @@ public class JiggleMeshSimple : MonoBehaviour
     private Vector3 previousTarget;
     private Vector3 oldPosition;
 
+    private MeshRenderer meshRenderer;
+    private Material jiggleMaterial;
+
     void Start()
     {
+        // Intantitate JiggleMaterial
+        meshRenderer = GetComponent<MeshRenderer>();
+        meshRenderer.materials[jiggleMaterialIndex] = Instantiate(meshRenderer.materials[jiggleMaterialIndex]);
+        jiggleMaterial = meshRenderer.materials[jiggleMaterialIndex];
+        // Set initial values
         previousTarget = transform.position;
         previousDiff = transform.position;
         oldPosition = transform.position;
@@ -28,7 +37,7 @@ public class JiggleMeshSimple : MonoBehaviour
     {
         Vector3 target = Vector3.Slerp(previousTarget, previousDiff - jiggleForwardDirection, Time.deltaTime * elasticity);
         var distance = target - jiggleForwardDirection;
-        jiggleMat.SetVector("_Distance", target);
+        jiggleMaterial.SetVector("_Distance", target);
         previousTarget = target + (oldPosition - transform.position) * movementSensitivity;
         previousDiff -= distance * 0.90f;
         previousDiff /= 2;
