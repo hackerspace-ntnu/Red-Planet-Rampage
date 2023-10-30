@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class JiggleMesh : MonoBehaviour
+public class FloppyExtensionJiggleMesh : MonoBehaviour
 {
     [SerializeField]
     private int jiggleMaterialIndex;
@@ -16,6 +16,9 @@ public class JiggleMesh : MonoBehaviour
     private MeshRenderer meshRenderer;
     private Material jiggleMaterial;
 
+    [SerializeField]
+    private PlayerManager player;
+
     private void Start()
     {
         // Intantitate JiggleMaterial
@@ -27,6 +30,7 @@ public class JiggleMesh : MonoBehaviour
         oldPosition = transform.position;
         animationTarget = transform.position;
     }
+
     private void Update()
     {
         // Momentum
@@ -36,7 +40,7 @@ public class JiggleMesh : MonoBehaviour
         Debug.DrawRay(transform.position, deltaPosition, Color.white);
 
         // Adjust animationTarget based on momentum loss
-        if (oldDeltaPosition.magnitude > deltaPosition.magnitude)
+        if (oldDeltaPosition.magnitude > deltaPosition.magnitude && player.inputManager.moveInput == Vector2.zero)
         {
             deltaAnimationTarget = Vector3.Slerp(deltaAnimationTarget, transform.up, Time.deltaTime);
             reflectedAnimationTarget = Vector3.Slerp(reflectedAnimationTarget, transform.up,  Time.deltaTime);
@@ -44,14 +48,14 @@ public class JiggleMesh : MonoBehaviour
         }
         else
         {
-            deltaAnimationTarget = oldPosition;
+            deltaAnimationTarget = Vector3.Slerp(deltaPosition, transform.up, Time.deltaTime);
             animationTarget = deltaAnimationTarget.normalized;
             reflectedAnimationTarget = Vector3.Reflect(animationTarget, Vector3.Cross(Vector3.Cross(deltaPosition, previousPosition), transform.up)).normalized;
         }
 
         // Start rotating towards AnimationTarget
         Vector3 animatedPosition = Vector3.Slerp(previousPosition, animationTarget, Time.deltaTime * elasticity);
-
+        Debug.DrawRay(Vector3.zero, deltaAnimationTarget, Color.red);
         // Pass state variables
         jiggleMaterial.SetVector("_Distance", Quaternion.Inverse(transform.rotation) * -animatedPosition.normalized);
         previousPosition = animatedPosition;
