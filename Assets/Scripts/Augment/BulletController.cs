@@ -13,8 +13,7 @@ public class BulletController : ProjectileController
 
     private float bulletSpeed = 50f;
 
-    [SerializeField]
-    public int bulletsPerShot { get; set; }
+    public int bulletsPerShot = 1;
 
     private VFXTextureFormatter trailPosTexture;
 

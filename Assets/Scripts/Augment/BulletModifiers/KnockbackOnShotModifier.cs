@@ -14,7 +14,7 @@ public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
     private float radius;
 
     [SerializeField]
-    private KnockbackEffect knockBackScript;
+    private KnockbackEffect knockBackEffect;
 
     private float bulletAmount = 1f;
 
