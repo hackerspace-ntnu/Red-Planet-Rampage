@@ -4,6 +4,8 @@ using TMPro;
 
 public class PlayerHUDController : MonoBehaviour
 {
+    [Header("Health and ammo")]
+
     [SerializeField]
     private RectTransform healthBar;
 
@@ -16,13 +18,19 @@ public class PlayerHUDController : MonoBehaviour
     private Material ammoCapacityMaterial;
 
     [SerializeField]
+    private float tweenDuration = .07f;
+
+    private const float ammoSpinDegrees = 30;
+    private const float availableDegrees = 270;
+
+
+    [Header("Death")]
+
+    [SerializeField]
     private GameObject deathScreen;
 
     [SerializeField]
     private TMP_Text deathText;
-
-    [SerializeField]
-    private float tweenDuration = .07f;
 
     [SerializeField]
     private float damageBorderFlashDuration = .2f;
@@ -35,8 +43,12 @@ public class PlayerHUDController : MonoBehaviour
 
     private Material damageBorder;
 
-    private const float ammoSpinDegrees = 30;
-    private const float availableDegrees = 270;
+
+    [Header("Effects")]
+
+    [SerializeField]
+    private PopupSpammer popupSpammer;
+    public PopupSpammer PopupSpammer => popupSpammer;
 
     void Start()
     {

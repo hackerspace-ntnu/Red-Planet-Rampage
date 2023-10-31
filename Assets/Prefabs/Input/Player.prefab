@@ -337,6 +337,73 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &345906872987025452
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3484089900029681523}
+  - component: {fileID: 5813241806607806329}
+  - component: {fileID: 6535424167945181997}
+  m_Layer: 5
+  m_Name: SpamTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &3484089900029681523
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 345906872987025452}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3570743071879246586}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!210 &5813241806607806329
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 345906872987025452}
+  m_Enabled: 1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 1
+  m_SortAtRoot: 0
+--- !u!114 &6535424167945181997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 345906872987025452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 054f8241b622aff439e7b31758f43d23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  popup: {fileID: 2749458525383876187, guid: 8f8cc66de768a2f48801942cf6b2988c, type: 3}
+  spamTarget: {fileID: 3484089900029681523}
+  hud: {fileID: 3570743071879246586}
+  minSpamDelay: 0.05
+  maxSpamDelay: 0.2
 --- !u!1 &650044701630506088
 GameObject:
   m_ObjectHideFlags: 0
@@ -936,6 +1003,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 3484089900029681523}
   - {fileID: 5051670465698078307}
   - {fileID: 1664387495115092571}
   - {fileID: 1417967732049705392}
@@ -1025,10 +1093,11 @@ MonoBehaviour:
   healthBar: {fileID: 8281853296856510176}
   ammoHud: {fileID: 6629533919243205533}
   ammoBar: {fileID: 4001729099187883475}
+  tweenDuration: 0.07
   deathScreen: {fileID: 1029316632486890240}
   deathText: {fileID: 9172283963218471322}
-  tweenDuration: 0.07
   damageBorderFlashDuration: 0.2
+  popupSpammer: {fileID: 6535424167945181997}
 --- !u!222 &1470896919934443344
 CanvasRenderer:
   m_ObjectHideFlags: 0
