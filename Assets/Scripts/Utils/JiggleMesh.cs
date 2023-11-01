@@ -6,20 +6,20 @@ using UnityEngine;
 public class JiggleMesh : MonoBehaviour
 {
     [SerializeField]
-    private int jiggleMaterialIndex;
+    protected int jiggleMaterialIndex;
     [SerializeField]
-    private Vector3 jiggleForwardDirection = Vector3.up;
+    protected Vector3 jiggleForwardDirection = Vector3.up;
     [SerializeField]
-    private float elasticity = 4f;
+    protected float elasticity = 4f;
     [SerializeField]
-    private float movementSensitivity = 1f;
+    protected float movementSensitivity = 1f;
 
-    private Vector3 previousDiff;
-    private Vector3 previousTarget;
-    private Vector3 oldPosition;
+    protected Vector3 previousDiff;
+    protected Vector3 previousTarget;
+    protected Vector3 oldPosition;
 
-    private MeshRenderer meshRenderer;
-    private Material jiggleMaterial;
+    protected MeshRenderer meshRenderer;
+    protected Material jiggleMaterial;
 
     void Start()
     {

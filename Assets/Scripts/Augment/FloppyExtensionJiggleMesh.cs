@@ -1,23 +1,11 @@
 using UnityEngine;
 
-public class FloppyExtensionJiggleMesh : MonoBehaviour
+public class FloppyExtensionJiggleMesh : JiggleMesh
 {
     [SerializeField]
-    private int jiggleMaterialIndex;
-    [SerializeField]
-    private float elasticity = 4f;
+    private float movementSensitivityWalking = 0.05f;
 
-    private Vector3 previousPosition;
-    private Vector3 oldPosition;
-    private Vector3 oldDeltaPosition;
-    private Vector3 animationTarget;
-    private Vector3 reflectedAnimationTarget;
-    private Vector3 deltaAnimationTarget;
-    private MeshRenderer meshRenderer;
-    private Material jiggleMaterial;
-
-    [SerializeField]
-    private PlayerManager player;
+    public PlayerManager player;
 
     private void Start()
     {
@@ -26,40 +14,23 @@ public class FloppyExtensionJiggleMesh : MonoBehaviour
         meshRenderer.materials[jiggleMaterialIndex] = Instantiate(meshRenderer.materials[jiggleMaterialIndex]);
         jiggleMaterial = meshRenderer.materials[jiggleMaterialIndex];
         // Set initial values
-        previousPosition = transform.position;
         oldPosition = transform.position;
-        animationTarget = transform.position;
+    }
+
+    public void AnimatePushback()
+    {
+        previousDiff += Vector3.up*3;
     }
 
     private void Update()
     {
-        // Momentum
-        Vector3 deltaPosition = (oldPosition - transform.position) * 100;
-        deltaPosition = new Vector3(Mathf.Clamp(deltaPosition.x, -50, 50), Mathf.Clamp(deltaPosition.y, -50, 50), Mathf.Clamp(deltaPosition.z, -50, 50));
-        deltaPosition = Vector3.Slerp(oldDeltaPosition, deltaPosition, Time.deltaTime * 1f);
-        Debug.DrawRay(transform.position, deltaPosition, Color.white);
-
-        // Adjust animationTarget based on momentum loss
-        if (oldDeltaPosition.magnitude > deltaPosition.magnitude && player.inputManager.moveInput == Vector2.zero)
-        {
-            deltaAnimationTarget = Vector3.Slerp(deltaAnimationTarget, transform.up, Time.deltaTime);
-            reflectedAnimationTarget = Vector3.Slerp(reflectedAnimationTarget, transform.up,  Time.deltaTime);
-            animationTarget = Vector3.Slerp(deltaAnimationTarget, reflectedAnimationTarget, (1+Mathf.Sin(deltaPosition.magnitude*10))*0.5f);
-        }
-        else
-        {
-            deltaAnimationTarget = Vector3.Slerp(deltaPosition, transform.up, Time.deltaTime);
-            animationTarget = deltaAnimationTarget.normalized;
-            reflectedAnimationTarget = Vector3.Reflect(animationTarget, Vector3.Cross(Vector3.Cross(deltaPosition, previousPosition), transform.up)).normalized;
-        }
-
-        // Start rotating towards AnimationTarget
-        Vector3 animatedPosition = Vector3.Slerp(previousPosition, animationTarget, Time.deltaTime * elasticity);
-        Debug.DrawRay(Vector3.zero, deltaAnimationTarget, Color.red);
-        // Pass state variables
-        jiggleMaterial.SetVector("_Distance", Quaternion.Inverse(transform.rotation) * -animatedPosition.normalized);
-        previousPosition = animatedPosition;
+        Vector3 target = Vector3.Slerp(previousTarget, previousDiff - jiggleForwardDirection, Time.deltaTime * elasticity);
+        var distance = target - jiggleForwardDirection;
+        jiggleMaterial.SetVector("_Distance", target);
+        var sensitivity = player.inputManager.moveInput.magnitude < 0.2f ? movementSensitivity : movementSensitivityWalking;
+        previousTarget = target + (oldPosition - transform.position) * sensitivity;
+        previousDiff -= distance * 0.90f;
+        previousDiff /= 2;
         oldPosition = transform.position;
-        oldDeltaPosition = deltaPosition;
     }
 }
