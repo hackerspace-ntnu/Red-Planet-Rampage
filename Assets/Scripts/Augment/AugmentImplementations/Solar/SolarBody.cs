@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Linq;
 using UnityEngine;
 
 public class SolarBody : GunBody
@@ -72,7 +71,7 @@ public class SolarBody : GunBody
     void FixedUpdate()
     {
         float orientationOverlap = Vector3.Dot(rayCastOrigin.transform.up, globalLightDirection.eulerAngles);
-        if ((!Physics.Raycast(rayCastOrigin.position, globalLightDirection.eulerAngles, maxObscuringCheckDistance, obscuringLayers.value)) && orientationOverlap > 0)
+        if (!Physics.Raycast(rayCastOrigin.position, globalLightDirection.eulerAngles, maxObscuringCheckDistance, obscuringLayers.value) && orientationOverlap > 0)
         {
             Reload(gunController.stats);
         }

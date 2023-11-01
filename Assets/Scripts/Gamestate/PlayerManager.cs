@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,6 +11,8 @@ public class PlayerManager : MonoBehaviour
 
     // Only Default and HitBox layers can be hit
     private static int hitMask = 1 | (1 << 3);
+
+    [Header("Shooting")]
 
     [SerializeField]
     private float maxHitDistance = 100;
@@ -29,14 +30,24 @@ public class PlayerManager : MonoBehaviour
     public delegate void BiddingPlatformEvent(BiddingPlatform platform);
     public BiddingPlatformEvent onSelectedBiddingPlatformChange;
 
+    [Header("Related objects")]
+
     public InputManager inputManager;
     public PlayerIdentity identity;
+
+    [SerializeField]
+    private PlayerHUDController hudController;
+    public PlayerHUDController HUDController => hudController;
+
+
+    [Header("Physics")]
 
     [SerializeField]
     private GameObject meshBase;
 
     [SerializeField]
-    private Rigidbody ragdoll;
+    private PlayerIK playerIK;
+
 
     private BiddingPlatform selectedBiddingPlatform;
     public BiddingPlatform SelectedBiddingPlatform
@@ -53,19 +64,15 @@ public class PlayerManager : MonoBehaviour
 
     private HealthController healthController;
 
-    [SerializeField]
-    private PlayerHUDController hudController;
+    [Header("Hit sounds")]
 
-    [SerializeField]
     private AudioSource audioSource;
 
     [SerializeField]
     private AudioGroup hitSounds;
-    [SerializeField]
-    private AudioGroup extraHitSounds;
 
     [SerializeField]
-    private PlayerIK playerIK;
+    private AudioGroup extraHitSounds;
 
     void Start()
     {
