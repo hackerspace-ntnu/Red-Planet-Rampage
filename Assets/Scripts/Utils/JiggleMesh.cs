@@ -8,7 +8,7 @@ public class JiggleMesh : MonoBehaviour
     [SerializeField]
     protected int jiggleMaterialIndex;
     [SerializeField]
-    protected Vector3 jiggleForwardDirection = Vector3.up;
+    protected float jiggleFalloff = 0.9f;
     [SerializeField]
     protected float elasticity = 4f;
     [SerializeField]
@@ -35,11 +35,10 @@ public class JiggleMesh : MonoBehaviour
 
     void Update()
     {
-        Vector3 target = Vector3.Slerp(previousTarget, previousDiff - jiggleForwardDirection, Time.deltaTime * elasticity);
-        var distance = target - jiggleForwardDirection;
+        Vector3 target = Vector3.Slerp(previousTarget, previousDiff, Time.deltaTime * elasticity);
         jiggleMaterial.SetVector("_Distance", target);
         previousTarget = target + (oldPosition - transform.position) * movementSensitivity;
-        previousDiff -= distance * 0.90f;
+        previousDiff -= target * jiggleFalloff;
         previousDiff /= 2;
         oldPosition = transform.position;
     }

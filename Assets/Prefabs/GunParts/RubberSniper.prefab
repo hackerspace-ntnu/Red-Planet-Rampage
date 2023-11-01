@@ -88,6 +88,7 @@ MonoBehaviour:
   model: {fileID: 7341961946538357438}
   jigglePhysics: {fileID: 7873005422744047526}
   audioSource: {fileID: 9023908238921556164}
+  maxHitDistance: 100
 --- !u!82 &9023908238921556164
 AudioSource:
   m_ObjectHideFlags: 0
@@ -281,8 +282,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   jiggleMaterialIndex: 0
-  jiggleForwardDirection: {x: 0, y: 0, z: 0}
+  jiggleFalloff: 0.7
   elasticity: 4
   movementSensitivity: 0.2
   movementSensitivityWalking: 0.05
+  jiggleFalloff: 0.7
   player: {fileID: 0}

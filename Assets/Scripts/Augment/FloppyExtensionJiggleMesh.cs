@@ -6,6 +6,9 @@ public class FloppyExtensionJiggleMesh : JiggleMesh
     private float movementSensitivityWalking = 0.05f;
 
     public PlayerManager player;
+    private Vector2 normalizedPointer;
+    public Vector2 NormalizedPointer => normalizedPointer;
+    public Vector3 Direction { get; private set; }
 
     private void Start()
     {
@@ -22,15 +25,26 @@ public class FloppyExtensionJiggleMesh : JiggleMesh
         previousDiff += Vector3.up*3;
     }
 
+    private void UpdatePointer(Vector3 target)
+    {
+        var normalizedTarget = target.normalized;
+        normalizedPointer = new Vector2(normalizedTarget.x, normalizedTarget.y);
+    }
+
     private void Update()
     {
-        Vector3 target = Vector3.Slerp(previousTarget, previousDiff - jiggleForwardDirection, Time.deltaTime * elasticity);
-        var distance = target - jiggleForwardDirection;
+        Vector3 target = Vector3.Slerp(previousTarget, previousDiff, Time.deltaTime * elasticity);
+        var distance = target;
         jiggleMaterial.SetVector("_Distance", target);
-        var sensitivity = player.inputManager.moveInput.magnitude < 0.2f ? movementSensitivity : movementSensitivityWalking;
+        var sensitivity = movementSensitivity;
+        if (player)
+            sensitivity = player.inputManager.moveInput.magnitude < 0.2f ? movementSensitivity : movementSensitivityWalking;
         previousTarget = target + (oldPosition - transform.position) * sensitivity;
-        previousDiff -= distance * 0.90f;
+        previousDiff -= distance * jiggleFalloff;
         previousDiff /= 2;
+
+        Direction = -(Quaternion.Inverse(transform.rotation) * (target - transform.forward));
+        UpdatePointer(Direction);
         oldPosition = transform.position;
     }
 }
