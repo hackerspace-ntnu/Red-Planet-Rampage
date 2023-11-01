@@ -13,7 +13,9 @@ public class BulletController : ProjectileController
 
     private float bulletSpeed = 50f;
 
-    public int bulletsPerShot = 1;
+    [SerializeField]
+    private int bulletsPerShot = 1;
+    public int BulletsPerShot => bulletsPerShot;
 
     private VFXTextureFormatter trailPosTexture;
 
@@ -33,7 +35,6 @@ public class BulletController : ProjectileController
     {
         base.Awake();
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
-        bulletsPerShot = bulletsPerShot != 0 ? bulletsPerShot : 1;
     }
 
     private void Start()

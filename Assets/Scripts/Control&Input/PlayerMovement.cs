@@ -188,7 +188,7 @@ public class PlayerMovement : MonoBehaviour
                     // Strafe slightly with less drag.
                     body.drag = airDrag;
                     body.AddForce(input * strafeForceInAir, ForceMode.VelocityChange);
-                    body.AddForce(Vector3.down * MarsGravity * 3.5f, ForceMode.Acceleration);
+                    body.AddForce(Vector3.down * MarsGravity, ForceMode.Acceleration);
                     if (!IsInAir()) state = PlayerState.GROUNDED;
                     break;
                 }

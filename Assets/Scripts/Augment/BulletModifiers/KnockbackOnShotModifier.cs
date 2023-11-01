@@ -16,6 +16,9 @@ public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
     [SerializeField]
     private KnockbackEffect knockBackEffect;
 
+    [SerializeField]
+    private float perBulletExtraForce = 100f;
+
     private float bulletAmount = 1f;
 
     [SerializeField]
@@ -27,14 +30,8 @@ public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
     public void Attach(ProjectileController projectile)
     {
         projectile.OnProjectileInit += KnockAwayOnShot;
-
         var bulletController = projectile.gameObject.GetComponent<BulletController>();
-        bulletAmount = bulletController == null ? 1f : bulletController.bulletsPerShot;
-        
-        if (bulletAmount >= 5)
-        {
-            bulletAmount -= 4;
-        }
+        bulletAmount = bulletController == null || bulletController.BulletsPerShot == 0 ? 1f : bulletController.BulletsPerShot;
 
         source = projectile.player;
     }
@@ -50,6 +47,6 @@ public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
         Vector3 ac = knockbackNormal[1].transform.position - transform.position;
         Vector3 normal = Vector3.Cross(ab, ac);
 
-        knockBackScript.KnockAwayTargetsDirectional(pushPower / bulletAmount, normal, source, radius);
+        knockBackEffect.KnockAwayTargetsDirectional((pushPower / bulletAmount) * (1f + (float) Math.Log10(bulletAmount)), normal, source, radius);
     }
 }
