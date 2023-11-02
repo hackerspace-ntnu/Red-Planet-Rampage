@@ -10,7 +10,8 @@ public class PlayerFactory : MonoBehaviour
     private GameObject playerPrefab;
     [SerializeField]
     private Transform[] spawnPoints;
-
+    [SerializeField]
+    private GameObject playerSelectItemPrefab;
     private PlayerInputManagerController playerInputManagerController;
 
     [SerializeField]
@@ -38,6 +39,12 @@ public class PlayerFactory : MonoBehaviour
     {
         playerInputManagerController.ChangeInputMaps("Bidding");
         InstantiateInputsOnSpawnpoints(InstantiateBiddingPlayer);
+    }
+    public void InstantiatePlayerSelectItems()
+    {
+        playerInputManagerController.ChangeInputMaps("Menu");
+        InstantiateInputsOnSpawnpoints(InstantiateItemSelectPlayer);
+
     }
 
     private void InstantiateInputsOnSpawnpoints(Action<InputManager, Transform> instantiate)
@@ -101,5 +108,11 @@ public class PlayerFactory : MonoBehaviour
         // Add player UI to globalUI
         globalHUDController.SetPlayer(playerManager);
         player.GetComponent<HealthController>().enabled = false;
+    }
+    private void InstantiateItemSelectPlayer(InputManager inputManager, Transform spawnPoint)
+    {
+        GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position, spawnPoint.rotation);
+
+
     }
 }

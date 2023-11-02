@@ -138,8 +138,10 @@ public class AuctionDriver : MonoBehaviour
         }
         */
 
-        StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
+        playerFactory.InstantiatePlayerSelectItems();
+
+        //StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
+        //PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
     }
 
     private IEnumerator AnimateGunConstruction(PlayerManager playerManager, RectTransform parent)
