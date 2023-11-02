@@ -5,48 +5,58 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
+public class KnockbackOnShotModifier: GunExtension, ProjectileModifier
 {
     [SerializeField]
     private float pushPower;
 
     [SerializeField]
-    private float radius;
-
-    [SerializeField]
-    private KnockbackEffect knockBackEffect;
-
-    [SerializeField]
     private float perBulletExtraForce = 100f;
+
+    [SerializeField]
+    private float EnemyForceMultiplier = 2f;
 
     private float bulletAmount = 1f;
 
-    [SerializeField]
-    private Transform[] knockbackNormal;
+    private GunController gunController;
 
-    private PlayerManager source;
+    private float calculatedPushPower;
 
-
-    public void Attach(ProjectileController projectile)
+    void Awake()
+    {
+        gunController = transform.parent.GetComponent<GunController>();
+        if (!gunController)
+        {
+            Debug.Log("Fire not attached to gun parent!");
+            return;
+        }
+    }
+public void Attach(ProjectileController projectile)
     {
         projectile.OnProjectileInit += KnockAwayOnShot;
+        projectile.OnHitboxCollision += KnockAwayTargets;
         var bulletController = projectile.gameObject.GetComponent<BulletController>();
         bulletAmount = bulletController == null || bulletController.BulletsPerShot == 0 ? 1f : bulletController.BulletsPerShot;
-
-        source = projectile.player;
+        calculatedPushPower = (pushPower / bulletAmount) * (1f + (float)Math.Log10(bulletAmount));
     }
 
     public void Detach(ProjectileController projectile)
     {
         projectile.OnProjectileInit -= KnockAwayOnShot;
+        projectile.OnHitboxCollision -= KnockAwayTargets;
     }
 
     public void KnockAwayOnShot(ref ProjectileState state, GunStats stats)
     {
-        Vector3 ab = knockbackNormal[0].transform.position - transform.position;
-        Vector3 ac = knockbackNormal[1].transform.position - transform.position;
-        Vector3 normal = Vector3.Cross(ab, ac);
+        Vector3 normal = -gunController.transform.forward;
 
-        knockBackEffect.KnockAwayTargetsDirectional((pushPower / bulletAmount) * (1f + (float) Math.Log10(bulletAmount)), normal, source, radius);
+        gunController.player.GetComponent<Rigidbody>().AddForce(normal * calculatedPushPower, ForceMode.Impulse);
+    }
+
+    public void KnockAwayTargets(HitboxController controller, ref ProjectileState state)
+    {
+        Vector3 normal = gunController.transform.forward;
+
+        controller.health.GetComponent<Rigidbody>().AddForce(normal * calculatedPushPower * 2f, ForceMode.Impulse);
     }
 }
