@@ -111,7 +111,9 @@ public class PlayerFactory : MonoBehaviour
     }
     private void InstantiateItemSelectPlayer(InputManager inputManager, Transform spawnPoint)
     {
-        GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position, spawnPoint.rotation);
+        Debug.Log("player instantiated");
+        GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position + new Vector3(1000f,1000f,0), spawnPoint.rotation);
+        Debug.Log(player);
 
 
     }
