@@ -4,6 +4,9 @@ using TMPro;
 
 public class PlayerHUDController : MonoBehaviour
 {
+    [SerializeField] 
+    private RectTransform hud;
+
     [Header("Health and ammo")]
 
     [SerializeField]
@@ -14,6 +17,9 @@ public class PlayerHUDController : MonoBehaviour
 
     [SerializeField]
     private SpriteRenderer ammoBar;
+
+    [SerializeField]
+    private RectTransform crosshair;
 
     private Material ammoCapacityMaterial;
 
@@ -128,5 +134,14 @@ public class PlayerHUDController : MonoBehaviour
         deathText.color = killer.color;
         deathScreen.SetActive(true);
         ammoHud.parent.gameObject.SetActive(false);
+    }
+
+    // x and y expected to be in range [-1, 1]
+    public void MoveCrosshair(float x, float y)
+    {
+        var halfWidth = hud.sizeDelta.x / 2;
+        var halfHeight = hud.sizeDelta.y / 2;
+
+        crosshair.anchoredPosition = (new Vector2(halfWidth * x, halfHeight * y));
     }
 }
