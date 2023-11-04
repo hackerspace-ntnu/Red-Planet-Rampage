@@ -5,7 +5,7 @@ using UnityEngine;
 public class WobbleMesh : MonoBehaviour
 {
     [SerializeField]
-    private Material jiggleMat;
+    private Material jiggleMaterial;
 
     [SerializeField]
     private float elasticity = 4f;
@@ -28,7 +28,7 @@ public class WobbleMesh : MonoBehaviour
         momentum = (target - transform.position) * slerpSpeed;
         var distance = target - transform.position;
         distance = new Vector3(Mathf.Clamp(distance.x, -maxBendDistance, maxBendDistance), Mathf.Clamp(distance.y, -maxBendDistance, maxBendDistance), Mathf.Clamp(distance.z, -maxBendDistance/2, maxBendDistance/2));
-        jiggleMat.SetVector("_Distance", Quaternion.Inverse(transform.rotation) * distance);
+        jiggleMaterial.SetVector("_Distance", Quaternion.Inverse(transform.rotation) * distance);
         previousPosition = target;
     }
 }
