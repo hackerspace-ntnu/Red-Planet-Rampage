@@ -18,7 +18,7 @@ public class SolarBody : GunBody
     [SerializeField, Range(0, 1)]
     protected float reloadEfficiencyPercentagen = 0.1f;
 
-    private Quaternion globalLightDirection;
+    private Transform globalLightDirection;
 
     private const float maxObscuringCheckDistance = 15f;
     private const float coolDownSeconds = 0.5f;
@@ -31,8 +31,8 @@ public class SolarBody : GunBody
     {
         meshRenderer.materials[solarPanelMaterialIndex] = Instantiate(meshRenderer.materials[solarPanelMaterialIndex]);
         solarPanelMaterial = meshRenderer.materials[solarPanelMaterialIndex];
-        // The main directional light in the scene (the sun) should ideally be tagged as such, but this works for now
-        globalLightDirection = FindFirstObjectByType<Light>().transform.rotation;
+        GameObject mainLight = GameObject.FindGameObjectsWithTag("MainLight")[0];
+        globalLightDirection = mainLight ? mainLight.transform : FindAnyObjectByType<Light>().transform;
 
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
@@ -70,8 +70,7 @@ public class SolarBody : GunBody
 
     void FixedUpdate()
     {
-        float orientationOverlap = Vector3.Dot(rayCastOrigin.transform.up, globalLightDirection.eulerAngles);
-        if (!Physics.Raycast(rayCastOrigin.position, globalLightDirection.eulerAngles, maxObscuringCheckDistance, obscuringLayers.value) && orientationOverlap > 0)
+        if (!Physics.Raycast(rayCastOrigin.position, -globalLightDirection.forward, maxObscuringCheckDistance, obscuringLayers.value))
         {
             Reload(gunController.stats);
         }
