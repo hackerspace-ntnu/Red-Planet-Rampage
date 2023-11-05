@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4610978060122796877}
   - component: {fileID: 4222000554002073790}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Extension
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -203,7 +203,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000022259, y: 0.00001812}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 1109, y: 521}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4675377582014236267
@@ -434,7 +434,7 @@ GameObject:
   - component: {fileID: 2186647488422746180}
   - component: {fileID: 8075959133707509648}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -686,7 +686,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3674956699687347171}
   m_Layer: 5
-  m_Name: ItemSelecter
+  m_Name: BodySelecter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -712,7 +712,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -365, y: 0.000022733067}
+  m_AnchoredPosition: {x: -365, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &4975805346272595057
@@ -813,6 +813,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6154156806219520954}
+  - component: {fileID: 5392219698050781977}
   m_Layer: 0
   m_Name: ItemSelectPlayer
   m_TagString: Untagged
@@ -828,7 +829,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6596575034333967962}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.33088952, y: 2.2866936, z: -13.847968}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -837,6 +838,25 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5392219698050781977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6596575034333967962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7638022abb1e3e438915d714186f11b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultItemPrefabs:
+  - {fileID: 6604547189345139607, guid: cc3a18a50e3137d7c868aa1b59f44f2d, type: 3}
+  - {fileID: 6861618831928518119, guid: 6472be2cfad244d408d9e6cd7c751e7a, type: 3}
+  itemSpawnPoints:
+  - {fileID: 1835420195716879589}
+  - {fileID: 7760025129845217879}
+  - {fileID: 3554179976705927318}
 --- !u!1 &7353474018953128622
 GameObject:
   m_ObjectHideFlags: 0
@@ -985,7 +1005,7 @@ GameObject:
   - component: {fileID: 9123200796075227308}
   - component: {fileID: 7665611240240976438}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Barrel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1059,7 +1079,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4022023894807504867}
   m_Layer: 5
-  m_Name: ItemSelecter (1)
+  m_Name: BarrelSelecter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1098,7 +1118,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5027557325281688046}
   m_Layer: 5
-  m_Name: ItemSelecter (2)
+  m_Name: ExtensionSelecter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
