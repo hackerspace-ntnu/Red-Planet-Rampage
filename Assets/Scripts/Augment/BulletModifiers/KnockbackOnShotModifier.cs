@@ -11,10 +11,10 @@ public class KnockbackOnShotModifier: GunExtension, ProjectileModifier
     private float pushPower;
 
     [SerializeField]
-    private float perBulletExtraForce = 100f;
+    private float EnemyForceMultiplier = 2f;
 
     [SerializeField]
-    private float EnemyForceMultiplier = 2f;
+    private float baseFireRateAdder = 2f;
 
     private float bulletAmount = 1f;
 
@@ -50,7 +50,10 @@ public void Attach(ProjectileController projectile)
     {
         Vector3 normal = -gunController.transform.forward;
 
-        gunController.player.GetComponent<Rigidbody>().AddForce(normal * calculatedPushPower, ForceMode.Impulse);
+        float calculatedPushPowerForPlayer = (calculatedPushPower / stats.Firerate) * (baseFireRateAdder + (float)Math.Log(stats.Firerate));
+
+        gunController.player.GetComponent<Rigidbody>().AddForce(normal * calculatedPushPowerForPlayer, ForceMode.Impulse);
+
     }
 
     public void KnockAwayTargets(HitboxController controller, ref ProjectileState state)
