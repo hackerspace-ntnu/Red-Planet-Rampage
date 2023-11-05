@@ -11,6 +11,7 @@ public class PlayerManager : MonoBehaviour
 
     // Only Default and HitBox layers can be hit
     private static int hitMask = 1 | (1 << 3);
+    public int HitMask => hitMask;
 
     [Header("Shooting")]
 
@@ -19,6 +20,8 @@ public class PlayerManager : MonoBehaviour
 
     [SerializeField]
     private float targetStartOffset = 0.28f;
+    public float TargetStartOffset => targetStartOffset;
+    public bool overrideAimTarget = false;
 
     // TODO add context when shooty system is done
     public delegate void HitEvent(PlayerManager killer, PlayerManager victim);
@@ -160,6 +163,8 @@ public class PlayerManager : MonoBehaviour
 
     private void UpdateAimTarget(GunStats stats)
     {
+        if (overrideAimTarget)
+            return;
         Vector3 cameraCenter = inputManager.transform.position;
         Vector3 cameraDirection = inputManager.transform.forward;
         Vector3 startPoint = cameraCenter + cameraDirection * targetStartOffset;
