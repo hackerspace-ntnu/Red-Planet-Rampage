@@ -31,7 +31,7 @@ public class KnockbackOnShotModifier: GunExtension, ProjectileModifier
             return;
         }
     }
-public void Attach(ProjectileController projectile)
+    public void Attach(ProjectileController projectile)
     {
         projectile.OnProjectileInit += KnockAwayOnShot;
         projectile.OnHitboxCollision += KnockAwayTargets;
