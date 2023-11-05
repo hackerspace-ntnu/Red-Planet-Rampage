@@ -9702,7 +9702,7 @@ GameObject:
   - component: {fileID: 3793305355763272404}
   - component: {fileID: 7162102617461057711}
   - component: {fileID: 1893612977846027039}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: AirTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9743,10 +9743,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 2.7
-  m_Height: 18
+  m_Radius: 3.5
+  m_Height: 20
   m_Direction: 1
-  m_Center: {x: 0, y: 7.5, z: 0}
+  m_Center: {x: 0, y: 5.5, z: 0}
 --- !u!114 &1893612977846027039
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9759,7 +9759,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5594377ea173ace4e913b607d142da26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  airForce: 35
+  airForce: 50
 --- !u!1001 &519146777735056192
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9828,9 +9828,17 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5568371526223589888, guid: c0b9224251df31e4dacfcb16077288a7, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: c0b9224251df31e4dacfcb16077288a7, type: 3}
       propertyPath: m_Name
       value: giantfan
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: c0b9224251df31e4dacfcb16077288a7, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7071182760956848314, guid: c0b9224251df31e4dacfcb16077288a7, type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -9840,6 +9848,10 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 346078e09844e5440a39786e21a82d14, type: 2}
+    - target: {fileID: 8513859187771203891, guid: c0b9224251df31e4dacfcb16077288a7, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: -8700617353114198275, guid: c0b9224251df31e4dacfcb16077288a7, type: 3}

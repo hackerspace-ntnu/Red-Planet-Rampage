@@ -15,6 +15,7 @@ public class BulletController : ProjectileController
 
     [SerializeField]
     private int bulletsPerShot = 1;
+    public int BulletsPerShot => bulletsPerShot;
 
     private VFXTextureFormatter trailPosTexture;
 

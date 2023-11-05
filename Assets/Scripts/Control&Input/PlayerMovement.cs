@@ -175,6 +175,8 @@ public class PlayerMovement : MonoBehaviour
         return Vector3.up;
     }
 
+
+
     private void UpdatePosition(Vector3 input)
     {
         // Modify input to addforce with relation to current rotation.
