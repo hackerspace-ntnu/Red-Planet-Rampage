@@ -130,10 +130,11 @@ public class PlayerMovement : MonoBehaviour
 
         if (ctx.performed)
         {
+            if (IsInAir())
+                return;
             animator.SetBool("Crouching", true);
             strafeForce = strafeForceCrouched;
-            if (!IsInAir())
-                inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
+            inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
         }
             
         if (ctx.canceled)
