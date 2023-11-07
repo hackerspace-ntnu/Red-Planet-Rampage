@@ -43,6 +43,8 @@ public class InputManager : MonoBehaviour
 
     [SerializeField]
     private float mouseLookScale = 0.1f;
+    [SerializeField]
+    private float gamepadLookScale = 0.75f;
 
     private bool isMouseAndKeyboard = false;
 
@@ -130,7 +132,7 @@ public class InputManager : MonoBehaviour
         }
         else
         {
-            lookInput = ctx.ReadValue<Vector2>();
+            lookInput = ctx.ReadValue<Vector2>() * gamepadLookScale;
         }
     }
 
