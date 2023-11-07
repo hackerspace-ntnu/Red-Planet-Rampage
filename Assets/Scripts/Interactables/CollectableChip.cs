@@ -17,4 +17,12 @@ public class CollectableChip : MonoBehaviour
         .setLoopType(LeanTweenType.easeInOutCubic).setLoopCount(-1));
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("Trigger");
+        if (!collision.collider.gameObject.TryGetComponent<PlayerManager>(out PlayerManager player))
+            return;
+        player.identity.UpdateChip(1);
+        Destroy(gameObject);
+    }
 }
