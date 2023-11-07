@@ -1,15 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 using System;
 using System.Collections;
-using System.Linq.Expressions;
-using System.Linq;
-using UnityEngine.InputSystem;
+using System.Threading.Tasks;
 
 [RequireComponent(typeof(AudioSource))]
 public class Scoreboard : MonoBehaviour
 {
+    public static Scoreboard Singleton { get; private set; }
+
     [Header("Variables")]
     [SerializeField]
     private List<string> wantedSubtitles = new();
@@ -39,48 +38,43 @@ public class Scoreboard : MonoBehaviour
 
     public event Action ShowNextCrime;
 
+    private int step = 0;
+    private int maxSteps = 0;
+
+    private void Awake()
+    {
+        #region Singleton boilerplate
+
+        if (Singleton != null)
+        {
+            if (Singleton != this)
+            {
+                Debug.LogWarning($"There's more than one {Singleton.GetType()} in the scene!");
+                Destroy(gameObject);
+                return;
+            }
+        }
+
+        Singleton = this;
+
+        #endregion Singleton boilerplate    
+    }
+
     void Start()
     {
         matchController = MatchController.Singleton;
         audioSource = GetComponent<AudioSource>();        
-
-        matchController.onRoundStart += CreateMostWanted;
-        matchController.onRoundEnd += CreateMatchResults;
     }
 
-    private void OnDestroy()
+    public void CreateMatchResults()
     {
-
-    }
-
-    private void CreateMostWanted()
-    {
-        // Initiate posters
+        // Setup posters
         InitiatePosters();
-        
-        // Check for current score amongst players
-        Dictionary<PlayerIdentity, int> bounties = matchController.GetSortedBounties();
-
-        // Display bounties!
-        for (int i = 0; i < bounties.Count; i++)
-        {
-            posters[i].SetupWantedPoster(bounties.ElementAt(i).Key);
-        }
-    }
-
-    private async void CreateMatchResults()
-    {
-        InitiatePosters();
-
-        // Order the relevant poster to update
-        for (int i = 0; i < posters.Length; i++)
-        {
-            posters[i].UpdatePosterValues();
-        }
-        // Assign main camera
-        Camera.main.transform.parent = transform;
+        // Populate posters with scores
+        SetPosterValues();
 
         // Animate the after battle scene
+        Camera.main.transform.parent = transform;
         Camera.main.GetComponent<Animator>().SetTrigger("ScoreboardZoom");
 
         for (int i = 0; i < posters.Length; i++)
@@ -90,47 +84,87 @@ public class Scoreboard : MonoBehaviour
 
             // Enable posters
             posters[i].gameObject.SetActive(true);
-
-            posters[i].UpdatePosterValues();
         }
-
-        float delay = Camera.main.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length;
-        await DelayDisplayCrimes(delay);
-    }
-
-    public void TryToStartBidding()
-    {
-        // Check that all posters have finished displaying
-        foreach (WantedPoster poster in posters)
-        {
-            if (poster.CurrentStep < poster.TotalSteps)
-                return;
-        }
-
-        StartCoroutine(StartBiddingCountDown());
-    }
-
-    private IEnumerator StartBiddingCountDown()
-    {
-        yield return new WaitForSeconds(startBiddingDelay);
         
+        // Do not start adding crimes before the camera has finished the animation
+        int delay = Mathf.RoundToInt(Camera.main.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length) * 1000;
+        StartCoroutine(DelayDisplayCrimes(delay));
+
+        maxSteps = MaxNumberOfCrimes();
+
+        StartCoroutine(NextCrime());
+        while (step <= maxSteps)
+        {
+            print("try this?");
+        }
+
+        print("Finished CreateMatchResults");
     }
 
-    private IEnumerator DelayDisplayCrimes(float delay)
+
+    private IEnumerator DelayDisplayCrimes(int delay)
     {
         yield return new WaitForSeconds(delay);
-        StartCoroutine(NextCrime());
     }
+
     private IEnumerator NextCrime()
     {
-        yield return new WaitForSeconds(displayCrimeDelay);
-        ShowNextCrime?.Invoke();
-        StartCoroutine(NextCrime());
+        if(step <= maxSteps)
+        {
+            yield return new WaitForSeconds(displayCrimeDelay);
+            print("Invoke next crime");
+            ShowNextCrime?.Invoke();
+            step++;
+            StartCoroutine(NextCrime());
+        }
+        else
+        {
+            yield break;
+        }
+        
     }
 
     private void PlayCrimeSound()
     {
         audioSource.PlayOneShot(nextCrimeSound);
+    }
+
+    public void SetPosterValues()
+    {
+        if (matchController == null)
+            matchController = MatchController.Singleton;
+
+        Round lastRound = matchController.GetLastRound;
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            Player player = players[i];
+            WantedPoster poster = posters[i];
+
+            poster.AddPosterCrime("Savings", player.playerIdentity.chips);
+
+            // Participation award
+            posters[i].AddPosterCrime("Base", matchController.RewardBase);
+
+            // Kill Award
+            if (lastRound.KillCount(players[i].playerManager) != 0)
+            {
+                poster.AddPosterCrime("Kills", matchController.RewardKill * lastRound.KillCount(player.playerManager));
+            }
+
+            // Round winner award
+            if (lastRound.IsWinner(player.playerIdentity))
+            {
+                poster.AddPosterCrime("Victor", matchController.RewardWin);
+            }
+
+            // New total
+            int roundSpoils = matchController.RewardBase
+                + matchController.RewardKill * lastRound.KillCount(player.playerManager)
+                + (lastRound.IsWinner(player.playerIdentity) ? matchController.RewardWin : 0);
+
+            poster.AddPosterCrime("Total", roundSpoils);
+        }
     }
 
     private void InitiatePosters (){
@@ -140,7 +174,7 @@ public class Scoreboard : MonoBehaviour
                 Destroy(poster.gameObject);
         }
 
-        players = PlayerInputManagerController.Singleton.playerInputs;
+        players = matchController.Players;
         posters = new WantedPoster[players.Count];
 
         for (int i = 0; i < players.Count; i++)
@@ -151,5 +185,17 @@ public class Scoreboard : MonoBehaviour
         }
 
         ShowNextCrime += PlayCrimeSound;
+    }
+
+    private int MaxNumberOfCrimes()
+    {
+        int maxCrimes = 0;
+        foreach (var poster in posters)
+        {
+            if (poster.TotalCrimes > maxCrimes)
+                maxCrimes = poster.TotalCrimes;
+        }
+
+        return maxCrimes;
     }
 }

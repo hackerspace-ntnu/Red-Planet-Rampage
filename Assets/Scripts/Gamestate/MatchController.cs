@@ -51,12 +51,16 @@ public class MatchController : MonoBehaviour
     [Header("Chip rewards")]
     [SerializeField]
     private int startAmount = 5;
+    public int StartAmount => startAmount;
     [SerializeField]
     private int rewardWin = 1;
+    public int RewardWin => rewardWin;
     [SerializeField]
     private int rewardKill = 1;
+    public int RewardKill => rewardKill;
     [SerializeField]
     private int rewardBase = 2;
+    public int RewardBase => rewardBase;
 
     public Timer roundTimer;
 
@@ -67,8 +71,9 @@ public class MatchController : MonoBehaviour
     public List<Player> Players { get { return players; } }
 
     private static List<Round> rounds = new List<Round>();
+    public Round GetLastRound { get { return rounds[rounds.Count - 1]; } }
 
-    void Start()
+    private void Awake()
     {
         #region Singleton boilerplate
 
@@ -86,7 +91,9 @@ public class MatchController : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
-
+    }
+    void Start()
+    {
         if (rounds.Count == 0)
         {
             PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
@@ -135,6 +142,7 @@ public class MatchController : MonoBehaviour
 
     public void EndActiveRound()
     {
+        Scoreboard.Singleton.CreateMatchResults();
         onRoundEnd?.Invoke();
         roundTimer.OnTimerUpdate -= AdjustMusic;
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
@@ -142,7 +150,7 @@ public class MatchController : MonoBehaviour
         AssignRewards();
 
         if (!IsWin())
-            StartCoroutine(WaitAndStartNextBidding());
+            StartNextBidding();
     }
 
     public IEnumerator WaitAndStartNextBidding()
