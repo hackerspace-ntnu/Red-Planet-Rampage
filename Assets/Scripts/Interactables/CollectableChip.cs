@@ -19,7 +19,6 @@ public class CollectableChip : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("Trigger");
         if (!collision.collider.gameObject.TryGetComponent<PlayerManager>(out PlayerManager player))
             return;
         player.identity.UpdateChip(1);
