@@ -80,6 +80,7 @@ public class BiddingPlatform : MonoBehaviour
         auctionTimer.OnTimerRunCompleted += EndAuction;
         material = GetComponent<MeshRenderer>().material;
         material.SetFloat("_Scale", 0f);
+        material.SetColor("_BidderColor", material.GetColor("_BaseColor"));
     }
 
     private void OnDestroy()
