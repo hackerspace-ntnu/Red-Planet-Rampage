@@ -12,31 +12,39 @@ public class ItemSelectManager : MonoBehaviour
     private GameObject currentBarrel;
     private GameObject currentExtension;
     private List<GameObject> bodies = new List<GameObject>();
+    private List<GameObject> barrels = new List<GameObject>();
+    private List<GameObject> extensions = new List<GameObject>();
     
-    public void SetItemSpawnPoints(InputManager inputManager,Transform spawnPoint){
+    public void SetItemSpawnPoints(InputManager inputManager){
         List<Item> bodyItems = inputManager.gameObject.GetComponent<PlayerIdentity>().Bodies;
-        GameObject defaultBody = Instantiate(defaultItemPrefabs[0], Vector3.zero, Quaternion.Euler(new Vector3(0, 90, 0)));
-        defaultBody.transform.localScale = new Vector3(1f,150f,150f);
+        List<Item> barrelItems = inputManager.gameObject.GetComponent<PlayerIdentity>().Barrels;
+        List<Item> extensionItems = inputManager.gameObject.GetComponent<PlayerIdentity>().Extensions;
 
+        SpawnItems(bodyItems,defaultItemPrefabs[0],itemSpawnPoints[0], bodies);
+        SpawnItems(barrelItems,defaultItemPrefabs[1],itemSpawnPoints[1], barrels);
 
-        for(int i = 0; i < bodyItems.Count; i++){
-            bodies.Add(Instantiate(bodyItems[i].augment, Vector3.zero, Quaternion.Euler(new Vector3(0, 90, 0))));
-            bodies[i].transform.localScale = new Vector3(1f,150f,150f);
-            Debug.Log("number" + i);
+    }
+
+    private void SpawnItems(List<Item> items, GameObject defaultItemPrefab, Transform itemSpawnPoint, List<GameObject> itemObjects){
+        GameObject defaultItem = Instantiate(defaultItemPrefab, Vector3.zero, Quaternion.Euler(new Vector3(0, 90, 0)));
+        defaultItem.transform.localScale = new Vector3(1f,150f,150f);
+
+        for(int i = 0; i < items.Count; i++){
+            itemObjects.Add(Instantiate(items[i].augment, Vector3.zero, Quaternion.Euler(new Vector3(0, 90, 0))));
         }
-        Debug.Log(bodies.Count);
+        Debug.Log(itemObjects.Count);
 
-        if(bodies.Count == 0){
-            defaultBody.transform.SetParent(itemSpawnPoints[0]);
-            defaultBody.transform.localScale = new Vector3(1f,150f,150f);
-
+        if(itemObjects.Count == 0){
+            SetSpawnPoint(defaultItem,itemSpawnPoint);
         }else{
-            Debug.Log("parented");
-            bodies[bodies.Count - 1].transform.SetParent(itemSpawnPoints[0]);
-            bodies[bodies.Count - 1].transform.localPosition = Vector3.zero;
-            bodies[bodies.Count - 1].transform.localScale = new Vector3(1f,150f,150f);
-
-
+            SetSpawnPoint(itemObjects[itemObjects.Count - 1],itemSpawnPoint);
         }
     }
+    private void SetSpawnPoint(GameObject item,Transform itemSpawnPoint){
+        Debug.Log("parented");
+        item.transform.SetParent(itemSpawnPoint);
+        item.transform.localPosition = Vector3.zero;
+        item.transform.localScale = new Vector3(1f,150f,150f);
+    }
+    
 }
