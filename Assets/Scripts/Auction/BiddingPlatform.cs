@@ -14,6 +14,7 @@ public class BiddingPlatform : MonoBehaviour
 
     [SerializeField]
     private PlayerIdentity leadingBidder;
+    public PlayerIdentity LeadingBidder => leadingBidder;
 
     [SerializeField]
     private TMP_Text itemNameText;
