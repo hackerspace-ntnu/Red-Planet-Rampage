@@ -38,7 +38,7 @@ public class BiddingPlayer : MonoBehaviour
     }
     private void AnimateBid(InputAction.CallbackContext ctx)
     {
-        if (LeanTween.isTweening(signMesh.gameObject) && !currentPlatform)
+        if (LeanTween.isTweening(signMesh.gameObject) || !currentPlatform)
             return;
 
         LeanTween.sequence()
