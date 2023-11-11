@@ -64,6 +64,7 @@ public class PlayerManager : MonoBehaviour
     }
 
     private GunController gunController;
+    public GunController GunController => gunController;
 
     private HealthController healthController;
 
