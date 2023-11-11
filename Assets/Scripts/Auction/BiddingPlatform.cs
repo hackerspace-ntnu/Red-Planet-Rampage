@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Timer))]
@@ -54,6 +55,9 @@ public class BiddingPlatform : MonoBehaviour
     private Color startingMaterialColor;
     private Material material;
 
+    [SerializeField]
+    private Image radialUI;
+
     private int playerCount = 0;
 
     public delegate void BiddingEvent(BiddingPlatform biddingPlatform);
@@ -95,6 +99,8 @@ public class BiddingPlatform : MonoBehaviour
         material.SetFloat("_Scale", 0f);
         material.SetColor("_BidderColor", startingMaterialColor);
         description.transform.localScale = Vector3.zero;
+        radialUI.material = Instantiate(radialUI.material);
+        radialUI.material.SetFloat("_Arc2", 0);
     }
 
     private void OnDestroy()
@@ -150,6 +156,7 @@ public class BiddingPlatform : MonoBehaviour
     private void UpdateTimer()
     {
         timerText.text = Mathf.Round(auctionTimer.WaitTime - auctionTimer.ElapsedTime).ToString();
+        radialUI.material.SetFloat("_Arc1", 360f - 360f*((auctionTimer.WaitTime - auctionTimer.ElapsedTime) / auctionTimer.WaitTime));
     }
 
     private void EndAuction()
