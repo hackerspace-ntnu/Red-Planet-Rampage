@@ -98,10 +98,10 @@ public class PlayerIdentity : MonoBehaviour
         chips = 0;
     }
 
-    public void SetLoadout(Item body){
+    public void SetLoadout(Item body,Item barrel, Item extension){
         this.body = body;
-        //this.barrel = barrel;
-        //this.extension = extension;
+        this.barrel = barrel;
+        this.extension = extension;
     }
 
     public override string ToString()

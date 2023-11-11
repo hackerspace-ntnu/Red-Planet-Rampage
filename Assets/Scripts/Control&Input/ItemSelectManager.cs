@@ -5,7 +5,9 @@ using UnityEngine;
 public class ItemSelectManager : MonoBehaviour
 {
     [SerializeField] 
-    private GameObject[] defaultItemPrefabs;
+    private Item defaultBodyItem;
+    [SerializeField] 
+    private Item defaultBarrelItem;
     [SerializeField] 
     private Transform[] itemSpawnPoints;
     
@@ -14,11 +16,10 @@ public class ItemSelectManager : MonoBehaviour
     private List<GameObject> extensions = new List<GameObject>();
     [SerializeField] 
     private Timer timer;
-
-    public void SetItemSpawnPoints(InputManager inputManager){
+   
+    public void SpawnItems(InputManager inputManager){
 
         timer.StartTimer(10f);
-        timer.OnStopTimer += ChangeScene;
         List<Item> bodyItems = inputManager.gameObject.GetComponent<PlayerIdentity>().Bodies;
         List<Item> barrelItems = inputManager.gameObject.GetComponent<PlayerIdentity>().Barrels;
         List<Item> extensionItems = inputManager.gameObject.GetComponent<PlayerIdentity>().Extensions;
@@ -26,32 +27,48 @@ public class ItemSelectManager : MonoBehaviour
         Debug.Log("bodyItems: " + bodyItems.Count);
         Debug.Log("barrel list: " + barrelItems.Count);       
 
-        SpawnItems(bodyItems,defaultItemPrefabs[0],itemSpawnPoints[0], bodies);
-        SpawnItems(barrelItems,defaultItemPrefabs[1],itemSpawnPoints[1], barrels);
+        SetSpawnPoints(bodyItems,defaultBodyItem,itemSpawnPoints[0], bodies);
+        SetSpawnPoints(barrelItems,defaultBarrelItem,itemSpawnPoints[1], barrels);
+        SetSpawnPoints(extensionItems,null,itemSpawnPoints[2],extensions);  
 
-        inputManager.gameObject.GetComponent<PlayerIdentity>().SetLoadout(bodyItems[bodyItems.Count - 1]);
+        inputManager.gameObject.GetComponent<PlayerIdentity>().SetLoadout(
+            bodyItems[^1],
+            barrelItems[^1],
+            extensionItems.Count != 0 ? extensionItems[^1] : null);
+
+        bodies.Clear();
+        barrels.Clear();
+        extensions.Clear(); 
+
+        timer.OnStopTimer += ChangeScene;
+
     }
+    
+    private void SetSpawnPoints(List<Item> items, Item defaultItem, Transform itemSpawnPoint, List<GameObject> itemObjects){
 
-    private void SpawnItems(List<Item> items, GameObject defaultItemPrefab, Transform itemSpawnPoint, List<GameObject> itemObjects){
-
-        itemObjects.Add(Instantiate(defaultItemPrefab, Vector3.zero, Quaternion.Euler(new Vector3(0, 90, 0))));
+        if(defaultItem != null) items.Insert(0,defaultItem);
 
         for(int i = 0; i < items.Count; i++){
-            itemObjects.Add(Instantiate(items[i].augment, Vector3.zero, Quaternion.Euler(new Vector3(0, 90, 0))));
+            itemObjects.Add(Instantiate(items[i].augment, new Vector3(-1000,-1000,0), Quaternion.Euler(new Vector3(0, 90, 0))));
         }
         Debug.Log(items.Count);
         Debug.Log(itemObjects.Count);
         
-        SetSpawnPoint(itemObjects[itemObjects.Count - 1],itemSpawnPoint);
+        SetItemSpawnPoint(itemObjects.Count != 0 ? itemObjects[^1] : null,itemSpawnPoint);
             
-        
+
     }
-    private void SetSpawnPoint(GameObject item,Transform itemSpawnPoint){
-        Debug.Log("parented");
-        item.transform.SetParent(itemSpawnPoint);
-        item.transform.localPosition = Vector3.zero;
-        item.transform.localScale = new Vector3(1f,150f,150f);
+    private void SetItemSpawnPoint(GameObject item,Transform itemSpawnPoint){
+        if(item != null){
+            Debug.Log("parented");
+            item.transform.SetParent(itemSpawnPoint);
+            item.transform.localPosition = Vector3.zero;
+            item.transform.localScale = new Vector3(1f,150f,150f);
+        }else{
+            Debug.Log("Player has no extensions");
+        }
     }
+ 
     void ChangeScene(){
         AuctionDriver.Singleton.ChangeScene();
     }
