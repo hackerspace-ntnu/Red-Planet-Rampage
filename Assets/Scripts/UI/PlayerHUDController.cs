@@ -4,6 +4,11 @@ using TMPro;
 
 public class PlayerHUDController : MonoBehaviour
 {
+    [SerializeField] 
+    private RectTransform hud;
+
+    [Header("Health and ammo")]
+
     [SerializeField]
     private RectTransform healthBar;
 
@@ -13,16 +18,25 @@ public class PlayerHUDController : MonoBehaviour
     [SerializeField]
     private SpriteRenderer ammoBar;
 
+    [SerializeField]
+    private RectTransform crosshair;
+
     private Material ammoCapacityMaterial;
+
+    [SerializeField]
+    private float tweenDuration = .07f;
+
+    private const float ammoSpinDegrees = 30;
+    private const float availableDegrees = 270;
+
+
+    [Header("Death")]
 
     [SerializeField]
     private GameObject deathScreen;
 
     [SerializeField]
     private TMP_Text deathText;
-
-    [SerializeField]
-    private float tweenDuration = .07f;
 
     [SerializeField]
     private float damageBorderFlashDuration = .2f;
@@ -35,8 +49,12 @@ public class PlayerHUDController : MonoBehaviour
 
     private Material damageBorder;
 
-    private const float ammoSpinDegrees = 30;
-    private const float availableDegrees = 270;
+
+    [Header("Effects")]
+
+    [SerializeField]
+    private PopupSpammer popupSpammer;
+    public PopupSpammer PopupSpammer => popupSpammer;
 
     void Start()
     {
@@ -116,5 +134,14 @@ public class PlayerHUDController : MonoBehaviour
         deathText.color = killer.color;
         deathScreen.SetActive(true);
         ammoHud.parent.gameObject.SetActive(false);
+    }
+
+    // x and y expected to be in range [-1, 1]
+    public void MoveCrosshair(float x, float y)
+    {
+        var halfWidth = hud.sizeDelta.x / 2;
+        var halfHeight = hud.sizeDelta.y / 2;
+
+        crosshair.anchoredPosition = (new Vector2(halfWidth * x, halfHeight * y));
     }
 }
