@@ -20,5 +20,7 @@ public class BarrelFiringAnimator : AugmentAnimator
     public override void OnFire(int remainingAmmo)
     {
         animator.SetTrigger("Fire");
+        // TODO wait for firing animation to end
+        OnFireAnimationEnd?.Invoke();
     }
 }

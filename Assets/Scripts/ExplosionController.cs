@@ -21,6 +21,11 @@ public class ExplosionController : MonoBehaviour
 
     private void Start()
     {
+        if (!visualEffect) Init();
+    }
+
+    public void Init()
+    {
         visualEffect = GetComponent<VisualEffect>();
         visualEffect.enabled = false;
     }
@@ -31,7 +36,6 @@ public class ExplosionController : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, radius);
     }
 
-    // Function that runs turns on the visual effect and calculates damage
     public void Explode(PlayerManager sourcePlayer)
     {
         visualEffect.enabled = true;
@@ -41,6 +45,7 @@ public class ExplosionController : MonoBehaviour
         {
             DealDamage(collider, sourcePlayer);
         }
+        Destroy(gameObject, 4);
     }
 
     private void DealDamage(Collider collider, PlayerManager sourcePlayer)
