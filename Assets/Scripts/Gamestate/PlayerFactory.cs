@@ -114,5 +114,7 @@ public class PlayerFactory : MonoBehaviour
         GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position + new Vector3(1000f,1000f,0), spawnPoint.rotation);
         player.GetComponent<ItemSelectManager>().SpawnItems(inputManager);
 
+
+
     }
 }
