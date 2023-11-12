@@ -44,9 +44,12 @@ public class AmmoBox : MonoBehaviour
         renderer.enabled = true;
     }
 
-    private void OnTriggerEnter(Collider intruder)
+    private void OnTriggerStay(Collider intruder)
     {
-        if (!intruder.gameObject.TryGetComponent<AmmoBoxCollector>(out var collector) || !collector.CanReload)
+        if (!intruder.gameObject.TryGetComponent<AmmoBoxCollector>(out var collector))
+            return;
+
+        if (!collector.CanReload || collector.HasFullMagazine)
             return;
 
         collector.Reload();
