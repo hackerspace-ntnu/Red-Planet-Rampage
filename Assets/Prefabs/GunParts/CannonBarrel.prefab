@@ -277,6 +277,7 @@ GameObject:
   - component: {fileID: 7617790890687186095}
   - component: {fileID: 2899364162837270656}
   - component: {fileID: 3910836754111931607}
+  - component: {fileID: 3709906556025536010}
   - component: {fileID: 7327065496144923300}
   - component: {fileID: 5073592139580318145}
   - component: {fileID: 1897810737203425439}
@@ -320,7 +321,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   statModifiers:
   - name: ProjectileDamage
-    addition: 50
+    addition: 30
     multiplier: 0
     exponential: 1
   - name: Firerate
@@ -350,7 +351,7 @@ MonoBehaviour:
   animator: {fileID: 6553004223414227404}
   maxProjectiles: 300
   maxDistance: 20
-  speed: 2
+  speed: 4
   size: 0.2
   vfx: {fileID: 562807672298037748}
 --- !u!114 &3910836754111931607
@@ -366,6 +367,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   explosion: {fileID: 6165050060944093848, guid: df102efe6b953a64c9ada25173bd30f6, type: 3}
+--- !u!114 &3709906556025536010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6861618831928518119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49ba4bdeb4a0c8548b6b50d2d03dc38a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pushPower: 50
+  baseFireRateAdder: 2
 --- !u!114 &7327065496144923300
 MonoBehaviour:
   m_ObjectHideFlags: 0

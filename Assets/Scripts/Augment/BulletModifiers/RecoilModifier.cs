@@ -1,10 +1,13 @@
 using System;
 using UnityEngine;
 
-public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
+public class RecoilModifier : MonoBehaviour, ProjectileModifier
 {
     [SerializeField]
     private float pushPower;
+
+    [SerializeField]
+    private float baseFireRateAdder = 2f;
 
     private float bulletAmount = 1f;
 
@@ -23,7 +26,7 @@ public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
     }
     public void Attach(ProjectileController projectile)
     {
-        projectile.OnHitboxCollision += KnockAwayTargets;
+        projectile.OnProjectileInit += KnockAwayOnShot;
         var bulletController = projectile.gameObject.GetComponent<BulletController>();
         bulletAmount = bulletController == null || bulletController.BulletsPerShot == 0 ? 1f : bulletController.BulletsPerShot;
         calculatedPushPower = (pushPower / bulletAmount) * (1f + (float)Math.Log10(bulletAmount));
@@ -31,13 +34,16 @@ public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
 
     public void Detach(ProjectileController projectile)
     {
-        projectile.OnHitboxCollision -= KnockAwayTargets;
+        projectile.OnProjectileInit -= KnockAwayOnShot;
     }
 
-    private void KnockAwayTargets(HitboxController controller, ref ProjectileState state)
+    private void KnockAwayOnShot(ref ProjectileState state, GunStats stats)
     {
-        Vector3 normal = gunController.transform.forward;
+        Vector3 normal = -gunController.transform.forward;
 
-        controller.health.GetComponent<Rigidbody>().AddForce(normal * calculatedPushPower * 2f, ForceMode.Impulse);
+        float calculatedPushPowerForPlayer = (calculatedPushPower / stats.Firerate) * (baseFireRateAdder + (float)Math.Log(stats.Firerate));
+
+        gunController.player.GetComponent<Rigidbody>().AddForce(normal * calculatedPushPowerForPlayer, ForceMode.Impulse);
+
     }
 }
