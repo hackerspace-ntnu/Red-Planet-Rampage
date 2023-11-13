@@ -10,18 +10,7 @@ public class MainMenuMoveCamera : MonoBehaviour
     private float cameraSpeed;
     [SerializeField]
     private float rotationAngle;
-    [SerializeField]
-    private Transform cameraPositionDefault;
-    [SerializeField]
-    private Transform cameraPositionAlternative;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    //
     public void MoveToOptions()
     {
         LeanTween.sequence()
