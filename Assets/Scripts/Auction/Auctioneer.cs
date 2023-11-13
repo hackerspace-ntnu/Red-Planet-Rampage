@@ -12,6 +12,8 @@ public class Auctioneer : MonoBehaviour
     [SerializeField]
     private AudioSource audioSource;
     [SerializeField]
+    private AudioSource audioSourceFX;
+    [SerializeField]
     private AudioClip[] bid;
     [SerializeField]
     private AudioClip[] haste;
@@ -65,6 +67,7 @@ public class Auctioneer : MonoBehaviour
         audioSource.Stop();
         audioSource.clip = sold.RandomElement();
         audioSource.Play();
+        audioSourceFX.PlayDelayed(0.5f);
     }
 
     public void Haste()

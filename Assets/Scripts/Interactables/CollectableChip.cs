@@ -7,8 +7,10 @@ public class CollectableChip : MonoBehaviour
     [SerializeField]
     private GameObject chipModel;
 
+    private AudioSource audioSource;
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         // Animate spin and bounce
         LeanTween.sequence()
         .append(LeanTween.moveLocalY(chipModel, 0.08f, 0.5f)
@@ -22,6 +24,8 @@ public class CollectableChip : MonoBehaviour
         if (!other.gameObject.TryGetComponent<PlayerManager>(out PlayerManager player))
             return;
         player.identity.UpdateChip(1);
-        Destroy(gameObject);
+        audioSource.Play();
+        GetComponent<Collider>().enabled = false;
+        chipModel.SetActive(false);
     }
 }
