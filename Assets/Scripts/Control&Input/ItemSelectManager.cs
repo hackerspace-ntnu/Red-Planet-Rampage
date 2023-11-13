@@ -24,7 +24,8 @@ public class ItemSelectManager : MonoBehaviour
     private List<Item> extensionItems;
     private InputManager inputManager;
     [SerializeField] 
-    private Selectable defaultSelecter;
+    private Selectable defaultSelector;
+    private GameObject currentSelectorObject;
     private Vector2 moveInput;
     private int bodyIndex;
     private int barrelIndex;
@@ -34,7 +35,7 @@ public class ItemSelectManager : MonoBehaviour
     {
 
         inputManager.onMovePerformed += MoveInputPerformed;
-        SelectControl(defaultSelecter);
+        SelectControl(defaultSelector);
     }
     public void SpawnItems(InputManager inputManager){
         this.inputManager = inputManager;
@@ -62,6 +63,7 @@ public class ItemSelectManager : MonoBehaviour
             itemSpawnPoints[2]);
 
         timer.StartTimer(10f);
+        
         timer.OnStopTimer += ChangeScene;
         timer.OnStopTimer += SetLoadout;
         timer.OnStopTimer += ClearItems;
@@ -74,7 +76,13 @@ public class ItemSelectManager : MonoBehaviour
             previousItem.transform.localPosition = Vector3.zero;
             Debug.Log("Item displayed");
             nextItem.transform.SetParent(itemSpawnPoint);
-            nextItem.transform.localPosition = Vector3.zero;
+            if(itemSpawnPoint == itemSpawnPoints[1]){
+                nextItem.transform.localPosition = new Vector3(-35f,0,0);
+
+            }else{
+                nextItem.transform.localPosition = Vector3.zero;
+
+            }
             nextItem.transform.localScale = new Vector3(1f,150f,150f);
         }else{
             Debug.Log("Player has no extensions");
@@ -96,44 +104,93 @@ public class ItemSelectManager : MonoBehaviour
     {
         moveInput = ctx.ReadValue<Vector2>();
         Debug.Log(moveInput);
+        currentSelectorObject = EventSystem.current.currentSelectedGameObject;
+        Debug.Log(currentSelectorObject.name);
+
         if(moveInput == Vector2.up){
             Debug.Log("up");
-
-            if(bodyIndex == bodies.Count - 1){
-                bodyIndex = 0;
-                ChangeItemDisplayed(bodies[bodyIndex + 1],bodies[bodyIndex],itemSpawnPoints[0]);
-
-            }else{
-                bodyIndex ++;
-                ChangeItemDisplayed(bodies[^1],bodies[bodyIndex],itemSpawnPoints[0]);
-
-            }
-
+            MoveUpPerformed();
         }else if (moveInput == Vector2.down){
-            Debug.Log("down");
-
-            if(bodyIndex == 0){
-                bodyIndex = bodies.Count - 1;
-                ChangeItemDisplayed(bodies[0],bodies[bodyIndex],itemSpawnPoints[0]);
-            }else{
-            bodyIndex --;
-            Debug.Log("BODY INDEX" + bodyIndex);
-            Debug.Log("BODY INDEX+1" + (bodyIndex + 1));
-
-            ChangeItemDisplayed(bodies[bodyIndex + 1],bodies[bodyIndex],itemSpawnPoints[0]);    
-            }
-            
-
+            MoveDownPerformed();
         }
-        //Debug.Log(EventSystem.current.currentSelectedGameObject);
-        //ChangeItemDisplayed(itemObjects.Count != 0 ? itemObjects[^1] : null,itemSpawnPoint);
     }
-    
+     private void MoveUpPerformed(){
+        switch(currentSelectorObject.name)
+        {
+            case "BodySelector":
+                if(bodyIndex == bodies.Count - 1){
+                    bodyIndex = 0;
+                    ChangeItemDisplayed(bodies[^1],bodies[bodyIndex],itemSpawnPoints[0]);
+                }else {
+                    bodyIndex ++;
+                    ChangeItemDisplayed(bodies[bodyIndex - 1],bodies[bodyIndex],itemSpawnPoints[0]);
+                }
+                break;
+            case "BarrelSelector":
+                if(barrelIndex == barrels.Count - 1){
+                    barrelIndex = 0;
+                    ChangeItemDisplayed(barrels[^1],barrels[barrelIndex],itemSpawnPoints[1]);
+
+                }else{
+                    barrelIndex ++;
+                    ChangeItemDisplayed(barrels[barrelIndex - 1],barrels[barrelIndex],itemSpawnPoints[1]);
+                }
+                break;
+            case "ExtensionSelector":
+                if(extensionIndex == extensions.Count - 1){
+                    extensionIndex = 0;
+                    ChangeItemDisplayed(extensions[^1],extensions[extensionIndex],itemSpawnPoints[2]);
+
+                }else{
+                    extensionIndex ++;
+                    ChangeItemDisplayed(extensions[extensionIndex - 1],extensions[extensionIndex],itemSpawnPoints[2]);
+                }
+                break;
+        }
+
+    }
+    private void MoveDownPerformed(){
+        switch(currentSelectorObject.name)
+        {
+            case "BodySelector":
+                if(bodyIndex == 0){
+                    bodyIndex = bodies.Count - 1;
+                    ChangeItemDisplayed(bodies[0],bodies[bodyIndex],itemSpawnPoints[0]);
+                }else {
+                    bodyIndex --;
+                    ChangeItemDisplayed(bodies[bodyIndex + 1],bodies[bodyIndex],itemSpawnPoints[0]);
+                }
+                break;
+            case "BarrelSelector":
+                if(barrelIndex == 0){
+                    barrelIndex = barrels.Count - 1;
+                    ChangeItemDisplayed(barrels[0],barrels[barrelIndex],itemSpawnPoints[1]);
+
+                }else{
+                    barrelIndex --;
+                    ChangeItemDisplayed(barrels[barrelIndex + 1],barrels[barrelIndex],itemSpawnPoints[1]);
+                }
+                break;
+            case "ExtensionSelector":
+            if(extensions.Count != 0){
+                if(extensionIndex == 0){
+                    extensionIndex = extensions.Count - 1;
+                    ChangeItemDisplayed(extensions[0],extensions[extensionIndex],itemSpawnPoints[2]);
+
+                }else{
+                    extensionIndex --;
+                    ChangeItemDisplayed(extensions[extensionIndex + 1],extensions[extensionIndex],itemSpawnPoints[2]);
+                }
+            }
+                break;
+        }
+
+    }
     public void SetLoadout(){
         inputManager.gameObject.GetComponent<PlayerIdentity>().SetLoadout(
-            bodyItems[^1],
-            barrelItems[^1],
-            extensionItems.Count != 0 ? extensionItems[^1] : null);
+            bodyItems[bodyIndex],
+            barrelItems[barrelIndex],
+            extensionItems.Count != 0 ? extensionItems[extensionIndex] : null);
     }
     public void ClearItems(){
         /*for(int i = 0; i < bodies.Count; i++){
