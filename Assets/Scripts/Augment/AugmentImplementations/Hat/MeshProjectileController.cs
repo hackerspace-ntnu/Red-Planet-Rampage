@@ -37,6 +37,9 @@ public class MeshProjectileController : ProjectileController
     private VisualEffect vfx;
 
     [SerializeField]
+    private VisualEffect flash;
+
+    [SerializeField]
     private float maxDistanceBeforeStuck = 100;
 
     protected override void Awake()
@@ -53,6 +56,14 @@ public class MeshProjectileController : ProjectileController
         vfx.SendEvent("OnPlay");
 
         animator.OnFireAnimationEnd += FireProjectile;
+    }
+
+    private void Start()
+    {
+        if (flash)
+        {
+            flash.transform.position = projectileOutput.position;
+        }
     }
 
     protected override void OnInitialize(GunStats gunstats)
@@ -105,6 +116,7 @@ public class MeshProjectileController : ProjectileController
             }
             currentStateIndex = (currentStateIndex + 1) % maxProjectiles;
         }
+        if (flash) flash.SendEvent("OnPlay");
     }
 
     private void FixedUpdate()
