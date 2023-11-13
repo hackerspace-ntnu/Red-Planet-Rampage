@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,12 +11,17 @@ public class PlayerManager : MonoBehaviour
 
     // Only Default and HitBox layers can be hit
     private static int hitMask = 1 | (1 << 3);
+    public int HitMask => hitMask;
+
+    [Header("Shooting")]
 
     [SerializeField]
     private float maxHitDistance = 100;
 
     [SerializeField]
     private float targetStartOffset = 0.28f;
+    public float TargetStartOffset => targetStartOffset;
+    public bool overrideAimTarget = false;
 
     // TODO add context when shooty system is done
     public delegate void HitEvent(PlayerManager killer, PlayerManager victim);
@@ -29,14 +33,24 @@ public class PlayerManager : MonoBehaviour
     public delegate void BiddingPlatformEvent(BiddingPlatform platform);
     public BiddingPlatformEvent onSelectedBiddingPlatformChange;
 
+    [Header("Related objects")]
+
     public InputManager inputManager;
     public PlayerIdentity identity;
+
+    [SerializeField]
+    private PlayerHUDController hudController;
+    public PlayerHUDController HUDController => hudController;
+
+
+    [Header("Physics")]
 
     [SerializeField]
     private GameObject meshBase;
 
     [SerializeField]
-    private Rigidbody ragdoll;
+    private PlayerIK playerIK;
+
 
     private BiddingPlatform selectedBiddingPlatform;
     public BiddingPlatform SelectedBiddingPlatform
@@ -53,19 +67,15 @@ public class PlayerManager : MonoBehaviour
 
     private HealthController healthController;
 
-    [SerializeField]
-    private PlayerHUDController hudController;
+    [Header("Hit sounds")]
 
-    [SerializeField]
     private AudioSource audioSource;
 
     [SerializeField]
     private AudioGroup hitSounds;
-    [SerializeField]
-    private AudioGroup extraHitSounds;
 
     [SerializeField]
-    private PlayerIK playerIK;
+    private AudioGroup extraHitSounds;
 
     void Start()
     {
@@ -123,7 +133,6 @@ public class PlayerManager : MonoBehaviour
         inputManager = playerInput;
         identity = inputManager.GetComponent<PlayerIdentity>();
         GetComponent<PlayerMovement>().SetPlayerInput(inputManager);
-        SetGun(inputManager.transform);
         // Subscribe relevant input events
         inputManager.onFirePerformed += Fire;
         inputManager.onFireCanceled += FireEnd;
@@ -154,6 +163,8 @@ public class PlayerManager : MonoBehaviour
 
     private void UpdateAimTarget(GunStats stats)
     {
+        if (overrideAimTarget)
+            return;
         Vector3 cameraCenter = inputManager.transform.position;
         Vector3 cameraDirection = inputManager.transform.forward;
         Vector3 startPoint = cameraCenter + cameraDirection * targetStartOffset;
@@ -169,6 +180,8 @@ public class PlayerManager : MonoBehaviour
 
     private void Fire(InputAction.CallbackContext ctx)
     {
+        if (!gunController)
+            return;
         gunController.triggerHeld = true;
         gunController.triggerPressed = true;
         StartCoroutine(UnpressTrigger());
@@ -221,7 +234,7 @@ public class PlayerManager : MonoBehaviour
         SetLayerOnSubtree(meshBase, playerLayer);
     }
 
-    private void SetGun(Transform offset)
+    public void SetGun(Transform offset)
     {
         var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, this, offset);
         // Set specific local transform

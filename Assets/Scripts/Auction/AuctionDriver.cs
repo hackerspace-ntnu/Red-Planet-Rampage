@@ -21,6 +21,9 @@ public class AuctionDriver : MonoBehaviour
     private BiddingPlatform[] biddingPlatforms;
     private RandomisedAuctionStage[] availableAuctionStages;
 
+    [SerializeField]
+    private Auctioneer auctioneer;
+
     private BiddingPlatform lastExtendedAuction;
 
     private HashSet<PlayerManager> playersInAuction;
@@ -33,6 +36,9 @@ public class AuctionDriver : MonoBehaviour
     private RectTransform[] gunConstructionPanels;
     private float gunConstructionScale = 8f;
 
+    [SerializeField]
+    private Animator cameraAnimator;
+
     // Stages
     // BiddingStage contains a list of items (scriptableobjects)
     private void Start()
@@ -41,38 +47,72 @@ public class AuctionDriver : MonoBehaviour
 #if UNITY_EDITOR
         biddingBeginDelay = 2f;
 #endif
-        availableAuctionStages = new RandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction };
+        availableAuctionStages = MatchController.Singleton.RoundCount switch
+        {
+            1 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction },
+            2 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BarrelAuction },
+            3 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction},
+            _ => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction }
+        };
+
         playerFactory = GetComponent<PlayerFactory>();
         playerFactory.InstantiatePlayersBidding();
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
 
         AnimateAuctionStart();
+        StartCoroutine(WaitAndStartCameraAnimation());
         StartCoroutine(PopulatePlatforms());
+    }
+
+    private void OnDestroy()
+    {
+        for (int i = 0; i < biddingPlatforms.Length; i++)
+        {
+            biddingPlatforms[i].onBiddingExtended -= SetPrioritizedPlatform;
+            biddingPlatforms[i].onBidPlaced -= ActivateAuctioneerBid;
+            biddingPlatforms[i].onBiddingEnd -= ActivateAuctioneerSell;
+            biddingPlatforms[i].onBiddingExtended -= ActivateAuctioneerHaste;
+            biddingPlatforms[i].onBidDenied -= ActivateAuctioneerMissing;
+        }
     }
 
     private void AnimateAuctionStart()
     {
+        //TODO: Animate auctioneer presenting items instead, meanwhile this functionality should still be here
         GlobalHUDController globalHUD = GetComponentInChildren<GlobalHUDController>();
-        StartCoroutine(globalHUD.DisplayStartScreen(biddingBeginDelay));
+        StartCoroutine(globalHUD.DisplayStartScreen(biddingBeginDelay+2));
+    }
+
+    private IEnumerator WaitAndStartCameraAnimation()
+    {
+        yield return new WaitForSeconds(biddingBeginDelay);
+        cameraAnimator.SetTrigger("start");
     }
 
     private IEnumerator PopulatePlatforms()
     {
         yield return new WaitForSeconds(biddingBeginDelay);
-        if (!(availableAuctionStages.Length == biddingPlatforms.Length))
-        {
-            Debug.Log("Not enough available auctionStages or biddingPlatforms!");
-        }
 
         lastExtendedAuction = biddingPlatforms[0];
         lastExtendedAuction.onBiddingEnd += EndAuction;
 
-        for (int i = 0; i < biddingPlatforms.Length; i++)
+        List<BiddingRound> biddingRounds = new List<BiddingRound>();
+        for (int i = 0; i < availableAuctionStages.Length; i++)
         {
             availableAuctionStages[i].Promote(out BiddingRound biddingRound);
-            biddingPlatforms[i].ActiveBiddingRound = biddingRound;
-            biddingPlatforms[i].SetItem(biddingRound.items[0]);
+            biddingRounds.Add(biddingRound);
+        }
+        bool isMultiple = availableAuctionStages.Length >= biddingPlatforms.Length;
+
+        for (int i = 0; i < biddingPlatforms.Length; i++)
+        {
+            biddingPlatforms[i].ActiveBiddingRound = biddingRounds[isMultiple ? i : 0];
+            biddingPlatforms[i].SetItem(biddingRounds[isMultiple ? i : 0].items[isMultiple ? 0 : i]);
             biddingPlatforms[i].onBiddingExtended += SetPrioritizedPlatform;
+            biddingPlatforms[i].onBidPlaced += ActivateAuctioneerBid;
+            biddingPlatforms[i].onBiddingEnd += ActivateAuctioneerSell;
+            biddingPlatforms[i].onBiddingExtended += ActivateAuctioneerHaste;
+            biddingPlatforms[i].onBidDenied += ActivateAuctioneerMissing;
         }
     }
 
@@ -87,13 +127,16 @@ public class AuctionDriver : MonoBehaviour
     {
         lastExtendedAuction.onBiddingEnd = null;
 
-        LeanTween.alpha(gunConstructionPanels[0].parent.GetComponent<RectTransform>(), 1f, 1f).setEase(LeanTweenType.linear);
-        MusicTrackManager.Singleton.SwitchTo(MusicType.CONSTRUCTION_FANFARE);
+        // TODO: Reuse and upgrade for new gun construction in the future
+        //LeanTween.alpha(gunConstructionPanels[0].parent.GetComponent<RectTransform>(), 1f, 1f).setEase(LeanTweenType.linear);
+        //MusicTrackManager.Singleton.SwitchTo(MusicType.CONSTRUCTION_FANFARE);
         
+        /*
         for (int i = 0; i < playersInAuction.Count; i++)
         {
             StartCoroutine(AnimateGunConstruction(playersInAuction.ElementAt(playersInAuction.Count-i-1), gunConstructionPanels[i]));
         }
+        */
 
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
         PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
@@ -132,4 +175,24 @@ public class AuctionDriver : MonoBehaviour
         gameObject.LeanRotateY(90f, 2f);
     }
 
+    private void ActivateAuctioneerBid(BiddingPlatform platform)
+    {
+        // TODO: Refactor this
+        auctioneer.BidOn(biddingPlatforms.ToList().IndexOf(platform));
+    }
+
+    private void ActivateAuctioneerSell(BiddingPlatform biddingPlatform)
+    {
+        auctioneer.Sell();
+    }
+
+    private void ActivateAuctioneerHaste(BiddingPlatform platform)
+    {
+        auctioneer.Haste();
+    }
+
+    private void ActivateAuctioneerMissing(BiddingPlatform platform)
+    {
+        auctioneer.Missing();
+    }
 }

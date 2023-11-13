@@ -63,8 +63,12 @@ public class MatchController : MonoBehaviour
     [SerializeField]
     private GlobalHUDController globalHUDController;
 
+    private string currentMapName;
+
     private List<Player> players = new List<Player>();
     private static List<Round> rounds = new List<Round>();
+
+    public int RoundCount { get => rounds.Count(); }
 
     void Start()
     {
@@ -90,6 +94,9 @@ public class MatchController : MonoBehaviour
             PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         }
         playerFactory = FindObjectOfType<PlayerFactory>();
+
+        if (currentMapName == null)
+            currentMapName = SceneManager.GetActiveScene().name;
 
         // Makes shooting end quickly if testing with 1 player
 #if UNITY_EDITOR
@@ -154,7 +161,7 @@ public class MatchController : MonoBehaviour
         yield return new WaitForSeconds(biddingEndDelay);
         // This needs to be called after inputs are set at start the first time this is needed.
         PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
-        SceneManager.LoadScene("CraterTown");
+        SceneManager.LoadScene(currentMapName);
         StartNextRound();
     }
 

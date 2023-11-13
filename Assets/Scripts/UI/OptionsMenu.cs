@@ -30,6 +30,9 @@ public class OptionsMenu : MonoBehaviour
     private const string audioGroupMusic = "musicVolume";
     private const string audioGroupSFX = "sfxVolume";
 
+    private float maxVolumeMusic;
+    private float maxVolumeSFX;
+
     [SerializeField]
     private AudioMixer mainAudioMixer;
 
@@ -39,6 +42,10 @@ public class OptionsMenu : MonoBehaviour
     {
         CheckResolutions();
         CheckQuality();
+        mainAudioMixer.GetFloat(audioGroupMusic, out float musicVolume);
+        maxVolumeMusic = musicVolume;
+        mainAudioMixer.GetFloat(audioGroupSFX, out float sfxVolume);
+        maxVolumeSFX = sfxVolume;
     }
 
 
@@ -73,12 +80,12 @@ public class OptionsMenu : MonoBehaviour
 
     public void SetMusicVolume(float volume)
     {
-        mainAudioMixer.SetFloat(audioGroupMusic, LinearToLogarithmicVolume(volume));
+        mainAudioMixer.SetFloat(audioGroupMusic, LinearToLogarithmicVolume(volume) + maxVolumeMusic);
     }
 
     public void SetSFXVolume(float volume)
     {
-        mainAudioMixer.SetFloat(audioGroupSFX, LinearToLogarithmicVolume(volume));
+        mainAudioMixer.SetFloat(audioGroupSFX, LinearToLogarithmicVolume(volume) + maxVolumeSFX);
     }
 
     public void SetQualityLevel(int qualityPresetIndex)

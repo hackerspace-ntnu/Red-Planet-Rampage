@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Timer))]
@@ -14,6 +15,7 @@ public class BiddingPlatform : MonoBehaviour
 
     [SerializeField]
     private PlayerIdentity leadingBidder;
+    public PlayerIdentity LeadingBidder => leadingBidder;
 
     [SerializeField]
     private TMP_Text itemNameText;
@@ -42,22 +44,36 @@ public class BiddingPlatform : MonoBehaviour
     private Timer auctionTimer;
 
     [SerializeField]
+    private GameObject description;
+
+    [SerializeField]
     private float borderTweenDuration = 0.2f;
 
-    private GameObject augmentModel; 
+    private GameObject augmentModel;
 
+    [SerializeField]
+    private Color startingMaterialColor;
     private Material material;
+
+    [SerializeField]
+    private Image radialUI;
+
+    private int playerCount = 0;
 
     public delegate void BiddingEvent(BiddingPlatform biddingPlatform);
 
     public BiddingEvent onBiddingExtended;
     public BiddingEvent onBiddingEnd;
+    public BiddingEvent onBidPlaced;
+    public BiddingEvent onBidDenied;
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent(out PlayerManager playerManager))
         {
             playerManager.SelectedBiddingPlatform = this;
+            description.LeanScale(Vector3.one, 0.2f);
+            playerCount++;
         }
     }
 
@@ -67,6 +83,10 @@ public class BiddingPlatform : MonoBehaviour
         {
             if (playerManager.SelectedBiddingPlatform == this)
                 playerManager.SelectedBiddingPlatform = null;
+
+            playerCount--;
+            if (playerCount == 0)
+                description.LeanScale(Vector3.zero, 0.2f);
         }
     }
 
@@ -77,6 +97,10 @@ public class BiddingPlatform : MonoBehaviour
         auctionTimer.OnTimerRunCompleted += EndAuction;
         material = GetComponent<MeshRenderer>().material;
         material.SetFloat("_Scale", 0f);
+        material.SetColor("_BidderColor", startingMaterialColor);
+        description.transform.localScale = Vector3.zero;
+        radialUI.material = Instantiate(radialUI.material);
+        radialUI.material.SetFloat("_Arc2", 0);
     }
 
     private void OnDestroy()
@@ -92,30 +116,35 @@ public class BiddingPlatform : MonoBehaviour
             Debug.Log("No active biddingRound on biddingPlatform!");
             return false;
         }
-
-        if (playerIdentity.chips > chips && playerIdentity != leadingBidder)
+        bool leadingPlayerCanIncrement = playerIdentity == leadingBidder && playerIdentity.chips > 0;
+        if (playerIdentity.chips > chips || leadingPlayerCanIncrement)
         {
             // Refund
             if (leadingBidder)
             {
                 leadingBidder.UpdateChip(chips);
             }
-            //activeBiddingRound.chips[0] = chips++;
             chips++;
             playerIdentity.UpdateChip(-chips);
             itemCostText.text = chips.ToString();
+            LeanTween.value(
+                gameObject,
+                (color) => material.SetColor("_BidderColor", color),
+                leadingBidder ? leadingBidder.color : Color.black,
+                playerIdentity.color, 0.2f)
+                .setEaseInOutBounce();
             leadingBidder = playerIdentity;
-            material.SetColor("_BidderColor", playerIdentity.color);
             LeanTween.value(gameObject, UpdateBorder, 0f, 1f, borderTweenDuration);
+            onBidPlaced(this);
 
             if ((auctionTimer.WaitTime - auctionTimer.ElapsedTime) < bumpTime)
             {
                 auctionTimer.AddTime(bumpTime);
                 onBiddingExtended(this);
             }
-
             return true;
         }
+        onBidDenied(this);
         return false;
     }
 
@@ -127,26 +156,17 @@ public class BiddingPlatform : MonoBehaviour
     private void UpdateTimer()
     {
         timerText.text = Mathf.Round(auctionTimer.WaitTime - auctionTimer.ElapsedTime).ToString();
+        radialUI.material.SetFloat("_Arc1", 360f - 360f*((auctionTimer.WaitTime - auctionTimer.ElapsedTime) / auctionTimer.WaitTime));
     }
 
     private void EndAuction()
     {
         if (leadingBidder)
-        {
             leadingBidder.PerformTransaction(item);
 
-            // Animate weapon flying towards winner
-            LeanTween.value(gameObject, UpdateBorder, 1f, 0f, borderTweenDuration);
-            augmentModel.LeanScale(40 * Vector3.one, 0.2f);
-            LeanTween.followLinear(augmentModel.transform, leadingBidder.transform, LeanProp.position, 20f);
-            Destroy(augmentModel, 0.6f);
-        }
-        else
-        {
-            augmentModel.LeanScale(Vector3.zero, 0.3f);
-            Destroy(augmentModel, 0.5f);
-        }
+        Destroy(augmentModel, 0.5f);
         onBiddingEnd?.Invoke(this);
+        gameObject.LeanScale(Vector3.zero, 0.5f).setEaseInOutExpo();
     }
 
     public void SetItem(Item item)
@@ -156,15 +176,13 @@ public class BiddingPlatform : MonoBehaviour
         itemDescriptionText.text = item.displayDescription;
         itemCostText.text = chips.ToString();
         augmentModel = Instantiate(item.augment, modelHolder.transform);
+        augmentModel.transform.localScale = Vector3.one / 20.0f;
+        augmentModel.transform.localPosition = Vector3.zero;
 
-        // All barrels have their origins skewed by design, this is the best solution to center barrels as long as that is the case.
-        if (item.augmentType == AugmentType.Barrel)
-        {
-            augmentModel.transform.Translate(new Vector3(-1f, 0f, 0f));
-        }
-
-        augmentModel.transform.Rotate(new Vector3(0f, 90f));
-        augmentModel.LeanScale(100 * Vector3.one, 0.5f);
+        modelHolder.transform.Rotate(new Vector3(90f, 0f));
+        LeanTween.sequence()
+            .append(LeanTween.rotateAroundLocal(augmentModel, Vector3.up, 360, 2.5f).setLoopCount(-1))
+            .append(LeanTween.moveLocalY(augmentModel, 0.01f, 3.0f).setLoopPingPong().setEaseInOutSine());
 
 
 #if UNITY_EDITOR

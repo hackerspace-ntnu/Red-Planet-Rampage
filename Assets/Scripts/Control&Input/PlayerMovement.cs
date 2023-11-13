@@ -55,7 +55,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private float leapTimeout = 0.875f;
 
-    private const float marsGravity = 3.72076f;
+    private const float MarsGravity = 3.72076f;
 
     private bool canJump = true;
 
@@ -66,6 +66,9 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField]
     private float airThreshold = 0.4f;
+
+    [SerializeField]
+    private float slopeAngleThreshold = 50;
 
     [SerializeField, ReadOnly]
     private PlayerState state = PlayerState.GROUNDED;
@@ -127,18 +130,18 @@ public class PlayerMovement : MonoBehaviour
 
         if (ctx.performed)
         {
+            if (IsInAir())
+                return;
             animator.SetBool("Crouching", true);
             strafeForce = strafeForceCrouched;
-            if (!IsInAir())
-                inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
+            inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
         }
             
         if (ctx.canceled)
         {
             animator.SetBool("Crouching", false);
             strafeForce = strafeForceGrounded;
-            if (!IsInAir())
-                inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f);
+            inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f);
         }
             
     }
@@ -158,6 +161,22 @@ public class PlayerMovement : MonoBehaviour
         return !Physics.BoxCast(hitbox.bounds.center, 0.5f * Vector3.one, Vector3.down, Quaternion.identity, 0.5f + airThreshold, ignoreMask); ;
     }
 
+    private Vector3 GroundNormal()
+    {
+        // Cast a box to detect (partial) ground. See OnDrawGizmos for what I think is the extent of the box cast.
+        // No, this does not work if the cast start at the bottom.
+        if (Physics.BoxCast(hitbox.bounds.center, 0.5f * Vector3.one, Vector3.down, out var hit, Quaternion.identity,
+                0.5f + airThreshold, ignoreMask))
+        {
+            var angle = Vector3.Angle(hit.normal, Vector3.up);
+            var isAngleWithinThreshold = angle < slopeAngleThreshold && angle > 0;
+            return isAngleWithinThreshold ? hit.normal : Vector3.up;
+        }
+        return Vector3.up;
+    }
+
+
+
     private void UpdatePosition(Vector3 input)
     {
         // Modify input to addforce with relation to current rotation.
@@ -169,7 +188,7 @@ public class PlayerMovement : MonoBehaviour
                     // Strafe slightly with less drag.
                     body.drag = airDrag;
                     body.AddForce(input * strafeForceInAir, ForceMode.VelocityChange);
-                    body.AddForce(Vector3.down * marsGravity, ForceMode.Acceleration);
+                    body.AddForce(Vector3.down * MarsGravity, ForceMode.Acceleration);
                     if (!IsInAir()) state = PlayerState.GROUNDED;
                     break;
                 }
@@ -177,7 +196,11 @@ public class PlayerMovement : MonoBehaviour
                 {
                     // Strafe normally with heavy drag.
                     body.drag = drag;
-                    body.AddForce(input * strafeForce, ForceMode.VelocityChange);
+                    // Walk along ground normal (adjusted if on heavy slope).
+                    var groundNormal = GroundNormal();
+                    var direction = Vector3.ProjectOnPlane(input, groundNormal);
+                    body.AddForce(direction * strafeForce, ForceMode.VelocityChange);
+                    body.AddForce(direction * strafeForce, ForceMode.Impulse);
                     if (IsInAir()) state = PlayerState.IN_AIR;
                     break;
                 }
