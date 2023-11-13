@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
+using TMPro;
 
 public class ItemSelectManager : MonoBehaviour
 {
@@ -30,7 +31,8 @@ public class ItemSelectManager : MonoBehaviour
     private int bodyIndex;
     private int barrelIndex;
     private int extensionIndex;
-    
+    [SerializeField]
+    private TMP_Text timerText;
    void Start()
     {
 
@@ -68,9 +70,11 @@ public class ItemSelectManager : MonoBehaviour
         inputManager.onMovePerformed += MoveInputPerformed;
 
         timer.StartTimer(10f);
+        timer.OnTimerUpdate += UpdateTimer;
+        timer.OnTimerRunCompleted += ChangeScene;
+        timer.OnTimerRunCompleted += SetLoadout;
+        timer.OnTimerRunCompleted -= UpdateTimer;
 
-        timer.OnStopTimer += ChangeScene;
-        timer.OnStopTimer += SetLoadout;
     }
 
     private void ChangeItemDisplayed(GameObject previousItem,GameObject nextItem,Transform itemSpawnPoint){
@@ -228,5 +232,9 @@ public class ItemSelectManager : MonoBehaviour
     {
         yield return null;
         target.Select();
+    }
+     private void UpdateTimer()
+    {
+        timerText.text = Mathf.Round(timer.WaitTime - timer.ElapsedTime).ToString();
     }
 }
