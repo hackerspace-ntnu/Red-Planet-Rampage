@@ -1,107 +1,94 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using System.Collections;
-using System.Threading.Tasks;
+using TMPro;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(AudioSource))]
 public class Scoreboard : MonoBehaviour
 {
-    public static Scoreboard Singleton { get; private set; }
-
-    [Header("Variables")]
-    [SerializeField]
-    private List<string> wantedSubtitles = new();
-
-    [SerializeField]
-    private float startBiddingDelay = 3;
-
-    [SerializeField]
-    private AudioClip nextCrimeSound;
-
     [Header("References")]
     [SerializeField]
     private Transform content;
 
-    private MatchController matchController;
+    private ScoreboardManager scoreboardManager;
 
-    private List<Player> players;
+    private Player player;
 
     private AudioSource audioSource;
 
-    [SerializeField]
-    private float displayCrimeDelay = 1;
-
-    [Header("Prefabs")]
-    public GameObject wantedPosterPrefab;
-    private WantedPoster[] posters;
-
     public event Action ShowNextCrime;
 
-    private int step = 0;
-    private int maxSteps = 0;
+    public int TotalCrimes { get => crimeData.Count; }
 
-    private void Awake()
+    [SerializeField]
+    private TMP_Text title;
+
+    [SerializeField]
+    private TMP_Text subtitle;
+
+    public Image photo;
+
+    [SerializeField]
+    private Image background;
+
+    [SerializeField]
+    private Transform crimeContent;
+
+    [Header("Prefabs")]
+    [SerializeField]
+    private GameObject crimeTextPrefab;
+
+
+    private int currentStep;
+    public int CurrentStep { get => currentStep; }
+
+    private List<(string, string)> crimeData = new();
+    private List<(TMP_Text, TMP_Text)> crimeTextComponents = new();
+
+    private Scoreboard scoreboard;
+
+    public void SetupPoster(Player player, string subtitle)
     {
-        #region Singleton boilerplate
+        background.color = player.playerIdentity.color;
+        this.subtitle.text = subtitle;
+        scoreboard = GetComponentInParent<Scoreboard>();
 
-        if (Singleton != null)
-        {
-            if (Singleton != this)
-            {
-                Debug.LogWarning($"There's more than one {Singleton.GetType()} in the scene!");
-                Destroy(gameObject);
-                return;
-            }
-        }
-
-        Singleton = this;
-
-        #endregion Singleton boilerplate    
+        scoreboard.ShowNextCrime += NextStep;
     }
 
+    public void AddPosterCrime(string crimeLabel, int Value)
+    {
+        GameObject crime = Instantiate(crimeTextPrefab, crimeContent);
+        TMP_Text[] texts = crime.GetComponentsInChildren<TMP_Text>();
+
+        crimeTextComponents.Add((texts[0], texts[1]));
+        crimeData.Add((crimeLabel, Value.ToString()));
+    }
+
+    private void NextStep()
+    {
+        DisplayCrime(currentStep);
+        currentStep++;
+    }
+
+    private void DisplayCrime(int index)
+    {
+        if (index <= crimeData.Count - 1)
+        {
+            crimeTextComponents[index].Item1.text = crimeData[index].Item1;
+            crimeTextComponents[index].Item2.text = crimeData[index].Item2;
+        }
+    }
     void Start()
     {
-        matchController = MatchController.Singleton;
-        audioSource = GetComponent<AudioSource>();        
-    }
-
-    public void CreateMatchResults()
-    {
-        // Setup posters
-        InitiatePosters();
-        // Populate posters with scores
-        SetPosterValues();
-
-        // Animate the after battle scene
-        Camera.main.transform.parent = transform;
-        Camera.main.GetComponent<Animator>().SetTrigger("ScoreboardZoom");
-
-        for (int i = 0; i < posters.Length; i++)
-        {
-            // Disable player camera
-            players[i].playerManager.inputManager.GetComponent<Camera>().enabled = false;
-
-            // Enable posters
-            posters[i].gameObject.SetActive(true);
-        }
+        scoreboardManager = ScoreboardManager.Singleton;
+        audioSource = GetComponent<AudioSource>();    
         
-        // Do not start adding crimes before the camera has finished the animation
-        int delay = Mathf.RoundToInt(Camera.main.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length) * 1000;
-        StartCoroutine(DelayDisplayCrimes(delay));
-
-        maxSteps = MaxNumberOfCrimes();
-
-        StartCoroutine(NextCrime());
-        while (step <= maxSteps)
-        {
-            print("try this?");
-        }
-
-        print("Finished CreateMatchResults");
+        
     }
 
-
+    /*
     private IEnumerator DelayDisplayCrimes(int delay)
     {
         yield return new WaitForSeconds(delay);
@@ -122,6 +109,41 @@ public class Scoreboard : MonoBehaviour
             yield break;
         }
         
+    }
+    
+    public void CreateMatchResults()
+    {
+        // Setup posters
+        InitiatePosters();
+        // Populate posters with scores
+        SetPosterValues();
+
+        // Animate the after battle scene
+        Camera.main.transform.parent = transform;
+        Camera.main.GetComponent<Animator>().SetTrigger("ScoreboardZoom");
+
+        for (int i = 0; i < posters.Length; i++)
+        {
+            // Disable player camera
+            players[i].playerManager.inputManager.GetComponent<Camera>().enabled = false;
+
+            // Enable posters
+            posters[i].gameObject.SetActive(true);
+        }
+
+        // Do not start adding crimes before the camera has finished the animation
+        int delay = Mathf.RoundToInt(Camera.main.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length) * 1000;
+        StartCoroutine(DelayDisplayCrimes(delay));
+
+        maxSteps = MaxNumberOfCrimes();
+
+        StartCoroutine(NextCrime());
+        while (step <= maxSteps)
+        {
+            print("try this?");
+        }
+
+        print("Finished CreateMatchResults");
     }
 
     private void PlayCrimeSound()
@@ -197,5 +219,5 @@ public class Scoreboard : MonoBehaviour
         }
 
         return maxCrimes;
-    }
+    }*/
 }

@@ -72,16 +72,12 @@ public class MatchController : MonoBehaviour
     private List<Player> players = new List<Player>();
     public List<Player> Players { get { return players; } }
 
-<<<<<<< HEAD
     private static List<Round> rounds = new List<Round>();
     public Round GetLastRound { get { return rounds[rounds.Count - 1]; } }
 
-    private void Awake()
-=======
     public int RoundCount { get => rounds.Count(); }
 
     void Start()
->>>>>>> origin/dev
     {
         #region Singleton boilerplate
 
@@ -99,9 +95,6 @@ public class MatchController : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
-    }
-    void Start()
-    {
         if (rounds.Count == 0)
         {
             PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
@@ -153,7 +146,6 @@ public class MatchController : MonoBehaviour
 
     public void EndActiveRound()
     {
-        Scoreboard.Singleton.CreateMatchResults();
         onRoundEnd?.Invoke();
         roundTimer.OnTimerUpdate -= AdjustMusic;
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
