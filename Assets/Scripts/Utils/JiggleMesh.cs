@@ -27,9 +27,7 @@ public class JiggleMesh : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
         meshRenderer.materials[jiggleMaterialIndex] = Instantiate(meshRenderer.materials[jiggleMaterialIndex]);
         jiggleMaterial = meshRenderer.materials[jiggleMaterialIndex];
-        // Set initial values
-        previousTarget = transform.position;
-        previousDiff = transform.position;
+        // Set initial value
         oldPosition = transform.position;
     }
 
