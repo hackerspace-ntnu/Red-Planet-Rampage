@@ -33,6 +33,8 @@ public class ItemSelectManager : MonoBehaviour
     private int extensionIndex;
     [SerializeField]
     private TMP_Text timerText;
+    private const float errorMarginInput = 0.1f;
+
    void Start()
     {
 
@@ -115,10 +117,10 @@ public class ItemSelectManager : MonoBehaviour
         currentSelectorObject = EventSystem.current.currentSelectedGameObject;
         Debug.Log(currentSelectorObject.name);
 
-        if(moveInput == Vector2.up){
+        if(moveInput.y > 1 - errorMarginInput){
             Debug.Log("up");
             MoveUpPerformed();
-        }else if (moveInput == Vector2.down){
+        }else if (moveInput.y < -1 + errorMarginInput){
             MoveDownPerformed();
         }
     }
