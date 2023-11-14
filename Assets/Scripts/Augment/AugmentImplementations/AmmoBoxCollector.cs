@@ -3,7 +3,8 @@ using UnityEngine;
 
 public class AmmoBoxCollector : MonoBehaviour
 {
-    private const string ammoBoxBodyName = "Gatling";
+    [SerializeField]
+    private Item ammoBoxBody;
 
     private bool hasAmmoBoxBody;
     public bool CanReload => hasAmmoBoxBody;
@@ -20,7 +21,7 @@ public class AmmoBoxCollector : MonoBehaviour
     {
         // Wait for one frame so that players actually have their gun bodies :9
         yield return null;
-        hasAmmoBoxBody = player.identity.Body.displayName == ammoBoxBodyName;
+        hasAmmoBoxBody = player.identity.Body == ammoBoxBody;
     }
 
     public bool HasFullMagazine => player.GunController.stats.Ammo >= player.GunController.stats.magazineSize;
