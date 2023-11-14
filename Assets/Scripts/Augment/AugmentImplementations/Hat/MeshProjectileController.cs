@@ -40,9 +40,6 @@ public class MeshProjectileController : ProjectileController
     [FormerlySerializedAs("hatVfx")] [SerializeField]
     private VisualEffect vfx;
 
-    [SerializeField]
-    private VisualEffect flash;
-
     [Header("Ricochet")]
 
     [SerializeField]
@@ -65,14 +62,6 @@ public class MeshProjectileController : ProjectileController
         vfx.SendEvent("OnPlay");
 
         animator.OnFireAnimationEnd += FireProjectile;
-    }
-
-    private void Start()
-    {
-        if (flash)
-        {
-            flash.transform.position = projectileOutput.position;
-        }
     }
 
     protected override void OnInitialize(GunStats gunstats)
@@ -125,7 +114,6 @@ public class MeshProjectileController : ProjectileController
             }
             currentStateIndex = (currentStateIndex + 1) % maxProjectiles;
         }
-        if (flash) flash.SendEvent("OnPlay");
     }
 
     private void FixedUpdate()
