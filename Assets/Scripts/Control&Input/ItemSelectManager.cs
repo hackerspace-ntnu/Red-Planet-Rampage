@@ -14,6 +14,9 @@ public class ItemSelectManager : MonoBehaviour
     private Item defaultBarrelItem;
     [SerializeField] 
     private Transform[] itemSpawnPoints;
+
+    [SerializeField]
+    private Canvas canvas;
     
     private List<GameObject> bodies = new List<GameObject>();
     private List<GameObject> barrels = new List<GameObject>();
@@ -26,7 +29,6 @@ public class ItemSelectManager : MonoBehaviour
     private InputManager inputManager;
     [SerializeField] 
     private Selectable defaultSelector;
-    private GameObject currentSelectorObject;
     private Vector2 moveInput;
     private int bodyIndex;
     private int barrelIndex;
@@ -34,14 +36,31 @@ public class ItemSelectManager : MonoBehaviour
     [SerializeField]
     private TMP_Text timerText;
     private const float errorMarginInput = 0.1f;
+    private bool gamepadMoveReady = true;
+    public Transform cameraPosition; 
+
+    [SerializeField] 
+    private Image bodySelect;
+    [SerializeField] 
+    private Image barrelSelect;
+    [SerializeField] 
+    private Image extensionSelect; 
+    [SerializeField]
+    private Color selectedColor;
+    [SerializeField]
+    private Color defaultColor;
+    private int selectedIndex = 0;
 
    void Start()
     {
-
-        SelectControl(defaultSelector);
+        bodySelect.color = selectedColor;
     }
-    public void SpawnItems(InputManager inputManager){
+    public IEnumerator SpawnItems(InputManager inputManager){
+
+        //Without this line it is arbitrary whether an item from aucion is transferred
+        yield return null;
         this.inputManager = inputManager;
+        canvas.worldCamera = inputManager.GetComponent<Camera>();
 
         bodyItems = inputManager.gameObject.GetComponent<PlayerIdentity>().Bodies;
         barrelItems = inputManager.gameObject.GetComponent<PlayerIdentity>().Barrels;
@@ -69,13 +88,18 @@ public class ItemSelectManager : MonoBehaviour
             extensions.Count != 0 ? extensions[extensionIndex] : null, 
             itemSpawnPoints[2]);
         
-        inputManager.onMovePerformed += MoveInputPerformed;
+        yield return null;
+        yield return null;
 
-        timer.StartTimer(10f);
+        inputManager.onMovePerformed += MoveInputPerformed;
+        inputManager.onMoveCanceled += MoveInputCanceled;
+
+        timer.StartTimer(20f);
         timer.OnTimerUpdate += UpdateTimer;
         timer.OnTimerRunCompleted += ChangeScene;
         timer.OnTimerRunCompleted += SetLoadout;
         timer.OnTimerRunCompleted -= UpdateTimer;
+
 
     }
 
@@ -99,6 +123,7 @@ public class ItemSelectManager : MonoBehaviour
         }
     
     }
+    
     private void InstantiateItems(List<Item> items, Item defaultItem, Transform itemSpawnPoint, List<GameObject> itemObjects){
 
         if(defaultItem != null && !items.Contains(defaultItem)) items.Insert(0,defaultItem);
@@ -112,22 +137,60 @@ public class ItemSelectManager : MonoBehaviour
     }
      private void MoveInputPerformed(InputAction.CallbackContext ctx)
     {
+        Debug.Log("moved");
         moveInput = ctx.ReadValue<Vector2>();
         Debug.Log(moveInput);
-        currentSelectorObject = EventSystem.current.currentSelectedGameObject;
-        Debug.Log(currentSelectorObject.name);
 
-        if(moveInput.y > 1 - errorMarginInput){
+        if(moveInput.y > 1 - errorMarginInput && gamepadMoveReady){
             Debug.Log("up");
             MoveUpPerformed();
-        }else if (moveInput.y < -1 + errorMarginInput){
+            gamepadMoveReady = false;
+            StartCoroutine(gamepadMoveDelay());
+        }else if (moveInput.y < -1 + errorMarginInput && gamepadMoveReady){
             MoveDownPerformed();
+            gamepadMoveReady = false;
+            StartCoroutine(gamepadMoveDelay());
+
+        }else if (moveInput.x < -1 + errorMarginInput && gamepadMoveReady){
+            selectedIndex--;
+            selectedIndex = selectedIndex < 0 ? 2 : selectedIndex;
+            gamepadMoveReady = false;
+            StartCoroutine(gamepadMoveDelay());
+
+        }else if (moveInput.x > 1 - errorMarginInput && gamepadMoveReady){
+            selectedIndex++;
+            selectedIndex = selectedIndex > 2 ? 0 : selectedIndex;
+            gamepadMoveReady = false;
+            StartCoroutine(gamepadMoveDelay());
+        }
+        bodySelect.color  = defaultColor;
+        barrelSelect.color  = defaultColor;
+        extensionSelect.color  = defaultColor;
+        Debug.Log("SelectedIndex was " + selectedIndex);
+        switch (selectedIndex){
+            case 0:
+                bodySelect.color = selectedColor;
+                break;
+            case 1:
+                barrelSelect.color = selectedColor;
+                break;
+            case 2:
+                extensionSelect.color = selectedColor;
+                break;
         }
     }
+    private IEnumerator gamepadMoveDelay(){
+        yield return new WaitForSeconds(0.2f);
+        gamepadMoveReady = true;
+    }
+     private void MoveInputCanceled(InputAction.CallbackContext ctx)
+    {
+        moveInput = Vector2.zero;
+    }
      private void MoveUpPerformed(){
-        switch(currentSelectorObject.name)
+        switch(selectedIndex)
         {
-            case "BodySelector":
+            case 0:
                 Debug.Log("bodyIndexBefore" + bodyIndex);
 
                 if(bodyIndex == bodies.Count - 1){
@@ -139,7 +202,7 @@ public class ItemSelectManager : MonoBehaviour
                 }
                 Debug.Log("bodyIndexAfter" + bodyIndex);
                 break;
-            case "BarrelSelector":
+            case 1:
                 Debug.Log("barrelIndexBefore" + barrelIndex);
                 if(barrelIndex == barrels.Count - 1){
                     barrelIndex = 0;
@@ -152,7 +215,7 @@ public class ItemSelectManager : MonoBehaviour
                 Debug.Log("barrelIndexAfter" + barrelIndex);
 
                 break;
-            case "ExtensionSelector":
+            case 2:
                 Debug.Log("extensionIndexBefore" + extensionIndex);
 
                 if(extensionIndex == extensions.Count - 1){
@@ -169,9 +232,9 @@ public class ItemSelectManager : MonoBehaviour
 
     }
     private void MoveDownPerformed(){
-        switch(currentSelectorObject.name)
+        switch(selectedIndex)
         {
-            case "BodySelector":
+            case 0:
                 Debug.Log("bodyIndexBefore" + bodyIndex);
 
                 if(bodyIndex == 0){
@@ -184,7 +247,7 @@ public class ItemSelectManager : MonoBehaviour
                 Debug.Log("bodyIndexAfter" + bodyIndex);
 
                 break;
-            case "BarrelSelector":
+            case 1:
                 Debug.Log("barrelIndexBefore" + barrelIndex);
 
                 if(barrelIndex == 0){
@@ -198,7 +261,7 @@ public class ItemSelectManager : MonoBehaviour
                Debug.Log("barrelIndexAfter" + barrelIndex);
 
                 break;
-            case "ExtensionSelector":
+            case 2:
                 Debug.Log("extensionIndexBefore" + extensionIndex);
 
                 if(extensions.Count != 0){
@@ -222,7 +285,10 @@ public class ItemSelectManager : MonoBehaviour
             barrelItems[barrelIndex],
             extensionItems.Count != 0 ? extensionItems[extensionIndex] : null);
     }
-   
+    private void OnDestroy() {
+        //inputManager.onMovePerformed -= MoveInputPerformed;
+        //inputManager.onMoveCanceled -= MoveInputCanceled;
+    }
     private void ChangeScene(){
         AuctionDriver.Singleton.ChangeScene();
     }
@@ -233,7 +299,6 @@ public class ItemSelectManager : MonoBehaviour
     private IEnumerator WaitSelect(Selectable target)
     {
         yield return null;
-        target.Select();
     }
      private void UpdateTimer()
     {

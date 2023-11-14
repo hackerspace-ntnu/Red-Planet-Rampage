@@ -12,6 +12,7 @@ public class PlayerFactory : MonoBehaviour
     private Transform[] spawnPoints;
     [SerializeField]
     private GameObject playerSelectItemPrefab;
+    private float spawnInterval = 0f;
     private PlayerInputManagerController playerInputManagerController;
 
     [SerializeField]
@@ -111,10 +112,21 @@ public class PlayerFactory : MonoBehaviour
     }
     private void InstantiateItemSelectPlayer(InputManager inputManager, Transform spawnPoint)
     {
-        GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position + new Vector3(1000f,1000f,0), spawnPoint.rotation);
-        player.GetComponent<ItemSelectManager>().SpawnItems(inputManager);
+        
+        gameObject.GetComponent<AuctionDriver>().Camera.GetComponent<Camera>().enabled = false;
+                inputManager.GetComponent<Camera>().enabled = true;
+        inputManager.gameObject.SetActive(false);
+        PlayerInputManagerController.Singleton.playerInputManager.splitScreen = true;
 
-
-
+        inputManager.gameObject.SetActive(true);
+        spawnInterval += 10000f;
+        GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position + new Vector3(spawnInterval,spawnInterval,0), spawnPoint.rotation);
+        //player.LeanRotateY(rotationCamera, 0.1f);
+        
+        Camera playerCamera = inputManager.GetComponent<Camera>();
+        playerCamera.transform.position = player.GetComponent<ItemSelectManager>().cameraPosition.transform.position;
+        //playerCamera.gameObject.LeanRotateY(rotationCamera, 0.1f);
+        //rotationCamera += 90f;
+        StartCoroutine(player.GetComponent<ItemSelectManager>().SpawnItems(inputManager));
     }
 }

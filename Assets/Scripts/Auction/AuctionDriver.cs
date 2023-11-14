@@ -38,6 +38,7 @@ public class AuctionDriver : MonoBehaviour
 
     [SerializeField]
     private Animator cameraAnimator;
+    public GameObject Camera => cameraAnimator.gameObject;
 
     public static AuctionDriver Singleton;
 
