@@ -35,7 +35,8 @@ public class HatBarrel : ProjectileController
     private VisualEffect hatVfx;
 
     [SerializeField]
-    private float maxLengthBeforeStuck = 100;
+    private float maxDistanceBeforeStuck = 100;
+
     protected override void Awake()
     {
         base.Awake();
@@ -138,15 +139,14 @@ public class HatBarrel : ProjectileController
 
         if (collisions.Length > 0)
         {
-            HitboxController hitbox = collisions[0].GetComponent<HitboxController>();
-            if (hitbox != null)
+            if (collisions[0].TryGetComponent<HitboxController>(out HitboxController hitbox))
             {
                 OnColliderHit?.Invoke(collisions[0], ref state);
                 OnHitboxCollision?.Invoke(hitbox, ref state);
                 state.active = false;
                 return;
             }
-            if (state.distanceTraveled < maxLengthBeforeStuck)
+            if (state.distanceTraveled < maxDistanceBeforeStuck)
             {
                 Physics.Raycast(state.oldPosition, state.direction, out RaycastHit hitInfo);
                 state.direction = Vector3.Reflect(state.direction, hitInfo.normal);
