@@ -10,6 +10,8 @@ public class MeshProjectileController : ProjectileController
 {
     [SerializeField]
     private AugmentAnimator animator;
+    
+    [Header("Parameters")]
 
     [FormerlySerializedAs("maxHatProjectiles")] [SerializeField]
     private int maxProjectiles = 300;
@@ -33,11 +35,18 @@ public class MeshProjectileController : ProjectileController
     // texture used to update the vfx position and alive-state of particles, RGB is used for position A for alive/dead
     private VFXTextureFormatter positionActiveTexture;
 
+    [Header("VFX")]
+
     [FormerlySerializedAs("hatVfx")] [SerializeField]
     private VisualEffect vfx;
 
     [SerializeField]
     private VisualEffect flash;
+
+    [Header("Ricochet")]
+
+    [SerializeField]
+    private bool shouldRicochet = true;
 
     [SerializeField]
     private float maxDistanceBeforeStuck = 100;
@@ -162,7 +171,7 @@ public class MeshProjectileController : ProjectileController
                 state.active = false;
                 return;
             }
-            if (state.distanceTraveled < maxDistanceBeforeStuck)
+            if (shouldRicochet && state.distanceTraveled < maxDistanceBeforeStuck)
             {
                 Physics.Raycast(state.oldPosition, state.direction, out RaycastHit hitInfo);
                 state.direction = Vector3.Reflect(state.direction, hitInfo.normal);
