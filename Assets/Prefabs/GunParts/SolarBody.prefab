@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 978496000584076961}
   - component: {fileID: 7676203181013868872}
   - component: {fileID: 3878788375916620117}
+  - component: {fileID: 2899968104443385103}
   m_Layer: 0
   m_Name: Cube.002
   m_TagString: Untagged
@@ -180,7 +181,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 5094313406688372865, guid: f2b8b09e2d586bb4d85b29f5a961e7b6, type: 3}
+  - {fileID: 2100000, guid: af95cab87c86bef4b80407724fcb7420, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -202,6 +203,22 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &2899968104443385103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4003006189137596285}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29838b16645ea694498a324662cd5628, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  jiggleMaterialIndex: 0
+  jiggleFalloff: 0.9
+  elasticity: 3
+  movementSensitivity: 0.0005
 --- !u!1 &4294008116585500296
 GameObject:
   m_ObjectHideFlags: 0
@@ -213,6 +230,7 @@ GameObject:
   - component: {fileID: 8929108151424653109}
   - component: {fileID: 7926646803352778008}
   - component: {fileID: 2952519668513926281}
+  - component: {fileID: 7894166252352807799}
   m_Layer: 0
   m_Name: Cube.001
   m_TagString: Untagged
@@ -263,7 +281,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 869547880689947767, guid: f2b8b09e2d586bb4d85b29f5a961e7b6, type: 3}
+  - {fileID: 2100000, guid: 8aa3b7d0ba2156f45a8e5fd7b4328f33, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -285,6 +303,22 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &7894166252352807799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4294008116585500296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29838b16645ea694498a324662cd5628, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  jiggleMaterialIndex: 0
+  jiggleFalloff: 0.9
+  elasticity: 3
+  movementSensitivity: 0.002
 --- !u!1 &4757673656308517166
 GameObject:
   m_ObjectHideFlags: 0
