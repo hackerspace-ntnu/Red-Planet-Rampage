@@ -190,10 +190,4 @@ public class ScoreboardManager : MonoBehaviour
 
         ShowMatchResults();
     }
-
-    private void InitiatePosters()
-    {
-
-    }
-
 }
