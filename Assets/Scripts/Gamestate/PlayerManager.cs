@@ -64,6 +64,7 @@ public class PlayerManager : MonoBehaviour
     }
 
     private GunController gunController;
+    public GunController GunController => gunController;
 
     private HealthController healthController;
 
@@ -226,8 +227,15 @@ public class PlayerManager : MonoBehaviour
         // Set layers for the camera to ignore (the other players' gun layers, and this layer)
         // Bitwise negation of this player's model layer and all gun layers that do not belong to this player
         // Gun layers are 4 above their respective player layers.
-        var mask = ((1 << 16) - 1) ^ ((1 << playerLayer) | ((1 << (playerLayer + 4)) ^ allGunsMask));
-        inputManager.GetComponent<Camera>().cullingMask = mask;
+        var playerAndGunMask = ((1 << playerLayer) | ((1 << (playerLayer + 4)) ^ allGunsMask));
+
+        // Ignore ammo boxes if this player doesn't have the gatling body
+        var hasAmmoBoxBody = identity.Body.displayName == "Gatling";
+        var ammoMask = hasAmmoBoxBody ? 0 : 1 << 6;
+
+        var negatedMask = ((1 << 16) - 1) ^ (playerAndGunMask | ammoMask);
+
+        inputManager.GetComponent<Camera>().cullingMask = negatedMask;
 
         // Set correct layer on self, mesh and gun (TODO)
         gameObject.layer = playerLayer;
