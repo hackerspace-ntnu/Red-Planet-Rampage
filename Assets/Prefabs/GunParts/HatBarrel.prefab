@@ -427,7 +427,7 @@ MonoBehaviour:
   - name: ProjectileGravityModifier
     addition: 1
     multiplier: 0
-    exponential: 0.1
+    exponential: 1
   - name: ProjectileDamage
     addition: 25
     multiplier: 0
@@ -454,10 +454,11 @@ MonoBehaviour:
   player: {fileID: 0}
   animator: {fileID: 5376405389655812532}
   maxHatProjectiles: 300
-  hatMaxDistance: 20
-  hatSpeed: 7
-  hatSize: 0.2
+  hatMaxDistance: 250
+  hatSpeed: 20
+  hatSize: 0.3
   hatVfx: {fileID: 1746704752495276340}
+  maxLengthBeforeStuck: 150
 --- !u!114 &1607281845865317333
 MonoBehaviour:
   m_ObjectHideFlags: 0

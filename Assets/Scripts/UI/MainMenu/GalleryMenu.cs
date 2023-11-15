@@ -118,7 +118,8 @@ public class GalleryMenu : MonoBehaviour
                 }
 
                 // Scale the weapon so it fits within the UI 
-                float scaleFactor = gridCellSize.x / bounds.size.z;
+                //float scaleFactor = gridCellSize.x / bounds.size.z;
+                float scaleFactor = bounds.size.z + 60;
                 gun.LeanScale(new Vector3(scaleFactor, scaleFactor, scaleFactor), 0.2f);
 
                 // Recalculate bounds
@@ -128,10 +129,13 @@ public class GalleryMenu : MonoBehaviour
                 }
 
                 // Center the gun on the grid cell
-                gun.transform.localPosition = new Vector3(0 - bounds.center.z * gridCellSize.x / 4, gridCellSize.y / 3, -bounds.extents.x);
+                //gun.transform.localPosition = new Vector3(0 - bounds.center.z * gridCellSize.x / 4, gridCellSize.y / 3, -bounds.extents.x);
+                gun.transform.position = new Vector3(gridElement.position.x, gridElement.position.y + .9f, gridElement.position.z);
+
 
                 // Rotate the weapon to the correct angle
-                gun.transform.Rotate(Vector3.up * 90);
+                //gun.transform.Rotate(Vector3.up * 90);
+                gun.transform.forward = gridElement.right;
 
                 // Add the weapon name
                 string name = GunFactory.GetGunName(weapon.body, weapon.barrel, weapon.extension);
