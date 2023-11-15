@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
 using TMPro;
+using SecretName;
 
 public class ItemSelectManager : MonoBehaviour
 {
@@ -37,7 +38,11 @@ public class ItemSelectManager : MonoBehaviour
     private TMP_Text timerText;
     private const float errorMarginInput = 0.1f;
     private bool gamepadMoveReady = true;
-    public Transform cameraPosition; 
+    public Transform cameraPosition;
+    [SerializeField]
+    private PlayerStatUI playerStatUI;
+    [SerializeField]
+    private TMP_Text secretName;
 
     [SerializeField] 
     private Image bodySelect;
@@ -61,10 +66,10 @@ public class ItemSelectManager : MonoBehaviour
         yield return null;
         this.inputManager = inputManager;
         canvas.worldCamera = inputManager.GetComponent<Camera>();
-
-        bodyItems = inputManager.gameObject.GetComponent<PlayerIdentity>().Bodies;
-        barrelItems = inputManager.gameObject.GetComponent<PlayerIdentity>().Barrels;
-        extensionItems = inputManager.gameObject.GetComponent<PlayerIdentity>().Extensions;   
+        playerStatUI.PlayerIdentity = inputManager.GetComponent<PlayerIdentity>();
+        bodyItems = inputManager.GetComponent<PlayerIdentity>().Bodies;
+        barrelItems = inputManager.GetComponent<PlayerIdentity>().Barrels;
+        extensionItems = inputManager.GetComponent<PlayerIdentity>().Extensions;   
 
         InstantiateItems(bodyItems,defaultBodyItem,itemSpawnPoints[0], bodies);
         InstantiateItems(barrelItems,defaultBarrelItem,itemSpawnPoints[1], barrels);
@@ -103,9 +108,10 @@ public class ItemSelectManager : MonoBehaviour
 
     }
 
-    private void ChangeItemDisplayed(GameObject previousItem,GameObject nextItem,Transform itemSpawnPoint){
+    private void ChangeItemDisplayed(GameObject previousItem, GameObject nextItem,Transform itemSpawnPoint){
 
         if(previousItem != null && nextItem != null){
+            SetLoadout();
             previousItem.transform.SetParent(null);
             previousItem.transform.localPosition = Vector3.zero;
             Debug.Log("Item displayed");
@@ -280,10 +286,13 @@ public class ItemSelectManager : MonoBehaviour
 
     }
     public void SetLoadout(){
-        inputManager.gameObject.GetComponent<PlayerIdentity>().SetLoadout(
+        var player = inputManager.GetComponent<PlayerIdentity>();
+        player.SetLoadout(
             bodyItems[bodyIndex],
             barrelItems[barrelIndex],
             extensionItems.Count != 0 ? extensionItems[extensionIndex] : null);
+        playerStatUI.UpdateStats();
+        secretName.text = player.GetGunName();
     }
     private void OnDestroy() {
         //inputManager.onMovePerformed -= MoveInputPerformed;

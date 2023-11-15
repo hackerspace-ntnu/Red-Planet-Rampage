@@ -106,27 +106,19 @@ public class PlayerFactory : MonoBehaviour
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
         playerManager.SetPlayerInput(inputManager);
-        // Add player UI to globalUI
-        globalHUDController.SetPlayer(playerManager);
         player.GetComponent<HealthController>().enabled = false;
     }
     private void InstantiateItemSelectPlayer(InputManager inputManager, Transform spawnPoint)
     {
-        
-        gameObject.GetComponent<AuctionDriver>().Camera.GetComponent<Camera>().enabled = false;
-                inputManager.GetComponent<Camera>().enabled = true;
+        GetComponent<AuctionDriver>().Camera.GetComponent<Camera>().enabled = false;
+        inputManager.GetComponent<Camera>().enabled = true;
         inputManager.gameObject.SetActive(false);
         PlayerInputManagerController.Singleton.playerInputManager.splitScreen = true;
-
         inputManager.gameObject.SetActive(true);
         spawnInterval += 10000f;
-        GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position + new Vector3(spawnInterval,spawnInterval,0), spawnPoint.rotation);
-        //player.LeanRotateY(rotationCamera, 0.1f);
-        
+        GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position + new Vector3(spawnInterval, spawnInterval, 0), spawnPoint.rotation);
         Camera playerCamera = inputManager.GetComponent<Camera>();
         playerCamera.transform.position = player.GetComponent<ItemSelectManager>().cameraPosition.transform.position;
-        //playerCamera.gameObject.LeanRotateY(rotationCamera, 0.1f);
-        //rotationCamera += 90f;
         StartCoroutine(player.GetComponent<ItemSelectManager>().SpawnItems(inputManager));
     }
 }
