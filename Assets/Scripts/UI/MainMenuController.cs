@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using CollectionExtensions;
+using System.Linq;
 
 public class MainMenuController : MonoBehaviour
 {
@@ -105,7 +106,7 @@ public class MainMenuController : MonoBehaviour
     public void ChangeScene()
     {
         playerInputManagerController.RemoveListeners();
-        SceneManager.LoadSceneAsync(mapNames.RandomElement());
+        SceneManager.LoadSceneAsync(mapNames[0]);
     }
 
     /// <summary>

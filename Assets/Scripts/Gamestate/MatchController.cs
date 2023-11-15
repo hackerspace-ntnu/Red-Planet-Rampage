@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine;
+using System;
 
 /// <summary>
 /// Wrapper struct for tying refference to Player class with the in-game player.
 /// </summary>
+[Serializable]
 public struct Player
 {
     public Player(PlayerIdentity playerIdentity, PlayerManager playerManager, int startAmount)
@@ -77,7 +79,7 @@ public class MatchController : MonoBehaviour
 
     public int RoundCount { get => rounds.Count(); }
 
-    void Start()
+    private void Awake()
     {
         #region Singleton boilerplate
 
@@ -95,6 +97,10 @@ public class MatchController : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
+    }
+
+    void Start()
+    {
         if (rounds.Count == 0)
         {
             PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
@@ -136,6 +142,9 @@ public class MatchController : MonoBehaviour
 
     public void StartNextBidding()
     {
+        if (IsWin())
+            return;
+
         PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
         onBiddingStart?.Invoke();
@@ -151,9 +160,6 @@ public class MatchController : MonoBehaviour
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
         AssignRewards();
-
-        if (!IsWin())
-            StartNextBidding();
     }
 
     public IEnumerator WaitAndStartNextBidding()

@@ -1,18 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
+using System.Linq;
+using CollectionExtensions;
+using System;
 
 public class ScoreboardManager : MonoBehaviour
 {
     public static ScoreboardManager Singleton { get; private set; }
-    
-    // Events
-    public delegate void scoreboardEvent();
-    public scoreboardEvent updateMostWanted;
-    public scoreboardEvent updateMatchResults;
+
+    // Actions
+    public event Action ShowNextCrime;
 
     [Header("Variables")]
-    private List<Player> players;
+    private List<Player> players = new List<Player>();
 
     [SerializeField]
     public List<string> wantedSubtitles = new();
@@ -24,9 +25,14 @@ public class ScoreboardManager : MonoBehaviour
     [Range(0f, 5f)]
     private float newCrimeDelay = 3f;
 
+    private int step = 0;
+    private int maxSteps = 0;
+
     [Header("Prefabs")]
     [SerializeField]
     private GameObject scoreboard;
+
+    private List<Scoreboard> scoreboards = new List<Scoreboard>();
 
     // Refrences
     private MatchController matchController;
@@ -54,33 +60,47 @@ public class ScoreboardManager : MonoBehaviour
     private void Start()
     {
         matchController = MatchController.Singleton;
-        players = matchController.Players;
 
-        for (int i = 0; i < players.Count; i++)
-        {
-            Scoreboard board = Instantiate(scoreboard, new Vector3(-i, 0, 0), Quaternion.identity).GetComponent<Scoreboard>();
-            board.SetupPoster(players[i], wantedSubtitles[Random.Range(0, wantedSubtitles.Count-1)]);
-        }
+        // Values in matchcontroller are not set in Start(), thus using a coroutine to wait until values are set.
+        StartCoroutine(SetupPosters());
     }
 
-    public void CreateMatchResults()
+    private IEnumerator SetupPosters()
     {
-        // Setup posters
-        InitiatePosters();
-        /*// Populate posters with scores
-        SetPosterValues();
+        yield return new WaitForEndOfFrame();
 
+        players = matchController.Players;
+
+        scoreboards = GetComponentsInChildren<Scoreboard>().ToList();
+
+        // Give each scoreboard a random subtitle, while removing unused scoreboards. 
+        for (int i = 0; i < scoreboards.Count; i++)
+        {
+            if (i < players.Count)
+            {
+                scoreboards[i].SetupPoster(players[i], wantedSubtitles.RandomElement());
+            }
+            else
+            {
+                Destroy(scoreboards[i].gameObject);
+            }
+        }
+        scoreboards.RemoveRange(players.Count, scoreboards.Count - players.Count);
+        matchController.onRoundEnd += SetPosterValues;
+    }
+
+    public void ShowMatchResults()
+    {
         // Animate the after battle scene
-        Camera.main.transform.parent = transform;
+        //Camera.main.transform.parent = transform;
         Camera.main.GetComponent<Animator>().SetTrigger("ScoreboardZoom");
 
-        for (int i = 0; i < posters.Length; i++)
+        for (int i = 0; i < scoreboards.Count; i++)
         {
+            print("Index: " + i);
+            print("Player count: " + players.Count);
             // Disable player camera
             players[i].playerManager.inputManager.GetComponent<Camera>().enabled = false;
-
-            // Enable posters
-            posters[i].gameObject.SetActive(true);
         }
 
         // Do not start adding crimes before the camera has finished the animation
@@ -90,12 +110,84 @@ public class ScoreboardManager : MonoBehaviour
         maxSteps = MaxNumberOfCrimes();
 
         StartCoroutine(NextCrime());
-        while (step <= maxSteps)
+
+        print("Finished CreateMatchResults");
+    }
+
+    private IEnumerator DelayDisplayCrimes(int delay)
+    {
+        yield return new WaitForSeconds(delay);
+    }
+
+    private int MaxNumberOfCrimes()
+    {
+        int maxCrimes = 0;
+        foreach (var scoreboard in scoreboards)
         {
-            print("try this?");
+            if (scoreboard.TotalCrimes > maxCrimes)
+                maxCrimes = scoreboard.TotalCrimes;
         }
 
-        print("Finished CreateMatchResults");*/
+        return maxCrimes;
+    }
+
+    private IEnumerator NextCrime()
+    {
+        if (step <= maxSteps)
+        {
+            yield return new WaitForSeconds(newCrimeDelay);
+            print("Invoke next crime");
+            ShowNextCrime?.Invoke();
+            step++;
+            StartCoroutine(NextCrime());
+        }
+        else
+        {
+            // Start next round
+            matchController.StartNextBidding();
+            yield break;
+        }
+    }
+
+    public void SetPosterValues()
+    {
+        if (matchController == null)
+            matchController = MatchController.Singleton;
+
+        Round lastRound = matchController.GetLastRound;
+
+        // Loop through each player, assign points as commented
+        for (int i = 0; i < players.Count; i++)
+        {
+            Player player = players[i];
+            Scoreboard scoreboard = scoreboards[i];
+
+            scoreboard.AddPosterCrime("Savings", player.playerIdentity.chips);
+
+            // Participation award
+            scoreboard.AddPosterCrime("Base", matchController.RewardBase);
+
+            // Kill Award
+            if (lastRound.KillCount(players[i].playerManager) != 0)
+            {
+                scoreboard.AddPosterCrime("Kills", matchController.RewardKill * lastRound.KillCount(player.playerManager));
+            }
+
+            // Round winner award
+            if (lastRound.IsWinner(player.playerIdentity))
+            {
+                scoreboard.AddPosterCrime("Victor", matchController.RewardWin);
+            }
+
+            // New total
+            int roundSpoils = matchController.RewardBase
+                + matchController.RewardKill * lastRound.KillCount(player.playerManager)
+                + (lastRound.IsWinner(player.playerIdentity) ? matchController.RewardWin : 0);
+
+            scoreboard.AddPosterCrime("Total", roundSpoils);
+        }
+
+        ShowMatchResults();
     }
 
     private void InitiatePosters()

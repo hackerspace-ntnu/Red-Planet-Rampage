@@ -3,6 +3,7 @@ using UnityEngine;
 using System;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections;
 
 [RequireComponent(typeof(AudioSource))]
 public class Scoreboard : MonoBehaviour
@@ -16,8 +17,6 @@ public class Scoreboard : MonoBehaviour
     private Player player;
 
     private AudioSource audioSource;
-
-    public event Action ShowNextCrime;
 
     public int TotalCrimes { get => crimeData.Count; }
 
@@ -46,15 +45,19 @@ public class Scoreboard : MonoBehaviour
     private List<(string, string)> crimeData = new();
     private List<(TMP_Text, TMP_Text)> crimeTextComponents = new();
 
-    private Scoreboard scoreboard;
+    void Start()
+    {
+        scoreboardManager = ScoreboardManager.Singleton;
+        audioSource = GetComponent<AudioSource>();
+    }
 
     public void SetupPoster(Player player, string subtitle)
     {
         background.color = player.playerIdentity.color;
         this.subtitle.text = subtitle;
-        scoreboard = GetComponentInParent<Scoreboard>();
+        this.player = player;
 
-        scoreboard.ShowNextCrime += NextStep;
+        scoreboardManager.ShowNextCrime += NextStep;
     }
 
     public void AddPosterCrime(string crimeLabel, int Value)
@@ -80,20 +83,12 @@ public class Scoreboard : MonoBehaviour
             crimeTextComponents[index].Item2.text = crimeData[index].Item2;
         }
     }
-    void Start()
-    {
-        scoreboardManager = ScoreboardManager.Singleton;
-        audioSource = GetComponent<AudioSource>();    
-        
-        
-    }
-
-    /*
+    
     private IEnumerator DelayDisplayCrimes(int delay)
     {
         yield return new WaitForSeconds(delay);
     }
-
+    /*
     private IEnumerator NextCrime()
     {
         if(step <= maxSteps)
@@ -138,10 +133,6 @@ public class Scoreboard : MonoBehaviour
         maxSteps = MaxNumberOfCrimes();
 
         StartCoroutine(NextCrime());
-        while (step <= maxSteps)
-        {
-            print("try this?");
-        }
 
         print("Finished CreateMatchResults");
     }
