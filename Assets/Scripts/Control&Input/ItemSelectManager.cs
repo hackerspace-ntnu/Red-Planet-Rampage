@@ -75,15 +75,11 @@ public class ItemSelectManager : MonoBehaviour
         InstantiateItems(barrelItems,defaultBarrelItem,itemSpawnPoints[1], barrels);
         InstantiateItems(extensionItems,null,itemSpawnPoints[2],extensions);
 
-        Debug.Log("body items" + bodyItems.Count);
-        Debug.Log("barrel items" + barrelItems.Count);
-        Debug.Log("extension items" + extensionItems.Count);
+       
         bodyIndex = bodies.Count - 1;
         barrelIndex = barrels.Count - 1;
         extensionIndex = extensions.Count - 1;
-        Debug.Log("bodyIndexLast" + bodyIndex);
-        Debug.Log("barrelIndexLast" + barrelIndex);
-        Debug.Log("extensionIndexLast" + extensionIndex);
+        
 
 
         ChangeItemDisplayed(bodies[bodyIndex], bodies[bodyIndex], itemSpawnPoints[0]);
@@ -114,16 +110,22 @@ public class ItemSelectManager : MonoBehaviour
             SetLoadout();
             previousItem.transform.SetParent(null);
             previousItem.transform.localPosition = Vector3.zero;
-            Debug.Log("Item displayed");
+           
             nextItem.transform.SetParent(itemSpawnPoint);
             if(itemSpawnPoint == itemSpawnPoints[1]){
-                nextItem.transform.localPosition = new Vector3(-35f,0,0);
+                nextItem.transform.localPosition = new Vector3(-40f,0,-60);
 
+                if(nextItem.TryGetComponent<HatBarrel>(out HatBarrel hatBarrel)){
+                    nextItem.LeanScale(new Vector3(100f, 100f, 100f), 0.5f);
+                }else{
+                    nextItem.LeanScale(new Vector3(150f, 150f, 150f), 0.5f);
+
+                }
             }else{
                 nextItem.transform.localPosition = Vector3.zero;
+                nextItem.LeanScale(new Vector3(150f, 150f, 150f), 0.5f);
 
             }
-            nextItem.transform.localScale = new Vector3(300f,150f,150f);
         }else{
             Debug.Log("Player has no extensions");
         }
@@ -143,12 +145,10 @@ public class ItemSelectManager : MonoBehaviour
     }
      private void MoveInputPerformed(InputAction.CallbackContext ctx)
     {
-        Debug.Log("moved");
         moveInput = ctx.ReadValue<Vector2>();
         Debug.Log(moveInput);
 
         if(moveInput.y > 1 - errorMarginInput && gamepadMoveReady){
-            Debug.Log("up");
             MoveUpPerformed();
             gamepadMoveReady = false;
             StartCoroutine(gamepadMoveDelay());
@@ -172,7 +172,6 @@ public class ItemSelectManager : MonoBehaviour
         bodySelect.color  = defaultColor;
         barrelSelect.color  = defaultColor;
         extensionSelect.color  = defaultColor;
-        Debug.Log("SelectedIndex was " + selectedIndex);
         switch (selectedIndex){
             case 0:
                 bodySelect.color = selectedColor;
@@ -197,7 +196,6 @@ public class ItemSelectManager : MonoBehaviour
         switch(selectedIndex)
         {
             case 0:
-                Debug.Log("bodyIndexBefore" + bodyIndex);
 
                 if(bodyIndex == bodies.Count - 1){
                     bodyIndex = 0;
@@ -206,10 +204,8 @@ public class ItemSelectManager : MonoBehaviour
                     bodyIndex ++;
                     ChangeItemDisplayed(bodies[bodyIndex - 1],bodies[bodyIndex],itemSpawnPoints[0]);
                 }
-                Debug.Log("bodyIndexAfter" + bodyIndex);
                 break;
             case 1:
-                Debug.Log("barrelIndexBefore" + barrelIndex);
                 if(barrelIndex == barrels.Count - 1){
                     barrelIndex = 0;
                     ChangeItemDisplayed(barrels[^1],barrels[barrelIndex],itemSpawnPoints[1]);
@@ -218,11 +214,9 @@ public class ItemSelectManager : MonoBehaviour
                     barrelIndex ++;
                     ChangeItemDisplayed(barrels[barrelIndex - 1],barrels[barrelIndex],itemSpawnPoints[1]);
                 }
-                Debug.Log("barrelIndexAfter" + barrelIndex);
 
                 break;
             case 2:
-                Debug.Log("extensionIndexBefore" + extensionIndex);
 
                 if(extensionIndex == extensions.Count - 1){
                     extensionIndex = 0;
@@ -232,7 +226,6 @@ public class ItemSelectManager : MonoBehaviour
                     extensionIndex ++;
                     ChangeItemDisplayed(extensions[extensionIndex - 1],extensions[extensionIndex],itemSpawnPoints[2]);
                 }
-                Debug.Log("extensionIndexAfter" + extensionIndex);
                 break;
         }
 
@@ -241,7 +234,6 @@ public class ItemSelectManager : MonoBehaviour
         switch(selectedIndex)
         {
             case 0:
-                Debug.Log("bodyIndexBefore" + bodyIndex);
 
                 if(bodyIndex == 0){
                     bodyIndex = bodies.Count - 1;
@@ -250,11 +242,9 @@ public class ItemSelectManager : MonoBehaviour
                     bodyIndex --;
                     ChangeItemDisplayed(bodies[bodyIndex + 1],bodies[bodyIndex],itemSpawnPoints[0]);
                 }
-                Debug.Log("bodyIndexAfter" + bodyIndex);
 
                 break;
             case 1:
-                Debug.Log("barrelIndexBefore" + barrelIndex);
 
                 if(barrelIndex == 0){
                     barrelIndex = barrels.Count - 1;
@@ -264,11 +254,9 @@ public class ItemSelectManager : MonoBehaviour
                     barrelIndex --;
                     ChangeItemDisplayed(barrels[barrelIndex + 1],barrels[barrelIndex],itemSpawnPoints[1]);
                 }
-               Debug.Log("barrelIndexAfter" + barrelIndex);
 
                 break;
             case 2:
-                Debug.Log("extensionIndexBefore" + extensionIndex);
 
                 if(extensions.Count != 0){
                     if(extensionIndex == 0){
@@ -280,7 +268,6 @@ public class ItemSelectManager : MonoBehaviour
                         ChangeItemDisplayed(extensions[extensionIndex + 1],extensions[extensionIndex],itemSpawnPoints[2]);
                     }
                 }
-                Debug.Log("extensionIndexAfter" + extensionIndex);
                 break;
         }
 
@@ -294,10 +281,7 @@ public class ItemSelectManager : MonoBehaviour
         playerStatUI.UpdateStats();
         secretName.text = player.GetGunName();
     }
-    private void OnDestroy() {
-        //inputManager.onMovePerformed -= MoveInputPerformed;
-        //inputManager.onMoveCanceled -= MoveInputCanceled;
-    }
+    
     private void ChangeScene(){
         AuctionDriver.Singleton.ChangeScene();
     }
