@@ -72,15 +72,12 @@ public class PlayerIdentity : MonoBehaviour
         switch (item.augmentType)
         {
             case AugmentType.Body:
-                body = item;
                 Bodies.Add(item);
                 break;
             case AugmentType.Barrel:
-                barrel = item;
                 Barrels.Add(item);
                 break;
             case AugmentType.Extension:
-                extension = item;
                 Extensions.Add(item);
                 break;
             default:
@@ -99,6 +96,12 @@ public class PlayerIdentity : MonoBehaviour
         barrel = StaticInfo.Singleton.StartingBarrel;
         extension = null;
         chips = 0;
+    }
+
+    public void SetLoadout(Item body,Item barrel, Item extension){
+        this.body = body;
+        this.barrel = barrel;
+        this.extension = extension;
     }
 
     public override string ToString()

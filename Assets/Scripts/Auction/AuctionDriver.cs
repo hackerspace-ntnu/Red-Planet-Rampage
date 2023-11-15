@@ -38,6 +38,28 @@ public class AuctionDriver : MonoBehaviour
 
     [SerializeField]
     private Animator cameraAnimator;
+    public GameObject Camera => cameraAnimator.gameObject;
+
+    public static AuctionDriver Singleton;
+
+    private void Awake() {
+            #region Singleton boilerplate
+
+        if (Singleton != null)
+        {
+            if (Singleton != this)
+            {
+                Debug.LogWarning($"There's more than one {Singleton.GetType()} in the scene!");
+                Destroy(gameObject);
+            }
+
+            return;
+        }
+
+        Singleton = this;
+
+        #endregion Singleton boilerplate
+    }
 
     // Stages
     // BiddingStage contains a list of items (scriptableobjects)
@@ -137,11 +159,15 @@ public class AuctionDriver : MonoBehaviour
             StartCoroutine(AnimateGunConstruction(playersInAuction.ElementAt(playersInAuction.Count-i-1), gunConstructionPanels[i]));
         }
         */
+        
+        playerFactory.InstantiatePlayerSelectItems();
 
-        StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
+        
     }
-
+    public void ChangeScene(){
+        StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
+        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());  
+    }
     private IEnumerator AnimateGunConstruction(PlayerManager playerManager, RectTransform parent)
     {
         yield return new WaitForSeconds(1);
