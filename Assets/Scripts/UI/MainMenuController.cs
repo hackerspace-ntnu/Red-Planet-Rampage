@@ -106,7 +106,7 @@ public class MainMenuController : MonoBehaviour
     public void ChangeScene()
     {
         playerInputManagerController.RemoveListeners();
-        SceneManager.LoadSceneAsync(mapNames[0]);
+        SceneManager.LoadSceneAsync(mapNames.RandomElement());
     }
 
     /// <summary>

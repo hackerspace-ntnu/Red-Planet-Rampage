@@ -92,13 +92,11 @@ public class ScoreboardManager : MonoBehaviour
     public void ShowMatchResults()
     {
         // Animate the after battle scene
-        //Camera.main.transform.parent = transform;
+        Camera.main.transform.parent = transform;
         Camera.main.GetComponent<Animator>().SetTrigger("ScoreboardZoom");
 
         for (int i = 0; i < scoreboards.Count; i++)
         {
-            print("Index: " + i);
-            print("Player count: " + players.Count);
             // Disable player camera
             players[i].playerManager.inputManager.GetComponent<Camera>().enabled = false;
         }
@@ -110,8 +108,6 @@ public class ScoreboardManager : MonoBehaviour
         maxSteps = MaxNumberOfCrimes();
 
         StartCoroutine(NextCrime());
-
-        print("Finished CreateMatchResults");
     }
 
     private IEnumerator DelayDisplayCrimes(int delay)
@@ -136,7 +132,6 @@ public class ScoreboardManager : MonoBehaviour
         if (step <= maxSteps)
         {
             yield return new WaitForSeconds(newCrimeDelay);
-            print("Invoke next crime");
             ShowNextCrime?.Invoke();
             step++;
             StartCoroutine(NextCrime());
