@@ -5,7 +5,6 @@ using TMPro;
 using UnityEngine.UI;
 using System.Collections;
 
-[RequireComponent(typeof(AudioSource))]
 public class Scoreboard : MonoBehaviour
 {
     [Header("References")]

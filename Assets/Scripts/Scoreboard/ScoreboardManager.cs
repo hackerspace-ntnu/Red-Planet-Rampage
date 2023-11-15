@@ -5,6 +5,7 @@ using System.Linq;
 using CollectionExtensions;
 using System;
 
+[RequireComponent(typeof(AudioSource))]
 public class ScoreboardManager : MonoBehaviour
 {
     public static ScoreboardManager Singleton { get; private set; }
@@ -21,9 +22,11 @@ public class ScoreboardManager : MonoBehaviour
     [SerializeField]
     private AudioClip nextCrimeSound;
 
+    private AudioSource audioSource;
+
     [SerializeField]
     [Range(0f, 5f)]
-    private float newCrimeDelay = 3f;
+    private float newCrimeDelay = 1f;
 
     private int step = 0;
     private int maxSteps = 0;
@@ -60,6 +63,8 @@ public class ScoreboardManager : MonoBehaviour
     private void Start()
     {
         matchController = MatchController.Singleton;
+
+        audioSource = GetComponent<AudioSource>();
 
         // Values in matchcontroller are not set in Start(), thus using a coroutine to wait until values are set.
         StartCoroutine(SetupPosters());
@@ -102,17 +107,17 @@ public class ScoreboardManager : MonoBehaviour
         }
 
         // Do not start adding crimes before the camera has finished the animation
-        int delay = Mathf.RoundToInt(Camera.main.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length) * 1000;
+        int delay = Mathf.RoundToInt(Camera.main.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
         StartCoroutine(DelayDisplayCrimes(delay));
-
-        maxSteps = MaxNumberOfCrimes();
-
-        StartCoroutine(NextCrime());
     }
 
     private IEnumerator DelayDisplayCrimes(int delay)
     {
         yield return new WaitForSeconds(delay);
+        
+        maxSteps = MaxNumberOfCrimes();
+
+        StartCoroutine(NextCrime());
     }
 
     private int MaxNumberOfCrimes()
@@ -134,6 +139,7 @@ public class ScoreboardManager : MonoBehaviour
             yield return new WaitForSeconds(newCrimeDelay);
             ShowNextCrime?.Invoke();
             step++;
+            audioSource.PlayOneShot(nextCrimeSound);
             StartCoroutine(NextCrime());
         }
         else
