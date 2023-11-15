@@ -28,6 +28,9 @@ public class ScoreboardManager : MonoBehaviour
     [Range(0f, 5f)]
     private float newCrimeDelay = 1f;
 
+    [SerializeField]
+    private float delayBeforeMatchResults = 3f;
+
     private int step = 0;
     private int maxSteps = 0;
 
@@ -94,8 +97,11 @@ public class ScoreboardManager : MonoBehaviour
         matchController.onRoundEnd += SetPosterValues;
     }
 
-    public void ShowMatchResults()
+    public IEnumerator ShowMatchResults()
     {
+        // Delay first so we can see who killed who
+        yield return new WaitForSeconds(delayBeforeMatchResults);
+
         // Animate the after battle scene
         Camera.main.transform.parent = transform;
         Camera.main.GetComponent<Animator>().SetTrigger("ScoreboardZoom");
@@ -108,11 +114,6 @@ public class ScoreboardManager : MonoBehaviour
 
         // Do not start adding crimes before the camera has finished the animation
         int delay = Mathf.RoundToInt(Camera.main.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
-        StartCoroutine(DelayDisplayCrimes(delay));
-    }
-
-    private IEnumerator DelayDisplayCrimes(int delay)
-    {
         yield return new WaitForSeconds(delay);
         
         maxSteps = MaxNumberOfCrimes();
@@ -145,8 +146,8 @@ public class ScoreboardManager : MonoBehaviour
         else
         {
             // Start next round
+            yield return new WaitForSeconds(newCrimeDelay);
             matchController.StartNextBidding();
-            yield break;
         }
     }
 
@@ -189,6 +190,6 @@ public class ScoreboardManager : MonoBehaviour
             scoreboard.AddPosterCrime("Total", roundSpoils + player.playerIdentity.chips);
         }
 
-        ShowMatchResults();
+        StartCoroutine(ShowMatchResults());
     }
 }
