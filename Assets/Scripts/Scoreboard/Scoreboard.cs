@@ -67,6 +67,15 @@ public class Scoreboard : MonoBehaviour
         crimeData.Add((crimeLabel, Value.ToString()));
     }
 
+    public void AddBlankPoster()
+    {
+        GameObject crime = Instantiate(crimeTextPrefab, crimeContent);
+        TMP_Text[] texts = crime.GetComponentsInChildren<TMP_Text>();
+
+        crimeTextComponents.Add((texts[0], texts[1]));
+        crimeData.Add(("", ""));
+    }
+
     private void NextStep()
     {
         DisplayCrime(currentStep);

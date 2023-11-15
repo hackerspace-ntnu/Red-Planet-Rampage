@@ -168,16 +168,17 @@ public class ScoreboardManager : MonoBehaviour
             // Participation award
             scoreboard.AddPosterCrime("Base", matchController.RewardBase);
 
-            // Kill Award
-            if (lastRound.KillCount(players[i].playerManager) != 0)
-            {
-                scoreboard.AddPosterCrime("Kills", matchController.RewardKill * lastRound.KillCount(player.playerManager));
-            }
+            // Kill Award (shows 0 if none)
+            scoreboard.AddPosterCrime("Kills", matchController.RewardKill * lastRound.KillCount(player.playerManager));
 
             // Round winner award
             if (lastRound.IsWinner(player.playerIdentity))
             {
                 scoreboard.AddPosterCrime("Victor", matchController.RewardWin);
+            }
+            else
+            {
+                scoreboard.AddBlankPoster();
             }
 
             // New total
