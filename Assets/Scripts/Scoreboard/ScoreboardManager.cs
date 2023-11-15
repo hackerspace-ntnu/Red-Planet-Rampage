@@ -134,12 +134,12 @@ public class ScoreboardManager : MonoBehaviour
 
     private IEnumerator NextCrime()
     {
-        if (step <= maxSteps)
+        if (step < maxSteps)
         {
-            yield return new WaitForSeconds(newCrimeDelay);
+            audioSource.PlayOneShot(nextCrimeSound);
             ShowNextCrime?.Invoke();
             step++;
-            audioSource.PlayOneShot(nextCrimeSound);
+            yield return new WaitForSeconds(newCrimeDelay);
             StartCoroutine(NextCrime());
         }
         else
@@ -185,7 +185,7 @@ public class ScoreboardManager : MonoBehaviour
                 + matchController.RewardKill * lastRound.KillCount(player.playerManager)
                 + (lastRound.IsWinner(player.playerIdentity) ? matchController.RewardWin : 0);
 
-            scoreboard.AddPosterCrime("Total", roundSpoils);
+            scoreboard.AddPosterCrime("Total", roundSpoils + player.playerIdentity.chips);
         }
 
         ShowMatchResults();
