@@ -54,7 +54,7 @@ public class ItemSelectManager : MonoBehaviour
     private Color selectedColor;
     [SerializeField]
     private Color defaultColor;
-    private int selectedIndex = 0;
+    private int selectedTypeIndex = 0;
 
    void Start()
     {
@@ -106,7 +106,11 @@ public class ItemSelectManager : MonoBehaviour
 
     private void ChangeItemDisplayed(GameObject previousItem, GameObject nextItem,Transform itemSpawnPoint){
 
-        if(previousItem != null && nextItem != null){
+        if(previousItem == null && nextItem == null){
+            Debug.Log("Player has no extensions");
+            return;
+        }
+
             SetLoadout();
             previousItem.transform.SetParent(null);
             previousItem.transform.localPosition = Vector3.zero;
@@ -119,16 +123,13 @@ public class ItemSelectManager : MonoBehaviour
                     nextItem.LeanScale(new Vector3(100f, 100f, 100f), 0.5f);
                 }else{
                     nextItem.LeanScale(new Vector3(150f, 150f, 150f), 0.5f);
-
                 }
             }else{
                 nextItem.transform.localPosition = Vector3.zero;
                 nextItem.LeanScale(new Vector3(150f, 150f, 150f), 0.5f);
 
             }
-        }else{
-            Debug.Log("Player has no extensions");
-        }
+
     
     }
     
@@ -158,21 +159,21 @@ public class ItemSelectManager : MonoBehaviour
             StartCoroutine(gamepadMoveDelay());
 
         }else if (moveInput.x < -1 + errorMarginInput && gamepadMoveReady){
-            selectedIndex--;
-            selectedIndex = selectedIndex < 0 ? 2 : selectedIndex;
+            selectedTypeIndex--;
+            selectedTypeIndex = selectedTypeIndex < 0 ? 2 : selectedTypeIndex;
             gamepadMoveReady = false;
             StartCoroutine(gamepadMoveDelay());
 
         }else if (moveInput.x > 1 - errorMarginInput && gamepadMoveReady){
-            selectedIndex++;
-            selectedIndex = selectedIndex > 2 ? 0 : selectedIndex;
+            selectedTypeIndex++;
+            selectedTypeIndex = selectedTypeIndex > 2 ? 0 : selectedTypeIndex;
             gamepadMoveReady = false;
             StartCoroutine(gamepadMoveDelay());
         }
         bodySelect.color  = defaultColor;
         barrelSelect.color  = defaultColor;
         extensionSelect.color  = defaultColor;
-        switch (selectedIndex){
+        switch (selectedTypeIndex){
             case 0:
                 bodySelect.color = selectedColor;
                 break;
@@ -193,7 +194,7 @@ public class ItemSelectManager : MonoBehaviour
         moveInput = Vector2.zero;
     }
      private void MoveUpPerformed(){
-        switch(selectedIndex)
+        switch(selectedTypeIndex)
         {
             case 0:
 
@@ -231,7 +232,7 @@ public class ItemSelectManager : MonoBehaviour
 
     }
     private void MoveDownPerformed(){
-        switch(selectedIndex)
+        switch(selectedTypeIndex)
         {
             case 0:
 
@@ -298,3 +299,4 @@ public class ItemSelectManager : MonoBehaviour
         timerText.text = Mathf.Round(timer.WaitTime - timer.ElapsedTime).ToString();
     }
 }
+

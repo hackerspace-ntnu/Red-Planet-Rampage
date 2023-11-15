@@ -42,7 +42,7 @@ public class AuctionDriver : MonoBehaviour
 
     public static AuctionDriver Singleton;
 
-private void Awake() {
+    private void Awake() {
             #region Singleton boilerplate
 
         if (Singleton != null)
@@ -59,7 +59,7 @@ private void Awake() {
         Singleton = this;
 
         #endregion Singleton boilerplate
-}
+    }
 
     // Stages
     // BiddingStage contains a list of items (scriptableobjects)
