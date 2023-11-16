@@ -62,6 +62,8 @@ public class SodiePopper : GunBody
         {
             playerLastPos = playerLastLastPos = playerTransform.position;
         }
+        if (gunController)
+            gunController.HasRecoil = false;
     }
 
     private void Update()

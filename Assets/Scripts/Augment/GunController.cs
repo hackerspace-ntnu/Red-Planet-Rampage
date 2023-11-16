@@ -24,6 +24,7 @@ public class GunController : MonoBehaviour
 
     // All the stats of the gun and projectile
     public GunStats stats { get; set; }
+    public bool HasRecoil = true; 
 
     // Inputs
     public bool triggerHeld, triggerPressed;
@@ -69,7 +70,8 @@ public class GunController : MonoBehaviour
         stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.magazineSize);
 
         onFire?.Invoke(stats);
-        gameObject.LeanMoveLocalZ(0.3f, 0.2f).setEasePunch();
+        if (HasRecoil)
+            gameObject.LeanMoveLocalZ(0.3f, 0.2f).setEasePunch();
 
         // Aim at target but lerp in original direction if target is close
         Vector3 targetedOutput = (target - projectile.projectileOutput.position).normalized;
