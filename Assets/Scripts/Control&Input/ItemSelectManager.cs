@@ -119,7 +119,7 @@ public class ItemSelectManager : MonoBehaviour
             if(itemSpawnPoint == itemSpawnPoints[1]){
                 nextItem.transform.localPosition = new Vector3(-40f,0,-60);
 
-                if(nextItem.TryGetComponent<HatBarrel>(out HatBarrel hatBarrel)){
+                if(nextItem.TryGetComponent<MeshProjectileController>(out MeshProjectileController meshProjectile)){
                     nextItem.LeanScale(new Vector3(100f, 100f, 100f), 0.5f);
                 }else{
                     nextItem.LeanScale(new Vector3(150f, 150f, 150f), 0.5f);
