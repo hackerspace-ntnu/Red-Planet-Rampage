@@ -42,6 +42,7 @@ GameObject:
   - component: {fileID: 8196151136836888530}
   - component: {fileID: 7575752308601990708}
   - component: {fileID: 545832892058184649}
+  - component: {fileID: 3207481307065765249}
   m_Layer: 0
   m_Name: KnockbackExtension
   m_TagString: Untagged
@@ -94,12 +95,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d0bc7e37e343104b92f5630b017e4cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  statModifiers: []
-  outputs: []
-  model: {fileID: 1494158463659799967, guid: d37a005aa0cfcdd4fa78dff2d3290c9b, type: 3}
   pushPower: 200
-  perBulletExtraForce: 25
   EnemyForceMultiplier: 2
+  baseFireRateAdder: 2
+--- !u!114 &3207481307065765249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8350213044137146345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49ba4bdeb4a0c8548b6b50d2d03dc38a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pushPower: 200
   baseFireRateAdder: 2
 --- !u!1001 &5385895471863538172
 PrefabInstance:

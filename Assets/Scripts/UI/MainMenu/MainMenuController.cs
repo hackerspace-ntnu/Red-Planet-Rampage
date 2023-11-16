@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using CollectionExtensions;
+using System.Linq;
 
 public class MainMenuController : MonoBehaviour
 {

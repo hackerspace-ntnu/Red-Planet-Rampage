@@ -17,9 +17,6 @@ public class HatBarrelModel : AugmentAnimator
     private float bulletHeigth = 0.05f;
 
     [SerializeField]
-    private HatBarrel barrel;
-
-    [SerializeField]
     private Transform ammunitionHolder;
     private List<GameObject> ammunition = new List<GameObject>();
 
@@ -64,7 +61,7 @@ public class HatBarrelModel : AugmentAnimator
         bullet.SetActive(!bullet.activeInHierarchy);
         if (!bullet.activeInHierarchy)
         {
-            barrel.ReleaseLoadedHat();
+            OnFireAnimationEnd?.Invoke();
         }
     }
 }

@@ -1,20 +1,10 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
-public class KnockbackOnShotModifier: GunExtension, ProjectileModifier
+public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
 {
     [SerializeField]
     private float pushPower;
-
-    [SerializeField]
-    private float EnemyForceMultiplier = 2f;
-
-    [SerializeField]
-    private float baseFireRateAdder = 2f;
 
     private float bulletAmount = 1f;
 
@@ -22,7 +12,7 @@ public class KnockbackOnShotModifier: GunExtension, ProjectileModifier
 
     private float calculatedPushPower;
 
-    void Awake()
+    private void Awake()
     {
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
@@ -33,7 +23,6 @@ public class KnockbackOnShotModifier: GunExtension, ProjectileModifier
     }
     public void Attach(ProjectileController projectile)
     {
-        projectile.OnProjectileInit += KnockAwayOnShot;
         projectile.OnHitboxCollision += KnockAwayTargets;
         var bulletController = projectile.gameObject.GetComponent<BulletController>();
         bulletAmount = bulletController == null || bulletController.BulletsPerShot == 0 ? 1f : bulletController.BulletsPerShot;
@@ -42,21 +31,10 @@ public class KnockbackOnShotModifier: GunExtension, ProjectileModifier
 
     public void Detach(ProjectileController projectile)
     {
-        projectile.OnProjectileInit -= KnockAwayOnShot;
         projectile.OnHitboxCollision -= KnockAwayTargets;
     }
 
-    public void KnockAwayOnShot(ref ProjectileState state, GunStats stats)
-    {
-        Vector3 normal = -gunController.transform.forward;
-
-        float calculatedPushPowerForPlayer = (calculatedPushPower / stats.Firerate) * (baseFireRateAdder + (float)Math.Log(stats.Firerate));
-
-        gunController.player.GetComponent<Rigidbody>().AddForce(normal * calculatedPushPowerForPlayer, ForceMode.Impulse);
-
-    }
-
-    public void KnockAwayTargets(HitboxController controller, ref ProjectileState state)
+    private void KnockAwayTargets(HitboxController controller, ref ProjectileState state)
     {
         Vector3 normal = gunController.transform.forward;
 
