@@ -6,7 +6,7 @@ public class GlobalHUDController : MonoBehaviour
 {
     [SerializeField]
     private TMP_Text roundTimer;
-
+    public TMP_Text RoundTimer => roundTimer;
 
     [SerializeField]
     private TMP_Text winText;

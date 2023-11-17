@@ -68,6 +68,7 @@ public class MatchController : MonoBehaviour
 
     [SerializeField]
     private GlobalHUDController globalHUDController;
+    public GlobalHUDController GlobalHUD => globalHUDController;
 
     private string currentMapName;
 
