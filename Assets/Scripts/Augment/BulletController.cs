@@ -7,9 +7,11 @@ public class BulletController : ProjectileController
     private float maxDistance = 20;
 
     [SerializeField]
-    private int collisionSamples = 30;
+    private int collisionSamplesPerUnit = 3;
 
-    private int vfxPositionsPerSample = 3;
+    private int collisionSamples;
+
+    private const int vfxPositionsPerSample = 3;
 
     private const float baseSpeed = 50f;
 
@@ -35,7 +37,8 @@ public class BulletController : ProjectileController
 
     private void Start()
     {
-        var bulletsPerShot = Mathf.FloorToInt(stats.ProjectilesPerShot);
+        collisionSamples = Mathf.CeilToInt(collisionSamplesPerUnit * maxDistance);
+        var bulletsPerShot = Mathf.CeilToInt(stats.ProjectilesPerShot);
         flash.transform.position = projectileOutput.position;
         trailPosTexture = new VFXTextureFormatter(vfxPositionsPerSample * collisionSamples * bulletsPerShot);
         trail.SetTexture("Position", this.trailPosTexture.Texture);
@@ -58,11 +61,11 @@ public class BulletController : ProjectileController
     {
         animator.OnFire(stats.Ammo);
 
-        // TODO: Possibly standardize this better
         for (int k = 0; k < stats.ProjectilesPerShot; k++)
         {
             Quaternion randomSpread = Quaternion.Lerp(Quaternion.identity, Random.rotation, stats.ProjectileSpread);
 
+            // TODO: Possibly standardize this better
             projectile.active = true;
             projectile.distanceTraveled = 0f;
             projectile.damage = stats.ProjectileDamage;
