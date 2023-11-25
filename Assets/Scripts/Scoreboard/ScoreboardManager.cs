@@ -99,6 +99,7 @@ public class ScoreboardManager : MonoBehaviour
 
     public IEnumerator ShowMatchResults()
     {
+        matchController.GlobalHUD.RoundTimer.enabled = false;
         // Delay first so we can see who killed who
         yield return new WaitForSeconds(delayBeforeMatchResults);
 

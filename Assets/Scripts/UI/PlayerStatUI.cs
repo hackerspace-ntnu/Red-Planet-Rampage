@@ -11,18 +11,12 @@ public class PlayerStatUI : MonoBehaviour
     [SerializeField]
     private TMP_Text playerNameText;
 
-    [SerializeField]
-    private TMP_Text chipsText;
-
     public string gunNameText { get; private set; }
 
     [SerializeField]
     private RectTransform gunPreviewPanel;
 
     private GameObject gunPreviewGameObject;
-
-    [SerializeField]
-    private Chip chip;
 
     [SerializeField]
     private StatBar damageBar;
@@ -68,8 +62,6 @@ public class PlayerStatUI : MonoBehaviour
         SetName(playerIdentity.playerName);
         SetColor(playerIdentity.color);
 
-        SetChips(playerIdentity.chips);
-
         SetGunName(playerIdentity.GetGunName());
         gunPreviewGameObject = GunFactory.InstantiateGun(playerIdentity.Body, playerIdentity.Barrel, playerIdentity.Extension, null, gunPreviewPanel);
         gunPreviewGameObject.transform.Rotate(new Vector3(0f, 90f));
@@ -89,8 +81,6 @@ public class PlayerStatUI : MonoBehaviour
         {
             return;
         }
-
-        playerIdentity.onChipChange -= SetChips;
         playerIdentity.onInventoryChange -= OnInventoryChange;
     }
 
@@ -147,11 +137,6 @@ public class PlayerStatUI : MonoBehaviour
     public void SetColor(Color color)
     {
         outline.effectColor = color;
-    }
-
-    public void SetChips(int amount)
-    {
-        chipsText.SetText(amount.ToString());
     }
 
     public void SetGunName(string name)
