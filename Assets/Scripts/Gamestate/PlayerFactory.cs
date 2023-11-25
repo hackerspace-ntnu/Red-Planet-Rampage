@@ -80,6 +80,7 @@ public class PlayerFactory : MonoBehaviour
     {
         // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
+        Debug.Log($"Spawned with {spawnPoint.rotation.eulerAngles} but got {player.transform.rotation.eulerAngles}");
         Transform cameraOffset = player.transform.Find("CameraOffset");
         // Make playerInput child of player it's attached to
         inputManager.transform.parent = player.transform;
