@@ -17,10 +17,9 @@ public class MeshProjectileController : ProjectileController
     private int maxProjectiles = 300;
 
     [FormerlySerializedAs("hatMaxDistance")] [SerializeField]
-    private float maxDistance = 20f;
+    private float maxDistance = 20;
 
-    [FormerlySerializedAs("hatSpeed")] [SerializeField]
-    private float speed = 10f;
+    private const float baseSpeed = 20;
 
     [FormerlySerializedAs("hatSize")] [SerializeField]
     private float size = .2f;
@@ -77,7 +76,7 @@ public class MeshProjectileController : ProjectileController
     public override void InitializeProjectile(GunStats stats)
     {
         loadedProjectile = new ProjectileState(stats, projectileOutput);
-        loadedProjectile.maxDistance = this.maxDistance;
+        loadedProjectile.maxDistance = maxDistance;
 
         animator.OnFire(stats.Ammo);
     }
@@ -87,7 +86,7 @@ public class MeshProjectileController : ProjectileController
         if (loadedProjectile == null) return;
 
         loadedProjectile.active = true;
-        loadedProjectile.speed = speed;
+        loadedProjectile.speed = baseSpeed;
         OnProjectileInit?.Invoke(ref loadedProjectile, stats);
         for (int i = 0; i < maxProjectiles; i++)
         {

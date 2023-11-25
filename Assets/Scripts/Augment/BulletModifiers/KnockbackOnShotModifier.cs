@@ -24,8 +24,7 @@ public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
     public void Attach(ProjectileController projectile)
     {
         projectile.OnHitboxCollision += KnockAwayTargets;
-        var bulletController = projectile.gameObject.GetComponent<BulletController>();
-        bulletAmount = bulletController == null || bulletController.BulletsPerShot == 0 ? 1f : bulletController.BulletsPerShot;
+        bulletAmount = projectile.stats.ProjectilesPerShot;
         calculatedPushPower = (pushPower / bulletAmount) * (1f + (float)Math.Log10(bulletAmount));
     }
 
