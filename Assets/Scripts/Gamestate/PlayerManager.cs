@@ -51,6 +51,9 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private PlayerIK playerIK;
 
+    [SerializeField]
+    private float deathKnockbackForceMultiplier = 10;
+
 
     private BiddingPlatform selectedBiddingPlatform;
     public BiddingPlatform SelectedBiddingPlatform
@@ -104,12 +107,13 @@ public class PlayerManager : MonoBehaviour
             killer = lastPlayerThatHitMe;
         }
         onDeath?.Invoke(killer, this);
-        TurnIntoRagdoll();
+        TurnIntoRagdoll(info);
         hudController.DisplayDeathScreen(killer.identity);
     }
 
-    void TurnIntoRagdoll()
+    void TurnIntoRagdoll(DamageInfo info)
     {
+        GetComponent<Rigidbody>().GetAccumulatedForce();
         // Disable components
         GetComponent<PlayerMovement>().enabled = false;
         healthController.enabled = false;
@@ -121,7 +125,8 @@ public class PlayerManager : MonoBehaviour
 
         // TODO: Make accurate hitbox forces for the different limbs of the player
 
-        GetComponent<RagdollController>().EnableRagdoll();
+        var force = info.force.normalized * info.damage * deathKnockbackForceMultiplier;
+        GetComponent<RagdollController>().EnableRagdoll(force);
     }
 
     /// <summary>

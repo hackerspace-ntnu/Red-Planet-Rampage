@@ -44,26 +44,26 @@ public class ExplosionController : MonoBehaviour
     {
         visualEffect.enabled = true;
         visualEffect.SendEvent("OnPlay");
-        Collider[] colliderList = Physics.OverlapSphere(transform.position, radius, hitBoxLayers);
-        foreach (Collider collider in colliderList)
+        var targets = Physics.OverlapSphere(transform.position, radius, hitBoxLayers);
+        foreach (var target in targets)
         {
-            DealDamage(collider, sourcePlayer);
+            DealDamage(target, sourcePlayer);
         }
         Destroy(gameObject, 4);
     }
 
-    private void DealDamage(Collider collider, PlayerManager sourcePlayer)
+    private void DealDamage(Collider target, PlayerManager sourcePlayer)
     {
-        HitboxController controller = collider.GetComponent<HitboxController>();
-        bool hasHealth = controller.health;
-        if (hasHealth && !hitHealthControllers.Contains(controller.health))
+        var hitbox = target.GetComponent<HitboxController>();
+        bool hasHealth = hitbox.health;
+        if (hasHealth && !hitHealthControllers.Contains(hitbox.health))
         {
-            hitHealthControllers.Add(controller.health);
-            float scaledDamage = damage * damageCurve.Evaluate(Vector3.Distance(collider.transform.position, transform.position) / radius);
-            controller.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage));
+            hitHealthControllers.Add(hitbox.health);
+            var scaledDamage = damage * damageCurve.Evaluate(Vector3.Distance(target.transform.position, transform.position) / radius);
+            hitbox.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage, target.transform.position, (target.transform.position - transform.position).normalized));
         }
 
-        if (hasHealth && controller.health.TryGetComponent<Rigidbody>(out var rigidbody))
+        if (hasHealth && hitbox.health.TryGetComponent<Rigidbody>(out var rigidbody))
         {
             rigidbody.AddExplosionForce(knockbackForce, transform.position, radius * 1.2f, knockbackLiftFactor);
         }
