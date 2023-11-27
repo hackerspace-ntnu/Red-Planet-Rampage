@@ -6,11 +6,15 @@ public class PlayerHand : MonoBehaviour
 {
     [SerializeField]
     private SkinnedMeshRenderer handMaterial;
+    [SerializeField]
+    private GameObject mesh;
 
     public void SetPlayer(PlayerManager player)
     {
         handMaterial.material.color = player.identity.color;
-        gameObject.layer = LayerMask.NameToLayer("Gun " + player.inputManager.playerInput.playerIndex);
+        var cullingLayer = LayerMask.NameToLayer("Gun " + player.inputManager.playerInput.playerIndex);
+        gameObject.layer = cullingLayer;
+        mesh.layer = cullingLayer;
     }
 
 }

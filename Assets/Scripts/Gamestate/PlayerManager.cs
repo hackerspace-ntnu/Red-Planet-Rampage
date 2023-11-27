@@ -230,7 +230,7 @@ public class PlayerManager : MonoBehaviour
         // Set layers for the camera to ignore (the other players' gun layers, and this layer)
         // Bitwise negation of this player's model layer and all gun layers that do not belong to this player
         // Gun layers are 4 above their respective player layers.
-        var playerAndGunMask = ((1 << playerLayer) | ((1 << (playerLayer + 4)) ^ allGunsMask));
+        var playerAndGunMask = ((1 << playerLayer) | allGunsMask) & ~(1 << (playerLayer + 4));
 
         // Ignore ammo boxes if this player doesn't have the required body
         var hasAmmoBoxBody = identity.Body == ammoMaskItem;
