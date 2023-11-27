@@ -6,9 +6,26 @@ public class Revolver : GunBody
     private Animator animator;
     [SerializeField]
     private ParticleSystem steamParticles;
+    [SerializeField]
+    private PlayerHand playerHand;
 
     private GunBarrel barrel;
     private GunExtension extension;
+
+    public override void Start()
+    {
+        gunController = transform.parent.GetComponent<GunController>();
+        if (!gunController)
+        {
+            Debug.Log("Revolver not attached to gun parent!");
+            return;
+        }
+        gunController.onFire += Reload;
+
+        if (gunController.player)
+            playerHand.SetPlayer(gunController.player);
+    }
+
     protected override void Reload(GunStats stats)
     {
         if (gunController.stats.Ammo >= 1)
