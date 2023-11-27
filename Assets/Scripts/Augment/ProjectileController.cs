@@ -122,6 +122,7 @@ public abstract class ProjectileController : MonoBehaviour
     // Used whenever a projectile hits any collider, though 
     public delegate void CollisionEvent(Collider other, ref ProjectileState state);
     public CollisionEvent OnColliderHit;
+    public CollisionEvent OnRicochet;
 
     protected GunController gunController;
 

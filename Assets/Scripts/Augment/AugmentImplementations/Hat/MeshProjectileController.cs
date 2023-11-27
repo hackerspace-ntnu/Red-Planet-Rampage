@@ -149,25 +149,25 @@ public class MeshProjectileController : ProjectileController
 
         var collisions = ProjectileMotions.GetPathCollisions(state, collisionLayers).Select(x => x.collider).ToArray();
 
-        if (collisions.Length > 0)
+        if (collisions.Length <= 0) return;
+
+        if (collisions[0].TryGetComponent<HitboxController>(out HitboxController hitbox))
         {
-            if (collisions[0].TryGetComponent<HitboxController>(out HitboxController hitbox))
-            {
-                OnColliderHit?.Invoke(collisions[0], ref state);
-                OnHitboxCollision?.Invoke(hitbox, ref state);
-                state.active = false;
-                return;
-            }
-            if (shouldRicochet && state.distanceTraveled < maxDistanceBeforeStuck)
-            {
-                Physics.Raycast(state.oldPosition, state.direction, out RaycastHit hitInfo);
-                state.direction = Vector3.Reflect(state.direction, hitInfo.normal);
-            }
-            else
-            {
-                OnColliderHit?.Invoke(collisions[0], ref state);
-                state.active = false;
-            }
+            OnColliderHit?.Invoke(collisions[0], ref state);
+            OnHitboxCollision?.Invoke(hitbox, ref state);
+            state.active = false;
+            return;
+        }
+        if (shouldRicochet && state.distanceTraveled < maxDistanceBeforeStuck)
+        {
+            OnRicochet?.Invoke(collisions[0], ref state);
+            Physics.Raycast(state.oldPosition, state.direction, out RaycastHit hitInfo);
+            state.direction = Vector3.Reflect(state.direction, hitInfo.normal);
+        }
+        else
+        {
+            OnColliderHit?.Invoke(collisions[0], ref state);
+            state.active = false;
         }
     }
 }

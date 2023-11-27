@@ -307,6 +307,7 @@ GameObject:
   - component: {fileID: 7327065496144923300}
   - component: {fileID: 5073592139580318145}
   - component: {fileID: 1897810737203425439}
+  - component: {fileID: 2663316941412716786}
   m_Layer: 0
   m_Name: CoilBarrel
   m_TagString: Untagged
@@ -525,6 +526,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firingSound: {fileID: 11400000, guid: b1c2515828913ba4d80a8799b82dab79, type: 2}
+--- !u!114 &2663316941412716786
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6861618831928518119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18b57f7d0109d614c8ff956eff6a9841, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 0
+  decal: {fileID: 5462112114334002006, guid: 65b7186194b414d4bb212807630f62c9, type: 3}
+  depthOffsetFraction: 0.6
+  stickToNormalFraction: 0.2
+  angleVariation: 180
+  lifetime: 60
 --- !u!1001 &1492273253223761825
 PrefabInstance:
   m_ObjectHideFlags: 0
