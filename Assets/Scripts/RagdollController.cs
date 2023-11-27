@@ -19,7 +19,10 @@ public class RagdollController : MonoBehaviour
     [SerializeField]
     private Animator animatorToDisable;
 
-    public void EnableRagdoll()
+    [SerializeField]
+    private Rigidbody rigidbodyToPush;
+
+    public void EnableRagdoll(Vector3 knockbackForce)
     {
         animatorToDisable.enabled = false;
 
@@ -43,5 +46,7 @@ public class RagdollController : MonoBehaviour
             rigidbody.isKinematic = false;
             rigidbody.useGravity = true;
         }
+
+        rigidbodyToPush.AddForce(knockbackForce, ForceMode.Impulse);
     }
 }

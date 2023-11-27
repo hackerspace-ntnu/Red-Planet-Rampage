@@ -9,17 +9,26 @@ public class ExplosionController : MonoBehaviour
 
     [SerializeField] private AnimationCurve damageCurve;
 
-    private VisualEffect visualEffect;
-
     [SerializeField] private float radius;
 
+    [SerializeField] private float knockbackForce = 2000;
+
+    [SerializeField] private float knockbackLiftFactor = .5f;
+
     [SerializeField] private LayerMask hitBoxLayers;
+
+    private VisualEffect visualEffect;
 
     // Makes sure a player doesn't take damage for each hitbox
     private HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
 
 
     private void Start()
+    {
+        if (!visualEffect) Init();
+    }
+
+    public void Init()
     {
         visualEffect = GetComponent<VisualEffect>();
         visualEffect.enabled = false;
@@ -31,26 +40,32 @@ public class ExplosionController : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, radius);
     }
 
-    // Function that runs turns on the visual effect and calculates damage
     public void Explode(PlayerManager sourcePlayer)
     {
         visualEffect.enabled = true;
         visualEffect.SendEvent("OnPlay");
-        Collider[] colliderList = Physics.OverlapSphere(transform.position, radius, hitBoxLayers);
-        foreach (Collider collider in colliderList)
+        var targets = Physics.OverlapSphere(transform.position, radius, hitBoxLayers);
+        foreach (var target in targets)
         {
-            DealDamage(collider, sourcePlayer);
+            DealDamage(target, sourcePlayer);
         }
+        Destroy(gameObject, 4);
     }
 
-    private void DealDamage(Collider collider, PlayerManager sourcePlayer)
+    private void DealDamage(Collider target, PlayerManager sourcePlayer)
     {
-        HitboxController controller = collider.GetComponent<HitboxController>();
-        if (!controller.health || !hitHealthControllers.Contains(controller.health))
+        var hitbox = target.GetComponent<HitboxController>();
+        bool hasHealth = hitbox.health;
+        if (hasHealth && !hitHealthControllers.Contains(hitbox.health))
         {
-            hitHealthControllers.Add(controller.health);
-            float scaledDamage = damage * damageCurve.Evaluate(Vector3.Distance(collider.transform.position, transform.position) / radius);
-            controller.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage));
+            hitHealthControllers.Add(hitbox.health);
+            var scaledDamage = damage * damageCurve.Evaluate(Vector3.Distance(target.transform.position, transform.position) / radius);
+            hitbox.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage, target.transform.position, (target.transform.position - transform.position).normalized));
+        }
+
+        if (hasHealth && hitbox.health.TryGetComponent<Rigidbody>(out var rigidbody))
+        {
+            rigidbody.AddExplosionForce(knockbackForce, transform.position, radius * 1.2f, knockbackLiftFactor);
         }
     }
 }

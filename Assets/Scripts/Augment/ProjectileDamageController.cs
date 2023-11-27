@@ -1,9 +1,5 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-// TODO use this
 public struct DamageInfo
 {
     public PlayerManager sourcePlayer;
@@ -13,25 +9,27 @@ public struct DamageInfo
     public Vector3 position;
 
     public Vector3 force;
-    public DamageInfo(PlayerManager source, float damage)
+    public DamageInfo(PlayerManager source, float damage, Vector3 position, Vector3 force)
     {
         this.sourcePlayer = source;
         this.damage = damage;
 
         // Todo, re-implement this with actual damage position and force
-        this.position = Vector3.zero;
-        this.force = Vector3.zero;
+        this.position = position;
+        this.force = force;
     }
 }
 
 public class ProjectileDamageController : MonoBehaviour, ProjectileModifier
 {
     public PlayerManager player;
+
     public void Attach(ProjectileController projectile)
     {
         player = projectile.player;
         projectile.OnHitboxCollision += DamageHitbox;
     }
+
     public void Detach(ProjectileController projectile)
     {
         projectile.OnHitboxCollision -= DamageHitbox;
@@ -39,7 +37,7 @@ public class ProjectileDamageController : MonoBehaviour, ProjectileModifier
 
     private void DamageHitbox(HitboxController controller, ref ProjectileState state)
     {
-        DamageInfo info = new DamageInfo(player, state.damage);
+        var info = new DamageInfo(player, state.damage, state.position, state.direction);
         if (controller.health && !state.hitHealthControllers.Contains(controller.health))
         {
             state.hitHealthControllers.Add(controller.health);

@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,7 +10,9 @@ public class PlayerFactory : MonoBehaviour
     private GameObject playerPrefab;
     [SerializeField]
     private Transform[] spawnPoints;
-
+    [SerializeField]
+    private GameObject playerSelectItemPrefab;
+    private float spawnInterval = 0f;
     private PlayerInputManagerController playerInputManagerController;
 
     [SerializeField]
@@ -20,7 +22,12 @@ public class PlayerFactory : MonoBehaviour
 
     private void Awake()
     {
-
+        if(PlayerInputManagerController.Singleton == null)
+        {
+            // We most likely started the game in the game scene, reload menu instead
+            SceneManager.LoadSceneAsync("Menu");
+            return;
+        }
         playerInputManagerController = PlayerInputManagerController.Singleton;
 
         // Enable splitscreen
@@ -38,6 +45,12 @@ public class PlayerFactory : MonoBehaviour
     {
         playerInputManagerController.ChangeInputMaps("Bidding");
         InstantiateInputsOnSpawnpoints(InstantiateBiddingPlayer);
+    }
+    public void InstantiatePlayerSelectItems()
+    {
+        playerInputManagerController.ChangeInputMaps("Menu");
+        InstantiateInputsOnSpawnpoints(InstantiateItemSelectPlayer);
+
     }
 
     private void InstantiateInputsOnSpawnpoints(Action<InputManager, Transform> instantiate)
@@ -98,8 +111,19 @@ public class PlayerFactory : MonoBehaviour
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
         playerManager.SetPlayerInput(inputManager);
-        // Add player UI to globalUI
-        globalHUDController.SetPlayer(playerManager);
         player.GetComponent<HealthController>().enabled = false;
+    }
+    private void InstantiateItemSelectPlayer(InputManager inputManager, Transform spawnPoint)
+    {
+        GetComponent<AuctionDriver>().Camera.GetComponent<Camera>().enabled = false;
+        inputManager.GetComponent<Camera>().enabled = true;
+        inputManager.gameObject.SetActive(false);
+        PlayerInputManagerController.Singleton.playerInputManager.splitScreen = true;
+        inputManager.gameObject.SetActive(true);
+        spawnInterval += 10000f;
+        GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position + new Vector3(spawnInterval, spawnInterval, 0), spawnPoint.rotation);
+        Camera playerCamera = inputManager.GetComponent<Camera>();
+        playerCamera.transform.position = player.GetComponent<ItemSelectManager>().cameraPosition.transform.position;
+        StartCoroutine(player.GetComponent<ItemSelectManager>().SpawnItems(inputManager));
     }
 }

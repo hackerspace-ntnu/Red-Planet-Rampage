@@ -6,9 +6,7 @@ public class GlobalHUDController : MonoBehaviour
 {
     [SerializeField]
     private TMP_Text roundTimer;
-
-    [SerializeField]
-    private PlayerStatUI[] playerStatPanels;
+    public TMP_Text RoundTimer => roundTimer;
 
     [SerializeField]
     private TMP_Text winText;
@@ -18,8 +16,6 @@ public class GlobalHUDController : MonoBehaviour
 
     [SerializeField]
     private TMP_Text startText;
-
-    private int nextPlayerStatIndex = 0;
 
     void Start()
     {
@@ -33,28 +29,6 @@ public class GlobalHUDController : MonoBehaviour
             roundTimer.alignment = TextAlignmentOptions.Top;
         }
 
-        StartCoroutine(DisableUnusedStatUIs());
-    }
-
-    private IEnumerator DisableUnusedStatUIs()
-    {
-        // Wait one frame before disabling stat blocks
-        yield return null;
-        for (int i = nextPlayerStatIndex; i < playerStatPanels.Length; i++)
-        {
-            playerStatPanels[i].enabled = false;
-        }
-    }
-
-    public void SetPlayer(PlayerManager playerManager)
-    {
-        if (nextPlayerStatIndex >= playerStatPanels.Length)
-        {
-            Debug.LogWarning("Too many player inputs!");
-            return;
-        }
-        playerStatPanels[nextPlayerStatIndex].PlayerManager = playerManager;
-        nextPlayerStatIndex++;
     }
 
     public void OnTimerUpdate(float time)

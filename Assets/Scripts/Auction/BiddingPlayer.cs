@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -25,7 +23,8 @@ public class BiddingPlayer : MonoBehaviour
 
     [SerializeField]
     private TMP_Text chipText;
-
+    [SerializeField]
+    private TMP_Text signCross;
     private BiddingPlatform currentPlatform = null;
 
     private void Start()
@@ -49,7 +48,34 @@ public class BiddingPlayer : MonoBehaviour
 
     private void AnimateChipStatus(BiddingPlatform platform)
     {
+        if (currentPlatform)
+            currentPlatform.onBidPlaced -= AnimateSign;
+
         currentPlatform = platform;
+        if (!currentPlatform)
+        {
+            if (LeanTween.isTweening(signCross.gameObject))
+                LeanTween.cancel(signCross.gameObject);
+            signCross.alpha = 0f;
+            return;
+        }
+
+        currentPlatform.onBidPlaced += AnimateSign;
+        AnimateSign(platform);
+    }
+
+    private void AnimateSign(BiddingPlatform platform)
+    {
+        bool isLeaderAndCanBid = (platform.LeadingBidder == playerManager.identity) && (playerManager.identity.chips > 0);
+        if (platform.chips < playerManager.identity.chips || isLeaderAndCanBid)
+        {
+            if (LeanTween.isTweening(signCross.gameObject))
+                LeanTween.cancel(signCross.gameObject);
+            signCross.alpha = 0f;
+            return;
+        }
+
+        LeanTween.value(signCross.gameObject, (alpha) => signCross.alpha = alpha, 0f, 1f, 0.5f).setLoopPingPong();
     }
 
     private void AnimateChipStatus(int chips)

@@ -15,7 +15,7 @@ public class ContinuousDamage : MonoBehaviour
 
     private HitboxController hitbox;
 
-    void Start()
+    private void Start()
     {
         hitbox = transform.parent.GetComponent<HitboxController>();
         if (hitbox && hitbox.health)
@@ -26,14 +26,14 @@ public class ContinuousDamage : MonoBehaviour
 
     private void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
-        this.enabled = false;
+        enabled = false;
     }
 
     private void Update()
     {
         if (hitbox && Time.time - lastDamageTime > 1 / damageRate)
         {
-            hitbox.DamageCollider(new DamageInfo(source, damage));
+            hitbox.DamageCollider(new DamageInfo(source, damage, transform.position, -hitbox.transform.forward));
             lastDamageTime = Time.time;
         }
     }

@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,12 +11,17 @@ public class PlayerManager : MonoBehaviour
 
     // Only Default and HitBox layers can be hit
     private static int hitMask = 1 | (1 << 3);
+    public int HitMask => hitMask;
+
+    [Header("Shooting")]
 
     [SerializeField]
     private float maxHitDistance = 100;
 
     [SerializeField]
     private float targetStartOffset = 0.28f;
+    public float TargetStartOffset => targetStartOffset;
+    public bool overrideAimTarget = false;
 
     // TODO add context when shooty system is done
     public delegate void HitEvent(PlayerManager killer, PlayerManager victim);
@@ -29,14 +33,27 @@ public class PlayerManager : MonoBehaviour
     public delegate void BiddingPlatformEvent(BiddingPlatform platform);
     public BiddingPlatformEvent onSelectedBiddingPlatformChange;
 
+    [Header("Related objects")]
+
     public InputManager inputManager;
     public PlayerIdentity identity;
+
+    [SerializeField]
+    private PlayerHUDController hudController;
+    public PlayerHUDController HUDController => hudController;
+
+
+    [Header("Physics")]
 
     [SerializeField]
     private GameObject meshBase;
 
     [SerializeField]
-    private Rigidbody ragdoll;
+    private PlayerIK playerIK;
+
+    [SerializeField]
+    private float deathKnockbackForceMultiplier = 10;
+
 
     private BiddingPlatform selectedBiddingPlatform;
     public BiddingPlatform SelectedBiddingPlatform
@@ -50,22 +67,19 @@ public class PlayerManager : MonoBehaviour
     }
 
     private GunController gunController;
+    public GunController GunController => gunController;
 
     private HealthController healthController;
 
-    [SerializeField]
-    private PlayerHUDController hudController;
+    [Header("Hit sounds")]
 
-    [SerializeField]
     private AudioSource audioSource;
 
     [SerializeField]
     private AudioGroup hitSounds;
-    [SerializeField]
-    private AudioGroup extraHitSounds;
 
     [SerializeField]
-    private PlayerIK playerIK;
+    private AudioGroup extraHitSounds;
 
     void Start()
     {
@@ -93,12 +107,13 @@ public class PlayerManager : MonoBehaviour
             killer = lastPlayerThatHitMe;
         }
         onDeath?.Invoke(killer, this);
-        TurnIntoRagdoll();
+        TurnIntoRagdoll(info);
         hudController.DisplayDeathScreen(killer.identity);
     }
 
-    void TurnIntoRagdoll()
+    void TurnIntoRagdoll(DamageInfo info)
     {
+        GetComponent<Rigidbody>().GetAccumulatedForce();
         // Disable components
         GetComponent<PlayerMovement>().enabled = false;
         healthController.enabled = false;
@@ -110,7 +125,8 @@ public class PlayerManager : MonoBehaviour
 
         // TODO: Make accurate hitbox forces for the different limbs of the player
 
-        GetComponent<RagdollController>().EnableRagdoll();
+        var force = info.force.normalized * info.damage * deathKnockbackForceMultiplier;
+        GetComponent<RagdollController>().EnableRagdoll(force);
     }
 
     /// <summary>
@@ -153,6 +169,8 @@ public class PlayerManager : MonoBehaviour
 
     private void UpdateAimTarget(GunStats stats)
     {
+        if (overrideAimTarget)
+            return;
         Vector3 cameraCenter = inputManager.transform.position;
         Vector3 cameraDirection = inputManager.transform.forward;
         Vector3 startPoint = cameraCenter + cameraDirection * targetStartOffset;
@@ -214,8 +232,15 @@ public class PlayerManager : MonoBehaviour
         // Set layers for the camera to ignore (the other players' gun layers, and this layer)
         // Bitwise negation of this player's model layer and all gun layers that do not belong to this player
         // Gun layers are 4 above their respective player layers.
-        var mask = ((1 << 16) - 1) ^ ((1 << playerLayer) | ((1 << (playerLayer + 4)) ^ allGunsMask));
-        inputManager.GetComponent<Camera>().cullingMask = mask;
+        var playerAndGunMask = ((1 << playerLayer) | ((1 << (playerLayer + 4)) ^ allGunsMask));
+
+        // Ignore ammo boxes if this player doesn't have the gatling body
+        var hasAmmoBoxBody = identity.Body.displayName == "Gatling";
+        var ammoMask = hasAmmoBoxBody ? 0 : 1 << 6;
+
+        var negatedMask = ((1 << 16) - 1) ^ (playerAndGunMask | ammoMask);
+
+        inputManager.GetComponent<Camera>().cullingMask = negatedMask;
 
         // Set correct layer on self, mesh and gun (TODO)
         gameObject.layer = playerLayer;
@@ -254,7 +279,7 @@ public class PlayerManager : MonoBehaviour
 
     private void PlayOnHit()
     {
-        if (Random.Range(0, 100) > 5)
+        if (Random.Range(0, 1000) > 5)
         {
             hitSounds.Play(audioSource);
         }

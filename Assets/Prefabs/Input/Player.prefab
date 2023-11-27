@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 6717855691676836013}
   - component: {fileID: 3252978923923797766}
   - component: {fileID: 7607358150439154286}
+  - component: {fileID: 435425937908780799}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -68,7 +69,7 @@ MonoBehaviour:
   leapForce: 12.5
   jumpTimeout: 0.5
   leapTimeout: 0.875
-  crouchedHeightOffset: 0.3
+  crouchedHeightOffset: 0.8
   airThreshold: 0.4
   slopeAngleThreshold: 50
   state: 1
@@ -177,15 +178,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHitDistance: 100
   targetStartOffset: 0.9
+  overrideAimTarget: 0
   inputManager: {fileID: 0}
   identity: {fileID: 0}
-  meshBase: {fileID: 5330336945653279977}
-  ragdoll: {fileID: 0}
   hudController: {fileID: 555885729091202788}
-  audioSource: {fileID: 0}
+  meshBase: {fileID: 5330336945653279977}
+  playerIK: {fileID: 142658303258642700}
+  deathKnockbackForceMultiplier: 10
   hitSounds: {fileID: 11400000, guid: 90b0dc5583765d64f81545c255b0fa3a, type: 2}
   extraHitSounds: {fileID: 11400000, guid: c5daa2802fa89a54986d53f2fc13cb8f, type: 2}
-  playerIK: {fileID: 142658303258642700}
 --- !u!114 &6717855691676836013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -241,6 +242,7 @@ MonoBehaviour:
   - {fileID: 3287810421338184656}
   - {fileID: 3287810421863630874}
   animatorToDisable: {fileID: 289053663840324231}
+  rigidbodyToPush: {fileID: 3287810421183947676}
 --- !u!82 &7607358150439154286
 AudioSource:
   m_ObjectHideFlags: 0
@@ -337,6 +339,86 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &435425937908780799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71015680234268067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a737b49bcd7bb1458b85cb60c9c5167, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ammoBoxBody: {fileID: 11400000, guid: a99e4b806f963ac45a0635c34182107a, type: 2}
+--- !u!1 &345906872987025452
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3484089900029681523}
+  - component: {fileID: 5813241806607806329}
+  - component: {fileID: 6535424167945181997}
+  m_Layer: 5
+  m_Name: SpamTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &3484089900029681523
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 345906872987025452}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3570743071879246586}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!210 &5813241806607806329
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 345906872987025452}
+  m_Enabled: 1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 1
+  m_SortAtRoot: 0
+--- !u!114 &6535424167945181997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 345906872987025452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 054f8241b622aff439e7b31758f43d23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  popup: {fileID: 2749458525383876187, guid: 8f8cc66de768a2f48801942cf6b2988c, type: 3}
+  spamTarget: {fileID: 3484089900029681523}
+  hud: {fileID: 3570743071879246586}
+  minSpamDelay: 0.05
+  maxSpamDelay: 0.2
 --- !u!1 &650044701630506088
 GameObject:
   m_ObjectHideFlags: 0
@@ -936,6 +1018,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 3484089900029681523}
   - {fileID: 5051670465698078307}
   - {fileID: 1664387495115092571}
   - {fileID: 1417967732049705392}
@@ -1022,13 +1105,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a725095c6b66189bba21421a5ac9557, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hud: {fileID: 3570743071879246586}
   healthBar: {fileID: 8281853296856510176}
   ammoHud: {fileID: 6629533919243205533}
   ammoBar: {fileID: 4001729099187883475}
+  crosshair: {fileID: 1417967732049705392}
+  tweenDuration: 0.07
   deathScreen: {fileID: 1029316632486890240}
   deathText: {fileID: 9172283963218471322}
-  tweenDuration: 0.07
   damageBorderFlashDuration: 0.2
+  popupSpammer: {fileID: 6535424167945181997}
 --- !u!222 &1470896919934443344
 CanvasRenderer:
   m_ObjectHideFlags: 0

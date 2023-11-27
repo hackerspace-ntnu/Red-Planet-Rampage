@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine;
+using System;
 
 /// <summary>
 /// Wrapper struct for tying refference to Player class with the in-game player.
 /// </summary>
+[Serializable]
 public struct Player
 {
     public Player(PlayerIdentity playerIdentity, PlayerManager playerManager, int startAmount)
@@ -51,26 +53,34 @@ public class MatchController : MonoBehaviour
     [Header("Chip rewards")]
     [SerializeField]
     private int startAmount = 5;
+    public int StartAmount => startAmount;
     [SerializeField]
     private int rewardWin = 1;
+    public int RewardWin => rewardWin;
     [SerializeField]
     private int rewardKill = 1;
+    public int RewardKill => rewardKill;
     [SerializeField]
     private int rewardBase = 2;
+    public int RewardBase => rewardBase;
 
     public Timer roundTimer;
 
     [SerializeField]
     private GlobalHUDController globalHUDController;
+    public GlobalHUDController GlobalHUD => globalHUDController;
 
     private string currentMapName;
 
     private List<Player> players = new List<Player>();
+    public List<Player> Players { get { return players; } }
+
     private static List<Round> rounds = new List<Round>();
+    public Round GetLastRound { get { return rounds[rounds.Count - 1]; } }
 
     public int RoundCount { get => rounds.Count(); }
 
-    void Start()
+    private void Awake()
     {
         #region Singleton boilerplate
 
@@ -88,7 +98,10 @@ public class MatchController : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
+    }
 
+    void Start()
+    {
         if (rounds.Count == 0)
         {
             PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
@@ -101,7 +114,7 @@ public class MatchController : MonoBehaviour
         // Makes shooting end quickly if testing with 1 player
 #if UNITY_EDITOR
         if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
-            roundLength = 60f;
+            roundLength = 5f;
 #endif
 
         StartNextRound();
@@ -130,6 +143,9 @@ public class MatchController : MonoBehaviour
 
     public void StartNextBidding()
     {
+        if (IsWin())
+            return;
+
         PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
         onBiddingStart?.Invoke();
@@ -145,9 +161,6 @@ public class MatchController : MonoBehaviour
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
         AssignRewards();
-
-        if (!IsWin())
-            StartCoroutine(WaitAndStartNextBidding());
     }
 
     public IEnumerator WaitAndStartNextBidding()

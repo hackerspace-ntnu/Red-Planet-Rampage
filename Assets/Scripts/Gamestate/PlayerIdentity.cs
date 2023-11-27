@@ -26,6 +26,8 @@ public class PlayerIdentity : MonoBehaviour
 
     public int chips { get; private set; } = 0;
 
+    public int bounty = 5;
+
     public delegate void ChipEvent(int amount);
     public delegate void ItemEvent(Item item);
 
@@ -48,6 +50,8 @@ public class PlayerIdentity : MonoBehaviour
         {
             Extensions.Add(extension);
         }
+
+        bounty += 5;
     }
 
     public void UpdateChip(int amount)
@@ -72,15 +76,12 @@ public class PlayerIdentity : MonoBehaviour
         switch (item.augmentType)
         {
             case AugmentType.Body:
-                body = item;
                 Bodies.Add(item);
                 break;
             case AugmentType.Barrel:
-                barrel = item;
                 Barrels.Add(item);
                 break;
             case AugmentType.Extension:
-                extension = item;
                 Extensions.Add(item);
                 break;
             default:
@@ -99,6 +100,12 @@ public class PlayerIdentity : MonoBehaviour
         barrel = StaticInfo.Singleton.StartingBarrel;
         extension = null;
         chips = 0;
+    }
+
+    public void SetLoadout(Item body,Item barrel, Item extension){
+        this.body = body;
+        this.barrel = barrel;
+        this.extension = extension;
     }
 
     public override string ToString()

@@ -13,7 +13,7 @@ public class RagdollControllerEditor : Editor
         {
             if (Application.isPlaying)
             {
-                ragdoll.EnableRagdoll();
+                ragdoll.EnableRagdoll(Vector3.zero);
             }
         }
     }
