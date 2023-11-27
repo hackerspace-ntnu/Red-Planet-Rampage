@@ -4,7 +4,7 @@
 
 Red Planet Rampage is a first person shooter game, where you fight against other players in arenas with dynamically constructed weapons made from weapon parts.
 
-The weapon parts are obtained from auctions in-between shooting rounds where players bid against each other. Due to the amount of weapon parts, there are hundreds of possible weapon combinations!
+The weapon parts are obtained from auctions between shooting rounds, where players bid against each other. Due to the amount of weapon parts, there are hundreds of possible weapon combinations!
 
 ---
 
@@ -12,7 +12,7 @@ Two players shooting at each other with their unique weapons:
 ![Gif of 2 players shooting their weapons](https://github.com/hackerspace-ntnu/Red-Planet-Rampage/assets/54811121/de4e0f91-9975-4fbd-951b-6a6ccb44674e)
 
 The auction for weapon parts:
-![Gif of 2 players bididng on weapon parts](https://github.com/hackerspace-ntnu/Red-Planet-Rampage/assets/54811121/ad7fa86e-2e0b-4448-870d-b1007b97c7b9)
+![Gif of 2 players bidding on weapon parts](https://github.com/hackerspace-ntnu/Red-Planet-Rampage/assets/54811121/ad7fa86e-2e0b-4448-870d-b1007b97c7b9)
 
 ### Project details
 - Unity version 2022.2.15f1
@@ -51,9 +51,9 @@ Add `-force-vulkan` to command line arguments to avoid glitched scene view due t
 
 ### Building the game
 
-There is a bug in this Unity version that gives build errors for missing 
-"System.Diagnostics.Tracing". This is resolved by manually downgrading 
-the version in "bcl.exe.config". The dependency should be replaced with 
+There is a bug in this Unity version that gives build errors for missing
+"System.Diagnostics.Tracing". This is resolved by manually downgrading
+the version in "bcl.exe.config". The dependency should be replaced with
 the following:
 ```
 <assemblyIdentity name="System.Diagnostics.Tracing" publicKeyToken="b03f5f7f11d50a3a" culture="neutral" />
