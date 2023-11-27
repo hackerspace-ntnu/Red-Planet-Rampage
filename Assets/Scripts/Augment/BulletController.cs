@@ -7,15 +7,13 @@ public class BulletController : ProjectileController
     private float maxDistance = 20;
 
     [SerializeField]
-    private int collisionSamples = 30;
+    private int collisionSamplesPerUnit = 3;
 
-    private int vfxPositionsPerSample = 3;
+    private int collisionSamples;
 
-    private float bulletSpeed = 50f;
+    private const int vfxPositionsPerSample = 3;
 
-    [SerializeField]
-    private int bulletsPerShot = 1;
-    public int BulletsPerShot => bulletsPerShot;
+    private const float baseSpeed = 50f;
 
     private VFXTextureFormatter trailPosTexture;
 
@@ -39,6 +37,8 @@ public class BulletController : ProjectileController
 
     private void Start()
     {
+        collisionSamples = Mathf.CeilToInt(collisionSamplesPerUnit * maxDistance);
+        var bulletsPerShot = Mathf.CeilToInt(stats.ProjectilesPerShot);
         flash.transform.position = projectileOutput.position;
         trailPosTexture = new VFXTextureFormatter(vfxPositionsPerSample * collisionSamples * bulletsPerShot);
         trail.SetTexture("Position", this.trailPosTexture.Texture);
@@ -61,12 +61,11 @@ public class BulletController : ProjectileController
     {
         animator.OnFire(stats.Ammo);
 
-        // TODO: Possibly standardize this better
-        for (int k = 0; k < bulletsPerShot; k++)
+        for (int k = 0; k < stats.ProjectilesPerShot; k++)
         {
-
             Quaternion randomSpread = Quaternion.Lerp(Quaternion.identity, Random.rotation, stats.ProjectileSpread);
 
+            // TODO: Possibly standardize this better
             projectile.active = true;
             projectile.distanceTraveled = 0f;
             projectile.damage = stats.ProjectileDamage;
@@ -83,7 +82,7 @@ public class BulletController : ProjectileController
 
             OnProjectileInit?.Invoke(ref projectile, stats);
 
-            projectile.speed = bulletSpeed * stats.ProjectileSpeedFactor;
+            projectile.speed = baseSpeed * stats.ProjectileSpeedFactor;
 
             int sampleNum = 0;
 
@@ -129,8 +128,8 @@ public class BulletController : ProjectileController
             }
 
             trailPosTexture.ApplyChanges();
-            // Play the flash and trail
         }
+        // Play the flash and trail
         trail.SendEvent("OnPlay");
         flash.SendEvent("OnPlay");
     }
