@@ -33,6 +33,9 @@ public class PlayerManager : MonoBehaviour
     public delegate void BiddingPlatformEvent(BiddingPlatform platform);
     public BiddingPlatformEvent onSelectedBiddingPlatformChange;
 
+    [SerializeField]
+    public Item ammoMaskItem;
+
     [Header("Related objects")]
 
     public InputManager inputManager;
@@ -229,8 +232,8 @@ public class PlayerManager : MonoBehaviour
         // Gun layers are 4 above their respective player layers.
         var playerAndGunMask = ((1 << playerLayer) | ((1 << (playerLayer + 4)) ^ allGunsMask));
 
-        // Ignore ammo boxes if this player doesn't have the gatling body
-        var hasAmmoBoxBody = identity.Body.displayName == "Gatling";
+        // Ignore ammo boxes if this player doesn't have the required body
+        var hasAmmoBoxBody = identity.Body == ammoMaskItem;
         var ammoMask = hasAmmoBoxBody ? 0 : 1 << 6;
 
         var negatedMask = ((1 << 16) - 1) ^ (playerAndGunMask | ammoMask);
