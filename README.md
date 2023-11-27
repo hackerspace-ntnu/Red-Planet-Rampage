@@ -1,18 +1,22 @@
-# Prosjekt-Spill-H22
+![redplanetrampagetitlerender](https://github.com/hackerspace-ntnu/Red-Planet-Rampage/assets/54811121/e720e411-dc90-4194-94c1-c08b0e99c6f2)
 
-## Project Description
+---
 
+Red Planet Rampage is a first person shooter game, where you fight against other players in arenas with dynamically constructed weapons made from weapon parts.
+
+The weapon parts are obtained from auctions in-between shooting rounds where players bid against each other. Due to the amount of weapon parts, there are hundreds of possible weapon combinations!
+
+---
+
+Two players shooting at each other with their unique weapons:
+![Gif of 2 players shooting their weapons](https://github.com/hackerspace-ntnu/Red-Planet-Rampage/assets/54811121/de4e0f91-9975-4fbd-951b-6a6ccb44674e)
+
+The auction for weapon parts:
+![Gif of 2 players bididng on weapon parts](https://github.com/hackerspace-ntnu/Red-Planet-Rampage/assets/54811121/ad7fa86e-2e0b-4448-870d-b1007b97c7b9)
+
+### Project details
 - Unity version 2022.2.15f1
 - Unity URP
-
-A game in the arena-FPS genre, where you construct weapons from weapon parts.
-The weapon parts are obtained from bidding wars between players.
-
-![Image of 2 players during a shooting round](https://github.com/hackerspace-ntnu/Prosjekt-Spill-H22/assets/54811121/2443d0ed-79b9-4849-a741-e0fca838a0fa)
-
-![Image of an auction for gun parts](https://github.com/hackerspace-ntnu/Prosjekt-Spill-H22/assets/54811121/f4a3fe60-33b9-467e-aced-a66a253da04a)
-
-
 
 ## Conventions
 
@@ -20,7 +24,7 @@ The weapon parts are obtained from bidding wars between players.
 
 Branch naming: `kebab-case`.
 Prefix the branch name with a one-word description of the purpose of the branch,
-e.g. `feature/main-menu` or `bugfix/wall-glitch`.
+e.g. `feature/main-menu` or `fix/wall-glitch`.
 
 ### Development
 
@@ -54,5 +58,4 @@ the following:
 ```
 <assemblyIdentity name="System.Diagnostics.Tracing" publicKeyToken="b03f5f7f11d50a3a" culture="neutral" />
 <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" newVersion="4.0.0.0" />
-</dependentAssembly>
 ```
