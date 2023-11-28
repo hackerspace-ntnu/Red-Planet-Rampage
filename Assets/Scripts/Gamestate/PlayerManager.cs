@@ -34,7 +34,7 @@ public class PlayerManager : MonoBehaviour
     public BiddingPlatformEvent onSelectedBiddingPlatformChange;
 
     [SerializeField]
-    public Item ammoMaskItem;
+    private Item ammoMaskItem;
 
     [Header("Related objects")]
 
@@ -232,13 +232,12 @@ public class PlayerManager : MonoBehaviour
         // Gun layers are 4 above their respective player layers.
         var playerMask = 1 << playerLayer;
         var gunMask = (1 << (playerLayer + 4)) ^ allGunsMask;
-        var playerAndGunMask = playerMask | gunMask;
 
         // Ignore ammo boxes if this player doesn't have the required body
         var hasAmmoBoxBody = identity.Body == ammoMaskItem;
         var ammoMask = hasAmmoBoxBody ? 0 : 1 << 6;
 
-        var negatedMask = ((1 << 16) - 1) ^ (playerAndGunMask | ammoMask);
+        var negatedMask = ((1 << 16) - 1) ^ (playerMask | gunMask | ammoMask);
 
         inputManager.GetComponent<Camera>().cullingMask = negatedMask;
 
