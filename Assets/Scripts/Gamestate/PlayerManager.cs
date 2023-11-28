@@ -33,6 +33,9 @@ public class PlayerManager : MonoBehaviour
     public delegate void BiddingPlatformEvent(BiddingPlatform platform);
     public BiddingPlatformEvent onSelectedBiddingPlatformChange;
 
+    [SerializeField]
+    private Item ammoMaskItem;
+
     [Header("Related objects")]
 
     public InputManager inputManager;
@@ -232,13 +235,14 @@ public class PlayerManager : MonoBehaviour
         // Set layers for the camera to ignore (the other players' gun layers, and this layer)
         // Bitwise negation of this player's model layer and all gun layers that do not belong to this player
         // Gun layers are 4 above their respective player layers.
-        var playerAndGunMask = ((1 << playerLayer) | ((1 << (playerLayer + 4)) ^ allGunsMask));
+        var playerMask = 1 << playerLayer;
+        var gunMask = (1 << (playerLayer + 4)) ^ allGunsMask;
 
-        // Ignore ammo boxes if this player doesn't have the gatling body
-        var hasAmmoBoxBody = identity.Body.displayName == "Gatling";
+        // Ignore ammo boxes if this player doesn't have the required body
+        var hasAmmoBoxBody = identity.Body == ammoMaskItem;
         var ammoMask = hasAmmoBoxBody ? 0 : 1 << 6;
 
-        var negatedMask = ((1 << 16) - 1) ^ (playerAndGunMask | ammoMask);
+        var negatedMask = ((1 << 16) - 1) ^ (playerMask | gunMask | ammoMask);
 
         inputManager.GetComponent<Camera>().cullingMask = negatedMask;
 
