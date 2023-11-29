@@ -8,6 +8,8 @@ public class Revolver : GunBody
     private ParticleSystem steamParticles;
     [SerializeField]
     private PlayerHand playerHand;
+    [SerializeField]
+    private AudioSource audioSource;
 
     private GunBarrel barrel;
     private GunExtension extension;
@@ -47,6 +49,11 @@ public class Revolver : GunBody
     public void TriggerSteam()
     {
         steamParticles.Play();
+    }
+
+    public void TriggerReloadSound()
+    {
+        audioSource.Play();
     }
 
     public void ResetReload()
