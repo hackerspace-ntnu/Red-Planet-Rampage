@@ -5,6 +5,8 @@ public class ExplodingBarrel : MonoBehaviour
 
     [SerializeField]
     private MeshRenderer barrelMesh;
+    [SerializeField]
+    private AudioSource audioSource;
 
     void Start()
     {
@@ -16,6 +18,7 @@ public class ExplodingBarrel : MonoBehaviour
         barrelMesh.enabled = false;
         GetComponentInChildren<CapsuleCollider>().enabled = false;
         GetComponent<ExplosionController>().Explode(info.sourcePlayer);
+        audioSource.Play();
         Destroy(gameObject, 4);
     }
 }
