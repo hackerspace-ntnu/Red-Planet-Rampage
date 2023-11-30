@@ -62,10 +62,14 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField]
     private float dashHeightMultiplier = 0.5f;
+
     [SerializeField]
     private float dashForwardMultiplier = 1.5f;
 
-    private bool canJumpHigh = true;
+    [SerializeField]
+    private float dashDamping = 4f;
+
+    private bool isDashing = false;
 
     [Header("State")]
     [SerializeField]
@@ -117,17 +121,16 @@ public class PlayerMovement : MonoBehaviour
         if (!(state == PlayerState.GROUNDED))
             return;
 
-        // Leap jump
+        // Leap/dash jump
         if (animator.GetBool("Crouching"))
         {
-            body.AddForce(Vector3.up * leapForce * (canJumpHigh ? 1f : dashHeightMultiplier), ForceMode.VelocityChange);
+            body.AddForce(Vector3.up * leapForce * (isDashing ? dashHeightMultiplier : 1f), ForceMode.VelocityChange);
             Vector3 forwardDirection = new Vector3(inputManager.transform.forward.x, 0, inputManager.transform.forward.z);
-            body.AddForce(forwardDirection * leapForce * (canJumpHigh ? 1f : dashForwardMultiplier), ForceMode.VelocityChange);
+            body.AddForce(forwardDirection * leapForce * (isDashing ? dashForwardMultiplier : 1f), ForceMode.VelocityChange);
             animator.SetTrigger("Leap");
-            canJumpHigh = false;
+            onLanding += EnableDash;
             return;
         }
-        
         // Normal jump
         body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
     }
@@ -155,7 +158,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Crouching", false);
             strafeForce = strafeForceGrounded;
             inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f);
-            canJumpHigh = true;
+            isDashing = false;
             onLanding -= SetCrouchTrue;
         }
             
@@ -168,12 +171,17 @@ public class PlayerMovement : MonoBehaviour
         inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
     }
 
+    private void EnableDash()
+    {
+        StartCoroutine(JumpTimeout(leapTimeout));
+    }
+
     private IEnumerator JumpTimeout(float time)
     {
         yield return new WaitForSeconds(time);
-        canJumpHigh = true;
+        isDashing = IsInAir();
+        onLanding -= EnableDash;
     }
-
 
     private bool IsInAir()
     {
@@ -196,8 +204,6 @@ public class PlayerMovement : MonoBehaviour
         return Vector3.up;
     }
 
-
-
     private void UpdatePosition(Vector3 input)
     {
         // Modify input to addforce with relation to current rotation.
@@ -213,8 +219,6 @@ public class PlayerMovement : MonoBehaviour
                         break;
                     state = PlayerState.GROUNDED;
                     onLanding?.Invoke();
-                    if (!canJumpHigh)
-                      StartCoroutine(JumpTimeout(leapTimeout));
                     break;
                 }
             case PlayerState.GROUNDED:
@@ -273,9 +277,8 @@ public class PlayerMovement : MonoBehaviour
             return;
         // Add extra drag when player velocity is too high
         var maxVelocityReached = Mathf.Abs(body.velocity.x) > maxVelocityBeforeExtraDamping || Mathf.Abs(body.velocity.z) > maxVelocityBeforeExtraDamping;
-        // TODO: also break if in a consecutive leapjump
         if (maxVelocityReached)
-            body.AddForce(-extraDamping * body.mass * new Vector3(body.velocity.x, 0, body.velocity.z), ForceMode.Force);
+            body.AddForce(-(isDashing ? dashDamping : extraDamping) * body.mass * new Vector3(body.velocity.x, 0, body.velocity.z), ForceMode.Force);
     }
 
     void Update()
