@@ -61,9 +61,9 @@ public class PlayerMovement : MonoBehaviour
     private float leapTimeout = 0.25f;
 
     [SerializeField]
-    private float consecutiveLeapHeightMultiplier = 0.5f;
+    private float dashHeightMultiplier = 0.5f;
     [SerializeField]
-    private float consecutiveLeapForwardMultiplier = 1.5f;
+    private float dashForwardMultiplier = 1.5f;
 
     private bool canJumpHigh = true;
 
@@ -88,6 +88,9 @@ public class PlayerMovement : MonoBehaviour
     private float localCameraHeight;
 
     private Vector2 aimAngle = Vector2.zero;
+
+    private delegate void MovementEvent();
+    private MovementEvent onLanding;
 
     void Start()
     {
@@ -117,9 +120,9 @@ public class PlayerMovement : MonoBehaviour
         // Leap jump
         if (animator.GetBool("Crouching"))
         {
-            body.AddForce(Vector3.up * leapForce * (canJumpHigh ? 1f : consecutiveLeapHeightMultiplier), ForceMode.VelocityChange);
+            body.AddForce(Vector3.up * leapForce * (canJumpHigh ? 1f : dashHeightMultiplier), ForceMode.VelocityChange);
             Vector3 forwardDirection = new Vector3(inputManager.transform.forward.x, 0, inputManager.transform.forward.z);
-            body.AddForce(forwardDirection * leapForce * (canJumpHigh ? 1f : consecutiveLeapForwardMultiplier), ForceMode.VelocityChange);
+            body.AddForce(forwardDirection * leapForce * (canJumpHigh ? 1f : dashForwardMultiplier), ForceMode.VelocityChange);
             animator.SetTrigger("Leap");
             canJumpHigh = false;
             return;
@@ -140,10 +143,11 @@ public class PlayerMovement : MonoBehaviour
         if (ctx.performed)
         {
             if (IsInAir())
-                return; // TODO: Queue crouch on landing
-            animator.SetBool("Crouching", true);
-            strafeForce = strafeForceCrouched;
-            inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
+            {
+                onLanding += SetCrouchTrue;
+                return;
+            }
+            SetCrouchTrue();
         }
             
         if (ctx.canceled)
@@ -152,8 +156,16 @@ public class PlayerMovement : MonoBehaviour
             strafeForce = strafeForceGrounded;
             inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f);
             canJumpHigh = true;
+            onLanding -= SetCrouchTrue;
         }
             
+    }
+
+    private void SetCrouchTrue()
+    {
+        animator.SetBool("Crouching", true);
+        strafeForce = strafeForceCrouched;
+        inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
     }
 
     private IEnumerator JumpTimeout(float time)
@@ -200,8 +212,9 @@ public class PlayerMovement : MonoBehaviour
                     if (IsInAir())
                         break;
                     state = PlayerState.GROUNDED;
+                    onLanding?.Invoke();
                     if (!canJumpHigh)
-                        StartCoroutine(JumpTimeout(leapTimeout));
+                      StartCoroutine(JumpTimeout(leapTimeout));
                     break;
                 }
             case PlayerState.GROUNDED:
