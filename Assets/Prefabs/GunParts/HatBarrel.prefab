@@ -386,6 +386,7 @@ GameObject:
   - component: {fileID: -936091643483276450}
   - component: {fileID: -8445443159102885784}
   - component: {fileID: 4878415339882279067}
+  - component: {fileID: 1730519356641753133}
   m_Layer: 0
   m_Name: HatBarrel
   m_TagString: Untagged
@@ -453,12 +454,12 @@ MonoBehaviour:
   stats: {fileID: 0}
   player: {fileID: 0}
   animator: {fileID: 5376405389655812532}
-  maxHatProjectiles: 300
-  hatMaxDistance: 250
-  hatSpeed: 20
-  hatSize: 0.3
-  hatVfx: {fileID: 1746704752495276340}
-  maxLengthBeforeStuck: 150
+  maxProjectiles: 300
+  maxDistance: 250
+  size: 0.3
+  vfx: {fileID: 1746704752495276340}
+  shouldRicochet: 1
+  maxDistanceBeforeStuck: 100
 --- !u!114 &1607281845865317333
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -598,6 +599,24 @@ MonoBehaviour:
   triggerOnHit: 1
   onHitInterval: 1
   priority: 4
+--- !u!114 &1730519356641753133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5374020728950191348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18b57f7d0109d614c8ff956eff6a9841, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 1
+  decal: {fileID: 5462112114334002006, guid: 9228972996ff4404b8de661fe7a9a3c9, type: 3}
+  depthOffsetFraction: 0.6
+  stickToNormalFraction: 0.1
+  angleVariation: 37.3
+  lifetime: 60
 --- !u!1 &5891994160488146896
 GameObject:
   m_ObjectHideFlags: 0
@@ -860,7 +879,6 @@ MonoBehaviour:
   hatPrefab: {fileID: 7671496889312377090, guid: 3a3baf8f14610324db1197776333cba3, type: 3}
   bullet: {fileID: 3020309704562934005}
   bulletHeigth: 0.05
-  barrel: {fileID: 6993121514854208436}
   ammunitionHolder: {fileID: 1431844989074518793}
 --- !u!1 &9061618782800774609
 GameObject:
@@ -911,7 +929,7 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 6786cce554114bb4fbd4a86907c7acfc, type: 2}
@@ -962,6 +980,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5317923193586596905}
     m_Modifications:
+    - target: {fileID: 7110793639515268558, guid: 3a3baf8f14610324db1197776333cba3, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 7224140131182847888, guid: 3a3baf8f14610324db1197776333cba3, type: 3}
       propertyPath: m_RootOrder
       value: 0
