@@ -43,6 +43,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private float airDrag = 2f;
 
+    private float chosenDrag = 0;
+
     [SerializeField]
     private float jumpForce = 10;
 
@@ -185,22 +187,20 @@ public class PlayerMovement : MonoBehaviour
         {
             case PlayerState.IN_AIR:
                 {
-                    // Strafe slightly with less drag.
-                    body.drag = airDrag;
-                    body.AddForce(input * strafeForceInAir, ForceMode.VelocityChange);
-                    body.AddForce(Vector3.down * MarsGravity, ForceMode.Acceleration);
+                    chosenDrag = airDrag;
+                    body.AddForce(input * strafeForceInAir * Time.deltaTime, ForceMode.VelocityChange);
+                    body.AddForce(Vector3.down * MarsGravity * Time.deltaTime, ForceMode.Acceleration);
                     if (!IsInAir()) state = PlayerState.GROUNDED;
                     break;
                 }
             case PlayerState.GROUNDED:
                 {
-                    // Strafe normally with heavy drag.
-                    body.drag = drag;
+                    chosenDrag = drag;
                     // Walk along ground normal (adjusted if on heavy slope).
                     var groundNormal = GroundNormal();
                     var direction = Vector3.ProjectOnPlane(input, groundNormal);
-                    body.AddForce(direction * strafeForce, ForceMode.VelocityChange);
-                    body.AddForce(direction * strafeForce, ForceMode.Impulse);
+                    body.AddForce(direction * strafeForce * Time.deltaTime, ForceMode.VelocityChange);
+                    body.AddForce(direction * strafeForce * Time.deltaTime, ForceMode.Impulse);
                     if (IsInAir()) state = PlayerState.IN_AIR;
                     break;
                 }
@@ -210,6 +210,8 @@ public class PlayerMovement : MonoBehaviour
                     break;
                 }
         }
+        var yDrag = body.velocity.y < 0 ? 0f : body.velocity.y;
+        body.AddForce(-chosenDrag * body.mass * new Vector3(body.velocity.x, yDrag, body.velocity.z), ForceMode.Force);
     }
 
     private void UpdateRotation()
@@ -241,10 +243,11 @@ public class PlayerMovement : MonoBehaviour
     void FixedUpdate()
     {
         var positionInput = new Vector3(inputManager.moveInput.x, 0, inputManager.moveInput.y);
-        UpdatePosition(positionInput * Time.deltaTime);
+        UpdatePosition(positionInput);
         // Limit velocity when not grounded
         if (state == PlayerState.GROUNDED)
             return;
+        // TODO: clamp the magnitude instead of individual components
         body.velocity = new Vector3(Mathf.Clamp(body.velocity.x, -maxVelocity, maxVelocity), body.velocity.y, Mathf.Clamp(body.velocity.z, -maxVelocity, maxVelocity));
     }
 
