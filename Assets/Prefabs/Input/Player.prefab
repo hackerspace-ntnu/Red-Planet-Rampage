@@ -59,16 +59,18 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 65335
   lookSpeed: 3
-  maxVelocity: 20
+  groundDrag: 6
+  airDrag: 1
+  maxVelocityBeforeExtraDamping: 10
+  extraDamping: 25
   strafeForceGrounded: 60
   strafeForceCrouched: 30
-  strafeForceInAir: 10
-  drag: 6
-  airDrag: 1
+  strafeForceInAir: 30
   jumpForce: 10
   leapForce: 12.5
-  jumpTimeout: 0
-  leapTimeout: 0
+  leapTimeout: 0.25
+  consecutiveLeapHeightMultiplier: 0.5
+  consecutiveLeapForwardMultiplier: 1.5
   crouchedHeightOffset: 0.8
   airThreshold: 0.4
   slopeAngleThreshold: 50

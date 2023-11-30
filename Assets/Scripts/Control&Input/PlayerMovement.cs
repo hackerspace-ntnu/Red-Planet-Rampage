@@ -23,11 +23,22 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private float lookSpeed = 3;
 
+    [Header("Drag")]
     [SerializeField]
-    private float maxVelocity = 10;
+    private float groundDrag = 6f;
 
-    private float strafeForce;
+    [SerializeField]
+    private float airDrag = 2f;
 
+    [SerializeField]
+    private float maxVelocityBeforeExtraDamping = 20f;
+
+    [SerializeField]
+    private float extraDamping = 25f;
+
+    private float dragForce = 0;
+
+    [Header("Strafe")]
     [SerializeField]
     private float strafeForceGrounded = 60;
 
@@ -37,14 +48,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private float strafeForceInAir = 16;
 
-    [SerializeField]
-    private float drag = 6f;
+    private float strafeForce;
 
-    [SerializeField]
-    private float airDrag = 2f;
-
-    private float chosenDrag = 0;
-
+    [Header("Jumping")]
     [SerializeField]
     private float jumpForce = 10;
 
@@ -52,19 +58,18 @@ public class PlayerMovement : MonoBehaviour
     private float leapForce = 12.5f;
 
     [SerializeField]
-    private float jumpTimeout = 0.5f;
+    private float leapTimeout = 0.25f;
 
     [SerializeField]
-    private float leapTimeout = 0.875f;
+    private float consecutiveLeapHeightMultiplier = 0.5f;
+    [SerializeField]
+    private float consecutiveLeapForwardMultiplier = 1.5f;
 
-    private const float MarsGravity = 3.72076f;
+    private bool canJumpHigh = true;
 
-    private bool canJump = true;
-
+    [Header("State")]
     [SerializeField]
     private float crouchedHeightOffset = 0.3f;
-
-    private float localCameraHeight;
 
     [SerializeField]
     private float airThreshold = 0.4f;
@@ -77,6 +82,10 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField]
     private Animator animator;
+
+    private const float MarsGravity = 3.7f;
+
+    private float localCameraHeight;
 
     private Vector2 aimAngle = Vector2.zero;
 
@@ -102,23 +111,22 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext ctx)
     {
-        if (!(canJump && state == PlayerState.GROUNDED))
+        if (!(state == PlayerState.GROUNDED))
             return;
 
         // Leap jump
         if (animator.GetBool("Crouching"))
         {
-            body.AddForce(Vector3.up * leapForce, ForceMode.VelocityChange);
+            body.AddForce(Vector3.up * leapForce * (canJumpHigh ? 1f : consecutiveLeapHeightMultiplier), ForceMode.VelocityChange);
             Vector3 forwardDirection = new Vector3(inputManager.transform.forward.x, 0, inputManager.transform.forward.z);
-            body.AddForce(forwardDirection * leapForce, ForceMode.VelocityChange);
+            body.AddForce(forwardDirection * leapForce * (canJumpHigh ? 1f : consecutiveLeapForwardMultiplier), ForceMode.VelocityChange);
             animator.SetTrigger("Leap");
-            StartCoroutine(JumpTimeout(leapTimeout));
+            canJumpHigh = false;
             return;
         }
         
         // Normal jump
         body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
-        StartCoroutine(JumpTimeout(jumpTimeout));
     }
 
     private void SetCrouch(InputAction.CallbackContext ctx)
@@ -129,11 +137,10 @@ public class PlayerMovement : MonoBehaviour
             inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localCameraHeight, inputManager.transform.localPosition.z);
         }
 
-
         if (ctx.performed)
         {
             if (IsInAir())
-                return;
+                return; // TODO: Queue crouch on landing
             animator.SetBool("Crouching", true);
             strafeForce = strafeForceCrouched;
             inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
@@ -144,15 +151,15 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Crouching", false);
             strafeForce = strafeForceGrounded;
             inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f);
+            canJumpHigh = true;
         }
             
     }
 
     private IEnumerator JumpTimeout(float time)
     {
-        canJump = false;
         yield return new WaitForSeconds(time);
-        canJump = true;
+        canJumpHigh = true;
     }
 
 
@@ -187,15 +194,19 @@ public class PlayerMovement : MonoBehaviour
         {
             case PlayerState.IN_AIR:
                 {
-                    chosenDrag = airDrag;
+                    dragForce = airDrag;
                     body.AddForce(input * strafeForceInAir * Time.deltaTime, ForceMode.VelocityChange);
                     body.AddForce(Vector3.down * MarsGravity * Time.deltaTime, ForceMode.Acceleration);
-                    if (!IsInAir()) state = PlayerState.GROUNDED;
+                    if (IsInAir())
+                        break;
+                    state = PlayerState.GROUNDED;
+                    if (!canJumpHigh)
+                        StartCoroutine(JumpTimeout(leapTimeout));
                     break;
                 }
             case PlayerState.GROUNDED:
                 {
-                    chosenDrag = drag;
+                    dragForce = groundDrag;
                     // Walk along ground normal (adjusted if on heavy slope).
                     var groundNormal = GroundNormal();
                     var direction = Vector3.ProjectOnPlane(input, groundNormal);
@@ -211,7 +222,7 @@ public class PlayerMovement : MonoBehaviour
                 }
         }
         var yDrag = body.velocity.y < 0 ? 0f : body.velocity.y;
-        body.AddForce(-chosenDrag * body.mass * new Vector3(body.velocity.x, yDrag, body.velocity.z), ForceMode.Force);
+        body.AddForce(-dragForce * body.mass * new Vector3(body.velocity.x, yDrag, body.velocity.z), ForceMode.Force);
     }
 
     private void UpdateRotation()
@@ -228,8 +239,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateAnimatorParameters()
     {
-        animator.SetFloat("Forward", Vector3.Dot(body.velocity, transform.forward) / maxVelocity);
-        animator.SetFloat("Right", Vector3.Dot(body.velocity, transform.right) / maxVelocity);
+        animator.SetFloat("Forward", Vector3.Dot(body.velocity, transform.forward) / maxVelocityBeforeExtraDamping);
+        animator.SetFloat("Right", Vector3.Dot(body.velocity, transform.right) / maxVelocityBeforeExtraDamping);
     }
 
     void OnDrawGizmos()
@@ -247,8 +258,11 @@ public class PlayerMovement : MonoBehaviour
         // Limit velocity when not grounded
         if (state == PlayerState.GROUNDED)
             return;
-        // TODO: clamp the magnitude instead of individual components
-        body.velocity = new Vector3(Mathf.Clamp(body.velocity.x, -maxVelocity, maxVelocity), body.velocity.y, Mathf.Clamp(body.velocity.z, -maxVelocity, maxVelocity));
+        // Add extra drag when player velocity is too high
+        var maxVelocityReached = Mathf.Abs(body.velocity.x) > maxVelocityBeforeExtraDamping || Mathf.Abs(body.velocity.z) > maxVelocityBeforeExtraDamping;
+        // TODO: also break if in a consecutive leapjump
+        if (maxVelocityReached)
+            body.AddForce(-extraDamping * body.mass * new Vector3(body.velocity.x, 0, body.velocity.z), ForceMode.Force);
     }
 
     void Update()
