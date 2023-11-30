@@ -16,6 +16,12 @@ public class ExplodingBarrel : MonoBehaviour
         GetComponent<HealthController>().onDeath += Explode;
     }
 
+    private void OnDestroy()
+    {
+        GetComponent<HealthController>().onDeath -= Explode;
+    }
+
+
     private void Explode(HealthController controller, float damage, DamageInfo info)
     {
         barrelMesh.enabled = false;
@@ -27,11 +33,12 @@ public class ExplodingBarrel : MonoBehaviour
 
     private void LeaveMark()
     {
-        if (!Physics.Raycast(transform.position, -transform.up, out RaycastHit hit, 100, explosionMarkMask))
+        // TODO This assumes that down is down on all maps. Refactor if gravity is made to work differently sometime.
+        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 3, explosionMarkMask))
             return;
-
-        var position = hit.point + .5f * explosionMark.size.z * hit.normal;
-        var spawnedDecal = Instantiate(explosionMark, position, Quaternion.LookRotation(-hit.normal));
+        
+        var position = hit.point + .5f * explosionMark.size.z * Vector3.down;
+        var spawnedDecal = Instantiate(explosionMark, position, Quaternion.LookRotation(Vector3.down));
         spawnedDecal.transform.parent = hit.collider.transform;
 
         Destroy(spawnedDecal, explosionMarkLifeTime);
