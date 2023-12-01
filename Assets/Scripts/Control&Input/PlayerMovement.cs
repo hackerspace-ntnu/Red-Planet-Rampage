@@ -69,6 +69,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private float dashDamping = 4f;
 
+    [SerializeField]
+    private float minDashVelocity = 8f;
+
     private bool isDashing = false;
 
     [Header("State")]
@@ -275,6 +278,13 @@ public class PlayerMovement : MonoBehaviour
         // Limit velocity when not grounded
         if (state == PlayerState.GROUNDED)
             return;
+
+        if (isDashing)
+        {
+            var directionalForces = new Vector3(body.velocity.x, 0, body.velocity.z);
+            if (directionalForces.magnitude < minDashVelocity)
+                isDashing = false;
+        }
         // Add extra drag when player velocity is too high
         var maxVelocityReached = Mathf.Abs(body.velocity.x) > maxVelocityBeforeExtraDamping || Mathf.Abs(body.velocity.z) > maxVelocityBeforeExtraDamping;
         if (maxVelocityReached)
