@@ -17,12 +17,14 @@ public class PlayerFactory : MonoBehaviour
 
     [SerializeField]
     private GlobalHUDController globalHUDController;
+    [SerializeField]
+    private bool overrideMatchManager = false;
 
     private static readonly System.Random random = new System.Random();
 
     private void Awake()
     {
-        if(PlayerInputManagerController.Singleton == null)
+        if(PlayerInputManagerController.Singleton == null && overrideMatchManager)
         {
             // We most likely started the game in the game scene, reload menu instead
             SceneManager.LoadSceneAsync("Menu");
@@ -33,6 +35,11 @@ public class PlayerFactory : MonoBehaviour
         // Enable splitscreen
         playerInputManagerController.playerInputManager.DisableJoining();
         playerInputManagerController.playerInputManager.splitScreen = true;
+
+        if (!overrideMatchManager)
+            return;
+        playerInputManagerController.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+        InstantiatePlayersFPS();
     }
 
     public void InstantiatePlayersFPS()
