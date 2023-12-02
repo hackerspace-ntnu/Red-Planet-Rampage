@@ -23,11 +23,22 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private float lookSpeed = 3;
 
+    [Header("Drag")]
     [SerializeField]
-    private float maxVelocity = 10;
+    private float groundDrag = 6f;
 
-    private float strafeForce;
+    [SerializeField]
+    private float airDrag = 2f;
 
+    [SerializeField]
+    private float maxVelocityBeforeExtraDamping = 20f;
+
+    [SerializeField]
+    private float extraDamping = 25f;
+
+    private float dragForce = 0;
+
+    [Header("Strafe")]
     [SerializeField]
     private float strafeForceGrounded = 60;
 
@@ -37,12 +48,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private float strafeForceInAir = 16;
 
-    [SerializeField]
-    private float drag = 6f;
+    private float strafeForce;
 
-    [SerializeField]
-    private float airDrag = 2f;
-
+    [Header("Jumping")]
     [SerializeField]
     private float jumpForce = 10;
 
@@ -50,19 +58,25 @@ public class PlayerMovement : MonoBehaviour
     private float leapForce = 12.5f;
 
     [SerializeField]
-    private float jumpTimeout = 0.5f;
+    private float leapTimeout = 0.25f;
 
     [SerializeField]
-    private float leapTimeout = 0.875f;
+    private float dashHeightMultiplier = 0.5f;
 
-    private const float MarsGravity = 3.72076f;
+    [SerializeField]
+    private float dashForwardMultiplier = 1.5f;
 
-    private bool canJump = true;
+    [SerializeField]
+    private float dashDamping = 4f;
 
+    [SerializeField]
+    private float minDashVelocity = 8f;
+
+    private bool isDashing = false;
+
+    [Header("State")]
     [SerializeField]
     private float crouchedHeightOffset = 0.3f;
-
-    private float localCameraHeight;
 
     [SerializeField]
     private float airThreshold = 0.4f;
@@ -76,7 +90,14 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private Animator animator;
 
+    private const float MarsGravity = 3.7f;
+
+    private float localCameraHeight;
+
     private Vector2 aimAngle = Vector2.zero;
+
+    private delegate void MovementEvent();
+    private MovementEvent onLanding;
 
     void Start()
     {
@@ -93,33 +114,31 @@ public class PlayerMovement : MonoBehaviour
     {
         inputManager = player;
         inputManager.onSelect += OnJump;
-        inputManager.onCrouchPerformed += SetCrouch;
-        inputManager.onCrouchCanceled += SetCrouch;
+        inputManager.onCrouchPerformed += OnCrouch;
+        inputManager.onCrouchCanceled += OnCrouch;
         localCameraHeight = inputManager.transform.localPosition.y;
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
     {
-        if (!(canJump && state == PlayerState.GROUNDED))
+        if (!(state == PlayerState.GROUNDED))
             return;
 
-        // Leap jump
+        // Leap/dash jump
         if (animator.GetBool("Crouching"))
         {
-            body.AddForce(Vector3.up * leapForce, ForceMode.VelocityChange);
+            body.AddForce(Vector3.up * leapForce * (isDashing ? dashHeightMultiplier : 1f), ForceMode.VelocityChange);
             Vector3 forwardDirection = new Vector3(inputManager.transform.forward.x, 0, inputManager.transform.forward.z);
-            body.AddForce(forwardDirection * leapForce, ForceMode.VelocityChange);
+            body.AddForce(forwardDirection * leapForce * (isDashing ? dashForwardMultiplier : 1f), ForceMode.VelocityChange);
             animator.SetTrigger("Leap");
-            StartCoroutine(JumpTimeout(leapTimeout));
+            onLanding += EnableDash;
             return;
         }
-        
         // Normal jump
         body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
-        StartCoroutine(JumpTimeout(jumpTimeout));
     }
 
-    private void SetCrouch(InputAction.CallbackContext ctx)
+    private void OnCrouch(InputAction.CallbackContext ctx)
     {
         if (LeanTween.isTweening(inputManager.gameObject))
         {
@@ -127,14 +146,14 @@ public class PlayerMovement : MonoBehaviour
             inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localCameraHeight, inputManager.transform.localPosition.z);
         }
 
-
         if (ctx.performed)
         {
             if (IsInAir())
+            {
+                onLanding += StartCrouch;
                 return;
-            animator.SetBool("Crouching", true);
-            strafeForce = strafeForceCrouched;
-            inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
+            }
+            StartCrouch();
         }
             
         if (ctx.canceled)
@@ -142,17 +161,30 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Crouching", false);
             strafeForce = strafeForceGrounded;
             inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f);
+            isDashing = false;
+            onLanding -= StartCrouch;
         }
             
     }
 
-    private IEnumerator JumpTimeout(float time)
+    private void StartCrouch()
     {
-        canJump = false;
-        yield return new WaitForSeconds(time);
-        canJump = true;
+        animator.SetBool("Crouching", true);
+        strafeForce = strafeForceCrouched;
+        inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
     }
 
+    private void EnableDash()
+    {
+        StartCoroutine(JumpTimeout(leapTimeout));
+    }
+
+    private IEnumerator JumpTimeout(float time)
+    {
+        yield return new WaitForSeconds(time);
+        isDashing = IsInAir();
+        onLanding -= EnableDash;
+    }
 
     private bool IsInAir()
     {
@@ -175,8 +207,6 @@ public class PlayerMovement : MonoBehaviour
         return Vector3.up;
     }
 
-
-
     private void UpdatePosition(Vector3 input)
     {
         // Modify input to addforce with relation to current rotation.
@@ -185,22 +215,23 @@ public class PlayerMovement : MonoBehaviour
         {
             case PlayerState.IN_AIR:
                 {
-                    // Strafe slightly with less drag.
-                    body.drag = airDrag;
-                    body.AddForce(input * strafeForceInAir, ForceMode.VelocityChange);
-                    body.AddForce(Vector3.down * MarsGravity, ForceMode.Acceleration);
-                    if (!IsInAir()) state = PlayerState.GROUNDED;
+                    dragForce = airDrag;
+                    body.AddForce(input * strafeForceInAir * Time.deltaTime, ForceMode.VelocityChange);
+                    body.AddForce(Vector3.down * MarsGravity * Time.deltaTime, ForceMode.Acceleration);
+                    if (IsInAir())
+                        break;
+                    state = PlayerState.GROUNDED;
+                    onLanding?.Invoke();
                     break;
                 }
             case PlayerState.GROUNDED:
                 {
-                    // Strafe normally with heavy drag.
-                    body.drag = drag;
+                    dragForce = groundDrag;
                     // Walk along ground normal (adjusted if on heavy slope).
                     var groundNormal = GroundNormal();
                     var direction = Vector3.ProjectOnPlane(input, groundNormal);
-                    body.AddForce(direction * strafeForce, ForceMode.VelocityChange);
-                    body.AddForce(direction * strafeForce, ForceMode.Impulse);
+                    body.AddForce(direction * strafeForce * Time.deltaTime, ForceMode.VelocityChange);
+                    body.AddForce(direction * strafeForce * Time.deltaTime, ForceMode.Impulse);
                     if (IsInAir()) state = PlayerState.IN_AIR;
                     break;
                 }
@@ -210,6 +241,8 @@ public class PlayerMovement : MonoBehaviour
                     break;
                 }
         }
+        var yDrag = body.velocity.y < 0 ? 0f : body.velocity.y;
+        body.AddForce(-dragForce * body.mass * new Vector3(body.velocity.x, yDrag, body.velocity.z), ForceMode.Force);
     }
 
     private void UpdateRotation()
@@ -226,8 +259,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateAnimatorParameters()
     {
-        animator.SetFloat("Forward", Vector3.Dot(body.velocity, transform.forward) / maxVelocity);
-        animator.SetFloat("Right", Vector3.Dot(body.velocity, transform.right) / maxVelocity);
+        animator.SetFloat("Forward", Vector3.Dot(body.velocity, transform.forward) / maxVelocityBeforeExtraDamping);
+        animator.SetFloat("Right", Vector3.Dot(body.velocity, transform.right) / maxVelocityBeforeExtraDamping);
     }
 
     void OnDrawGizmos()
@@ -241,11 +274,21 @@ public class PlayerMovement : MonoBehaviour
     void FixedUpdate()
     {
         var positionInput = new Vector3(inputManager.moveInput.x, 0, inputManager.moveInput.y);
-        UpdatePosition(positionInput * Time.deltaTime);
+        UpdatePosition(positionInput);
         // Limit velocity when not grounded
         if (state == PlayerState.GROUNDED)
             return;
-        body.velocity = new Vector3(Mathf.Clamp(body.velocity.x, -maxVelocity, maxVelocity), body.velocity.y, Mathf.Clamp(body.velocity.z, -maxVelocity, maxVelocity));
+
+        if (isDashing)
+        {
+            var directionalForces = new Vector3(body.velocity.x, 0, body.velocity.z);
+            if (directionalForces.magnitude < minDashVelocity)
+                isDashing = false;
+        }
+        // Add extra drag when player velocity is too high
+        var maxVelocityReached = Mathf.Abs(body.velocity.x) > maxVelocityBeforeExtraDamping || Mathf.Abs(body.velocity.z) > maxVelocityBeforeExtraDamping;
+        if (maxVelocityReached)
+            body.AddForce(-(isDashing ? dashDamping : extraDamping) * body.mass * new Vector3(body.velocity.x, 0, body.velocity.z), ForceMode.Force);
     }
 
     void Update()

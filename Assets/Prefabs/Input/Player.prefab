@@ -59,16 +59,19 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 65335
   lookSpeed: 3
-  maxVelocity: 10
+  groundDrag: 6
+  airDrag: 1
+  maxVelocityBeforeExtraDamping: 10
+  extraDamping: 25
   strafeForceGrounded: 60
   strafeForceCrouched: 30
-  strafeForceInAir: 16
-  drag: 6
-  airDrag: 2
+  strafeForceInAir: 30
   jumpForce: 10
   leapForce: 12.5
-  jumpTimeout: 0.5
-  leapTimeout: 0.875
+  leapTimeout: 0.25
+  dashHeightMultiplier: 0.5
+  dashForwardMultiplier: 1
+  dashDamping: 0.5
   crouchedHeightOffset: 0.8
   airThreshold: 0.4
   slopeAngleThreshold: 50
@@ -145,8 +148,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 71015680234268067}
   serializedVersion: 4
-  m_Mass: 10
-  m_Drag: 4
+  m_Mass: 5
+  m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
