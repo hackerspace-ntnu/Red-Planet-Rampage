@@ -114,8 +114,8 @@ public class PlayerMovement : MonoBehaviour
     {
         inputManager = player;
         inputManager.onSelect += OnJump;
-        inputManager.onCrouchPerformed += SetCrouch;
-        inputManager.onCrouchCanceled += SetCrouch;
+        inputManager.onCrouchPerformed += OnCrouch;
+        inputManager.onCrouchCanceled += OnCrouch;
         localCameraHeight = inputManager.transform.localPosition.y;
     }
 
@@ -138,7 +138,7 @@ public class PlayerMovement : MonoBehaviour
         body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
     }
 
-    private void SetCrouch(InputAction.CallbackContext ctx)
+    private void OnCrouch(InputAction.CallbackContext ctx)
     {
         if (LeanTween.isTweening(inputManager.gameObject))
         {
@@ -150,10 +150,10 @@ public class PlayerMovement : MonoBehaviour
         {
             if (IsInAir())
             {
-                onLanding += SetCrouchTrue;
+                onLanding += StartCrouch;
                 return;
             }
-            SetCrouchTrue();
+            StartCrouch();
         }
             
         if (ctx.canceled)
@@ -162,12 +162,12 @@ public class PlayerMovement : MonoBehaviour
             strafeForce = strafeForceGrounded;
             inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f);
             isDashing = false;
-            onLanding -= SetCrouchTrue;
+            onLanding -= StartCrouch;
         }
             
     }
 
-    private void SetCrouchTrue()
+    private void StartCrouch()
     {
         animator.SetBool("Crouching", true);
         strafeForce = strafeForceCrouched;
