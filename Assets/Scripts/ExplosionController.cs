@@ -10,6 +10,7 @@ public class ExplosionController : MonoBehaviour
     [SerializeField] private AnimationCurve damageCurve;
 
     [SerializeField] private float radius;
+    public float Radius => radius;
 
     [SerializeField] private float knockbackForce = 2000;
 
