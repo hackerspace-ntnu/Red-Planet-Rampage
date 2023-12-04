@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,6 +20,9 @@ public class RagdollController : MonoBehaviour
 
     [SerializeField]
     private Rigidbody rigidbodyToPush;
+
+    [SerializeField]
+    private Transform cameraParent;
 
     public void EnableRagdoll(Vector3 knockbackForce)
     {
@@ -47,6 +49,12 @@ public class RagdollController : MonoBehaviour
             rigidbody.useGravity = true;
         }
 
+
         rigidbodyToPush.AddForce(knockbackForce, ForceMode.Impulse);
+    }
+
+    public void ReparentCamera(Transform cameraTransform)
+    {
+        cameraTransform.parent = cameraParent;
     }
 }
