@@ -125,11 +125,15 @@ public class PlayerManager : MonoBehaviour
         gunController.gameObject.SetActive(false);
         // Disable all colliders and physics
         // Ragdollify
-
+        
         // TODO: Make accurate hitbox forces for the different limbs of the player
 
+        var ragdollController = GetComponent<RagdollController>();
+        
+        ragdollController.ReparentCamera(inputManager.transform);
+
         var force = info.force.normalized * info.damage * deathKnockbackForceMultiplier;
-        GetComponent<RagdollController>().EnableRagdoll(force);
+        ragdollController.EnableRagdoll(force);
     }
 
     /// <summary>

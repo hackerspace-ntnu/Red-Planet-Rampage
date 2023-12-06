@@ -72,6 +72,7 @@ MonoBehaviour:
   dashHeightMultiplier: 0.5
   dashForwardMultiplier: 1
   dashDamping: 0.5
+  minDashVelocity: 8
   crouchedHeightOffset: 0.8
   airThreshold: 0.4
   slopeAngleThreshold: 50
@@ -247,6 +248,7 @@ MonoBehaviour:
   - {fileID: 3287810421863630874}
   animatorToDisable: {fileID: 289053663840324231}
   rigidbodyToPush: {fileID: 3287810421183947676}
+  cameraParent: {fileID: 800741041111796087}
 --- !u!82 &7607358150439154286
 AudioSource:
   m_ObjectHideFlags: 0
@@ -2001,6 +2003,11 @@ Transform:
 --- !u!95 &289053663840324231 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 3000042688875756406, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
+  m_PrefabInstance: {fileID: 3287810421515891185}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &800741041111796087 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2791224155276818566, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
   m_PrefabInstance: {fileID: 3287810421515891185}
   m_PrefabAsset: {fileID: 0}
 --- !u!136 &2815208169435112715 stripped
