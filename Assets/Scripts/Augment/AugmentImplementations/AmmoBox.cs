@@ -36,11 +36,11 @@ public class AmmoBox : MonoBehaviour
         ammoBoxes.Remove(this);
     }
 
-    public static AmmoBox GetClosestAmmoBox(Transform from)
+    public static AmmoBox GetClosestAmmoBox(Vector3 from)
     {
         return ammoBoxes.Aggregate(
             (ammoBox, next) => 
-            Vector3.Distance(from.position, next.transform.position) < Vector3.Distance(from.position, ammoBox.transform.position) ? next : ammoBox);
+            Vector3.Distance(from, next.transform.position) < Vector3.Distance(from, ammoBox.transform.position) ? next : ammoBox);
     }
 
     private IEnumerator CheckForCollectors()

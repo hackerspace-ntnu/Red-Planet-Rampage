@@ -7,6 +7,8 @@ public class AmmoBoxBody : GunBody
     private GameObject radar;
     [SerializeField]
     private float ammoRadarCooldownTime = 2f;
+    [SerializeField]
+    private float radarRotationSpeed = 5f;
     private AmmoBox selectedAmmoBox;
 
     public override void Start()
@@ -23,7 +25,7 @@ public class AmmoBoxBody : GunBody
 
     private IEnumerator SetClosestAmmoBox()
     {
-        selectedAmmoBox = AmmoBox.GetClosestAmmoBox(transform);
+        selectedAmmoBox = AmmoBox.GetClosestAmmoBox(transform.position);
         yield return new WaitForSeconds(ammoRadarCooldownTime);
         if (gameObject)
             StartCoroutine(SetClosestAmmoBox());
@@ -31,12 +33,12 @@ public class AmmoBoxBody : GunBody
 
     protected override void Reload(GunStats stats)
     {
-        selectedAmmoBox = AmmoBox.GetClosestAmmoBox(transform);
+        selectedAmmoBox = AmmoBox.GetClosestAmmoBox(transform.position);
     }
     private void Update()
     {
         if (!selectedAmmoBox)
             return;
-        radar.transform.LookAt(selectedAmmoBox.transform);
+        radar.transform.rotation = Quaternion.Slerp(radar.transform.rotation, Quaternion.LookRotation(selectedAmmoBox.transform.position - transform.position), Time.deltaTime * radarRotationSpeed);
     }
 }
