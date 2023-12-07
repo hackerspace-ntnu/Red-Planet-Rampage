@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ public class AmmoBox : MonoBehaviour
 
     private Collider collider;
     private MeshRenderer renderer;
+    private static List<AmmoBox> ammoBoxes = new List<AmmoBox>();
 
     private void Start()
     {
@@ -22,6 +24,23 @@ public class AmmoBox : MonoBehaviour
                 .setLoopPingPong().setEaseInOutCubic())
             .insert(LeanTween.rotateAroundLocal(boxModel, Vector3.forward, boxModel.transform.eulerAngles.y + 360, 1.5f)
                 .setLoopType(LeanTweenType.easeInOutCubic).setLoopCount(-1));
+    }
+
+    private void OnEnable()
+    {
+        ammoBoxes.Add(this);
+    }
+
+    private void OnDisable()
+    {
+        ammoBoxes.Remove(this);
+    }
+
+    public static AmmoBox GetClosestAmmoBox(Transform from)
+    {
+        return ammoBoxes.Aggregate(
+            (ammoBox, next) => 
+            Vector3.Distance(from.position, next.transform.position) < Vector3.Distance(from.position, ammoBox.transform.position) ? next : ammoBox);
     }
 
     private IEnumerator CheckForCollectors()
@@ -42,6 +61,7 @@ public class AmmoBox : MonoBehaviour
         yield return new WaitForSeconds(respawnTime);
         collider.enabled = true;
         renderer.enabled = true;
+        ammoBoxes.Add(this);
     }
 
     private void OnTriggerStay(Collider intruder)
@@ -56,6 +76,7 @@ public class AmmoBox : MonoBehaviour
 
         collider.enabled = false;
         renderer.enabled = false;
+        ammoBoxes.Remove(this);
         StartCoroutine(RespawnAfterTimeout());
     }
 }
