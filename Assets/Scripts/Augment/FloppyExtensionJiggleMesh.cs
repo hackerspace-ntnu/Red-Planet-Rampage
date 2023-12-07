@@ -42,7 +42,7 @@ public class FloppyExtensionJiggleMesh : JiggleMesh
         var sensitivity = movementSensitivity;
         if (player)
             sensitivity = player.inputManager.moveInput.magnitude < 0.2f ? movementSensitivity : movementSensitivityWalking;
-        previousTarget = target + (oldPosition - transform.position) * sensitivity;
+        previousTarget = target + Quaternion.Inverse(transform.rotation) * -(oldPosition - transform.position) * sensitivity;
         previousDiff -= distance * jiggleFalloff;
         previousDiff /= 2;
 
