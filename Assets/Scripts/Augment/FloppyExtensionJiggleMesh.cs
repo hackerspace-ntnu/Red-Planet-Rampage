@@ -5,6 +5,9 @@ public class FloppyExtensionJiggleMesh : JiggleMesh
     [SerializeField]
     private float movementSensitivityWalking = 0.05f;
 
+    [SerializeField]
+    private float jiggleDistanceMultiplier = 1.5f;
+
     public PlayerManager player;
     private Vector2 normalizedPointer;
     public Vector2 NormalizedPointer => normalizedPointer;
@@ -43,7 +46,7 @@ public class FloppyExtensionJiggleMesh : JiggleMesh
         previousDiff -= distance * jiggleFalloff;
         previousDiff /= 2;
 
-        Direction = -(Quaternion.Inverse(transform.rotation) * (target - transform.forward));
+        Direction = -(Quaternion.Inverse(transform.rotation) * (target - transform.forward) * jiggleDistanceMultiplier);
         UpdatePointer(Direction);
         oldPosition = transform.position;
     }
