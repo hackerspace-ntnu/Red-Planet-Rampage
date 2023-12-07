@@ -73,7 +73,7 @@ GameObject:
   - component: {fileID: 6091813380986844731}
   - component: {fileID: 5827192658648779728}
   m_Layer: 0
-  m_Name: GatlingBody
+  m_Name: SeekerBody
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -126,6 +126,7 @@ GameObject:
   - component: {fileID: 7892646461465390510}
   - component: {fileID: 6496314603577565707}
   - component: {fileID: 9062224311694956225}
+  - component: {fileID: 2201384046096287263}
   m_Layer: 0
   m_Name: SeekerBody
   m_TagString: Untagged
@@ -200,6 +201,25 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &2201384046096287263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7404903565536474900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2eb4e58302d4c64298bd7019f43c89e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  jiggleMaterial: {fileID: 2100000, guid: 8ebc2dfc073844742b90541dca492b74, type: 2}
+  jiggleMaterialIndex: 2
+  wobbleOriginOffset: 0.073
+  elasticity: 4
+  distanceScale: 3
+  slerpSpeed: 0.1
+  maxBendDistance: 1
 --- !u!1 &8476307063284615586
 GameObject:
   m_ObjectHideFlags: 0
