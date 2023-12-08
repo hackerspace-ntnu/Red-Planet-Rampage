@@ -51,7 +51,9 @@ public class RubberSniper : GunExtension
 
     private void FixedUpdate()
     {
-        if (gunController)
-            gunController.player.HUDController.MoveCrosshair(jigglePhysics.NormalizedPointer.x, jigglePhysics.NormalizedPointer.y);
+        if (!gunController)
+            return;
+        var correctedDirection = gunController.player.inputManager.transform.rotation * jigglePhysics.NormalizedPointer;
+        gunController.player.HUDController.MoveCrosshair(correctedDirection.x, correctedDirection.y);
     }
 }

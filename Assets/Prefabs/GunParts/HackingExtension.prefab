@@ -131,7 +131,7 @@ MonoBehaviour:
   jiggleMaterialIndex: 0
   jiggleFalloff: 0.9
   elasticity: 3
-  movementSensitivity: 0.0005
+  movementSensitivity: 1
 --- !u!1 &2978767890328388517
 GameObject:
   m_ObjectHideFlags: 0
@@ -231,7 +231,7 @@ MonoBehaviour:
   jiggleMaterialIndex: 0
   jiggleFalloff: 0.9
   elasticity: 3
-  movementSensitivity: 0.0005
+  movementSensitivity: 1
 --- !u!1 &3629719358906180994
 GameObject:
   m_ObjectHideFlags: 0
@@ -331,7 +331,7 @@ MonoBehaviour:
   jiggleMaterialIndex: 0
   jiggleFalloff: 0.9
   elasticity: 3
-  movementSensitivity: 0.0005
+  movementSensitivity: 1
 --- !u!1 &4827614958556121204
 GameObject:
   m_ObjectHideFlags: 0
@@ -372,7 +372,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4827614959384518682}
-  - component: {fileID: 4827614959384518683}
+  - component: {fileID: 6124192737764207717}
   - component: {fileID: 643204947169274698}
   m_Layer: 0
   m_Name: HackingExtension
@@ -398,7 +398,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4827614959384518683
+--- !u!114 &6124192737764207717
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -407,13 +407,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 4827614959384518680}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a7619e994087ad4383adf04a959152d, type: 3}
+  m_Script: {fileID: 11500000, guid: 20c35178c9c126e4783c473fa251318b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   statModifiers: []
   outputs:
   - {fileID: 4827614958556121207}
   model: {fileID: 2248296421995411996}
+  meshRenderer: {fileID: 5603072098888237411}
+  hackingScreen: {fileID: 2100000, guid: 8433c20840b9c9f4fb17f23a56da4dfa, type: 2}
+  scrollAmount: 0.1
 --- !u!114 &643204947169274698
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -490,7 +493,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 035e66e4ec53ddb4dae99a8c22dae441, type: 2}
-  - {fileID: 3589333493158463532, guid: 4ce328e6a0dae504e81f30fce0a08a56, type: 3}
+  - {fileID: 2100000, guid: 8433c20840b9c9f4fb17f23a56da4dfa, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

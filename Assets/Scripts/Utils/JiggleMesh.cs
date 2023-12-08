@@ -35,7 +35,7 @@ public class JiggleMesh : MonoBehaviour
     {
         Vector3 target = Vector3.Slerp(previousTarget, previousDiff, Time.deltaTime * elasticity);
         jiggleMaterial.SetVector("_Distance", target);
-        previousTarget = target + (oldPosition - transform.position) * movementSensitivity;
+        previousTarget = target + Quaternion.Inverse(transform.rotation) * -(oldPosition - transform.position) * movementSensitivity;
         previousDiff -= target * jiggleFalloff;
         previousDiff /= 2;
         oldPosition = transform.position;
