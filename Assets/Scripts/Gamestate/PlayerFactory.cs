@@ -115,11 +115,7 @@ public class PlayerFactory : MonoBehaviour
     }
     private void InstantiateItemSelectPlayer(InputManager inputManager, Transform spawnPoint)
     {
-        GetComponent<AuctionDriver>().Camera.GetComponent<Camera>().enabled = false;
         inputManager.GetComponent<Camera>().enabled = true;
-        inputManager.gameObject.SetActive(false);
-        PlayerInputManagerController.Singleton.playerInputManager.splitScreen = true;
-        inputManager.gameObject.SetActive(true);
         spawnInterval += 10000f;
         GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position + new Vector3(spawnInterval, spawnInterval, 0), spawnPoint.rotation);
         Camera playerCamera = inputManager.GetComponent<Camera>();

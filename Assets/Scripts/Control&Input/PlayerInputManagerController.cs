@@ -74,8 +74,11 @@ public class PlayerInputManagerController : MonoBehaviour
             playerInput.AddListeners();
 
             // Free the playerInputs from their mortail coils (Player prefab or similar assets)
+            var previousParent = playerInput.transform.parent;
             playerInput.transform.parent = null;
             DontDestroyOnLoad(playerInput);
+            if (previousParent)
+                Destroy(previousParent.gameObject);
         });
     }
 }
