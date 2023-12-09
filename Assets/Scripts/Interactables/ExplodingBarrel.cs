@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -30,7 +31,7 @@ public class ExplodingBarrel : MonoBehaviour
     private void Explode(HealthController controller, float damage, DamageInfo info)
     {
         barrelMesh.enabled = false;
-        GetComponentInChildren<CapsuleCollider>().enabled = false;
+        GetComponentsInChildren<Collider>().Select(c => c.enabled = false);
         explosionController.Explode(info.sourcePlayer);
         LeaveMark();
         Destroy(gameObject, 4);
