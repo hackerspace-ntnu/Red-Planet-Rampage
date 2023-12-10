@@ -12,14 +12,6 @@ public class BiddingPlayer : MonoBehaviour
     private Transform signMesh;
     [SerializeField]
     private Transform signTarget;
-    [SerializeField]
-    private Transform root;
-    [SerializeField]
-    private Transform joint;
-    [SerializeField]
-    private Transform end;
-    [SerializeField]
-    private Transform pole;
 
     [SerializeField]
     private TMP_Text chipText;
@@ -35,6 +27,7 @@ public class BiddingPlayer : MonoBehaviour
         playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
 
         chipText.text = playerManager.identity.chips.ToString();
+        GetComponent<PlayerIK>().RightHandIKTarget = signTarget;
     }
     private void AnimateBid(InputAction.CallbackContext ctx)
     {
@@ -90,10 +83,6 @@ public class BiddingPlayer : MonoBehaviour
         sign.LookAt(new Vector3(sign.position.x, Camera.main.transform.position.y, sign.position.z));
     }
 
-    private void LateUpdate()
-    {
-        GenericTwoBodyIK.AnimateTransforms(root, joint, end, pole, signTarget);
-    }
     private void OnDestroy()
     {
         playerManager.inputManager.onFirePerformed -= AnimateBid;
