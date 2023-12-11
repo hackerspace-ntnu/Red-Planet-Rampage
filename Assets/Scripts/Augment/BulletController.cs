@@ -29,11 +29,11 @@ public class BulletController : ProjectileController
 
     private ProjectileState projectile = new ProjectileState();
 
-
     protected override void Awake()
     {
         base.Awake();
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
+        animator.OnFireAnimationEnd += FireProjectile;
     }
 
     private void Start()
@@ -53,7 +53,7 @@ public class BulletController : ProjectileController
         animator.OnInitialize(gunstats);
     }
 
-    protected override void OnReload(GunStats gunstats)
+    protected override void OnReload(GunStats stats)
     {
         animator.OnReload(gunstats);
     }
@@ -61,7 +61,10 @@ public class BulletController : ProjectileController
     public override void InitializeProjectile(GunStats stats)
     {
         animator.OnFire(stats);
+    }
 
+    private void FireProjectile()
+    {
         for (int k = 0; k < stats.ProjectilesPerShot; k++)
         {
             Quaternion randomSpread = Quaternion.Lerp(Quaternion.identity, Random.rotation, stats.ProjectileSpread);
