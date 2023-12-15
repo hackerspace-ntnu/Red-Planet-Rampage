@@ -20,6 +20,8 @@ public class LawnMower : GunBody
     private float arrowHitSpan = 5f;
     [SerializeField]
     private AnimationCurve targetRateOfChange;
+    [SerializeField]
+    private ParticleSystem exhaustParticles;
 
     private float currentTarget;
     public override void Start()
@@ -47,6 +49,7 @@ public class LawnMower : GunBody
     {
         LeanTween.cancel(gameObject);
         animator.SetTrigger("PistonPump");
+        exhaustParticles.Play();
         var currentDegrees = mowerScreen.GetFloat("_ArrowDegrees");
         if (currentDegrees > currentTarget - arrowHitSpan && currentDegrees < currentTarget + arrowHitSpan)
         {
@@ -70,7 +73,7 @@ public class LawnMower : GunBody
     private void StartTween(GunStats stats)
     {
         gameObject.LeanValue( 
-            (degree) => mowerScreen.SetFloat("_ArrowDegrees", degree), minArrowDegrees, maxArrowDegrees, 5f)
+            (degree) => mowerScreen.SetFloat("_ArrowDegrees", degree), minArrowDegrees, maxArrowDegrees, 4f)
             .setOnComplete(() => 
             {
                 currentTarget = maxArrowDegrees;
