@@ -116,7 +116,7 @@ SkinnedMeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: c7d6d829721ac67439312d1d001ebd5a, type: 2}
-  - {fileID: 3589333493158463532, guid: a351b4f9299b2634e9fa9f654b5c495b, type: 3}
+  - {fileID: 2100000, guid: ba0e56975e31013409abfe9b36e7aa35, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -167,7 +167,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6114546431771368496}
-  - component: {fileID: 8712166324016566095}
+  - component: {fileID: 8412244710553485749}
   m_Layer: 0
   m_Name: lawnMower
   m_TagString: Untagged
@@ -188,10 +188,11 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4937800962132136112}
+  - {fileID: 4393314981897995506}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8712166324016566095
+--- !u!114 &8412244710553485749
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -200,7 +201,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1809122596642359082}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cfa69fed5ef1c1c4c8c1e1de6b412aee, type: 3}
+  m_Script: {fileID: 11500000, guid: 8375e0b741c00094a839bd88e690adf5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: ed4e735ad892c924f83cd52e7590ab02, type: 2}
@@ -208,6 +209,37 @@ MonoBehaviour:
   RightHandTarget: {fileID: 4828178755023173497}
   LeftHandTarget: {fileID: 0}
   reloadEfficiencyPercentage: 1
+  animator: {fileID: 7075965889028507396}
+  mowerScreenMaterialIndex: 1
+  meshRenderer: {fileID: 2808703246572567439}
+  mowerScreen: {fileID: 2100000, guid: ba0e56975e31013409abfe9b36e7aa35, type: 2}
+  minArrowDegrees: -70
+  maxArrowDegrees: 70
+  arrowHitSpan: 5.5
+  targetRateOfChange:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.20029794
+      inSlope: -0.47579575
+      outSlope: -0.47579575
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.14166667
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1.4451784
+      outSlope: 1.4451784
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.07499999
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &2723610396305189264
 GameObject:
   m_ObjectHideFlags: 0
@@ -232,18 +264,17 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2723610396305189264}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: -0.06, y: 0, z: 0}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 5293788015442051607}
   - {fileID: 1271292455574593028}
-  - {fileID: 4393314981897995506}
   - {fileID: 4828178755023173497}
   m_Father: {fileID: 6114546431771368496}
   m_RootOrder: -1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!95 &7075965889028507396
 Animator:
   serializedVersion: 5
@@ -542,11 +573,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6667944422328699187}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -1.98}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.396}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 4937800962132136112}
+  m_Father: {fileID: 6114546431771368496}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7196802311962116544
