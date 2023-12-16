@@ -22,6 +22,15 @@ public class LawnMower : GunBody
     private AnimationCurve targetRateOfChange;
     [SerializeField]
     private ParticleSystem exhaustParticles;
+    [SerializeField]
+    private ParticleSystem failedExhaustParticles;
+    [SerializeField]
+    private PlayerHand playerHand;
+    [SerializeField]
+    private LineRenderer handString;
+    private Animator handAnimator;
+    [SerializeField]
+    private Transform lineStart;
 
     private float currentTarget;
     public override void Start()
@@ -43,12 +52,26 @@ public class LawnMower : GunBody
             (degree) => mowerScreen.SetFloat("_ArrowDegrees", degree), maxArrowDegrees + 4f, maxArrowDegrees - 4f, 0.15f)
             .setLoopPingPong();
 
+        if (!gunController.player)
+            return;
+
+        playerHand.gameObject.SetActive(true);
+        playerHand.SetPlayer(gunController.player);
+        handAnimator = GetComponent<Animator>();
+        handString.gameObject.SetActive(true);
+    }
+
+    private void Update()
+    {
+        handString.SetPosition(0, lineStart.position);
+        handString.SetPosition(1, playerHand.HoldingPoint.position);
     }
 
     private void Fire(GunStats stats)
     {
         LeanTween.cancel(gameObject);
         animator.SetTrigger("PistonPump");
+        handAnimator.SetTrigger("Pull");
         exhaustParticles.Play();
         var currentDegrees = mowerScreen.GetFloat("_ArrowDegrees");
         if (currentDegrees > currentTarget - arrowHitSpan && currentDegrees < currentTarget + arrowHitSpan)
@@ -61,6 +84,7 @@ public class LawnMower : GunBody
         else
         {
             mowerScreen.SetFloat("_TargetDegrees", maxArrowDegrees);
+            failedExhaustParticles.Play();
         }
         StartTween(stats);
     }
@@ -73,7 +97,7 @@ public class LawnMower : GunBody
     private void StartTween(GunStats stats)
     {
         gameObject.LeanValue( 
-            (degree) => mowerScreen.SetFloat("_ArrowDegrees", degree), minArrowDegrees, maxArrowDegrees, 4f)
+            (degree) => mowerScreen.SetFloat("_ArrowDegrees", degree), minArrowDegrees, maxArrowDegrees, 3f)
             .setOnComplete(() => 
             {
                 currentTarget = maxArrowDegrees;

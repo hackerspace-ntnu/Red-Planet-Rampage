@@ -8,6 +8,9 @@ public class PlayerHand : MonoBehaviour
     private SkinnedMeshRenderer handMaterial;
     [SerializeField]
     private GameObject mesh;
+    [SerializeField]
+    private Transform holdingPoint;
+    public Transform HoldingPoint => holdingPoint;
 
     public void SetPlayer(PlayerManager player)
     {
