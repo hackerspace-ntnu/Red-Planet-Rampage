@@ -36,6 +36,10 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private Item ammoMaskItem;
 
+    [SerializeField]
+    private Transform gunHolder;
+    public Transform GunHolder => gunHolder;
+
     [Header("Related objects")]
 
     public InputManager inputManager;

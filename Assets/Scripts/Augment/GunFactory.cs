@@ -18,6 +18,40 @@ public class GunFactory : MonoBehaviour
         // Initialize everything
         gun.GetComponent<GunFactory>().InitializeGun(owner);
 
+        var cullingLayer = LayerMask.NameToLayer("Gun " + owner.inputManager.playerInput.playerIndex);
+        gun.layer = cullingLayer;
+
+        var childrenMeshRenderer = gun.GetComponentsInChildren<MeshRenderer>(includeInactive: true);
+        foreach (var child in childrenMeshRenderer)
+        {
+            child.gameObject.layer = cullingLayer;
+        }
+        var childrenSkinnedMeshRenderer = gun.GetComponentsInChildren<MeshRenderer>(includeInactive: true);
+        foreach (var child in childrenSkinnedMeshRenderer)
+        {
+            child.gameObject.layer = cullingLayer;
+        }
+
+        GunFactory displayGun = owner.GunHolder.GetComponent<GunFactory>();
+        displayGun.Body = bodyPrefab;
+        displayGun.Barrel = barrelPrefab;
+        displayGun.Extension = extensionPrefab;
+        displayGun.InitializeGun();
+
+        var cullingLayerDisplay = LayerMask.NameToLayer("Player " + owner.inputManager.playerInput.playerIndex);
+        displayGun.gameObject.layer = cullingLayerDisplay;
+
+        var childrenDisplayMeshRenderer = displayGun.GetComponentsInChildren<MeshRenderer>(includeInactive: true);
+        foreach (var child in childrenDisplayMeshRenderer)
+        {
+            child.gameObject.layer = cullingLayerDisplay;
+        }
+        var childrenDisplaySkinnedMeshRenderer = displayGun.GetComponentsInChildren<SkinnedMeshRenderer>(includeInactive: true);
+        foreach (var child in childrenDisplaySkinnedMeshRenderer)
+        {
+            child.gameObject.layer = cullingLayerDisplay;
+        }
+
         return gun;
     }
 
