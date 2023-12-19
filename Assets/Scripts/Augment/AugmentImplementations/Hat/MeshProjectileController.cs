@@ -74,7 +74,7 @@ public class MeshProjectileController : ProjectileController
 
     protected override void OnReload(GunStats gunstats)
     {
-        animator.OnReload(gunstats.Ammo);
+        animator.OnReload(gunstats);
     }
 
     public override void InitializeProjectile(GunStats stats)
@@ -82,7 +82,7 @@ public class MeshProjectileController : ProjectileController
         loadedProjectile = new ProjectileState(stats, projectileOutput);
         loadedProjectile.maxDistance = maxDistance;
 
-        animator.OnFire(stats.Ammo);
+        animator.OnFire(stats);
     }
 
     private void FireProjectile()

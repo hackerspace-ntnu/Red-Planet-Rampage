@@ -10,6 +10,6 @@ public abstract class AugmentAnimator : MonoBehaviour
     public AnimationEvent OnFireAnimationEnd;
 
     public abstract void OnInitialize(GunStats stats);
-    public abstract void OnReload(int ammo);
-    public abstract void OnFire(int remainingAmmo);
+    public abstract void OnReload(GunStats stats);
+    public abstract void OnFire(GunStats stats);
 }

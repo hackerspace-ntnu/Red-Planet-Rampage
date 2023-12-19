@@ -54,12 +54,12 @@ public class BulletController : ProjectileController
 
     protected override void OnReload(GunStats gunstats)
     {
-        animator.OnReload(gunstats.Ammo);
+        animator.OnReload(gunstats);
     }
 
     public override void InitializeProjectile(GunStats stats)
     {
-        animator.OnFire(stats.Ammo);
+        animator.OnFire(stats);
 
         for (int k = 0; k < stats.ProjectilesPerShot; k++)
         {

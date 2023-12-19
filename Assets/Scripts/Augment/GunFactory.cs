@@ -19,18 +19,7 @@ public class GunFactory : MonoBehaviour
         gun.GetComponent<GunFactory>().InitializeGun(owner);
 
         var cullingLayer = LayerMask.NameToLayer("Gun " + owner.inputManager.playerInput.playerIndex);
-        gun.layer = cullingLayer;
-
-        var childrenMeshRenderer = gun.GetComponentsInChildren<MeshRenderer>(includeInactive: true);
-        foreach (var child in childrenMeshRenderer)
-        {
-            child.gameObject.layer = cullingLayer;
-        }
-        var childrenSkinnedMeshRenderer = gun.GetComponentsInChildren<MeshRenderer>(includeInactive: true);
-        foreach (var child in childrenSkinnedMeshRenderer)
-        {
-            child.gameObject.layer = cullingLayer;
-        }
+        SetGunLayer(gun.GetComponent<GunFactory>(), cullingLayer);
 
         GunFactory displayGun = owner.GunHolder.GetComponent<GunFactory>();
         displayGun.Body = bodyPrefab;
@@ -39,20 +28,35 @@ public class GunFactory : MonoBehaviour
         displayGun.InitializeGun();
 
         var cullingLayerDisplay = LayerMask.NameToLayer("Player " + owner.inputManager.playerInput.playerIndex);
-        displayGun.gameObject.layer = cullingLayerDisplay;
+        SetGunLayer(displayGun, cullingLayerDisplay);
 
-        var childrenDisplayMeshRenderer = displayGun.GetComponentsInChildren<MeshRenderer>(includeInactive: true);
-        foreach (var child in childrenDisplayMeshRenderer)
+        var firstPersonGunController = gun.GetComponent<GunFactory>().gunController;
+        var gunAnimations = displayGun.GetComponentsInChildren<AugmentAnimator>(includeInactive: true);
+        foreach (var animation in gunAnimations)
         {
-            child.gameObject.layer = cullingLayerDisplay;
-        }
-        var childrenDisplaySkinnedMeshRenderer = displayGun.GetComponentsInChildren<SkinnedMeshRenderer>(includeInactive: true);
-        foreach (var child in childrenDisplaySkinnedMeshRenderer)
-        {
-            child.gameObject.layer = cullingLayerDisplay;
+            animation.OnInitialize(firstPersonGunController.stats);
+            firstPersonGunController.onFire += animation.OnFire;
+            firstPersonGunController.onReload += animation.OnReload;
         }
 
         return gun;
+    }
+
+    private static void SetGunLayer(GunFactory gunFactory, int cullingLayer)
+    {
+        gunFactory.gameObject.layer = cullingLayer;
+
+        var childrenDisplayMeshRenderer = gunFactory.GetComponentsInChildren<MeshRenderer>(includeInactive: true);
+        foreach (var child in childrenDisplayMeshRenderer)
+        {
+            child.gameObject.layer = cullingLayer;
+        }
+
+        var childrenDisplaySkinnedMeshRenderer = gunFactory.GetComponentsInChildren<SkinnedMeshRenderer>(includeInactive: true);
+        foreach (var child in childrenDisplaySkinnedMeshRenderer)
+        {
+            child.gameObject.layer = cullingLayer;
+        }
     }
 
     public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, RectTransform parent)
@@ -97,7 +101,7 @@ public class GunFactory : MonoBehaviour
     [SerializeField]
     public Item Extension;
 
-    private GunController gunController;
+    public GunController gunController { private set; get; }
 
 #if UNITY_EDITOR
     private void Start()

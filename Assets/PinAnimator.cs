@@ -18,9 +18,9 @@ public class PinAnimator : AugmentAnimator
         time = 1 / stats.Firerate.Value();
     }
 
-    public override void OnReload(int ammo) { }
+    public override void OnReload(GunStats stats) { }
 
-    public override void OnFire(int remainingAmmo)
+    public override void OnFire(GunStats stats)
     {
         transform.localPosition = Vector3.zero;
         LeanTween.moveLocalZ(gameObject, maxDist, time * (1 - delay))
