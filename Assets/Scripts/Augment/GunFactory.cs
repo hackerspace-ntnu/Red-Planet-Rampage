@@ -26,7 +26,7 @@ public class GunFactory : MonoBehaviour
         displayGun.Barrel = barrelPrefab;
         displayGun.Extension = extensionPrefab;
         displayGun.InitializeGun();
-
+        owner.GunHolder.SetParent(parent);
         var cullingLayerDisplay = LayerMask.NameToLayer("Player " + owner.inputManager.playerInput.playerIndex);
         SetGunLayer(displayGun, cullingLayerDisplay);
 
@@ -39,15 +39,14 @@ public class GunFactory : MonoBehaviour
             firstPersonGunController.onReload += animation.OnReload;
         }
 
+        if (displayGun.gunController.HasRecoil)
+            firstPersonGunController.onFire += displayGun.gunController.PlayRecoil;
+
         if (!(displayGun.gunController.projectile.GetType() == typeof(BulletController)))
             return gun;
-
-        // TODO: Maybe use the same smoke trail from first-person gun? This operation currently double calculations for every shot 
-        firstPersonGunController.onInitializeBullet += ((BulletController)displayGun.gunController.projectile).InitializeProjectile;
-
-        // Unfinished attempt at reusing texture, might have to just manually apply layer instead.
-        //firstPersonGunController.onInitializeBullet += ((BulletController) displayGun.gunController.projectile).PlayCachedVFX;
-        //((BulletController) displayGun.gunController.projectile).RealBullet = (BulletController) firstPersonGunController.projectile;
+        // TODO: Refactor BulletController so this badness isn't needed
+        ((BulletController)gun.GetComponent<GunFactory>().gunController.projectile).Trail.layer = 0;
+        firstPersonGunController.onFire += ((BulletController) displayGun.gunController.projectile).PlayMuzzleFlash;
 
         return gun;
     }

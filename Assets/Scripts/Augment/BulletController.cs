@@ -19,6 +19,7 @@ public class BulletController : ProjectileController
 
     [SerializeField]
     private VisualEffect trail;
+    public GameObject Trail => trail.gameObject;
 
     [SerializeField]
     private VisualEffect flash;
@@ -131,6 +132,11 @@ public class BulletController : ProjectileController
         }
         // Play the flash and trail
         trail.SendEvent("OnPlay");
+        flash.SendEvent("OnPlay");
+    }
+
+    public void PlayMuzzleFlash(GunStats stats)
+    {
         flash.SendEvent("OnPlay");
     }
 

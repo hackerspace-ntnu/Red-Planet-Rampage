@@ -38,7 +38,7 @@ public class RevolverAnimator : AugmentAnimator
         extension = transform.parent.gameObject.GetComponentInChildren<GunExtension>();
         if (extension)
             extension.transform.SetParent(attachmentSite, true);
-        Debug.Log("Reload called");
+
         animator.SetTrigger("Reload");
     }
 }

@@ -61,6 +61,17 @@ public class GunController : MonoBehaviour
         onReload?.Invoke(stats);
     }
 
+    private void Start()
+    {
+        if (HasRecoil)
+            onFire += PlayRecoil;
+    }
+
+    public void PlayRecoil(GunStats stats)
+    {
+        gameObject.LeanMoveLocalZ(0.3f, 0.2f).setEasePunch();
+    }
+
     private void FireGun()
     {
         if (stats.Ammo <= 0)
@@ -71,9 +82,7 @@ public class GunController : MonoBehaviour
         stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.magazineSize);
 
         onFire?.Invoke(stats);
-        if (HasRecoil)
-            gameObject.LeanMoveLocalZ(0.3f, 0.2f).setEasePunch();
-
+            
         // Aim at target but lerp in original direction if target is close
         Vector3 targetedOutput = (target - projectile.projectileOutput.position).normalized;
         Vector3 defaultOutput = projectile.projectileOutput.forward;

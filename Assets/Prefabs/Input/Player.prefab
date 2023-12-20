@@ -1416,8 +1416,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2192650951514295549}
-  - component: {fileID: 6995614115377055334}
-  - component: {fileID: 5493321919775659824}
+  - component: {fileID: 4170563085359155052}
+  - component: {fileID: 7354243706276186767}
   m_Layer: 3
   m_Name: GunHolder
   m_TagString: Untagged
@@ -1432,15 +1432,15 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6965675563780692420}
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0.7071068, w: 0}
-  m_LocalPosition: {x: 0.00011059483, y: 0.00051207544, z: -0.0003212733}
-  m_LocalScale: {x: 0.05, y: 0.05, z: 0.05}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.39, y: -0.34, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 4604144610022740314}
+  m_Father: {fileID: 6507685450046118291}
   m_RootOrder: -1
-  m_LocalEulerAnglesHint: {x: -90, y: 180, z: 0}
---- !u!114 &6995614115377055334
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4170563085359155052
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1457,11 +1457,11 @@ MonoBehaviour:
   RightHandTarget: {fileID: 0}
   LeftHandTarget: {fileID: 0}
   player: {fileID: 0}
-  HasRecoil: 0
+  HasRecoil: 1
   triggerHeld: 0
   triggerPressed: 0
   target: {x: 0, y: 0, z: 0}
---- !u!114 &5493321919775659824
+--- !u!114 &7354243706276186767
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1619,7 +1619,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 1.837, z: -0.265}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 2192650951514295549}
   m_Father: {fileID: 71015680234268071}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2051,10 +2052,7 @@ PrefabInstance:
       objectReference: {fileID: 6717855691676836013}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 1316620135651827883, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2192650951514295549}
+    m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
 --- !u!114 &142658303258642700 stripped
@@ -2191,11 +2189,6 @@ Rigidbody:
 --- !u!136 &3287810422978762219 stripped
 CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 1496441882, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
-  m_PrefabInstance: {fileID: 3287810421515891185}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &4604144610022740314 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1316620135651827883, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
   m_PrefabInstance: {fileID: 3287810421515891185}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &5330336945653279977 stripped
