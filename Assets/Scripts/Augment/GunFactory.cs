@@ -44,11 +44,14 @@ public class GunFactory : MonoBehaviour
         if (displayGun.gunController.HasRecoil)
             firstPersonGunController.onFire += displayGun.gunController.PlayRecoil;
 
-        if (!(displayGun.gunController.projectile.GetType() == typeof(BulletController)))
-            return gun;
+        if (displayGun.gunController.projectile.GetType() == typeof(BulletController))
+        {
+            ((BulletController) gun.GetComponent<GunFactory>().gunController.projectile).Trail.layer = 0;
+            firstPersonGunController.onFire += ((BulletController)displayGun.gunController.projectile).PlayMuzzleFlash;
+        }
 
-        ((BulletController)gun.GetComponent<GunFactory>().gunController.projectile).Trail.layer = 0;
-        firstPersonGunController.onFire += ((BulletController) displayGun.gunController.projectile).PlayMuzzleFlash;
+        if (displayGun.gunController.projectile.GetType() == typeof(MeshProjectileController))
+            ((MeshProjectileController) gun.GetComponent<GunFactory>().gunController.projectile).Vfx.gameObject.layer = 0;
 
         return gun;
     }

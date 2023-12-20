@@ -41,6 +41,7 @@ public class MeshProjectileController : ProjectileController
 
     [FormerlySerializedAs("hatVfx")] [SerializeField]
     private VisualEffect vfx;
+    public VisualEffect Vfx => vfx;
 
     [Header("Ricochet")]
 
