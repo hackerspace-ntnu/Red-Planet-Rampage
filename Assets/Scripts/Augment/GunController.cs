@@ -35,6 +35,7 @@ public class GunController : MonoBehaviour
     public GunEvent onReload;
     public GunEvent onFire;
     public GunEvent onInitializeGun;
+    public GunEvent onInitializeBullet;
 
     private void FixedUpdate()
     {
@@ -81,5 +82,6 @@ public class GunController : MonoBehaviour
         projectile.projectileRotation = Quaternion.AngleAxis(Vector3.Angle(defaultOutput, lerpedOutput), Vector3.Cross(defaultOutput, lerpedOutput));
 
         projectile.InitializeProjectile(stats);
+        onInitializeBullet?.Invoke(stats);
     }
 }

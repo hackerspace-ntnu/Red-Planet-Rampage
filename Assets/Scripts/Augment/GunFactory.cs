@@ -39,6 +39,16 @@ public class GunFactory : MonoBehaviour
             firstPersonGunController.onReload += animation.OnReload;
         }
 
+        if (!(displayGun.gunController.projectile.GetType() == typeof(BulletController)))
+            return gun;
+
+        // TODO: Maybe use the same smoke trail from first-person gun? This operation currently double calculations for every shot 
+        firstPersonGunController.onInitializeBullet += ((BulletController)displayGun.gunController.projectile).InitializeProjectile;
+
+        // Unfinished attempt at reusing texture, might have to just manually apply layer instead.
+        //firstPersonGunController.onInitializeBullet += ((BulletController) displayGun.gunController.projectile).PlayCachedVFX;
+        //((BulletController) displayGun.gunController.projectile).RealBullet = (BulletController) firstPersonGunController.projectile;
+
         return gun;
     }
 
@@ -46,17 +56,12 @@ public class GunFactory : MonoBehaviour
     {
         gunFactory.gameObject.layer = cullingLayer;
 
-        var childrenDisplayMeshRenderer = gunFactory.GetComponentsInChildren<MeshRenderer>(includeInactive: true);
-        foreach (var child in childrenDisplayMeshRenderer)
+        var children = gunFactory.GetComponentsInChildren<Transform>(includeInactive: true);
+        foreach (var child in children)
         {
             child.gameObject.layer = cullingLayer;
         }
 
-        var childrenDisplaySkinnedMeshRenderer = gunFactory.GetComponentsInChildren<SkinnedMeshRenderer>(includeInactive: true);
-        foreach (var child in childrenDisplaySkinnedMeshRenderer)
-        {
-            child.gameObject.layer = cullingLayer;
-        }
     }
 
     public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, RectTransform parent)
