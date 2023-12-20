@@ -21,12 +21,12 @@ public class GunFactory : MonoBehaviour
         var cullingLayer = LayerMask.NameToLayer("Gun " + owner.inputManager.playerInput.playerIndex);
         SetGunLayer(gun.GetComponent<GunFactory>(), cullingLayer);
 
-        GunFactory displayGun = owner.GunHolder.GetComponent<GunFactory>();
+        GunFactory displayGun = owner.GunOrigin.GetComponent<GunFactory>();
         displayGun.Body = bodyPrefab;
         displayGun.Barrel = barrelPrefab;
         displayGun.Extension = extensionPrefab;
         displayGun.InitializeGun();
-        owner.GunHolder.SetParent(parent);
+        //owner.GunOrigin.SetParent(owner.GunHolder);
         var cullingLayerDisplay = LayerMask.NameToLayer("Player " + owner.inputManager.playerInput.playerIndex);
         SetGunLayer(displayGun, cullingLayerDisplay);
 
@@ -39,12 +39,15 @@ public class GunFactory : MonoBehaviour
             firstPersonGunController.onReload += animation.OnReload;
         }
 
+        firstPersonGunController.LeftHandTarget = displayGun.gunController.LeftHandTarget;
+        firstPersonGunController.RightHandTarget = displayGun.gunController.RightHandTarget;
+
         if (displayGun.gunController.HasRecoil)
             firstPersonGunController.onFire += displayGun.gunController.PlayRecoil;
 
         if (!(displayGun.gunController.projectile.GetType() == typeof(BulletController)))
             return gun;
-        // TODO: Refactor BulletController so this badness isn't needed
+
         ((BulletController)gun.GetComponent<GunFactory>().gunController.projectile).Trail.layer = 0;
         firstPersonGunController.onFire += ((BulletController) displayGun.gunController.projectile).PlayMuzzleFlash;
 

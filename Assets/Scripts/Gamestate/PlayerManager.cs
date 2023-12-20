@@ -37,8 +37,9 @@ public class PlayerManager : MonoBehaviour
     private Item ammoMaskItem;
 
     [SerializeField]
-    private Transform gunHolder;
-    public Transform GunHolder => gunHolder;
+    public Transform GunHolder;
+    [SerializeField]
+    public Transform GunOrigin;
 
     [Header("Related objects")]
 
@@ -96,6 +97,12 @@ public class PlayerManager : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
     }
 
+    private void Update()
+    {
+        if (GunHolder)
+            GunHolder.transform.forward = inputManager.transform.forward;
+    }
+
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
         hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
@@ -127,6 +134,7 @@ public class PlayerManager : MonoBehaviour
         playerIK.enabled = false;
         // TODO display guns falling to the floor
         gunController.gameObject.SetActive(false);
+        GunHolder.gameObject.SetActive(false);
         // Disable all colliders and physics
         // Ragdollify
         
@@ -272,7 +280,8 @@ public class PlayerManager : MonoBehaviour
         gunController.onReload += UpdateHudReload;
 
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
-        playerIK.RightHandIKTarget = gunController.RightHandTarget;
+        if (gunController.RightHandTarget)
+            playerIK.RightHandIKTarget = gunController.RightHandTarget;
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)
