@@ -26,7 +26,7 @@ public class GunFactory : MonoBehaviour
         displayGun.Barrel = barrelPrefab;
         displayGun.Extension = extensionPrefab;
         displayGun.InitializeGun();
-        //owner.GunOrigin.SetParent(owner.GunHolder);
+
         var cullingLayerDisplay = LayerMask.NameToLayer("Player " + owner.inputManager.playerInput.playerIndex);
         SetGunLayer(displayGun, cullingLayerDisplay);
 
@@ -39,7 +39,6 @@ public class GunFactory : MonoBehaviour
             firstPersonGunController.onReload += animation.OnReload;
         }
 
-        firstPersonGunController.LeftHandTarget = displayGun.gunController.LeftHandTarget;
         firstPersonGunController.RightHandTarget = displayGun.gunController.RightHandTarget;
 
         if (displayGun.gunController.HasRecoil)

@@ -19,7 +19,6 @@ public class RevolverAnimator : AugmentAnimator
     {
         animator = GetComponent<Animator>();
         var playerHand = GetComponentInChildren<PlayerHand>(includeInactive: true);
-        //playerHand.transform.SetParent(null);
         Destroy(playerHand);
         if (!animator)
             Debug.Log("Revolver Body missing Animator");
