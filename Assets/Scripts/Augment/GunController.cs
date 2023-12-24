@@ -24,7 +24,7 @@ public class GunController : MonoBehaviour
 
     // All the stats of the gun and projectile
     public GunStats stats { get; set; }
-    public bool HasRecoil = true; 
+    public bool HasRecoil = true;
 
     // Inputs
     public bool triggerHeld, triggerPressed;
@@ -33,9 +33,35 @@ public class GunController : MonoBehaviour
     public delegate void GunEvent(GunStats gunStats);
 
     public GunEvent onReload;
+    public GunEvent onFireStart;
     public GunEvent onFire;
+    public GunEvent onFireEnd;
     public GunEvent onInitializeGun;
     public GunEvent onInitializeBullet;
+
+    private AugmentAnimator barrelAnimator;
+
+    private bool isFiring = false;
+
+    private void Start()
+    {
+        var barrel = GetComponentInChildren<GunBarrel>();
+        barrelAnimator = barrel.GetComponentInChildren<AugmentAnimator>();
+        if (HasRecoil)
+            barrelAnimator.OnShotFiredAnimation += PlayRecoil;
+        if (!player)
+            barrelAnimator.OnShotFiredAnimation += ShotFired;
+        barrelAnimator.OnAnimationEnd += FireEnd;
+    }
+
+    private void OnDestroy()
+    {
+        if (HasRecoil)
+            barrelAnimator.OnShotFiredAnimation -= PlayRecoil;
+        if (!player)
+            barrelAnimator.OnShotFiredAnimation -= ShotFired;
+        barrelAnimator.OnAnimationEnd -= FireEnd;
+    }
 
     private void FixedUpdate()
     {
@@ -44,7 +70,7 @@ public class GunController : MonoBehaviour
             // No fireratecontroller exists
             return;
         }
-        if (fireRateController.shouldFire(triggerPressed, triggerHeld))
+        if (!isFiring && fireRateController.shouldFire(triggerPressed, triggerHeld))
         {
             FireGun();
         }
@@ -61,17 +87,6 @@ public class GunController : MonoBehaviour
         onReload?.Invoke(stats);
     }
 
-    private void Start()
-    {
-        if (HasRecoil)
-            onFire += PlayRecoil;
-    }
-
-    public void PlayRecoil(GunStats stats)
-    {
-        gameObject.LeanMoveLocalZ(0.3f, 0.2f).setEasePunch();
-    }
-
     private void FireGun()
     {
         if (stats.Ammo <= 0)
@@ -79,18 +94,43 @@ public class GunController : MonoBehaviour
             return;
         }
 
-        stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.magazineSize);
+        isFiring = true;
+        onFireStart?.Invoke(stats);
+        AimAtTarget();
+        projectile.InitializeProjectile(stats);
+        onInitializeBullet?.Invoke(stats);
+    }
 
-        onFire?.Invoke(stats);
-            
+    private void AimAtTarget()
+    {
         // Aim at target but lerp in original direction if target is close
         Vector3 targetedOutput = (target - projectile.projectileOutput.position).normalized;
         Vector3 defaultOutput = projectile.projectileOutput.forward;
         float distanceToTarget = Vector3.Distance(projectile.projectileOutput.position, target);
         Vector3 lerpedOutput = Vector3.Lerp(defaultOutput, targetedOutput, distanceToTarget / outputTransitionDistance);
         projectile.projectileRotation = Quaternion.AngleAxis(Vector3.Angle(defaultOutput, lerpedOutput), Vector3.Cross(defaultOutput, lerpedOutput));
+    }
+    
+    public void PlayRecoil()
+    {
+        PlayRecoil(stats);
+    }
 
-        projectile.InitializeProjectile(stats);
-        onInitializeBullet?.Invoke(stats);
+    public void PlayRecoil(GunStats stats)
+    {
+        gameObject.LeanMoveLocalZ(0.3f, 0.2f).setEasePunch();
+    }
+
+    private void ShotFired()
+    {
+        onFire?.Invoke(stats);
+        AimAtTarget();
+    }
+
+    private void FireEnd()
+    {
+        stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.magazineSize);
+        onFireEnd?.Invoke(stats);
+        isFiring = false;
     }
 }

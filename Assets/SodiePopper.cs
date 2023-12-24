@@ -57,13 +57,14 @@ public class SodiePopper : GunBody
         lastMeassurementPos = meassurementPoint.position;
 
         lastPos = lastLastPos = meassurementPoint.position;
-        playerTransform = gunController.player.transform;
-        if(playerTransform)
-        {
-            playerLastPos = playerLastLastPos = playerTransform.position;
-        }
-        if (gunController)
-            gunController.HasRecoil = false;
+
+        if (!gunController)
+            return;
+        gunController.HasRecoil = false;
+
+        if(!gunController.player)
+            return;
+        playerLastPos = playerLastLastPos = gunController.player.transform.position;
     }
 
     private void Update()

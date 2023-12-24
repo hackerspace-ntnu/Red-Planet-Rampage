@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class RubberSniper : GunExtension
@@ -12,7 +10,7 @@ public class RubberSniper : GunExtension
     private float maxHitDistance = 100f;
 
     private GunController gunController;
-    void Awake()
+    private void Awake()
     {
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
@@ -22,14 +20,28 @@ public class RubberSniper : GunExtension
         }
         jigglePhysics.player = gunController.player;
         gunController.player.overrideAimTarget = true;
+        gunController.onFireStart += Aim;
+        gunController.onFire += Aim;
         gunController.onFire += Fire;
+    }
+
+    private void OnDestroy()
+    {
+        if (!gunController)
+            return;
+        gunController.onFireStart -= Aim;
+        gunController.onFire -= Aim;
+        gunController.onFire -= Fire;
+    }
+
+    private void Aim(GunStats stats)
+    {
+        // Manual override of UpdateAimTarget
+        UpdateAimTarget(stats);
     }
 
     private void Fire(GunStats stats)
     {
-        // Manual override of UpdateAimTarget
-        UpdateAimTarget(stats);
-
         audioSource.Play();
         jigglePhysics.AnimatePushback();
     }

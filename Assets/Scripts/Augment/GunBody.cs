@@ -30,18 +30,18 @@ public class GunBody : MonoBehaviour
             return;
         }
         // TODO: refactor this, which additionaly only exists to support placeholder weapons with no reload implementation
-        gunController.onFire += Reload;
+        gunController.onFireEnd += Reload;
     }
 
     protected virtual void Reload(GunStats stats)
     {
-        if (gunController.stats.Ammo == 1)
+        if (gunController.stats.Ammo == 0)
             gunController.Reload(reloadEfficiencyPercentage);
     }
 
     private void OnDestroy()
     {
         if (!gunController) return;
-        gunController.onFire -= Reload;
+        gunController.onFireEnd -= Reload;
     }
 }

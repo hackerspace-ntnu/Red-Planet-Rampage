@@ -19,8 +19,15 @@ public class AmmoBoxBody : GunBody
             Debug.Log("Seeker not attached to gun parent!");
             return;
         }
-        gunController.onFire += Reload;
+        gunController.onFireStart += Reload;
         StartCoroutine(SetClosestAmmoBox());
+    }
+
+    private void OnDestroy()
+    {
+        if (!gunController)
+            return;
+        gunController.onFireStart -= Reload;
     }
 
     private IEnumerator SetClosestAmmoBox()
@@ -29,12 +36,13 @@ public class AmmoBoxBody : GunBody
         yield return new WaitForSeconds(ammoRadarCooldownTime);
         if (gameObject)
             StartCoroutine(SetClosestAmmoBox());
-    } 
+    }
 
     protected override void Reload(GunStats stats)
     {
         selectedAmmoBox = AmmoBox.GetClosestAmmoBox(transform.position);
     }
+
     private void Update()
     {
         if (!selectedAmmoBox)

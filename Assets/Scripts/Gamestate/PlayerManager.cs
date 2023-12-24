@@ -138,11 +138,11 @@ public class PlayerManager : MonoBehaviour
         GunHolder.gameObject.SetActive(false);
         // Disable all colliders and physics
         // Ragdollify
-        
+
         // TODO: Make accurate hitbox forces for the different limbs of the player
 
         var ragdollController = GetComponent<RagdollController>();
-        
+
         ragdollController.ReparentCamera(inputManager.transform);
 
         var force = info.force.normalized * info.damage * deathKnockbackForceMultiplier;
@@ -179,8 +179,9 @@ public class PlayerManager : MonoBehaviour
         healthController.onDeath -= OnDeath;
         if (gunController)
         {
+            gunController.onFireStart -= UpdateAimTarget;
             gunController.onFire -= UpdateAimTarget;
-            gunController.onFire -= UpdateHudFire;
+            gunController.onFireEnd -= UpdateHudFire;
             gunController.onReload -= UpdateHudReload;
             //Remove the gun
             Destroy(gunController.gameObject);
@@ -276,8 +277,9 @@ public class PlayerManager : MonoBehaviour
         gun.transform.localRotation = Quaternion.AngleAxis(0.5f, Vector3.up);
         // Remember gun controller
         gunController = gun.GetComponent<GunController>();
+        gunController.onFireStart += UpdateAimTarget;
         gunController.onFire += UpdateAimTarget;
-        gunController.onFire += UpdateHudFire;
+        gunController.onFireEnd += UpdateHudFire;
         gunController.onReload += UpdateHudReload;
 
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;

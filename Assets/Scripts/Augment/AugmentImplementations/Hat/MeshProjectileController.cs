@@ -10,18 +10,21 @@ public class MeshProjectileController : ProjectileController
 {
     [SerializeField]
     private AugmentAnimator animator;
-    
+
     [Header("Parameters")]
 
-    [FormerlySerializedAs("maxHatProjectiles")] [SerializeField]
+    [FormerlySerializedAs("maxHatProjectiles")]
+    [SerializeField]
     private int maxProjectiles = 300;
 
-    [FormerlySerializedAs("hatMaxDistance")] [SerializeField]
+    [FormerlySerializedAs("hatMaxDistance")]
+    [SerializeField]
     private float maxDistance = 20;
 
     private const float baseSpeed = 20;
 
-    [FormerlySerializedAs("hatSize")] [SerializeField]
+    [FormerlySerializedAs("hatSize")]
+    [SerializeField]
     private float size = .2f;
 
     [SerializeField]
@@ -39,7 +42,8 @@ public class MeshProjectileController : ProjectileController
 
     [Header("VFX")]
 
-    [FormerlySerializedAs("hatVfx")] [SerializeField]
+    [FormerlySerializedAs("hatVfx")]
+    [SerializeField]
     private VisualEffect vfx;
     public VisualEffect Vfx => vfx;
 
@@ -65,7 +69,9 @@ public class MeshProjectileController : ProjectileController
         vfx.SetFloat("Size", visualSize);
         vfx.SendEvent("OnPlay");
 
-        animator.OnFireAnimationEnd += FireProjectile;
+        if (!gunController || !gunController.player)
+            return;
+        animator.OnShotFiredAnimation += FireProjectile;
     }
 
     protected override void OnInitialize(GunStats gunstats)

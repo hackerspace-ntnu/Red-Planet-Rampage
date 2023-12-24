@@ -136,6 +136,11 @@ public abstract class ProjectileController : MonoBehaviour
             Debug.Log("Barrel not attached to gun parent!");
             return;
         }
+        if (!gunController.player)
+        {
+            Debug.Log("Barrel w/o player reference, is this a display gun?");
+            return;
+        }
         gunController.onInitializeGun += OnInitialize;
         gunController.onReload += OnReload;
     }
