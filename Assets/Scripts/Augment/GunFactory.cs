@@ -35,7 +35,7 @@ public class GunFactory : MonoBehaviour
         foreach (var animation in gunAnimations)
         {
             animation.OnInitialize(firstPersonGunController.stats);
-            firstPersonGunController.onFire += animation.OnFire;
+            firstPersonGunController.onFireStart += animation.OnFire;
             firstPersonGunController.onReload += animation.OnReload;
         }
 

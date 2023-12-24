@@ -10,17 +10,22 @@ public class CoilFiringAnimator : AugmentAnimator
         animator.speed = Mathf.Max(stats.Firerate / 2.5f, 1f);
     }
 
-    public override void OnReload(int ammo)
+    public override void OnReload(GunStats stats)
     {
     }
 
-    public override void OnFire(int remainingAmmo)
+    public override void OnFire(GunStats stats)
     {
         animator.SetTrigger("Fire");
     }
 
-    public void ShotFired()
+    public void ShotFired(int number)
     {
-        OnFireAnimationEnd?.Invoke();
+        OnShotFiredAnimation?.Invoke();
+    }
+
+    public void AnimationEnd()
+    {
+        OnAnimationEnd?.Invoke();
     }
 }

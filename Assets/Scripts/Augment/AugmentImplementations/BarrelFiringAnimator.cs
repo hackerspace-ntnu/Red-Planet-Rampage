@@ -21,6 +21,7 @@ public class BarrelFiringAnimator : AugmentAnimator
     {
         animator.SetTrigger("Fire");
         // TODO wait for firing animation to end
-        OnFireAnimationEnd?.Invoke();
+        OnShotFiredAnimation?.Invoke();
+        OnAnimationEnd?.Invoke();
     }
 }

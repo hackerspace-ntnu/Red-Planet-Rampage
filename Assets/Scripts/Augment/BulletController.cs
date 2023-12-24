@@ -32,8 +32,10 @@ public class BulletController : ProjectileController
     protected override void Awake()
     {
         base.Awake();
+        if (!gunController || !gunController.player)
+            return;
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
-        animator.OnFireAnimationEnd += FireProjectile;
+        animator.OnShotFiredAnimation += FireProjectile;
     }
 
     private void Start()
@@ -55,7 +57,7 @@ public class BulletController : ProjectileController
 
     protected override void OnReload(GunStats stats)
     {
-        animator.OnReload(gunstats);
+        animator.OnReload(stats);
     }
 
     public override void InitializeProjectile(GunStats stats)
