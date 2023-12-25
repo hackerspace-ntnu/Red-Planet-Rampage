@@ -23,6 +23,7 @@ public class ExplosionModifier : MonoBehaviour, ProjectileModifier
 
     private void Explode(Collider other, ref ProjectileState state)
     {
+        // TODO Trigger on-hit on all hitboxes hit by the explosion
         var instance = Instantiate(explosion, state.position, Quaternion.identity);
         instance.Init();
         instance.Explode(player);
