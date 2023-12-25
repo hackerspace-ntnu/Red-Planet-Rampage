@@ -24,6 +24,9 @@ public class MeshProjectileController : ProjectileController
     [FormerlySerializedAs("hatSize")] [SerializeField]
     private float size = .2f;
 
+    [SerializeField]
+    private float visualSize = 80f;
+
     private ProjectileState[] projectiles;
 
     private ProjectileState loadedProjectile;
@@ -58,6 +61,7 @@ public class MeshProjectileController : ProjectileController
 
         vfx.SetTexture("Positions", positionActiveTexture.Texture);
         vfx.SetInt("MaxParticleCount", maxProjectiles);
+        vfx.SetFloat("Size", visualSize);
         vfx.SendEvent("OnPlay");
 
         animator.OnFireAnimationEnd += FireProjectile;
