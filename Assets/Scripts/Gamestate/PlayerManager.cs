@@ -58,6 +58,7 @@ public class PlayerManager : MonoBehaviour
 
     [SerializeField]
     private PlayerIK playerIK;
+    public PlayerIK PlayerIK => playerIK;
 
     [SerializeField]
     private float deathKnockbackForceMultiplier = 10;

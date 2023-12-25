@@ -30,7 +30,7 @@ public class GunFactory : MonoBehaviour
         var cullingLayerDisplay = LayerMask.NameToLayer("Player " + owner.inputManager.playerInput.playerIndex);
         SetGunLayer(displayGun, cullingLayerDisplay);
 
-        var firstPersonGunController = gun.GetComponent<GunFactory>().gunController;
+        var firstPersonGunController = gun.GetComponent<GunFactory>().GunController;
         var gunAnimations = displayGun.GetComponentsInChildren<AugmentAnimator>(includeInactive: true);
         foreach (var animation in gunAnimations)
         {
@@ -39,19 +39,19 @@ public class GunFactory : MonoBehaviour
             firstPersonGunController.onReload += animation.OnReload;
         }
 
-        firstPersonGunController.RightHandTarget = displayGun.gunController.RightHandTarget;
+        firstPersonGunController.RightHandTarget = displayGun.GunController.RightHandTarget;
 
-        if (displayGun.gunController.HasRecoil)
-            firstPersonGunController.onFire += displayGun.gunController.PlayRecoil;
+        if (displayGun.GunController.HasRecoil)
+            firstPersonGunController.onFire += displayGun.GunController.PlayRecoil;
 
-        if (displayGun.gunController.projectile.GetType() == typeof(BulletController))
+        if (displayGun.GunController.projectile.GetType() == typeof(BulletController))
         {
-            ((BulletController) gun.GetComponent<GunFactory>().gunController.projectile).Trail.layer = 0;
-            firstPersonGunController.onFire += ((BulletController)displayGun.gunController.projectile).PlayMuzzleFlash;
+            ((BulletController) gun.GetComponent<GunFactory>().GunController.projectile).Trail.layer = 0;
+            firstPersonGunController.onFire += ((BulletController)displayGun.GunController.projectile).PlayMuzzleFlash;
         }
 
-        if (displayGun.gunController.projectile.GetType() == typeof(MeshProjectileController))
-            ((MeshProjectileController) gun.GetComponent<GunFactory>().gunController.projectile).Vfx.gameObject.layer = 0;
+        if (displayGun.GunController.projectile.GetType() == typeof(MeshProjectileController))
+            ((MeshProjectileController) gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
 
         return gun;
     }
@@ -109,8 +109,8 @@ public class GunFactory : MonoBehaviour
 
     [SerializeField]
     public Item Extension;
-
-    public GunController gunController { private set; get; }
+    private GunController gunController;
+    public GunController GunController => gunController;
 
 #if UNITY_EDITOR
     private void Start()

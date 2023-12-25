@@ -33,6 +33,7 @@ public class LawnMower : GunBody
     [SerializeField]
     private LineRenderer handString;
     private Animator handAnimator;
+    public Transform LineHoldingPoint;
 
     [Header("Material parameters")]
     [SerializeField]
@@ -65,16 +66,21 @@ public class LawnMower : GunBody
         playerHand.gameObject.SetActive(true);
         playerHand.SetPlayer(gunController.player);
         handAnimator = GetComponent<Animator>();
+        LineHoldingPoint = playerHand.HoldingPoint;
         handString.gameObject.SetActive(true);
+
         if (!MatchController.Singleton)
             return;
-        MatchController.Singleton.onRoundEnd += DisableLine; 
+        MatchController.Singleton.onRoundEnd += DisableLine;
+
+        if (gunController.player.GunOrigin.TryGetComponent(out GunController gunControllerDisplay))
+            gunControllerDisplay.GetComponentInChildren<LawnMower>().LineHoldingPoint = gunController.player.PlayerIK.LeftHandIKTransform;
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         handString.SetPosition(0, lineStart.position);
-        handString.SetPosition(1, playerHand.HoldingPoint.position);
+        handString.SetPosition(1, LineHoldingPoint.position);
     }
 
     private void Fire(GunStats stats)

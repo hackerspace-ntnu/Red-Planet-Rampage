@@ -10,16 +10,16 @@ public class RevolverAnimator : AugmentAnimator
     private Transform attachmentSite;
     private GunBarrel barrel;
     private GunExtension extension;
-    public override void OnFire(GunStats stats)
-    {
 
-    }
+    public override void OnFire(GunStats stats){}
 
     public override void OnInitialize(GunStats stats)
     {
         animator = GetComponent<Animator>();
         var playerHand = GetComponentInChildren<PlayerHand>(includeInactive: true);
         Destroy(playerHand);
+        barrel = transform.parent.gameObject.GetComponentInChildren<GunBarrel>();
+        extension = transform.parent.gameObject.GetComponentInChildren<GunExtension>();
         if (!animator)
             Debug.Log("Revolver Body missing Animator");
     }
@@ -30,11 +30,9 @@ public class RevolverAnimator : AugmentAnimator
         if (!canReload)
             return;
 
-        barrel = transform.parent.gameObject.GetComponentInChildren<GunBarrel>();
         if (barrel)
             barrel.transform.SetParent(attachmentSite, true);
 
-        extension = transform.parent.gameObject.GetComponentInChildren<GunExtension>();
         if (extension)
             extension.transform.SetParent(attachmentSite, true);
 
