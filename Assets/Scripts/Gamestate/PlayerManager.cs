@@ -158,7 +158,10 @@ public class PlayerManager : MonoBehaviour
     {
         inputManager = playerInput;
         identity = inputManager.GetComponent<PlayerIdentity>();
-        GetComponent<PlayerMovement>().SetPlayerInput(inputManager);
+        var playerMovement = GetComponent<PlayerMovement>();
+        playerMovement.SetPlayerInput(inputManager);
+        playerMovement.onLeapContionous += EnableHudLeap;
+        playerMovement.onLeapEnd += DisableHudLeap;
         // Subscribe relevant input events
         inputManager.onFirePerformed += Fire;
         inputManager.onFireCanceled += FireEnd;
@@ -186,6 +189,12 @@ public class PlayerManager : MonoBehaviour
             //Remove the gun
             Destroy(gunController.gameObject);
         }
+        if (TryGetComponent(out PlayerMovement playerMovement))
+        {
+            playerMovement.onLeapContionous -= EnableHudLeap;
+            playerMovement.onLeapEnd -= DisableHudLeap;
+        }
+
     }
 
     private void UpdateAimTarget(GunStats stats)
@@ -212,6 +221,16 @@ public class PlayerManager : MonoBehaviour
         gunController.triggerHeld = true;
         gunController.triggerPressed = true;
         StartCoroutine(UnpressTrigger());
+    }
+
+    private void EnableHudLeap(Vector3 velocity)
+    {
+        hudController.SetSpeedLines(true, velocity);
+    }
+
+    private void DisableHudLeap(Vector3 velocity)
+    {
+        hudController.SetSpeedLines(false, velocity);
     }
 
     private void UpdateHudFire(GunStats stats)

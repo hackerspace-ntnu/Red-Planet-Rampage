@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Rendering.Universal;
 
 public class PlayerHUDController : MonoBehaviour
 {
@@ -55,12 +56,17 @@ public class PlayerHUDController : MonoBehaviour
     [SerializeField]
     private PopupSpammer popupSpammer;
     public PopupSpammer PopupSpammer => popupSpammer;
+    [SerializeField]
+    private GameObject speedLines;
+    [SerializeField]
+    private Material speedLinesMaterial;
 
     [SerializeField]
     private RectTransform scopeZoom;
 
     void Start()
     {
+        speedLines.SetActive(false);
         var image = GetComponent<RawImage>();
         // Prevent material properties from being handled globally
         damageBorder = Instantiate(image.material);
@@ -72,6 +78,14 @@ public class PlayerHUDController : MonoBehaviour
         ammoCapacityMaterial.SetFloat("_Arc2", 0);
 
         healthBarScaleX = healthBar.localScale.x;
+    }
+
+    public void SetSpeedLines(bool isActive, Vector3 velocity)
+    {
+        speedLines.SetActive(isActive);
+        if (isActive)
+            speedLinesMaterial.SetFloat("_LineRemovalRadius", velocity.magnitude * (1 / (velocity.magnitude * 20)));
+        Debug.Log((1 / (velocity.magnitude * 20)));
     }
 
     public void OnDamageTaken(float damage, float currentHealth, float maxHealth)
