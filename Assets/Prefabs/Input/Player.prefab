@@ -74,6 +74,7 @@ MonoBehaviour:
   dashDamping: 0.5
   minDashVelocity: 8
   crouchedHeightOffset: 0.8
+  crouchedHeightGunOffset: 0.5
   airThreshold: 0.4
   slopeAngleThreshold: 50
   state: 1
@@ -184,6 +185,8 @@ MonoBehaviour:
   targetStartOffset: 0.9
   overrideAimTarget: 0
   ammoMaskItem: {fileID: 11400000, guid: a99e4b806f963ac45a0635c34182107a, type: 2}
+  GunHolder: {fileID: 2192650951514295549}
+  GunOrigin: {fileID: 5285924196574601758}
   inputManager: {fileID: 0}
   identity: {fileID: 0}
   hudController: {fileID: 555885729091202788}
@@ -1156,6 +1159,75 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
+--- !u!1 &3433598770842043782
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5285924196574601758}
+  - component: {fileID: 180929155250404221}
+  - component: {fileID: 2798034521173301447}
+  m_Layer: 3
+  m_Name: GunHoldPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5285924196574601758
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3433598770842043782}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.35}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2192650951514295549}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &180929155250404221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3433598770842043782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ff631b6f3d59cd4c8d253e00109042b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  projectile: {fileID: 0}
+  outputs: []
+  RightHandTarget: {fileID: 0}
+  LeftHandTarget: {fileID: 0}
+  player: {fileID: 0}
+  HasRecoil: 1
+  triggerHeld: 0
+  triggerPressed: 0
+  target: {x: 0, y: 0, z: 0}
+--- !u!114 &2798034521173301447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3433598770842043782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a5d153951108c144a246beccd96ee7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Body: {fileID: 0}
+  Barrel: {fileID: 0}
+  Extension: {fileID: 0}
 --- !u!1 &4536483048541249167
 GameObject:
   m_ObjectHideFlags: 0
@@ -1406,6 +1478,38 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 1
   m_SpriteSortPoint: 0
+--- !u!1 &6965675563780692420
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2192650951514295549}
+  m_Layer: 3
+  m_Name: GunHolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2192650951514295549
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6965675563780692420}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.307, y: -0.404, z: 0.268}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children:
+  - {fileID: 5285924196574601758}
+  m_Father: {fileID: 6507685450046118291}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7177846384712759188
 GameObject:
   m_ObjectHideFlags: 0
@@ -1549,7 +1653,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 1.837, z: -0.265}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 2192650951514295549}
   m_Father: {fileID: 71015680234268071}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1919,6 +2024,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: YiiHaw
       objectReference: {fileID: 0}
+    - target: {fileID: 3195995323192703229, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
+      propertyPath: leftHandIKTransform
+      value: 
+      objectReference: {fileID: 3680236445534610840}
+    - target: {fileID: 3195995323192703229, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
+      propertyPath: rightHandIKTranform
+      value: 
+      objectReference: {fileID: 4604144610022740314}
     - target: {fileID: 3326176138852896576, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -2118,6 +2231,16 @@ Rigidbody:
 --- !u!136 &3287810422978762219 stripped
 CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 1496441882, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
+  m_PrefabInstance: {fileID: 3287810421515891185}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &3680236445534610840 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2211959717696197737, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
+  m_PrefabInstance: {fileID: 3287810421515891185}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &4604144610022740314 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1316620135651827883, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
   m_PrefabInstance: {fileID: 3287810421515891185}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &5330336945653279977 stripped

@@ -3,9 +3,9 @@ using UnityEngine;
 public class PlaceholderFiringAnimator : AugmentAnimator
 {
     public override void OnInitialize(GunStats stats) { }
-    public override void OnReload(int ammo) { }
+    public override void OnReload(GunStats stats) { }
 
-    public override void OnFire(int remainingAmmo)
+    public override void OnFire(GunStats stats)
     {
         OnFireAnimationEnd?.Invoke();
     }

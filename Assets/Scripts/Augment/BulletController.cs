@@ -19,6 +19,7 @@ public class BulletController : ProjectileController
 
     [SerializeField]
     private VisualEffect trail;
+    public GameObject Trail => trail.gameObject;
 
     [SerializeField]
     private VisualEffect flash;
@@ -54,12 +55,12 @@ public class BulletController : ProjectileController
 
     protected override void OnReload(GunStats gunstats)
     {
-        animator.OnReload(gunstats.Ammo);
+        animator.OnReload(gunstats);
     }
 
     public override void InitializeProjectile(GunStats stats)
     {
-        animator.OnFire(stats.Ammo);
+        animator.OnFire(stats);
 
         for (int k = 0; k < stats.ProjectilesPerShot; k++)
         {
@@ -131,6 +132,11 @@ public class BulletController : ProjectileController
         }
         // Play the flash and trail
         trail.SendEvent("OnPlay");
+        flash.SendEvent("OnPlay");
+    }
+
+    public void PlayMuzzleFlash(GunStats stats)
+    {
         flash.SendEvent("OnPlay");
     }
 

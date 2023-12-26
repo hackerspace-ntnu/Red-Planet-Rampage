@@ -18,7 +18,54 @@ public class GunFactory : MonoBehaviour
         // Initialize everything
         gun.GetComponent<GunFactory>().InitializeGun(owner);
 
+        var cullingLayer = LayerMask.NameToLayer("Gun " + owner.inputManager.playerInput.playerIndex);
+        SetGunLayer(gun.GetComponent<GunFactory>(), cullingLayer);
+
+        GunFactory displayGun = owner.GunOrigin.GetComponent<GunFactory>();
+        displayGun.Body = bodyPrefab;
+        displayGun.Barrel = barrelPrefab;
+        displayGun.Extension = extensionPrefab;
+        displayGun.InitializeGun();
+
+        var cullingLayerDisplay = LayerMask.NameToLayer("Player " + owner.inputManager.playerInput.playerIndex);
+        SetGunLayer(displayGun, cullingLayerDisplay);
+
+        var firstPersonGunController = gun.GetComponent<GunFactory>().GunController;
+        var gunAnimations = displayGun.GetComponentsInChildren<AugmentAnimator>(includeInactive: true);
+        foreach (var animation in gunAnimations)
+        {
+            animation.OnInitialize(firstPersonGunController.stats);
+            firstPersonGunController.onFire += animation.OnFire;
+            firstPersonGunController.onReload += animation.OnReload;
+        }
+
+        firstPersonGunController.RightHandTarget = displayGun.GunController.RightHandTarget;
+
+        if (displayGun.GunController.HasRecoil)
+            firstPersonGunController.onFire += displayGun.GunController.PlayRecoil;
+
+        if (displayGun.GunController.projectile.GetType() == typeof(BulletController))
+        {
+            ((BulletController) gun.GetComponent<GunFactory>().GunController.projectile).Trail.layer = 0;
+            firstPersonGunController.onFire += ((BulletController)displayGun.GunController.projectile).PlayMuzzleFlash;
+        }
+
+        if (displayGun.GunController.projectile.GetType() == typeof(MeshProjectileController))
+            ((MeshProjectileController) gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
+
         return gun;
+    }
+
+    private static void SetGunLayer(GunFactory gunFactory, int cullingLayer)
+    {
+        gunFactory.gameObject.layer = cullingLayer;
+
+        var children = gunFactory.GetComponentsInChildren<Transform>(includeInactive: true);
+        foreach (var child in children)
+        {
+            child.gameObject.layer = cullingLayer;
+        }
+
     }
 
     public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, RectTransform parent)
@@ -62,8 +109,8 @@ public class GunFactory : MonoBehaviour
 
     [SerializeField]
     public Item Extension;
-
     private GunController gunController;
+    public GunController GunController => gunController;
 
 #if UNITY_EDITOR
     private void Start()

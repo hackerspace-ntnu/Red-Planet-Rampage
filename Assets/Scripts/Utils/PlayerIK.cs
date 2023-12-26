@@ -41,6 +41,13 @@ public class PlayerIK : MonoBehaviour
     [SerializeField]
     private float modelScaleOffset;
 
+    [SerializeField]
+    private Transform leftHandIKTransform;
+    public Transform LeftHandIKTransform => leftHandIKTransform;
+    [SerializeField]
+    private Transform rightHandIKTranform;
+    public Transform RightHandIKTransform => rightHandIKTranform;
+
     private void LateUpdate()
     {
         if (LeftHandIKTarget && LeftHandIKTarget.gameObject.activeInHierarchy)

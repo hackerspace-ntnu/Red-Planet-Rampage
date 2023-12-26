@@ -40,13 +40,20 @@ public class Revolver : GunBody
         if (extension)
             extension.transform.SetParent(attachmentSite, true);
 
-
         animator.SetTrigger("Reload");
+        gunController.onReload.Invoke(stats);
     }
 
     public void TriggerSteam()
     {
         steamParticles.Play();
+    }
+
+    public void ToggleArm()
+    {
+        if (!playerHand)
+            return;
+        playerHand.gameObject.SetActive(!playerHand.gameObject.activeInHierarchy);
     }
 
     public void ResetReload()
@@ -55,7 +62,6 @@ public class Revolver : GunBody
             barrel.transform.SetParent(gunController.transform, true);
         if (extension)
             extension.transform.SetParent(gunController.transform, true);
-
         gunController.Reload(reloadEfficiencyPercentage);
     }
 

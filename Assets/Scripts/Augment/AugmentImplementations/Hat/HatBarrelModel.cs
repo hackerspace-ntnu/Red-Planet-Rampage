@@ -24,6 +24,8 @@ public class HatBarrelModel : AugmentAnimator
 
     public override void OnInitialize(GunStats stats)
     {
+        if (ammunition.Count > 0)
+            return;
         animator.speed = Mathf.Max(stats.Firerate, 1f);
         magazineSize = stats.magazineSize;
         for (int i = 0; i < magazineSize; i++)
@@ -33,23 +35,23 @@ public class HatBarrelModel : AugmentAnimator
         }
     }
 
-    public override void OnReload(int ammo)
+    public override void OnReload(GunStats stats)
     {
         bullet.SetActive(true);
-        for (int i = 0; i < ammo; i++)
+        for (int i = 0; i < stats.Ammo; i++)
         {
             ammunition[i].SetActive(true);
         }
     }
 
-    public override void OnFire(int remainingAmmo)
+    public override void OnFire(GunStats stats)
     {
         animator.SetTrigger("Fire");
-        for (int i = remainingAmmo; i < magazineSize; i++)
+        for (int i = stats.Ammo; i < magazineSize; i++)
         {
             ammunition[i].SetActive(false);
         }
-        if (remainingAmmo == 0)
+        if (stats.Ammo == 0)
         {
             ToggleBullet();
         }

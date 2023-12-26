@@ -82,7 +82,7 @@ public class DDRBody : GunBody
                 .setDelay(MusicTrackManager.Singleton.TrackOffset)
                 .setLoopPingPong()
                 .setOnComplete(
-                () => animator.OnFire(0));
+                () => animator.OnFire(gunController.stats));
 
             animator.OnInitialize(gunController.stats);
 
@@ -114,15 +114,15 @@ public class DDRBody : GunBody
             .setOnComplete(
             () => precisionText.enabled = false);
 
-        LeanTween.value(gameObject, SetFlashFactor, 0, 20f, 0.5f).setEasePunch();
+        LeanTween.value(gameObject, SetFlashFactor, 0, 50f, 0.5f).setEasePunch();
 
         gunController.Reload(reloadEfficiencyPercentage * precision.Value.awardFactor);
-        animator.OnReload(1);
+        animator.OnReload(gunController.stats);
     }
 
     private void Fire(InputAction.CallbackContext ctx)
     {
-        animator.OnFire(gunController.stats.Ammo);
+        animator.OnFire(gunController.stats);
     }
 
     private void ArrowSelect(InputAction.CallbackContext ctx)

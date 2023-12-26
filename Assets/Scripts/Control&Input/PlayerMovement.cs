@@ -77,6 +77,8 @@ public class PlayerMovement : MonoBehaviour
     [Header("State")]
     [SerializeField]
     private float crouchedHeightOffset = 0.3f;
+    [SerializeField]
+    private float crouchedHeightGunOffset = 0.28f;
 
     [SerializeField]
     private float airThreshold = 0.4f;
@@ -90,9 +92,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private Animator animator;
 
+    private GameObject gunHolder;
+
     private const float MarsGravity = 3.7f;
 
     private float localCameraHeight;
+    private float localGunHolderHeight;
 
     private Vector2 aimAngle = Vector2.zero;
 
@@ -117,6 +122,8 @@ public class PlayerMovement : MonoBehaviour
         inputManager.onCrouchPerformed += OnCrouch;
         inputManager.onCrouchCanceled += OnCrouch;
         localCameraHeight = inputManager.transform.localPosition.y;
+        gunHolder = GetComponent<PlayerManager>().GunHolder.gameObject;
+        localGunHolderHeight = gunHolder.transform.localPosition.y;
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
@@ -144,6 +151,7 @@ public class PlayerMovement : MonoBehaviour
         {
             LeanTween.cancel(inputManager.gameObject);
             inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localCameraHeight, inputManager.transform.localPosition.z);
+            gunHolder.transform.localPosition = new Vector3(gunHolder.transform.localPosition.x, localGunHolderHeight, gunHolder.transform.localPosition.z);
         }
 
         if (ctx.performed)
@@ -161,6 +169,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("Crouching", false);
             strafeForce = strafeForceGrounded;
             inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f);
+            gunHolder.LeanMoveLocalY(localGunHolderHeight, 0.2f);
             isDashing = false;
             onLanding -= StartCrouch;
         }
@@ -172,6 +181,7 @@ public class PlayerMovement : MonoBehaviour
         animator.SetBool("Crouching", true);
         strafeForce = strafeForceCrouched;
         inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
+        gunHolder.LeanMoveLocalY(localGunHolderHeight - crouchedHeightGunOffset, 0.2f);
     }
 
     private void EnableDash()
@@ -249,7 +259,10 @@ public class PlayerMovement : MonoBehaviour
     {
         aimAngle += inputManager.lookInput * lookSpeed * Time.deltaTime;
         // Constrain aiming angle vertically and wrap horizontally.
-        aimAngle.y = Mathf.Clamp(aimAngle.y, -Mathf.PI / 2, Mathf.PI / 2);
+        // + and - Mathf.Deg2Rad is offsetting with 1 degree in radians,
+        // which is neccesary to avoid IK shortest path slerping that causes aniamtions to break at exactly the halfway points.
+        // This is way more computationaly efficient than creating edgecase checks in IK with practically no gameplay impact
+        aimAngle.y = Mathf.Clamp(aimAngle.y, -Mathf.PI / 2 + Mathf.Deg2Rad, Mathf.PI / 2 - Mathf.Deg2Rad);
         aimAngle.x = (aimAngle.x + Mathf.PI) % (2 * Mathf.PI) - Mathf.PI;
         // Rotate rigidbody.
         body.MoveRotation(Quaternion.AngleAxis(aimAngle.x * Mathf.Rad2Deg, Vector3.up));

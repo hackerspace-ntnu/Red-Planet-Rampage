@@ -13,11 +13,11 @@ public class BarrelFiringAnimator : AugmentAnimator
         animator.speed = Mathf.Max(stats.Firerate, 1f);
     }
 
-    public override void OnReload(int ammo)
+    public override void OnReload(GunStats stats)
     {
     }
 
-    public override void OnFire(int remainingAmmo)
+    public override void OnFire(GunStats stats)
     {
         animator.SetTrigger("Fire");
         // TODO wait for firing animation to end
