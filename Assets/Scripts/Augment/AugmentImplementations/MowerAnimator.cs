@@ -12,6 +12,7 @@ public class MowerAnimator : AugmentAnimator
     private Animator handAnimator;
     [SerializeField]
     private ParticleSystem exhaustParticles;
+
     public override void OnFire(GunStats stats)
     {
         animator.SetTrigger("PistonPump");
