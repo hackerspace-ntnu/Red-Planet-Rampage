@@ -114,7 +114,7 @@ public class DDRBody : GunBody
             .setOnComplete(
             () => precisionText.enabled = false);
 
-        LeanTween.value(gameObject, SetFlashFactor, 0, 20f, 0.5f).setEasePunch();
+        LeanTween.value(gameObject, SetFlashFactor, 0, 50f, 0.5f).setEasePunch();
 
         gunController.Reload(reloadEfficiencyPercentage * precision.Value.awardFactor);
         animator.OnReload(gunController.stats);
