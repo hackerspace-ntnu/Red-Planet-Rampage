@@ -16,6 +16,8 @@ public class PlayerMovement : MonoBehaviour
     private InputManager inputManager;
     private Rigidbody body;
     private Collider hitbox;
+    private Camera playerCamera;
+    private GunController gun;
 
     [SerializeField]
     private LayerMask ignoreMask;
@@ -98,6 +100,11 @@ public class PlayerMovement : MonoBehaviour
 
     private float localCameraHeight;
     private float localGunHolderHeight;
+    private float localGunXOffset;
+
+    [SerializeField]
+    private float zoomFov = 30f;
+    private float startingFov;
 
     private Vector2 aimAngle = Vector2.zero;
 
@@ -121,9 +128,22 @@ public class PlayerMovement : MonoBehaviour
         inputManager.onSelect += OnJump;
         inputManager.onCrouchPerformed += OnCrouch;
         inputManager.onCrouchCanceled += OnCrouch;
+        inputManager.onZoomPerformed += OnZoom;
+        inputManager.onZoomCanceled += OnZoomCanceled;
         localCameraHeight = inputManager.transform.localPosition.y;
         gunHolder = GetComponent<PlayerManager>().GunHolder.gameObject;
         localGunHolderHeight = gunHolder.transform.localPosition.y;
+        playerCamera = inputManager.GetComponent<Camera>();
+        startingFov = playerCamera.fieldOfView;
+
+        if (MatchController.Singleton)
+            MatchController.Singleton.onRoundEnd += ResetZoom;
+    }
+
+    public void SetGun(GunController gun)
+    {
+        this.gun = gun;
+        localGunXOffset = gun.transform.localPosition.x;
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
@@ -143,6 +163,31 @@ public class PlayerMovement : MonoBehaviour
         }
         // Normal jump
         body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
+    }
+
+    private void OnZoom(InputAction.CallbackContext ctx)
+    {
+        playerCamera.fieldOfView = zoomFov;
+        gun.transform.localPosition = new Vector3(0f, gun.transform.localPosition.y, gun.transform.localPosition.z);
+    }
+
+    private void OnZoomCanceled(InputAction.CallbackContext ctx)
+    {
+        CancelZoom();
+    }
+
+    private void CancelZoom()
+    {
+        playerCamera.fieldOfView = startingFov;
+        gun.transform.localPosition = new Vector3(localGunXOffset, gun.transform.localPosition.y, gun.transform.localPosition.z);
+    }
+
+    private void ResetZoom()
+    {
+        inputManager.ZoomActive = false;
+        inputManager.onZoomPerformed -= OnZoom;
+        inputManager.onZoomCanceled -= OnZoomCanceled;
+        CancelZoom();
     }
 
     private void OnCrouch(InputAction.CallbackContext ctx)
@@ -308,5 +353,18 @@ public class PlayerMovement : MonoBehaviour
     {
         UpdateRotation();
         UpdateAnimatorParameters();
+    }
+
+    private void OnDestroy()
+    {
+        ResetZoom();
+        inputManager.onSelect -= OnJump;
+        inputManager.onCrouchPerformed -= OnCrouch;
+        inputManager.onCrouchCanceled -= OnCrouch;
+        inputManager.onZoomPerformed -= OnZoom;
+        inputManager.onZoomCanceled -= OnZoomCanceled;
+
+        if (MatchController.Singleton)
+            MatchController.Singleton.onRoundEnd -= ResetZoom;
     }
 }

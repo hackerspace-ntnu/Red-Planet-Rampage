@@ -26,6 +26,8 @@ public class InputManager : MonoBehaviour
     public InputEvent onFireCanceled;
     public InputEvent onCrouchPerformed;
     public InputEvent onCrouchCanceled;
+    public InputEvent onZoomPerformed;
+    public InputEvent onZoomCanceled;
     private InputEvent onLookPerformed;
     private InputEvent onLookCanceled;
 
@@ -47,6 +49,7 @@ public class InputManager : MonoBehaviour
     private float gamepadLookScale = 0.75f;
 
     private bool isMouseAndKeyboard = false;
+    public bool ZoomActive = false;
 
     void Start()
     {
@@ -79,6 +82,8 @@ public class InputManager : MonoBehaviour
         playerInput.actions["Fire"].canceled += Fire;
         playerInput.actions["Crouch"].performed += Crouch;
         playerInput.actions["Crouch"].canceled += Crouch;
+        playerInput.actions["Zoom"].performed += Zoom;
+        playerInput.actions["Zoom"].canceled += Zoom;
         playerInput.actions["Look"].performed += Look;
         playerInput.actions["Look"].canceled += Look;
 
@@ -201,6 +206,23 @@ public class InputManager : MonoBehaviour
     {
         if (ctx.performed) { onCrouchPerformed?.Invoke(ctx); return; }
         onCrouchCanceled?.Invoke(ctx);
+    }
+
+    private void Zoom(InputAction.CallbackContext ctx)
+    {
+        if (isMouseAndKeyboard)
+        {
+            if (ctx.performed) { onZoomPerformed.Invoke(ctx); return; }
+            onZoomCanceled.Invoke(ctx);
+            return;
+        }
+
+        if (ctx.performed)
+        {
+            ZoomActive = !ZoomActive;
+            if (!ZoomActive) { onZoomCanceled.Invoke(ctx); return; }
+            onZoomPerformed.Invoke(ctx);
+        }
     }
 
     private void Look(InputAction.CallbackContext ctx)

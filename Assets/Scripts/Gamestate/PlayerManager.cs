@@ -280,6 +280,8 @@ public class PlayerManager : MonoBehaviour
         gunController.onFire += UpdateHudFire;
         gunController.onReload += UpdateHudReload;
 
+        GetComponent<PlayerMovement>().SetGun(gunController);
+
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
         if (gunController.RightHandTarget)
             playerIK.RightHandIKTarget = gunController.RightHandTarget;
