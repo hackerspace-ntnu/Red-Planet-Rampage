@@ -60,11 +60,11 @@ public class LawnMower : GunBody
         mowerScreen.SetFloat("_ArrowDegrees", maxArrowDegrees);
         StartArrowWobbleTween();
 
-        if (!gunController.player)
+        if (!gunController.Player)
             return;
 
         playerHand.gameObject.SetActive(true);
-        playerHand.SetPlayer(gunController.player);
+        playerHand.SetPlayer(gunController.Player);
         handAnimator = GetComponent<Animator>();
         LineHoldingPoint = playerHand.HoldingPoint;
         handString.gameObject.SetActive(true);
@@ -73,8 +73,8 @@ public class LawnMower : GunBody
             return;
         MatchController.Singleton.onRoundEnd += DisableLine;
 
-        if (gunController.player.GunOrigin.TryGetComponent(out GunController gunControllerDisplay))
-            gunControllerDisplay.GetComponentInChildren<LawnMower>().LineHoldingPoint = gunController.player.PlayerIK.LeftHandIKTransform;
+        if (gunController.Player.GunOrigin.TryGetComponent(out GunController gunControllerDisplay))
+            gunControllerDisplay.GetComponentInChildren<LawnMower>().LineHoldingPoint = gunController.Player.PlayerIK.LeftHandIKTransform;
     }
 
     private void LateUpdate()

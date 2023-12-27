@@ -68,10 +68,10 @@ public class DDRBody : GunBody
             return;
         }
 
-        if (gunController.player)
+        if (gunController.Player)
         {
-            gunController.player.inputManager.onFirePerformed += Fire;
-            gunController.player.inputManager.onMovePerformed += ArrowSelect;
+            gunController.Player.inputManager.onFirePerformed += Fire;
+            gunController.Player.inputManager.onMovePerformed += ArrowSelect;
 
             arrowMover = LeanTween.value(gameObject, SetArrowHeigth, startHeight, screenHeight, secondsPerUnitHeight * (screenHeight - startHeight))
                 .setDelay(MusicTrackManager.Singleton.TrackOffset)
@@ -133,19 +133,19 @@ public class DDRBody : GunBody
         switch (arrowDirection)
         {
             case ArrowDirection.NORTH:
-                if (!(gunController.player.inputManager.moveInput.y > 1 - errorMarginInput))
+                if (!(gunController.Player.inputManager.moveInput.y > 1 - errorMarginInput))
                     return;
                 break;
             case ArrowDirection.EAST:
-                if (!(gunController.player.inputManager.moveInput.x > 1 - errorMarginInput))
+                if (!(gunController.Player.inputManager.moveInput.x > 1 - errorMarginInput))
                     return;
                 break;
             case ArrowDirection.SOUTH:
-                if (!(gunController.player.inputManager.moveInput.y < -1 + errorMarginInput))
+                if (!(gunController.Player.inputManager.moveInput.y < -1 + errorMarginInput))
                     return;
                 break;
             case ArrowDirection.WEST:
-                if (!(gunController.player.inputManager.moveInput.x < -1 + errorMarginInput))
+                if (!(gunController.Player.inputManager.moveInput.x < -1 + errorMarginInput))
                     return;
                 break;
         }
@@ -199,10 +199,10 @@ public class DDRBody : GunBody
     {
         if (!gunController)
             return;
-        if (!gunController.player)
+        if (!gunController.Player)
             return;
 
-        gunController.player.inputManager.onFirePerformed -= Fire;
-        gunController.player.inputManager.onMovePerformed -= ArrowSelect;
+        gunController.Player.inputManager.onFirePerformed -= Fire;
+        gunController.Player.inputManager.onMovePerformed -= ArrowSelect;
     }
 }

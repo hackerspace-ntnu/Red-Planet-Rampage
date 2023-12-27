@@ -17,13 +17,15 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody body;
     private Collider hitbox;
     private Camera playerCamera;
-    private GunController gun;
 
     [SerializeField]
     private LayerMask ignoreMask;
 
     [SerializeField]
     private float lookSpeed = 3;
+
+    [SerializeField]
+    private float lookSpeedZoom = 0.75f;
 
     [Header("Drag")]
     [SerializeField]
@@ -100,7 +102,7 @@ public class PlayerMovement : MonoBehaviour
 
     private float localCameraHeight;
     private float localGunHolderHeight;
-    private float localGunXOffset;
+    private float localGunHolderX;
 
     [SerializeField]
     private float zoomFov = 30f;
@@ -125,25 +127,21 @@ public class PlayerMovement : MonoBehaviour
     public void SetPlayerInput(InputManager player)
     {
         inputManager = player;
+        var playerManager = GetComponent<PlayerManager>();
+        gunHolder = playerManager.GunHolder.gameObject;
         inputManager.onSelect += OnJump;
         inputManager.onCrouchPerformed += OnCrouch;
         inputManager.onCrouchCanceled += OnCrouch;
         inputManager.onZoomPerformed += OnZoom;
         inputManager.onZoomCanceled += OnZoomCanceled;
         localCameraHeight = inputManager.transform.localPosition.y;
-        gunHolder = GetComponent<PlayerManager>().GunHolder.gameObject;
+        localGunHolderX = gunHolder.transform.localPosition.x;
         localGunHolderHeight = gunHolder.transform.localPosition.y;
         playerCamera = inputManager.GetComponent<Camera>();
         startingFov = playerCamera.fieldOfView;
 
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += ResetZoom;
-    }
-
-    public void SetGun(GunController gun)
-    {
-        this.gun = gun;
-        localGunXOffset = gun.transform.localPosition.x;
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
@@ -167,8 +165,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnZoom(InputAction.CallbackContext ctx)
     {
-        playerCamera.fieldOfView = zoomFov;
-        gun.transform.localPosition = new Vector3(0f, gun.transform.localPosition.y, gun.transform.localPosition.z);
+        LeanTween.value(gameObject, (fov) => playerCamera.fieldOfView = fov, playerCamera.fieldOfView, zoomFov, 0.2f).setEaseInOutCubic();
+        gunHolder.LeanMoveLocalX(0f, 0.2f);
     }
 
     private void OnZoomCanceled(InputAction.CallbackContext ctx)
@@ -178,8 +176,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void CancelZoom()
     {
-        playerCamera.fieldOfView = startingFov;
-        gun.transform.localPosition = new Vector3(localGunXOffset, gun.transform.localPosition.y, gun.transform.localPosition.z);
+        LeanTween.value(gameObject, (fov) => playerCamera.fieldOfView = fov, playerCamera.fieldOfView, startingFov, 0.2f).setEaseInOutCubic();
+        gunHolder.LeanMoveLocalX(localGunHolderX, 0.2f);
     }
 
     private void ResetZoom()
@@ -302,7 +300,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateRotation()
     {
-        aimAngle += inputManager.lookInput * lookSpeed * Time.deltaTime;
+        var lookSpeedFactor = inputManager.ZoomActive ? lookSpeedZoom : lookSpeed;
+        aimAngle += inputManager.lookInput * lookSpeedFactor * Time.deltaTime;
         // Constrain aiming angle vertically and wrap horizontally.
         // + and - Mathf.Deg2Rad is offsetting with 1 degree in radians,
         // which is neccesary to avoid IK shortest path slerping that causes aniamtions to break at exactly the halfway points.
@@ -363,6 +362,9 @@ public class PlayerMovement : MonoBehaviour
         inputManager.onCrouchCanceled -= OnCrouch;
         inputManager.onZoomPerformed -= OnZoom;
         inputManager.onZoomCanceled -= OnZoomCanceled;
+        var playerManager = GetComponent<PlayerManager>();
+        inputManager.onZoomPerformed -= playerManager.GunController.OnZoom;
+        inputManager.onZoomCanceled -= playerManager.GunController.OnZoomCanceled;
 
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd -= ResetZoom;

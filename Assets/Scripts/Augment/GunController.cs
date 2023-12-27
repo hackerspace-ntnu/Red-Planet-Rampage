@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GunController : MonoBehaviour
 {
@@ -14,13 +15,14 @@ public class GunController : MonoBehaviour
     // Where players will hold the gun
     public Transform RightHandTarget;
     public Transform LeftHandTarget;
+    private float localGunXOffset;
 
     // Keeps track of when gun should be fired
     [HideInInspector]
     public FireRateController fireRateController;
 
     [HideInInspector]
-    public PlayerManager player;
+    public PlayerManager Player { get; private set; }
 
     // All the stats of the gun and projectile
     public GunStats stats { get; set; }
@@ -36,6 +38,13 @@ public class GunController : MonoBehaviour
     public GunEvent onFire;
     public GunEvent onInitializeGun;
     public GunEvent onInitializeBullet;
+
+    public void SetPlayer(PlayerManager player)
+    {
+        Player = player;
+        Player.inputManager.onZoomPerformed += OnZoom;
+        Player.inputManager.onZoomCanceled += OnZoomCanceled;
+    }
 
     private void FixedUpdate()
     {
@@ -65,11 +74,27 @@ public class GunController : MonoBehaviour
     {
         if (HasRecoil)
             onFire += PlayRecoil;
+
+        localGunXOffset = transform.localPosition.x;
     }
 
     public void PlayRecoil(GunStats stats)
     {
         gameObject.LeanMoveLocalZ(0.3f, 0.2f).setEasePunch();
+    }
+
+    public void OnZoom(InputAction.CallbackContext ctx)
+    {
+        gameObject.LeanMoveLocalX(0f, 0.2f).setEaseInOutCubic();
+    }
+    public void OnZoomCanceled(InputAction.CallbackContext ctx)
+    {
+        CancelZoom();
+    }
+
+    private void CancelZoom()
+    {
+        gameObject.LeanMoveLocalX(localGunXOffset, 0.2f).setEaseInOutCubic();
     }
 
     private void FireGun()

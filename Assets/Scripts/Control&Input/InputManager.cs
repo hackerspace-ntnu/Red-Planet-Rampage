@@ -159,6 +159,8 @@ public class InputManager : MonoBehaviour
         onFireCanceled = null;
         onCrouchPerformed = null;
         onCrouchCanceled = null;
+        onZoomPerformed = null;
+        onZoomCanceled = null;
         onLookPerformed = null;
         onLookCanceled = null;
 
