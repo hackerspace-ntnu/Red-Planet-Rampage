@@ -105,7 +105,7 @@ public class PlayerMovement : MonoBehaviour
     private float localGunHolderX;
 
     [SerializeField]
-    private float zoomFov = 30f;
+    public float ZoomFov = 30f;
     private float startingFov;
 
     private Vector2 aimAngle = Vector2.zero;
@@ -165,7 +165,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnZoom(InputAction.CallbackContext ctx)
     {
-        LeanTween.value(gameObject, (fov) => playerCamera.fieldOfView = fov, playerCamera.fieldOfView, zoomFov, 0.2f).setEaseInOutCubic();
+        LeanTween.value(gameObject, (fov) => playerCamera.fieldOfView = fov, playerCamera.fieldOfView, ZoomFov, 0.2f).setEaseInOutCubic();
         gunHolder.LeanMoveLocalX(0f, 0.2f);
     }
 
