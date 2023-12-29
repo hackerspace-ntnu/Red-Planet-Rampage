@@ -25,7 +25,7 @@ public class PlayerMovement : MonoBehaviour
     private float lookSpeed = 3;
 
     [SerializeField]
-    private float lookSpeedZoom = 0.75f;
+    public float LookSpeedZoom = 0.75f;
 
     [Header("Drag")]
     [SerializeField]
@@ -300,7 +300,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateRotation()
     {
-        var lookSpeedFactor = inputManager.ZoomActive ? lookSpeedZoom : lookSpeed;
+        var lookSpeedFactor = inputManager.ZoomActive ? LookSpeedZoom : lookSpeed;
         aimAngle += inputManager.lookInput * lookSpeedFactor * Time.deltaTime;
         // Constrain aiming angle vertically and wrap horizontally.
         // + and - Mathf.Deg2Rad is offsetting with 1 degree in radians,
