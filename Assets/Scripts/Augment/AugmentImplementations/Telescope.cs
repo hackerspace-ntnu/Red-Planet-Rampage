@@ -31,21 +31,29 @@ public class Telescope : GunExtension
         playerMovement.ZoomFov = overrideZoomFov;
         playerMovement.LookSpeedZoom = overrideZoomSpeed;
 
-        gunController.Player.inputManager.onZoomPerformed += Zoom;
-        gunController.Player.inputManager.onZoomCanceled += CancelZoom;
+        gunController.Player.inputManager.onZoomPerformed += OnZoom;
+        gunController.Player.inputManager.onZoomCanceled += OnZoomCanceled;
 
         gunMeshes = gunController.GetComponentsInChildren<MeshRenderer>().ToList();
         gunSkinMeshes = gunController.GetComponentsInChildren<SkinnedMeshRenderer>().ToList();
+
+        if (MatchController.Singleton)
+            MatchController.Singleton.onRoundEnd += CancelZoom;
     }
 
-    private void Zoom(InputAction.CallbackContext ctx)
+    private void OnZoom(InputAction.CallbackContext ctx)
     {
         gunMeshes.ForEach((mesh) => mesh.enabled = false);
         gunSkinMeshes.ForEach((mesh) => mesh.enabled = false);
         gunController.Player.HUDController.TweenScope(1f, 0.2f);
     }
 
-    private void CancelZoom(InputAction.CallbackContext ctx)
+    private void OnZoomCanceled(InputAction.CallbackContext ctx)
+    {
+        CancelZoom();
+    }
+
+    private void CancelZoom()
     {
         gunMeshes.ForEach((mesh) => mesh.enabled = true);
         gunSkinMeshes.ForEach((mesh) => mesh.enabled = true);
@@ -54,7 +62,7 @@ public class Telescope : GunExtension
 
     private void OnDestroy()
     {
-        gunController.Player.inputManager.onZoomPerformed -= Zoom;
-        gunController.Player.inputManager.onZoomCanceled -= CancelZoom;
+        gunController.Player.inputManager.onZoomPerformed -= OnZoom;
+        gunController.Player.inputManager.onZoomCanceled -= OnZoomCanceled;
     }
 }

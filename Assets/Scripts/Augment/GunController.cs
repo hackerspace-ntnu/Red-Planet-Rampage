@@ -44,6 +44,9 @@ public class GunController : MonoBehaviour
         Player = player;
         Player.inputManager.onZoomPerformed += OnZoom;
         Player.inputManager.onZoomCanceled += OnZoomCanceled;
+
+        if (MatchController.Singleton)
+            MatchController.Singleton.onRoundEnd += CancelZoom;
     }
 
     private void FixedUpdate()
