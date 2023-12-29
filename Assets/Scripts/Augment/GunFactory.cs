@@ -127,7 +127,8 @@ public class GunFactory : MonoBehaviour
     {
         gunController = GetComponent<GunController>();
         // Make gun remember who shoots with it
-        gunController.player = owner;
+        if (owner)
+            gunController.SetPlayer(owner);
 
         List<ProjectileModifier> modifiers = new List<ProjectileModifier>();
 

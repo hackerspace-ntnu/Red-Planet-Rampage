@@ -22,8 +22,8 @@ public class Revolver : GunBody
         }
         gunController.onFire += Reload;
 
-        if (gunController.player)
-            playerHand.SetPlayer(gunController.player);
+        if (gunController.Player)
+            playerHand.SetPlayer(gunController.Player);
     }
 
     protected override void Reload(GunStats stats)

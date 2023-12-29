@@ -56,6 +56,9 @@ public class PlayerHUDController : MonoBehaviour
     private PopupSpammer popupSpammer;
     public PopupSpammer PopupSpammer => popupSpammer;
 
+    [SerializeField]
+    private RectTransform scopeZoom;
+
     void Start()
     {
         var image = GetComponent<RawImage>();
@@ -110,6 +113,11 @@ public class PlayerHUDController : MonoBehaviour
     private void SetHealthBar(float width)
     {
         healthBar.localScale = new Vector3(width, healthBar.localScale.y, healthBar.localScale.z);
+    }
+
+    public void TweenScope(float alpha, float seconds)
+    {
+        scopeZoom.LeanAlpha(alpha, seconds).setEaseInOutCubic();
     }
 
     public void UpdateDamageBorder(float intensity)

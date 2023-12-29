@@ -20,8 +20,8 @@ public class RubberSniper : GunExtension
             Debug.Log("Fire not attached to gun parent!");
             return;
         }
-        jigglePhysics.player = gunController.player;
-        gunController.player.overrideAimTarget = true;
+        jigglePhysics.player = gunController.Player;
+        gunController.Player.overrideAimTarget = true;
         gunController.onFire += Fire;
     }
 
@@ -36,10 +36,10 @@ public class RubberSniper : GunExtension
 
     public void UpdateAimTarget(GunStats stats)
     {
-        Vector3 cameraCenter = gunController.player.inputManager.transform.position;
-        Vector3 cameraDirection = gunController.player.inputManager.transform.rotation * jigglePhysics.Direction;
-        Vector3 startPoint = cameraCenter + cameraDirection * gunController.player.TargetStartOffset;
-        if (Physics.Raycast(startPoint, cameraDirection, out RaycastHit hit, maxHitDistance, gunController.player.HitMask))
+        Vector3 cameraCenter = gunController.Player.inputManager.transform.position;
+        Vector3 cameraDirection = gunController.Player.inputManager.transform.rotation * jigglePhysics.Direction;
+        Vector3 startPoint = cameraCenter + cameraDirection * gunController.Player.TargetStartOffset;
+        if (Physics.Raycast(startPoint, cameraDirection, out RaycastHit hit, maxHitDistance, gunController.Player.HitMask))
         {
             gunController.target = hit.point;
         }
@@ -53,7 +53,7 @@ public class RubberSniper : GunExtension
     {
         if (!gunController)
             return;
-        var correctedDirection = gunController.player.inputManager.transform.rotation * jigglePhysics.NormalizedPointer;
-        gunController.player.HUDController.MoveCrosshair(correctedDirection.x, correctedDirection.y);
+        var correctedDirection = gunController.Player.inputManager.transform.rotation * jigglePhysics.NormalizedPointer;
+        gunController.Player.HUDController.MoveCrosshair(correctedDirection.x, correctedDirection.y);
     }
 }

@@ -38,13 +38,13 @@ public class RecoilModifier : MonoBehaviour, ProjectileModifier
 
     private void KnockAwayOnShot(ref ProjectileState state, GunStats stats)
     {
-        if (!gunController.player)
+        if (!gunController.Player)
             return;
 
         Vector3 normal = -gunController.transform.forward;
 
         float calculatedPushPowerForPlayer = (calculatedPushPower / stats.Firerate) * (baseFireRateAdder + (float)Math.Log(stats.Firerate));
 
-        gunController.player.GetComponent<Rigidbody>().AddForce(normal * calculatedPushPowerForPlayer, ForceMode.Impulse);
+        gunController.Player.GetComponent<Rigidbody>().AddForce(normal * calculatedPushPowerForPlayer, ForceMode.Impulse);
     }
 }
