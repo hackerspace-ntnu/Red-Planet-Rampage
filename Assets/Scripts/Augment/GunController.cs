@@ -16,6 +16,7 @@ public class GunController : MonoBehaviour
     public Transform RightHandTarget;
     public Transform LeftHandTarget;
     private float localGunXOffset;
+    private float localGunZOffset;
 
     // Keeps track of when gun should be fired
     [HideInInspector]
@@ -55,6 +56,8 @@ public class GunController : MonoBehaviour
 
     private bool isFiring = false;
 
+    private LTDescr recoilTween;
+
     private void Start()
     {
         var barrel = GetComponentInChildren<GunBarrel>();
@@ -65,6 +68,7 @@ public class GunController : MonoBehaviour
         barrelAnimator.OnAnimationEnd += FireEnd;
 
         localGunXOffset = transform.localPosition.x;
+        localGunZOffset = transform.localPosition.z;
     }
 
     private void OnDestroy()
@@ -145,7 +149,14 @@ public class GunController : MonoBehaviour
 
     public void PlayRecoil(GunStats stats)
     {
-        gameObject.LeanMoveLocalZ(0.3f, 0.2f).setEasePunch();
+        if (recoilTween != null)
+        {
+            LeanTween.cancel(recoilTween.id);
+            transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, localGunZOffset);
+        }
+        var moveAmount = Player != null ? 0.3f : 0.6f;
+        // TODO reduce tween time based on fire rate
+        recoilTween = gameObject.LeanMoveLocalZ(moveAmount, 0.2f).setEasePunch();
     }
 
     private void ShotFired()
