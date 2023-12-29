@@ -20,7 +20,7 @@ public class Revolver : GunBody
             Debug.Log("Revolver not attached to gun parent!");
             return;
         }
-        gunController.onFire += Reload;
+        gunController.onFireEnd += Reload;
 
         if (gunController.Player)
             playerHand.SetPlayer(gunController.Player);
@@ -34,14 +34,14 @@ public class Revolver : GunBody
         barrel = gunController.gameObject.GetComponentInChildren<GunBarrel>();
         if (barrel)
             barrel.transform.SetParent(attachmentSite, true);
-            
+
 
         extension = gunController.gameObject.GetComponentInChildren<GunExtension>();
         if (extension)
             extension.transform.SetParent(attachmentSite, true);
 
         animator.SetTrigger("Reload");
-        gunController.onReload.Invoke(stats);
+        gunController.onReload?.Invoke(stats);
     }
 
     public void TriggerSteam()

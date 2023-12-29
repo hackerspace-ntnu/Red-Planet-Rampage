@@ -19,7 +19,6 @@ public class GunFactory : MonoBehaviour
         gun.GetComponent<GunFactory>().InitializeGun(owner);
 
         var cullingLayer = LayerMask.NameToLayer("Gun " + owner.inputManager.playerInput.playerIndex);
-        SetGunLayer(gun.GetComponent<GunFactory>(), cullingLayer);
 
         GunFactory displayGun = owner.GunOrigin.GetComponent<GunFactory>();
         displayGun.Body = bodyPrefab;
@@ -28,16 +27,19 @@ public class GunFactory : MonoBehaviour
         displayGun.InitializeGun();
 
         var cullingLayerDisplay = LayerMask.NameToLayer("Player " + owner.inputManager.playerInput.playerIndex);
-        SetGunLayer(displayGun, cullingLayerDisplay);
 
         var firstPersonGunController = gun.GetComponent<GunFactory>().GunController;
         var gunAnimations = displayGun.GetComponentsInChildren<AugmentAnimator>(includeInactive: true);
         foreach (var animation in gunAnimations)
         {
             animation.OnInitialize(firstPersonGunController.stats);
-            firstPersonGunController.onFire += animation.OnFire;
+            firstPersonGunController.onFireStart += animation.OnFire;
             firstPersonGunController.onReload += animation.OnReload;
         }
+
+        // Animator initializers may instantiate objects, so we should set layers *afterwards*.
+        SetGunLayer(gun.GetComponent<GunFactory>(), cullingLayer);
+        SetGunLayer(displayGun, cullingLayerDisplay);
 
         firstPersonGunController.RightHandTarget = displayGun.GunController.RightHandTarget;
 
@@ -45,13 +47,10 @@ public class GunFactory : MonoBehaviour
             firstPersonGunController.onFire += displayGun.GunController.PlayRecoil;
 
         if (displayGun.GunController.projectile.GetType() == typeof(BulletController))
-        {
-            ((BulletController) gun.GetComponent<GunFactory>().GunController.projectile).Trail.layer = 0;
-            firstPersonGunController.onFire += ((BulletController)displayGun.GunController.projectile).PlayMuzzleFlash;
-        }
+            ((BulletController)gun.GetComponent<GunFactory>().GunController.projectile).Trail.layer = 0;
 
         if (displayGun.GunController.projectile.GetType() == typeof(MeshProjectileController))
-            ((MeshProjectileController) gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
+            ((MeshProjectileController)gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
 
         return gun;
     }

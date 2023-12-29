@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3894901145996896954}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.9697697, y: 0.20419401, z: -0.40223685}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -141,7 +141,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5527306435488764705}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.607}
+  m_LocalPosition: {x: 0, y: 0, z: 0.5608}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -302,7 +302,6 @@ GameObject:
   - component: {fileID: 6537988700951070003}
   - component: {fileID: 7617790890687186095}
   - component: {fileID: 8515215133120317911}
-  - component: {fileID: 3717791059097881470}
   - component: {fileID: 3975746179230621477}
   - component: {fileID: 7327065496144923300}
   - component: {fileID: 5073592139580318145}
@@ -348,13 +347,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   statModifiers:
   - name: ProjectileDamage
-    addition: 30
+    addition: 25
     multiplier: 0
     exponential: 1
+  - name: Firerate
+    addition: 0
+    multiplier: 0
+    exponential: 0.5
   outputs:
   - {fileID: 5765902433490691002}
   attachmentPoints:
   - {fileID: 5765902433490691002}
+  muzzleFlash: {fileID: 261841362781268065}
 --- !u!114 &8515215133120317911
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -374,22 +378,7 @@ MonoBehaviour:
   maxDistance: 100
   collisionSamplesPerUnit: 2
   trail: {fileID: 6753720039035056053}
-  flash: {fileID: 261841362781268065}
-  animator: {fileID: 8505203738795632164}
---- !u!114 &3717791059097881470
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6861618831928518119}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49ba4bdeb4a0c8548b6b50d2d03dc38a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pushPower: 20
-  baseFireRateAdder: 2
+  animator: {fileID: 2021749910137901998}
 --- !u!114 &3975746179230621477
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -578,7 +567,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 87a03ac48b15b05bf9325fe22bd9a220, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.501
+      value: 0.3368
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 87a03ac48b15b05bf9325fe22bd9a220, type: 3}
       propertyPath: m_LocalRotation.w
@@ -853,7 +842,7 @@ PrefabInstance:
       addedObject: {fileID: 193246735575622659}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 87a03ac48b15b05bf9325fe22bd9a220, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8505203738795632164}
+      addedObject: {fileID: 2021749910137901998}
   m_SourcePrefab: {fileID: 100100000, guid: 87a03ac48b15b05bf9325fe22bd9a220, type: 3}
 --- !u!4 &1386871068052250698 stripped
 Transform:
@@ -886,7 +875,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &8505203738795632164
+--- !u!114 &2021749910137901998
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -895,7 +884,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1762305276812540656}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 320aa0cde1f535db6a61f945a936c992, type: 3}
+  m_Script: {fileID: 11500000, guid: d557516397a20ed6b92ae73066be4fd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 193246735575622659}

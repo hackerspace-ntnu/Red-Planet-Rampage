@@ -1,16 +1,13 @@
 using UnityEngine;
 
-/// <summary>
-/// Class for starting a firing animation.
-/// </summary>
-public class BarrelFiringAnimator : AugmentAnimator
+public class CoilFiringAnimator : AugmentAnimator
 {
     [SerializeField]
     private Animator animator;
 
     public override void OnInitialize(GunStats stats)
     {
-        animator.speed = Mathf.Max(stats.Firerate, 1f);
+        animator.speed = Mathf.Clamp(stats.Firerate * 1.5f, 1f, 6f);
     }
 
     public override void OnReload(GunStats stats)
@@ -20,8 +17,15 @@ public class BarrelFiringAnimator : AugmentAnimator
     public override void OnFire(GunStats stats)
     {
         animator.SetTrigger("Fire");
-        // TODO wait for firing animation to end
+    }
+
+    public void ShotFired(int number)
+    {
         OnShotFiredAnimation?.Invoke();
+    }
+
+    public void AnimationEnd()
+    {
         OnAnimationEnd?.Invoke();
     }
 }

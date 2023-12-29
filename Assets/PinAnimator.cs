@@ -26,5 +26,7 @@ public class PinAnimator : AugmentAnimator
         LeanTween.moveLocalZ(gameObject, maxDist, time * (1 - delay))
             .setDelay(delay * time)
             .setEase(easeCurve);
+        OnShotFiredAnimation?.Invoke();
+        OnAnimationEnd?.Invoke();
     }
 }

@@ -24,7 +24,7 @@ public class HackingExtension : GunExtension
             Debug.Log("HackingExtension not attached to gun parent!");
             return;
         }
-        gunController.onFire += Fire;
+        gunController.onFireStart += Fire;
     }
 
     private void Fire(GunStats stats)

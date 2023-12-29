@@ -57,20 +57,21 @@ public class SodiePopper : GunBody
         lastMeassurementPos = meassurementPoint.position;
 
         lastPos = lastLastPos = meassurementPoint.position;
-        playerTransform = gunController.Player.transform;
-        if(playerTransform)
-        {
-            playerLastPos = playerLastLastPos = playerTransform.position;
-        }
-        if (gunController)
-            gunController.HasRecoil = false;
+
+        if (!gunController)
+            return;
+        gunController.HasRecoil = false;
+
+        if (!gunController.Player)
+            return;
+        playerLastPos = playerLastLastPos = gunController.Player.transform.position;
     }
 
     private void Update()
     {
-        if( gunController != null)
+        if (gunController != null)
         {
-            anim.SetFloat("Ammo", (float)gunController.stats.Ammo/(float)gunController.stats.magazineSize);
+            anim.SetFloat("Ammo", (float)gunController.stats.Ammo / (float)gunController.stats.magazineSize);
         }
     }
 
@@ -88,25 +89,25 @@ public class SodiePopper : GunBody
 
         if (playerTransform)
         {
-            Vector3 playerSpeedDiff = (playerLastLastPos - 2 * playerLastPos + playerTransform.position)/Time.fixedDeltaTime;
+            Vector3 playerSpeedDiff = (playerLastLastPos - 2 * playerLastPos + playerTransform.position) / Time.fixedDeltaTime;
             offsetVelocity += playerSpeedDiff * playermovementRelativeAdjustment;
-            
+
             playerLastLastPos = playerLastPos;
             playerLastPos = playerTransform.position;
         }
 
         lastLastPos = lastPos;
-        
+
         lastPos += offsetVelocity * Time.fixedDeltaTime;
 
-        if( (lastPos - meassurementPoint.position).magnitude > offsetMagnitude)
+        if ((lastPos - meassurementPoint.position).magnitude > offsetMagnitude)
         {
             Vector3 diff = lastPos - meassurementPoint.position;
 
-            if(diff.magnitude >= shakeCorrectionReloadThreshold && Time.fixedTime - lastReload > reload_delay)
+            if (diff.magnitude >= shakeCorrectionReloadThreshold && Time.fixedTime - lastReload > reload_delay)
             {
                 lastReload = Time.fixedTime;
-                
+
                 gunController?.Reload(reload_ammount);
             }
 

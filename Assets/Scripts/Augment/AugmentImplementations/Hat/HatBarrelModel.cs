@@ -63,7 +63,8 @@ public class HatBarrelModel : AugmentAnimator
         bullet.SetActive(!bullet.activeInHierarchy);
         if (!bullet.activeInHierarchy)
         {
-            OnFireAnimationEnd?.Invoke();
+            OnShotFiredAnimation?.Invoke();
+            OnAnimationEnd?.Invoke();
         }
     }
 }
