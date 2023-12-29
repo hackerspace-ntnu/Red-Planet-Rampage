@@ -52,6 +52,9 @@ public class ProjectileState
     // TODO: Make this to anything
     public float size = 0f;
 
+    // Extra margin for hit detection intended for aim assist
+    public float hitAssistRadius = 0f;
+
     // Dictionary for storing properties that a projectile modifier might need, see SpiralPathModifier for an example
     public Dictionary<string, object> additionalProperties = new Dictionary<string, object>();
 
@@ -190,7 +193,14 @@ public class ProjectileMotions
         }
         else
         {
-            rayCasts = Physics.RaycastAll(state.oldPosition, direction, direction.magnitude, collisionLayers);
+            if (state.hitAssistRadius > 0)
+            {
+                rayCasts = Physics.SphereCastAll(state.oldPosition, state.hitAssistRadius, direction, direction.magnitude, collisionLayers);
+            }
+            else
+            {
+                rayCasts = Physics.RaycastAll(state.oldPosition, direction, direction.magnitude, collisionLayers);
+            }
         }
 
         return rayCasts.OrderBy(x => x.distance).ToArray();
