@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
 using UnityEngine.VFX;
+using Random = UnityEngine.Random;
 
 public class BulletController : ProjectileController
 {
@@ -97,7 +99,7 @@ public class BulletController : ProjectileController
 
                 for (int j = 0; j < vfxPositionsPerSample; j++)
                 {
-                    trailPosTexture.setValue(sampleNum * vfxPositionsPerSample + j + k * vfxPositionsPerSample * collisionSamples, projectile.position);
+                    TrySetTextureValue(sampleNum * vfxPositionsPerSample + j + k * vfxPositionsPerSample * collisionSamples, projectile.position);
                     UpdateProjectileMovement?.Invoke(maxDistance / (collisionSamples * vfxPositionsPerSample), ref projectile);
                 }
 
@@ -106,17 +108,19 @@ public class BulletController : ProjectileController
                 if (collisions.Length > 0)
                 {
                     var collider = collisions[0].collider;
-                    OnColliderHit?.Invoke(collider, ref projectile);
                     HitboxController hitbox = collider.GetComponent<HitboxController>();
                     projectile.position = collisions[0].point;
+
+                    OnColliderHit?.Invoke(collider, ref projectile);
                     if (hitbox != null)
                     {
                         OnHitboxCollision?.Invoke(hitbox, ref projectile);
                     }
+
                     projectile.active = false;
                     sampleNum += 1;
-                    trailPosTexture.setValue(sampleNum * vfxPositionsPerSample + k * vfxPositionsPerSample * collisionSamples, projectile.position);
-
+                    if (sampleNum < collisionSamples)
+                        TrySetTextureValue(sampleNum * vfxPositionsPerSample + k * vfxPositionsPerSample * collisionSamples, projectile.position);
                 }
                 else
                 {
@@ -126,13 +130,25 @@ public class BulletController : ProjectileController
 
             for (int i = sampleNum * vfxPositionsPerSample + 1; i < collisionSamples * vfxPositionsPerSample; i++)
             {
-                trailPosTexture.setValue(i + k * vfxPositionsPerSample * collisionSamples, projectile.position);
+                TrySetTextureValue(i + k * vfxPositionsPerSample * collisionSamples, projectile.position);
             }
 
             trailPosTexture.ApplyChanges();
         }
         // Play the trail
         trail.SendEvent("OnPlay");
+    }
+
+    private void TrySetTextureValue(int index, Vector3 position)
+    {
+        try
+        {
+            trailPosTexture.setValue(index, position);
+        }
+        catch (IndexOutOfRangeException _)
+        {
+            Debug.LogWarning($"Index {index} is out of bounds in BulletController texture (max {vfxPositionsPerSample * collisionSamples * Mathf.CeilToInt(stats.ProjectilesPerShot)})");
+        }
     }
 
     public Vector3 LerpPos(ProjectileState state)
