@@ -22,9 +22,6 @@ public class BulletController : ProjectileController
     public GameObject Trail => trail.gameObject;
 
     [SerializeField]
-    private VisualEffect flash;
-
-    [SerializeField]
     private AugmentAnimator animator;
 
     private ProjectileState projectile = new ProjectileState();
@@ -42,7 +39,6 @@ public class BulletController : ProjectileController
     {
         collisionSamples = Mathf.CeilToInt(collisionSamplesPerUnit * maxDistance);
         var bulletsPerShot = Mathf.CeilToInt(stats.ProjectilesPerShot);
-        flash.transform.position = projectileOutput.position;
         trailPosTexture = new VFXTextureFormatter(vfxPositionsPerSample * collisionSamples * bulletsPerShot);
         trail.SetTexture("Position", this.trailPosTexture.Texture);
         trail.SetInt("StripLength", vfxPositionsPerSample * collisionSamples);
@@ -135,14 +131,8 @@ public class BulletController : ProjectileController
 
             trailPosTexture.ApplyChanges();
         }
-        // Play the flash and trail
+        // Play the trail
         trail.SendEvent("OnPlay");
-        flash.SendEvent("OnPlay");
-    }
-
-    public void PlayMuzzleFlash(GunStats stats)
-    {
-        flash.SendEvent("OnPlay");
     }
 
     public Vector3 LerpPos(ProjectileState state)

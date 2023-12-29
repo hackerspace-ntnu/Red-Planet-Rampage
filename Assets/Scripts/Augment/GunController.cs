@@ -61,8 +61,7 @@ public class GunController : MonoBehaviour
         barrelAnimator = barrel.GetComponentInChildren<AugmentAnimator>();
         if (HasRecoil)
             barrelAnimator.OnShotFiredAnimation += PlayRecoil;
-        if (!player)
-            barrelAnimator.OnShotFiredAnimation += ShotFired;
+        barrelAnimator.OnShotFiredAnimation += ShotFired;
         barrelAnimator.OnAnimationEnd += FireEnd;
 
         localGunXOffset = transform.localPosition.x;
@@ -72,8 +71,7 @@ public class GunController : MonoBehaviour
     {
         if (HasRecoil)
             barrelAnimator.OnShotFiredAnimation -= PlayRecoil;
-        if (!player)
-            barrelAnimator.OnShotFiredAnimation -= ShotFired;
+        barrelAnimator.OnShotFiredAnimation -= ShotFired;
         barrelAnimator.OnAnimationEnd -= FireEnd;
     }
 
