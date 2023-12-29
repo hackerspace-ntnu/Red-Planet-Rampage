@@ -307,6 +307,7 @@ GameObject:
   - component: {fileID: 5073592139580318145}
   - component: {fileID: 1897810737203425439}
   - component: {fileID: 2663316941412716786}
+  - component: {fileID: 2783153416872954018}
   m_Layer: 0
   m_Name: CoilBarrel
   m_TagString: Untagged
@@ -350,6 +351,10 @@ MonoBehaviour:
     addition: 25
     multiplier: 0
     exponential: 1
+  - name: Firerate
+    addition: 0
+    multiplier: 0
+    exponential: 0
   outputs:
   - {fileID: 5765902433490691002}
   attachmentPoints:
@@ -374,7 +379,6 @@ MonoBehaviour:
   maxDistance: 100
   collisionSamplesPerUnit: 2
   trail: {fileID: 6753720039035056053}
-  flash: {fileID: 261841362781268065}
   animator: {fileID: 2021749910137901998}
 --- !u!114 &3975746179230621477
 MonoBehaviour:
@@ -530,6 +534,20 @@ MonoBehaviour:
   stickToNormalFraction: 0.2
   angleVariation: 180
   lifetime: 60
+--- !u!114 &2783153416872954018
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6861618831928518119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49ba4bdeb4a0c8548b6b50d2d03dc38a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pushPower: 10
+  baseFireRateAdder: 2
 --- !u!1001 &1492273253223761825
 PrefabInstance:
   m_ObjectHideFlags: 0

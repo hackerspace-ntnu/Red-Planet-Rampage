@@ -138,7 +138,6 @@ public abstract class ProjectileController : MonoBehaviour
         }
         if (!gunController.player)
         {
-            Debug.Log("Barrel w/o player reference, is this a display gun?");
             return;
         }
         gunController.onInitializeGun += OnInitialize;
