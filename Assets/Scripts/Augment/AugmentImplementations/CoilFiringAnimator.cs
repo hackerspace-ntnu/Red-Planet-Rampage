@@ -7,7 +7,7 @@ public class CoilFiringAnimator : AugmentAnimator
 
     public override void OnInitialize(GunStats stats)
     {
-        animator.speed = Mathf.Max(stats.Firerate / 2.5f, 1f);
+        animator.speed = Mathf.Clamp(stats.Firerate * 1.5f, 1f, 6f);
     }
 
     public override void OnReload(GunStats stats)

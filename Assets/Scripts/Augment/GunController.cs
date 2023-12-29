@@ -157,7 +157,7 @@ public class GunController : MonoBehaviour
     private void FireEnd()
     {
         stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.magazineSize);
-        onFireEnd?.Invoke(stats);
         isFiring = false;
+        onFireEnd?.Invoke(stats);
     }
 }

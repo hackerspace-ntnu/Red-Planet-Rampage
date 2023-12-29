@@ -69,7 +69,7 @@ public class MeshProjectileController : ProjectileController
         vfx.SetFloat("Size", visualSize);
         vfx.SendEvent("OnPlay");
 
-        if (!gunController || !gunController.player)
+        if (!gunController || !gunController.Player)
             return;
         animator.OnShotFiredAnimation += FireProjectile;
     }

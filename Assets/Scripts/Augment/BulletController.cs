@@ -29,7 +29,7 @@ public class BulletController : ProjectileController
     protected override void Awake()
     {
         base.Awake();
-        if (!gunController || !gunController.player)
+        if (!gunController || !gunController.Player)
             return;
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
         animator.OnShotFiredAnimation += FireProjectile;

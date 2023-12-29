@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class LawnMower : GunBody
@@ -43,6 +41,8 @@ public class LawnMower : GunBody
     [SerializeField]
     private Material mowerScreen;
 
+    private bool success = false;
+
     public override void Start()
     {
         meshRenderer.materials[mowerScreenMaterialIndex] = Instantiate(meshRenderer.materials[mowerScreenMaterialIndex]);
@@ -53,7 +53,8 @@ public class LawnMower : GunBody
             Debug.Log("MowerBody not attached to gun parent!");
             return;
         }
-        gunController.onFire += Fire;
+        gunController.onFireStart += Fire;
+        gunController.onFireEnd += FireEnd;
 
         currentTarget = maxArrowDegrees;
         mowerScreen.SetFloat("_TargetDegrees", currentTarget);
@@ -94,6 +95,7 @@ public class LawnMower : GunBody
         var isInHigherTreshold = currentDegrees > currentTarget - arrowHitSpan;
         if (isInLowerTreshold && isInHigherTreshold)
         {
+            success = true;
             var deltaDegrees = targetRateOfChange.Evaluate(Mathf.InverseLerp(minArrowDegrees, maxArrowDegrees, currentTarget - degreeStepSize));
             currentTarget = Mathf.Lerp(minArrowDegrees, maxArrowDegrees, deltaDegrees);
             mowerScreen.SetFloat("_TargetDegrees", currentTarget);
@@ -101,6 +103,7 @@ public class LawnMower : GunBody
         }
         else
         {
+            success = false;
             mowerScreen.SetFloat("_TargetDegrees", maxArrowDegrees);
             failedExhaustParticles.Play();
         }
@@ -118,9 +121,14 @@ public class LawnMower : GunBody
             });
     }
 
+    private void FireEnd(GunStats stats)
+    {
+        if (success) Reload(stats);
+    }
+
     protected override void Reload(GunStats stats)
     {
-        gunController.Reload(1f); 
+        gunController.Reload(1f);
     }
 
     private void StartArrowWobbleTween()

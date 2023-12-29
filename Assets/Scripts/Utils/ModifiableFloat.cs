@@ -14,7 +14,7 @@ public class ModifiableFloat
 
     private float exponential = 1f;
 
-    public  ModifiableFloat(float value)
+    public ModifiableFloat(float value)
     {
         baseValue = value;
     }
@@ -43,5 +43,10 @@ public class ModifiableFloat
     {
         return a.Value();
     }
+
+    public override string ToString()
+    {
+        return $"({baseValue} + {addition}) * {multiplier} * {exponential}";
+    }
 }
-    
+
