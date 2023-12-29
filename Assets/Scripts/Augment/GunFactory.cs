@@ -19,7 +19,6 @@ public class GunFactory : MonoBehaviour
         gun.GetComponent<GunFactory>().InitializeGun(owner);
 
         var cullingLayer = LayerMask.NameToLayer("Gun " + owner.inputManager.playerInput.playerIndex);
-        SetGunLayer(gun.GetComponent<GunFactory>(), cullingLayer);
 
         GunFactory displayGun = owner.GunOrigin.GetComponent<GunFactory>();
         displayGun.Body = bodyPrefab;
@@ -28,7 +27,6 @@ public class GunFactory : MonoBehaviour
         displayGun.InitializeGun();
 
         var cullingLayerDisplay = LayerMask.NameToLayer("Player " + owner.inputManager.playerInput.playerIndex);
-        SetGunLayer(displayGun, cullingLayerDisplay);
 
         var firstPersonGunController = gun.GetComponent<GunFactory>().GunController;
         var gunAnimations = displayGun.GetComponentsInChildren<AugmentAnimator>(includeInactive: true);
@@ -38,6 +36,10 @@ public class GunFactory : MonoBehaviour
             firstPersonGunController.onFireStart += animation.OnFire;
             firstPersonGunController.onReload += animation.OnReload;
         }
+
+        // Animator initializers may instantiate objects, so we should set layers *afterwards*.
+        SetGunLayer(gun.GetComponent<GunFactory>(), cullingLayer);
+        SetGunLayer(displayGun, cullingLayerDisplay);
 
         firstPersonGunController.RightHandTarget = displayGun.GunController.RightHandTarget;
 
