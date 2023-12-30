@@ -49,6 +49,7 @@ public class InputManager : MonoBehaviour
     private float gamepadLookScale = 0.75f;
 
     private bool isMouseAndKeyboard = false;
+    public bool IsMouseAndKeyboard => isMouseAndKeyboard;
     public bool ZoomActive = false;
 
     void Start()

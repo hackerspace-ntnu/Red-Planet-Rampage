@@ -195,6 +195,13 @@ public class PlayerManager : MonoBehaviour
         Vector3 cameraCenter = inputManager.transform.position;
         Vector3 cameraDirection = inputManager.transform.forward;
         Vector3 startPoint = cameraCenter + cameraDirection * targetStartOffset;
+        var defaultLayer = 1;
+        if (Physics.Raycast(cameraCenter, cameraDirection, out RaycastHit hitInfo, targetStartOffset, defaultLayer))
+        {
+            gunController.target = hitInfo.point;
+            return;
+        }
+
         if (Physics.Raycast(startPoint, cameraDirection, out RaycastHit hit, maxHitDistance, hitMask))
         {
             gunController.target = hit.point;

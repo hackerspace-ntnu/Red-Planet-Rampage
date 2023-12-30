@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 public class GunController : MonoBehaviour
 {
     private const float outputTransitionDistance = 2;
+    public float OutputTransitionDistance => outputTransitionDistance;
 
     [HideInInspector]
     public ProjectileController projectile;
