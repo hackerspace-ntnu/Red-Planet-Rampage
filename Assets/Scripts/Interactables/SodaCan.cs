@@ -26,7 +26,7 @@ public class SodaCan : MonoBehaviour
     private Rigidbody body;
 
     private bool isFlying = false;
-    private Vector3 flyingDirection;
+    private bool isEmptied = false;
 
     private void Start()
     {
@@ -39,7 +39,9 @@ public class SodaCan : MonoBehaviour
     {
         var force = info.force.normalized * info.damage * knockbackForceMultiplier;
         body.AddForce(force, ForceMode.Impulse);
-        StartCoroutine(StartFlyingEventually());
+
+        if (!isEmptied)
+            StartCoroutine(StartFlyingEventually());
     }
 
     private IEnumerator StartFlyingEventually()
@@ -50,6 +52,7 @@ public class SodaCan : MonoBehaviour
         sprayEffect.SetBool("IsSpraying", true);
         yield return new WaitForSeconds(timeSpentFlying);
         isFlying = false;
+        isEmptied = true;
         sprayEffect.SetBool("IsSpraying", false);
     }
 
