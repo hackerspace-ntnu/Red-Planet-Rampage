@@ -70,9 +70,6 @@ public class SodaCan : MonoBehaviour
         if (!isFlying) return;
 
         var contact = collision.GetContact(0);
-
-        Debug.Log("ENTERED");
-
         var flyingDirection = (-transform.up + flyingDirectionOffset).normalized;
         var direction = Vector3.Slerp(Vector3.Reflect(flyingDirection, contact.normal), contact.normal, .5f);
         body.AddForce(direction * flyingForce, ForceMode.Impulse);

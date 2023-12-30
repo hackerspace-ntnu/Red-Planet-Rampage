@@ -50,6 +50,7 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
     private void OnHit(Collider target, ref ProjectileState state)
     {
         // Soda cans are tiny and flail around, making them unsuitable for placing bullet holes on
+        // TODO Add some way of determining which *other* objects to avoid placing decals on
         if (target.TryGetComponent<SodaCan>(out var _))
             return;
 
