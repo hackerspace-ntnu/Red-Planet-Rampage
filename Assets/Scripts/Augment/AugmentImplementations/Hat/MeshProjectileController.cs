@@ -67,7 +67,7 @@ public class MeshProjectileController : ProjectileController
         vfx.SetTexture("Positions", positionActiveTexture.Texture);
         vfx.SetInt("MaxParticleCount", maxProjectiles);
         vfx.SetFloat("Size", visualSize);
-        vfx.SendEvent("OnPlay");
+        vfx.SendEvent(VisualEffectAsset.PlayEventID);
 
         if (!gunController || !gunController.Player)
             return;

@@ -44,7 +44,7 @@ public class ExplosionController : MonoBehaviour
     public void Explode(PlayerManager sourcePlayer)
     {
         visualEffect.enabled = true;
-        visualEffect.SendEvent("OnPlay");
+        visualEffect.SendEvent(VisualEffectAsset.PlayEventID);
         var targets = Physics.OverlapSphere(transform.position, radius, hitBoxLayers);
         foreach (var target in targets)
         {

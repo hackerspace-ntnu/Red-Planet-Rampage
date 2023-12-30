@@ -15,11 +15,11 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
     // Note that the decal has to be quite deep (like 1 unit or so) because of the somewhat imprecise colliders we have
     [SerializeField] private DecalProjector decal;
 
-    [Range(.2f, .8f)] [SerializeField] private float depthOffsetFraction = .6f;
+    [Range(.2f, .8f)][SerializeField] private float depthOffsetFraction = .6f;
 
-    [Range(0f, 1f)] [SerializeField] private float stickToNormalFraction = 0;
+    [Range(0f, 1f)][SerializeField] private float stickToNormalFraction = 0;
 
-    [Range(0f, 180f)] [SerializeField] private float angleVariation = 180f;
+    [Range(0f, 180f)][SerializeField] private float angleVariation = 180f;
 
     [SerializeField] private float lifetime = 60;
 
@@ -49,6 +49,10 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
 
     private void OnHit(Collider target, ref ProjectileState state)
     {
+        // Soda cans are tiny and flail around, making them unsuitable for placing bullet holes on
+        if (target.TryGetComponent<SodaCan>(out var _))
+            return;
+
         // Place the decal some distance away from the target so that it is more likely to be projected onto a surface
         var depthOffset = decal.size.z * depthOffsetFraction;
         var position = target.ClosestPoint(state.position) - state.direction * depthOffset;

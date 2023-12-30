@@ -136,7 +136,7 @@ public class BulletController : ProjectileController
             trailPosTexture.ApplyChanges();
         }
         // Play the trail
-        trail.SendEvent("OnPlay");
+        trail.SendEvent(VisualEffectAsset.PlayEventID);
     }
 
     private void TrySetTextureValue(int index, Vector3 position)
