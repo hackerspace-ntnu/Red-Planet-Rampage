@@ -47,9 +47,10 @@ public class SodaCan : MonoBehaviour
         yield return new WaitForSeconds(timeBeforeFlying);
         isFlying = true;
         sprayEffect.SendEvent(VisualEffectAsset.PlayEventID);
+        sprayEffect.SetBool("IsSpraying", true);
         yield return new WaitForSeconds(timeSpentFlying);
         isFlying = false;
-        sprayEffect.SendEvent(VisualEffectAsset.StopEventID);
+        sprayEffect.SetBool("IsSpraying", false);
     }
 
 
