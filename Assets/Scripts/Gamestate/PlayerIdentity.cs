@@ -98,11 +98,12 @@ public class PlayerIdentity : MonoBehaviour
         Extensions = new List<Item>();
         body = StaticInfo.Singleton.StartingBody;
         barrel = StaticInfo.Singleton.StartingBarrel;
-        extension = null;
+        extension = StaticInfo.Singleton.StartingExtension;
         chips = 0;
     }
 
-    public void SetLoadout(Item body,Item barrel, Item extension){
+    public void SetLoadout(Item body, Item barrel, Item extension)
+    {
         this.body = body;
         this.barrel = barrel;
         this.extension = extension;
