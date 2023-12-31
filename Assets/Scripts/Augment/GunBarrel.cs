@@ -41,6 +41,6 @@ public class GunBarrel : Augment
         if (!muzzleFlash)
             return;
 
-        muzzleFlash.SendEvent("OnPlay");
+        muzzleFlash.SendEvent(VisualEffectAsset.PlayEventID);
     }
 }
