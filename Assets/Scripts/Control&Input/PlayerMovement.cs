@@ -206,7 +206,7 @@ public class PlayerMovement : MonoBehaviour
             }
             StartCrouch();
         }
-            
+
         if (ctx.canceled)
         {
             animator.SetBool("Crouching", false);
@@ -216,7 +216,7 @@ public class PlayerMovement : MonoBehaviour
             isDashing = false;
             onLanding -= StartCrouch;
         }
-            
+
     }
 
     private void StartCrouch()
@@ -301,7 +301,8 @@ public class PlayerMovement : MonoBehaviour
     private void UpdateRotation()
     {
         var lookSpeedFactor = inputManager.ZoomActive ? LookSpeedZoom : lookSpeed;
-        aimAngle += inputManager.lookInput * lookSpeedFactor * Time.deltaTime;
+        var lookInput = inputManager.IsMouseAndKeyboard ? inputManager.lookInput : inputManager.lookInput * Time.deltaTime;
+        aimAngle += lookInput * lookSpeedFactor;
         // Constrain aiming angle vertically and wrap horizontally.
         // + and - Mathf.Deg2Rad is offsetting with 1 degree in radians,
         // which is neccesary to avoid IK shortest path slerping that causes aniamtions to break at exactly the halfway points.

@@ -44,11 +44,13 @@ public class InputManager : MonoBehaviour
     public Vector2 lookInput { get; private set; } = Vector2.zero;
 
     [SerializeField]
-    private float mouseLookScale = 0.1f;
+    private float mouseLookScale = 0.02f;
     [SerializeField]
     private float gamepadLookScale = 0.75f;
 
     private bool isMouseAndKeyboard = false;
+    public bool IsMouseAndKeyboard => isMouseAndKeyboard;
+
     public bool ZoomActive = false;
 
     void Start()
