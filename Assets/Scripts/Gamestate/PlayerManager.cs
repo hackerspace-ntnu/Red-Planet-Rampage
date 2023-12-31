@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(AudioSource))]
@@ -12,6 +13,9 @@ public class PlayerManager : MonoBehaviour
     // Only Default and HitBox layers can be hit
     private static int hitMask = 1 | (1 << 3);
     public int HitMask => hitMask;
+
+    [FormerlySerializedAs("interactableMask")] [SerializeField]
+    private LayerMask interactMask;
 
     [Header("Shooting")]
 
@@ -164,6 +168,7 @@ public class PlayerManager : MonoBehaviour
         inputManager.onFireCanceled += FireEnd;
         inputManager.onSelect += TryPlaceBid;
         inputManager.onFirePerformed += TryPlaceBid;
+        inputManager.onInteract += Interact;
         // Set camera on canvas
         var canvas = hudController.GetComponent<Canvas>();
         canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
@@ -203,6 +208,18 @@ public class PlayerManager : MonoBehaviour
         {
             gunController.target = cameraCenter + cameraDirection * maxHitDistance;
         }
+    }
+
+    private void Interact(InputAction.CallbackContext ctx)
+    {
+        if (!Physics.Raycast(inputManager.transform.position, inputManager.transform.forward, out var hit,
+                maxHitDistance, interactMask))
+            return;
+
+        if (!hit.transform.TryGetComponent<Interactable>(out var interactable))
+            return;
+        
+        interactable.Interact(this);
     }
 
     private void Fire(InputAction.CallbackContext ctx)

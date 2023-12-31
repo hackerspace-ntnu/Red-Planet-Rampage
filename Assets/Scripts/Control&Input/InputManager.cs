@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -22,6 +19,7 @@ public class InputManager : MonoBehaviour
     public InputEvent onLeftTab;
     public InputEvent onRightTab;
     // FPS-related
+    public InputEvent onInteract;
     public InputEvent onFirePerformed;
     public InputEvent onFireCanceled;
     public InputEvent onCrouchPerformed;
@@ -80,6 +78,7 @@ public class InputManager : MonoBehaviour
         playerInput.actions["Move"].canceled += Move;
         playerInput.actions["LeftTab"].performed += LeftTab;
         playerInput.actions["RightTab"].performed += RightTab;
+        playerInput.actions["Interact"].performed += Interact;
         playerInput.actions["Fire"].performed += Fire;
         playerInput.actions["Fire"].canceled += Fire;
         playerInput.actions["Crouch"].performed += Crouch;
@@ -192,6 +191,11 @@ public class InputManager : MonoBehaviour
     private void RightTab(InputAction.CallbackContext ctx)
     {
         onRightTab?.Invoke(ctx);
+    }
+
+    private void Interact(InputAction.CallbackContext ctx)
+    {
+        onInteract?.Invoke(ctx);
     }
 
     private void Move(InputAction.CallbackContext ctx)
