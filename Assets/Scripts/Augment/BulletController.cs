@@ -115,16 +115,13 @@ public class BulletController : ProjectileController
                     var collider = collisions[0].collider;
                     HitboxController hitbox = collider.GetComponent<HitboxController>();
                     if (hitbox != null)
+                    {
                         if (hitbox.health.Player == player && projectile.distanceTraveled < player.GunController.OutputTransitionDistance)
                             continue;
-                    projectile.position = collisions[0].point;
-
-                    OnColliderHit?.Invoke(collider, ref projectile);
-                    if (hitbox != null)
-                    {
                         OnHitboxCollision?.Invoke(hitbox, ref projectile);
                     }
-
+                    OnColliderHit?.Invoke(collider, ref projectile);
+                    projectile.position = collisions[0].point;
                     projectile.active = false;
                     if (sampleNum < collisionSamples)
                         TrySetTextureValue(sampleNum * vfxPositionsPerSample + k * vfxPositionsPerSample * collisionSamples, projectile.position);

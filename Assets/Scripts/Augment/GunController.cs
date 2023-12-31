@@ -33,6 +33,7 @@ public class GunController : MonoBehaviour
     // Inputs
     public bool triggerHeld, triggerPressed;
     public Vector3 target;
+    public bool TargetIsTooClose;
 
     public delegate void GunEvent(GunStats gunStats);
 
@@ -135,6 +136,10 @@ public class GunController : MonoBehaviour
 
     private void AimAtTarget()
     {
+        // Output become camera when distance hit is closer than weaponOutput
+        if (Player)
+            projectile.projectileOutput = TargetIsTooClose ? Player.inputManager.transform : outputs[0];
+        
         // Aim at target but lerp in original direction if target is close
         Vector3 targetedOutput = (target - projectile.projectileOutput.position).normalized;
         Vector3 defaultOutput = projectile.projectileOutput.forward;
