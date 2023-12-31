@@ -199,9 +199,10 @@ public class PlayerManager : MonoBehaviour
         if (Physics.Raycast(cameraCenter, cameraDirection, out RaycastHit hitInfo, targetStartOffset, defaultLayer))
         {
             gunController.target = hitInfo.point;
+            GunController.TargetIsTooClose = true;
             return;
         }
-
+        GunController.TargetIsTooClose = false;
         if (Physics.Raycast(startPoint, cameraDirection, out RaycastHit hit, maxHitDistance, hitMask))
         {
             gunController.target = hit.point;
