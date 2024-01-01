@@ -5,8 +5,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using CollectionExtensions;
-using System.Linq;
 
 public class MainMenuController : MonoBehaviour
 {
@@ -103,10 +101,10 @@ public class MainMenuController : MonoBehaviour
     /// Function to be called as an onclick event from a button
     /// </summary>
     /// <param name="sceneName"></param>
-    public void ChangeScene()
+    public void ChangeScene(string name)
     {
         playerInputManagerController.RemoveListeners();
-        SceneManager.LoadSceneAsync(mapNames.RandomElement());
+        SceneManager.LoadSceneAsync(name);
     }
 
     /// <summary>
