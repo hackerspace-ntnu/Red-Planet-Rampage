@@ -144,6 +144,11 @@ public class PlayerMovement : MonoBehaviour
             MatchController.Singleton.onRoundEnd += ResetZoom;
     }
 
+    public void SetInitialRotation(float radians)
+    {
+        aimAngle = new Vector2(radians, aimAngle.y);
+    }
+
     private void OnJump(InputAction.CallbackContext ctx)
     {
         if (!(state == PlayerState.GROUNDED))
@@ -206,7 +211,7 @@ public class PlayerMovement : MonoBehaviour
             }
             StartCrouch();
         }
-            
+
         if (ctx.canceled)
         {
             animator.SetBool("Crouching", false);
@@ -216,7 +221,7 @@ public class PlayerMovement : MonoBehaviour
             isDashing = false;
             onLanding -= StartCrouch;
         }
-            
+
     }
 
     private void StartCrouch()
