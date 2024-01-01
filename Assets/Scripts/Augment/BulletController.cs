@@ -23,7 +23,7 @@ public class BulletController : ProjectileController
     private VisualEffect trail;
     public GameObject Trail => trail.gameObject;
 
-    private float HitAssistRadius = 0.5f;
+    private bool hitAssist = false;
 
     [SerializeField]
     private AugmentAnimator animator;
@@ -37,7 +37,7 @@ public class BulletController : ProjectileController
             return;
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
         animator.OnShotFiredAnimation += FireProjectile;
-        HitAssistRadius = gunController.Player.inputManager.IsMouseAndKeyboard ? 0f : HitAssistRadius;
+        hitAssist = !gunController.Player.inputManager.IsMouseAndKeyboard;
     }
 
     private void Start()
@@ -84,7 +84,6 @@ public class BulletController : ProjectileController
             projectile.initializationTime = Time.fixedTime;
             projectile.speedFactor = stats.ProjectileSpeedFactor;
             projectile.gravity = stats.ProjectileGravityModifier * 9.81f;
-            projectile.hitAssistRadius = HitAssistRadius;
             projectile.additionalProperties.Clear();
             projectile.hitHealthControllers.Clear();
 
@@ -115,11 +114,12 @@ public class BulletController : ProjectileController
                     var collider = collisions[0].collider;
                     HitboxController hitbox = collider.GetComponent<HitboxController>();
                     if (hitbox != null)
-                    {
                         if (hitbox.health.Player == player && projectile.distanceTraveled < player.GunController.OutputTransitionDistance)
                             continue;
+
+                    if (hitbox != null)
                         OnHitboxCollision?.Invoke(hitbox, ref projectile);
-                    }
+
                     OnColliderHit?.Invoke(collider, ref projectile);
                     projectile.position = collisions[0].point;
                     projectile.active = false;

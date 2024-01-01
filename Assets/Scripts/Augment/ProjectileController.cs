@@ -52,9 +52,6 @@ public class ProjectileState
     // TODO: Make this to anything
     public float size = 0f;
 
-    // Extra margin for hit detection intended for aim assist
-    public float hitAssistRadius = 0f;
-
     // Dictionary for storing properties that a projectile modifier might need, see SpiralPathModifier for an example
     public Dictionary<string, object> additionalProperties = new Dictionary<string, object>();
 
@@ -98,6 +95,9 @@ public abstract class ProjectileController : MonoBehaviour
     [HideInInspector]
     public PlayerManager player;
 
+    // Checks the extra large Hitboxes intended for aim assist
+    public bool HitAssist = false;
+
     // PLEASE READ
     // This is how the event-system of the guns work, all of these delegate are "hooks" that additional effects can be applied to
     // Each implementation of a projectile type must also describe when these events are triggered
@@ -131,6 +131,7 @@ public abstract class ProjectileController : MonoBehaviour
 
     protected virtual void Awake()
     {
+
         collisionLayers = LayerMask.GetMask("Default", "HitBox");
 
         gunController = transform.parent.GetComponent<GunController>();
@@ -145,6 +146,9 @@ public abstract class ProjectileController : MonoBehaviour
         }
         gunController.onInitializeGun += OnInitialize;
         gunController.onReload += OnReload;
+        HitAssist = !gunController.Player.inputManager.IsMouseAndKeyboard;
+        if (HitAssist)
+            collisionLayers |= LayerMask.GetMask("AimAssist");
     }
 
     protected virtual void OnDestroy()
@@ -193,14 +197,7 @@ public class ProjectileMotions
         }
         else
         {
-            if (state.hitAssistRadius > 0)
-            {
-                rayCasts = Physics.SphereCastAll(state.oldPosition, state.hitAssistRadius, direction, direction.magnitude, collisionLayers);
-            }
-            else
-            {
-                rayCasts = Physics.RaycastAll(state.oldPosition, direction, direction.magnitude, collisionLayers);
-            }
+            rayCasts = Physics.RaycastAll(state.oldPosition, direction, direction.magnitude, collisionLayers);
         }
 
         return rayCasts.OrderBy(x => x.distance).ToArray();
