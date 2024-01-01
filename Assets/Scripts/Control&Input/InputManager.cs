@@ -164,6 +164,7 @@ public class InputManager : MonoBehaviour
         onZoomCanceled = null;
         onLookPerformed = null;
         onLookCanceled = null;
+        onInteract = null;
 
         // Free the mouse
         if (isMouseAndKeyboard)

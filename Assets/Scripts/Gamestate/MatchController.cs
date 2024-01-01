@@ -237,6 +237,11 @@ public class MatchController : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(matchEndDelay);
 
+        ReturnToMainMenu();
+    }
+
+    public void ReturnToMainMenu()
+    {
         // Update playerInputs in preperation for Menu scene
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
 
@@ -244,6 +249,5 @@ public class MatchController : MonoBehaviour
         rounds = new List<Round>();
         PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         SceneManager.LoadSceneAsync("Menu");
-
     }
 }
