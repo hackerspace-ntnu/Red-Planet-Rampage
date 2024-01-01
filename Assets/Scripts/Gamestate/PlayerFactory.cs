@@ -24,7 +24,7 @@ public class PlayerFactory : MonoBehaviour
 
     private void Awake()
     {
-        if(PlayerInputManagerController.Singleton == null && overrideMatchManager)
+        if (PlayerInputManagerController.Singleton == null && overrideMatchManager)
         {
             // We most likely started the game in the game scene, reload menu instead
             SceneManager.LoadSceneAsync("Menu");
@@ -101,6 +101,7 @@ public class PlayerFactory : MonoBehaviour
         playerManager.SetGun(inputManager.transform);
         // Set unique layer for player
         playerManager.SetLayer(inputManager.playerInput.playerIndex);
+        playerManager.GetComponent<PlayerMovement>().SetInitialRotation(spawnPoint.eulerAngles.y * Mathf.Deg2Rad);
     }
 
     private void InstantiateBiddingPlayer(InputManager inputManager, Transform spawnPoint)

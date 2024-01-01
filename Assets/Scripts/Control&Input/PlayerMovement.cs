@@ -144,6 +144,11 @@ public class PlayerMovement : MonoBehaviour
             MatchController.Singleton.onRoundEnd += ResetZoom;
     }
 
+    public void SetInitialRotation(float radians)
+    {
+        aimAngle = new Vector2(radians, aimAngle.y);
+    }
+
     private void OnJump(InputAction.CallbackContext ctx)
     {
         if (!(state == PlayerState.GROUNDED))
