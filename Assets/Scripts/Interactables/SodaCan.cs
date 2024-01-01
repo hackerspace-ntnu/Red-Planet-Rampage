@@ -17,9 +17,6 @@ public class SodaCan : MonoBehaviour
     private float timeSpentFlying = 10;
 
     [SerializeField]
-    private float knockbackForceMultiplier = 10;
-
-    [SerializeField]
     private VisualEffect sprayEffect;
 
     private HealthController healthController;
@@ -35,11 +32,13 @@ public class SodaCan : MonoBehaviour
         healthController.onDeath += OnDeath;
     }
 
+    private void OnDestroy()
+    {
+        healthController.onDeath -= OnDeath;
+    }
+
     private void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
-        var force = info.force.normalized * info.damage * knockbackForceMultiplier;
-        body.AddForce(force, ForceMode.Impulse);
-
         if (!isEmptied)
             StartCoroutine(StartFlyingEventually());
     }
@@ -55,7 +54,6 @@ public class SodaCan : MonoBehaviour
         isEmptied = true;
         sprayEffect.SetBool("IsSpraying", false);
     }
-
 
     private void FixedUpdate()
     {
