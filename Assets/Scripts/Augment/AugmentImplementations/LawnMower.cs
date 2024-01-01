@@ -70,9 +70,8 @@ public class LawnMower : GunBody
         LineHoldingPoint = playerHand.HoldingPoint;
         handString.gameObject.SetActive(true);
 
-        if (!MatchController.Singleton)
-            return;
-        MatchController.Singleton.onRoundEnd += DisableLine;
+        if (MatchController.Singleton)
+            MatchController.Singleton.onRoundEnd += DisableLine;
 
         if (gunController.Player.GunOrigin.TryGetComponent(out GunController gunControllerDisplay))
             gunControllerDisplay.GetComponentInChildren<LawnMower>().LineHoldingPoint = gunController.Player.PlayerIK.LeftHandIKTransform;

@@ -77,6 +77,15 @@ public class GunController : MonoBehaviour
             barrelAnimator.OnShotFiredAnimation -= PlayRecoil;
         barrelAnimator.OnShotFiredAnimation -= ShotFired;
         barrelAnimator.OnAnimationEnd -= FireEnd;
+
+        if (!Player)
+            return;
+
+        Player.inputManager.onZoomPerformed -= OnZoom;
+        Player.inputManager.onZoomCanceled -= OnZoomCanceled;
+
+        if (MatchController.Singleton)
+            MatchController.Singleton.onRoundEnd -= CancelZoom;
     }
 
     private void FixedUpdate()

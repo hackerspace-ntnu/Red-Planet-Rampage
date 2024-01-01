@@ -44,6 +44,12 @@ public class MusicTrackManager : MonoBehaviour
     [SerializeField]
     private MusicTrack constructionFanfare;
 
+    private float trackStartTime;
+    public float TimeSinceTrackStart => Time.realtimeSinceStartup - trackStartTime;
+
+    private bool isFadingOutPreviousTrack = false;
+    public bool IsfadingOutPreviousTrack => isFadingOutPreviousTrack;
+
     private Coroutine trackSwitchingRoutine;
 
     private readonly float LOGARITHMIC_MUTE = -90f;
@@ -67,6 +73,8 @@ public class MusicTrackManager : MonoBehaviour
 
         #endregion Singleton boilerplate
 
+        track = menuTheme;
+        trackStartTime = Time.realtimeSinceStartup;
         AssignPlayedLayers(menuTheme);
 
         DontDestroyOnLoad(gameObject);
@@ -175,11 +183,14 @@ public class MusicTrackManager : MonoBehaviour
     private IEnumerator FadeOutThenSwitchTo(MusicTrack track)
     {
         mixer.GetFloat("musicVolume", out float startVolume);
+        isFadingOutPreviousTrack = true;
         yield return FadeOut();
 
         // Reset volume and switch track
         AssignPlayedLayers(track);
         mixer.SetFloat("musicVolume", startVolume);
+        trackStartTime = Time.realtimeSinceStartup;
+        isFadingOutPreviousTrack = false;
     }
 
     private IEnumerator WaitThenSwitchToLoop(MusicTrack track, float time)
