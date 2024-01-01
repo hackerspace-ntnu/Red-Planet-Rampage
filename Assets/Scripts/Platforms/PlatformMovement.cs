@@ -6,22 +6,28 @@ public class PlatformMovement : MonoBehaviour
 {
     public List<Transform> routepoints;
 
-    [SerializeField] 
+    [SerializeField]
+    private float moveSpeedFactor = 1;
+
     private float moveSpeed = 5f;
     private int nextRoutepointIndex;
     private float travelDistance;
+
     private void Start()
     {
         nextRoutepointIndex = 0;
 
         travelDistance = Vector3.Distance(routepoints[nextRoutepointIndex + 1].transform.position, transform.position);
-        if (routepoints.Count <= 0){
+
+        if (routepoints.Count <= 0)
+        {
             Debug.LogWarning("No routepoints specified");
             return;
-        } 
+        }
     }
 
-    private void FixedUpdate() {
+    private void FixedUpdate()
+    {
         MovePlatform();
     }
 
@@ -36,28 +42,34 @@ public class PlatformMovement : MonoBehaviour
         {
             nextRoutepointIndex++;
         }
+
         if (currentDistance < 2 || currentDistance + 2 >= travelDistance)
         {
-            moveSpeed = 2f;
-
-        }else{
-            moveSpeed = 5f;
+            moveSpeed = 2f * moveSpeedFactor;
+        }
+        else
+        {
+            moveSpeed = 5f * moveSpeedFactor;
         }
 
         if (nextRoutepointIndex != routepoints.Count) return;
-        
+
         routepoints.Reverse();
         nextRoutepointIndex = 0;
     }
 
-    private void OnTriggerEnter(Collider other) {
-        if(other.gameObject.TryGetComponent<PlayerManager>(out PlayerManager playerManager)){
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.TryGetComponent<PlayerManager>(out PlayerManager playerManager))
+        {
             other.transform.SetParent(transform);
         }
     }
-    private void OnTriggerExit(Collider other) {
-        if(other.gameObject.TryGetComponent<PlayerManager>(out PlayerManager playerManager)){
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.TryGetComponent<PlayerManager>(out PlayerManager playerManager))
+        {
             other.transform.SetParent(null);
         }
     }
-} 
+}
