@@ -14,7 +14,8 @@ public class PlayerManager : MonoBehaviour
     private static int hitMask = 1 | (1 << 3);
     public int HitMask => hitMask;
 
-    [FormerlySerializedAs("interactableMask")] [SerializeField]
+    [FormerlySerializedAs("interactableMask")]
+    [SerializeField]
     private LayerMask interactMask;
 
     [Header("Shooting")]
@@ -218,7 +219,7 @@ public class PlayerManager : MonoBehaviour
 
         if (!hit.transform.TryGetComponent<Interactable>(out var interactable))
             return;
-        
+
         interactable.Interact(this);
     }
 
