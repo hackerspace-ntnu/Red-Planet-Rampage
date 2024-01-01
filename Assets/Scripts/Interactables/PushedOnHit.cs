@@ -1,21 +1,23 @@
 using UnityEngine;
 
-public class ShootableDummy : MonoBehaviour
+public class PushedOnHit : MonoBehaviour
 {
     [SerializeField]
-    private float knockbackForceMultiplier = 40;
+    private float knockbackForceMultiplier = 1;
 
     private HealthController healthController;
     private Rigidbody body;
-
-    private bool isFlying = false;
-    private bool isEmptied = false;
 
     private void Start()
     {
         body = GetComponent<Rigidbody>();
         healthController = GetComponent<HealthController>();
         healthController.onDamageTaken += OnHit;
+    }
+
+    private void Destroy()
+    {
+        healthController.onDamageTaken -= OnHit;
     }
 
     private void OnHit(HealthController healthController, float damage, DamageInfo info)
