@@ -14,7 +14,6 @@ public class PlayerManager : MonoBehaviour
     private static int hitMask = 1 | (1 << 3);
     public int HitMask => hitMask;
 
-    [FormerlySerializedAs("interactableMask")]
     [SerializeField]
     private LayerMask interactMask;
 
@@ -289,6 +288,7 @@ public class PlayerManager : MonoBehaviour
 
     public void SetGun(Transform offset)
     {
+        overrideAimTarget = false;
         var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, this, offset);
         // Set specific local transform
         gun.transform.localPosition = new Vector3(0.39f, -0.34f, 0.5f);
@@ -302,6 +302,20 @@ public class PlayerManager : MonoBehaviour
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
         if (gunController.RightHandTarget)
             playerIK.RightHandIKTarget = gunController.RightHandTarget;
+        GetComponent<AmmoBoxCollector>().CheckForAmmoBoxBodyAgain();
+    }
+
+    public void RemoveGun()
+    {
+        for (int i = gunController.transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(gunController.transform.GetChild(i).gameObject);
+        }
+        Destroy(gunController.gameObject);
+        for (int i = GunOrigin.transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(GunOrigin.transform.GetChild(i).gameObject);
+        }
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)

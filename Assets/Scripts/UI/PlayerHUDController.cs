@@ -4,7 +4,7 @@ using TMPro;
 
 public class PlayerHUDController : MonoBehaviour
 {
-    [SerializeField] 
+    [SerializeField]
     private RectTransform hud;
 
     [Header("Health and ammo")]
@@ -89,8 +89,8 @@ public class PlayerHUDController : MonoBehaviour
             LeanTween.cancel(ammoHud.gameObject);
             ammoBar.gameObject.transform.eulerAngles = new Vector3(ammoBar.gameObject.transform.eulerAngles.x, ammoBar.gameObject.transform.eulerAngles.y, 0);
         }
-        
-        ammoCapacityMaterial.SetFloat("_Arc2", (1-ammoPercent)* availableDegrees);
+
+        ammoCapacityMaterial.SetFloat("_Arc2", (1 - ammoPercent) * availableDegrees);
         ammoHud.gameObject.LeanRotateAroundLocal(Vector3.forward, ammoSpinDegrees, 0.5f).setEaseSpring()
             .setOnStart(
             () => ammoBar.gameObject.transform.Rotate(new Vector3(0, 0, -ammoSpinDegrees)));

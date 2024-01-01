@@ -34,7 +34,7 @@ public class SodaCan : MonoBehaviour
 
     private void OnDestroy()
     {
-        healthController.onDeath -= OnDeath;
+        if (healthController) healthController.onDeath -= OnDeath;
     }
 
     private void OnDeath(HealthController healthController, float damage, DamageInfo info)

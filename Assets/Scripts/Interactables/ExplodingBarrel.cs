@@ -24,7 +24,7 @@ public class ExplodingBarrel : MonoBehaviour
 
     private void OnDestroy()
     {
-        healthController.onDeath -= Explode;
+        if (healthController) healthController.onDeath -= Explode;
     }
 
 
