@@ -160,8 +160,7 @@ public class PlayerManager : MonoBehaviour
         identity = inputManager.GetComponent<PlayerIdentity>();
         var playerMovement = GetComponent<PlayerMovement>();
         playerMovement.SetPlayerInput(inputManager);
-        playerMovement.onLeapContionous += EnableHudLeap;
-        playerMovement.onLeapEnd += DisableHudLeap;
+        playerMovement.onMove += UpdateHudLeap;
         // Subscribe relevant input events
         inputManager.onFirePerformed += Fire;
         inputManager.onFireCanceled += FireEnd;
@@ -191,8 +190,7 @@ public class PlayerManager : MonoBehaviour
         }
         if (TryGetComponent(out PlayerMovement playerMovement))
         {
-            playerMovement.onLeapContionous -= EnableHudLeap;
-            playerMovement.onLeapEnd -= DisableHudLeap;
+            playerMovement.onMove -= UpdateHudLeap;
         }
 
     }
@@ -223,14 +221,9 @@ public class PlayerManager : MonoBehaviour
         StartCoroutine(UnpressTrigger());
     }
 
-    private void EnableHudLeap(Vector3 velocity)
+    private void UpdateHudLeap(Rigidbody body)
     {
-        hudController.SetSpeedLines(true, velocity);
-    }
-
-    private void DisableHudLeap(Vector3 velocity)
-    {
-        hudController.SetSpeedLines(false, velocity);
+        hudController.SetSpeedLines(body.velocity);
     }
 
     private void UpdateHudFire(GunStats stats)

@@ -112,9 +112,8 @@ public class PlayerMovement : MonoBehaviour
 
     public delegate void MovementEvent();
     public MovementEvent onLanding;
-    public delegate void MovementEventVelocity(Vector3 velocity);
-    public MovementEventVelocity onLeapContionous;
-    public MovementEventVelocity onLeapEnd;
+    public delegate void MovementEventBody(Rigidbody body);
+    public MovementEventBody onMove;
 
     void Start()
     {
@@ -239,8 +238,6 @@ public class PlayerMovement : MonoBehaviour
     {
         yield return new WaitForSeconds(time);
         isDashing = IsInAir();
-        if (!isDashing)
-            onLeapEnd(body.velocity);
         onLanding -= EnableDash;
     }
 
@@ -344,7 +341,6 @@ public class PlayerMovement : MonoBehaviour
         if (isDashing)
         {
             var directionalForces = new Vector3(body.velocity.x, 0, body.velocity.z);
-            onLeapContionous(body.velocity);
             if (directionalForces.magnitude < minDashVelocity)
                 isDashing = false;
         }
@@ -358,6 +354,7 @@ public class PlayerMovement : MonoBehaviour
     {
         UpdateRotation();
         UpdateAnimatorParameters();
+        onMove(body);
     }
 
     private void OnDestroy()

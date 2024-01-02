@@ -57,8 +57,9 @@ public class PlayerHUDController : MonoBehaviour
     private PopupSpammer popupSpammer;
     public PopupSpammer PopupSpammer => popupSpammer;
     [SerializeField]
-    private GameObject speedLines;
+    private Image speedLines;
     [SerializeField]
+    private AnimationCurve speedLineEase;
     private Material speedLinesMaterial;
 
     [SerializeField]
@@ -66,7 +67,8 @@ public class PlayerHUDController : MonoBehaviour
 
     void Start()
     {
-        speedLines.SetActive(false);
+        speedLines.material = Instantiate(speedLines.material);
+        speedLinesMaterial = speedLines.material;
         var image = GetComponent<RawImage>();
         // Prevent material properties from being handled globally
         damageBorder = Instantiate(image.material);
@@ -80,12 +82,17 @@ public class PlayerHUDController : MonoBehaviour
         healthBarScaleX = healthBar.localScale.x;
     }
 
-    public void SetSpeedLines(bool isActive, Vector3 velocity)
+    public void SetSpeedLines(Vector3 velocity)
     {
-        speedLines.SetActive(isActive);
-        if (isActive)
-            speedLinesMaterial.SetFloat("_LineRemovalRadius", velocity.magnitude * (1 / (velocity.magnitude * 20)));
-        Debug.Log((1 / (velocity.magnitude * 20)));
+        var magnitude = velocity.magnitude;
+        if (magnitude < 1)
+        {
+            speedLinesMaterial.SetFloat("_LineRemovalRadius", 1f);
+            speedLinesMaterial.SetVector("_Center", new Vector4(0.5f, 0.5f));
+            return;
+        }
+
+        speedLinesMaterial.SetFloat("_LineRemovalRadius", speedLineEase.Evaluate(1 / magnitude));
     }
 
     public void OnDamageTaken(float damage, float currentHealth, float maxHealth)
