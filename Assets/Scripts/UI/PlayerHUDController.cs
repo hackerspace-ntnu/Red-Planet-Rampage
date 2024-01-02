@@ -69,6 +69,7 @@ public class PlayerHUDController : MonoBehaviour
     {
         speedLines.material = Instantiate(speedLines.material);
         speedLinesMaterial = speedLines.material;
+        speedLines.gameObject.SetActive(true);
         var image = GetComponent<RawImage>();
         // Prevent material properties from being handled globally
         damageBorder = Instantiate(image.material);
@@ -91,7 +92,8 @@ public class PlayerHUDController : MonoBehaviour
             speedLinesMaterial.SetVector("_Center", new Vector4(0.5f, 0.5f));
             return;
         }
-
+        var direction = velocity.normalized;
+        speedLinesMaterial.SetVector("_Center", new Vector4(0.5f + Vector3.Dot(transform.parent.right, direction) * 0.25f, 0.5f + Vector3.Dot(transform.parent.up, direction) * 0.25f));
         speedLinesMaterial.SetFloat("_LineRemovalRadius", speedLineEase.Evaluate(1 / magnitude));
     }
 
@@ -163,6 +165,7 @@ public class PlayerHUDController : MonoBehaviour
         deathText.color = killer.color;
         deathScreen.SetActive(true);
         ammoHud.parent.gameObject.SetActive(false);
+        speedLines.gameObject.SetActive(false);
     }
 
     // x and y expected to be in range [-1, 1]
