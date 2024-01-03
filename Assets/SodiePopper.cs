@@ -65,6 +65,7 @@ public class SodiePopper : GunBody
         if (!gunController.Player)
             return;
         playerLastPos = playerLastLastPos = gunController.Player.transform.position;
+        playerTransform = gunController.Player.transform;
     }
 
     private void Update()
@@ -87,23 +88,25 @@ public class SodiePopper : GunBody
 
         offsetVelocity += (meassurementPoint.position - lastPos) * springStrength * Time.fixedDeltaTime;
 
+        /*
         if (playerTransform)
         {
+            Debug.Log("before" + offsetVelocity.magnitude);
             Vector3 playerSpeedDiff = (playerLastLastPos - 2 * playerLastPos + playerTransform.position) / Time.fixedDeltaTime;
-            offsetVelocity += playerSpeedDiff * playermovementRelativeAdjustment;
-
+            //offsetVelocity -= playerSpeedDiff * playermovementRelativeAdjustment;
+            offsetVelocity -= (playerTransform.position - playerLastPos) * playermovementRelativeAdjustment;
+            Debug.Log("after" + offsetVelocity.magnitude);
             playerLastLastPos = playerLastPos;
             playerLastPos = playerTransform.position;
         }
+        */
 
         lastLastPos = lastPos;
 
         lastPos += offsetVelocity * Time.fixedDeltaTime;
-
         if ((lastPos - meassurementPoint.position).magnitude > offsetMagnitude)
         {
             Vector3 diff = lastPos - meassurementPoint.position;
-
             if (diff.magnitude >= shakeCorrectionReloadThreshold && Time.fixedTime - lastReload > reload_delay)
             {
                 lastReload = Time.fixedTime;

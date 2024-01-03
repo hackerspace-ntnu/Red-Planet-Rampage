@@ -64,8 +64,7 @@ public class GunController : MonoBehaviour
     {
         var barrel = GetComponentInChildren<GunBarrel>();
         barrelAnimator = barrel.GetComponentInChildren<AugmentAnimator>();
-        if (HasRecoil)
-            barrelAnimator.OnShotFiredAnimation += PlayRecoil;
+        barrelAnimator.OnShotFiredAnimation += PlayRecoil;
         barrelAnimator.OnShotFiredAnimation += ShotFired;
         barrelAnimator.OnAnimationEnd += FireEnd;
 
@@ -159,7 +158,8 @@ public class GunController : MonoBehaviour
 
     public void PlayRecoil()
     {
-        PlayRecoil(stats);
+        if (HasRecoil)
+            PlayRecoil(stats);
     }
 
     public void PlayRecoil(GunStats stats)
