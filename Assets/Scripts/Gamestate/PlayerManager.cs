@@ -43,6 +43,9 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     public Transform GunOrigin;
 
+    [SerializeField]
+    private GameObject aimAssistCollider;
+
     [Header("Related objects")]
 
     public InputManager inputManager;
@@ -124,6 +127,7 @@ public class PlayerManager : MonoBehaviour
             killer = lastPlayerThatHitMe;
         }
         onDeath?.Invoke(killer, this);
+        aimAssistCollider.SetActive(false);
         TurnIntoRagdoll(info);
         hudController.DisplayDeathScreen(killer.identity);
     }

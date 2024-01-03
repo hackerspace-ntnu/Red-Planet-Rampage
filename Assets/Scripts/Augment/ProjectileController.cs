@@ -49,7 +49,6 @@ public class ProjectileState
 
     public float damage = 0f;
 
-    // TODO: Make this to anything
     public float size = 0f;
 
     // Dictionary for storing properties that a projectile modifier might need, see SpiralPathModifier for an example
