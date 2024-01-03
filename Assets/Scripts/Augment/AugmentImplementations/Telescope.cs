@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,6 +14,9 @@ public class Telescope : GunExtension
     private List<MeshRenderer> gunMeshes;
     private List<SkinnedMeshRenderer> gunSkinMeshes;
 
+    private float originalZoomFov;
+    private float originalZoomSpeed;
+
     void Start()
     {
         gunController = transform.parent.GetComponent<GunController>();
@@ -28,6 +30,8 @@ public class Telescope : GunExtension
             return;
 
         var playerMovement = gunController.Player.GetComponent<PlayerMovement>();
+        originalZoomFov = playerMovement.ZoomFov;
+        originalZoomSpeed = playerMovement.LookSpeedZoom;
         playerMovement.ZoomFov = overrideZoomFov;
         playerMovement.LookSpeedZoom = overrideZoomSpeed;
 
@@ -62,6 +66,12 @@ public class Telescope : GunExtension
 
     private void OnDestroy()
     {
+        if (!gunController || !gunController.Player)
+            return;
+        var playerMovement = gunController.Player.GetComponent<PlayerMovement>();
+        playerMovement.ZoomFov = originalZoomFov;
+        playerMovement.LookSpeedZoom = originalZoomSpeed;
+        gunController.Player.HUDController?.TweenScope(0, 0);
         gunController.Player.inputManager.onZoomPerformed -= OnZoom;
         gunController.Player.inputManager.onZoomCanceled -= OnZoomCanceled;
     }

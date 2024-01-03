@@ -21,14 +21,16 @@ public class PlayerHand : MonoBehaviour
         gameObject.layer = cullingLayer;
         mesh.layer = cullingLayer;
 
-        MatchController.Singleton.onRoundEnd += DisableHand;
+        if (MatchController.Singleton)
+            MatchController.Singleton.onRoundEnd += DisableHand;
         player.onDeath += DisableHand;
         unsubscribePlayer = () => player.onDeath -= DisableHand;
     }
 
     private void OnDestroy()
     {
-        MatchController.Singleton.onRoundEnd -= DisableHand;
+        if (MatchController.Singleton)
+            MatchController.Singleton.onRoundEnd -= DisableHand;
         unsubscribePlayer?.Invoke();
     }
 

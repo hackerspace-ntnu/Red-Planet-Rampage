@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEditor;
+using SecretName;
 
 [RequireComponent(typeof(GunController))]
 public class GunFactory : MonoBehaviour
@@ -92,11 +93,16 @@ public class GunFactory : MonoBehaviour
 
     public static string GetGunName(Item body, Item barrel, Item extension)
     {
-        OverrideName result = StaticInfo.Singleton.SecretNames.Where(x => (x.Body == body && x.Barrel == barrel && x.Extension == extension)).FirstOrDefault();
-        if (!(result.Name is null)) { return result.Name; }
+        OverrideName result = StaticInfo.Singleton.SecretNames
+                                        .Where(x => (x.Body == body && x.Barrel == barrel && x.Extension == extension))
+                                        .FirstOrDefault();
+        if (!(result.Name is null))
+            return result.Name;
+
         if (extension == null)
-            return $"The {body.secretName} {barrel.secretName}";
-        return $"The {body.secretName} {extension.secretName} {barrel.secretName}";
+            return $"The {body.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
+
+        return $"The {body.secretName.Capitalized()} {extension.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
     }
 
     // Prefabs of the different parts

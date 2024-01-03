@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(AudioSource))]
@@ -14,6 +15,9 @@ public class PlayerManager : MonoBehaviour
 
     private const int defaultLayer = 1;
     public int HitMask => hitMask;
+
+    [SerializeField]
+    private LayerMask interactMask;
 
     [Header("Shooting")]
 
@@ -170,6 +174,7 @@ public class PlayerManager : MonoBehaviour
         inputManager.onFireCanceled += FireEnd;
         inputManager.onSelect += TryPlaceBid;
         inputManager.onFirePerformed += TryPlaceBid;
+        inputManager.onInteract += Interact;
         // Set camera on canvas
         var canvas = hudController.GetComponent<Canvas>();
         canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
@@ -216,6 +221,18 @@ public class PlayerManager : MonoBehaviour
         {
             gunController.target = cameraCenter + cameraDirection * maxHitDistance;
         }
+    }
+
+    private void Interact(InputAction.CallbackContext ctx)
+    {
+        if (!Physics.Raycast(inputManager.transform.position, inputManager.transform.forward, out var hit,
+                maxHitDistance, interactMask))
+            return;
+
+        if (!hit.transform.TryGetComponent<Interactable>(out var interactable))
+            return;
+
+        interactable.Interact(this);
     }
 
     private void Fire(InputAction.CallbackContext ctx)
@@ -284,6 +301,7 @@ public class PlayerManager : MonoBehaviour
 
     public void SetGun(Transform offset)
     {
+        overrideAimTarget = false;
         var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, this, offset);
         // Set specific local transform
         gun.transform.localPosition = new Vector3(0.39f, -0.34f, 0.5f);
@@ -297,6 +315,20 @@ public class PlayerManager : MonoBehaviour
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
         if (gunController.RightHandTarget)
             playerIK.RightHandIKTarget = gunController.RightHandTarget;
+        GetComponent<AmmoBoxCollector>().CheckForAmmoBoxBodyAgain();
+    }
+
+    public void RemoveGun()
+    {
+        for (int i = gunController.transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(gunController.transform.GetChild(i).gameObject);
+        }
+        Destroy(gunController.gameObject);
+        for (int i = GunOrigin.transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(GunOrigin.transform.GetChild(i).gameObject);
+        }
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)

@@ -18,20 +18,24 @@ public class RubberSniper : GunExtension
             Debug.Log("Fire not attached to gun parent!");
             return;
         }
+        gunController.onFire += Fire;
+        if (!gunController.Player)
+            return;
         jigglePhysics.player = gunController.Player;
         gunController.Player.overrideAimTarget = true;
         gunController.onFireStart += Aim;
         gunController.onFire += Aim;
-        gunController.onFire += Fire;
     }
 
     private void OnDestroy()
     {
         if (!gunController)
             return;
+        gunController.onFire -= Fire;
+        if (!gunController.Player)
+            return;
         gunController.onFireStart -= Aim;
         gunController.onFire -= Aim;
-        gunController.onFire -= Fire;
     }
 
     private void Aim(GunStats stats)
@@ -63,7 +67,7 @@ public class RubberSniper : GunExtension
 
     private void FixedUpdate()
     {
-        if (!gunController)
+        if (!gunController || !gunController.Player)
             return;
         var correctedDirection = gunController.Player.inputManager.transform.rotation * jigglePhysics.NormalizedPointer;
         gunController.Player.HUDController.MoveCrosshair(correctedDirection.x, correctedDirection.y);

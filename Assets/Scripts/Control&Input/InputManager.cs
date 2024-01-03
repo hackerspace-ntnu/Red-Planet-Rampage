@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -22,6 +19,7 @@ public class InputManager : MonoBehaviour
     public InputEvent onLeftTab;
     public InputEvent onRightTab;
     // FPS-related
+    public InputEvent onInteract;
     public InputEvent onFirePerformed;
     public InputEvent onFireCanceled;
     public InputEvent onCrouchPerformed;
@@ -44,12 +42,13 @@ public class InputManager : MonoBehaviour
     public Vector2 lookInput { get; private set; } = Vector2.zero;
 
     [SerializeField]
-    private float mouseLookScale = 0.1f;
+    private float mouseLookScale = 0.02f;
     [SerializeField]
     private float gamepadLookScale = 0.75f;
 
     private bool isMouseAndKeyboard = false;
     public bool IsMouseAndKeyboard => isMouseAndKeyboard;
+
     public bool ZoomActive = false;
 
     void Start()
@@ -79,6 +78,7 @@ public class InputManager : MonoBehaviour
         playerInput.actions["Move"].canceled += Move;
         playerInput.actions["LeftTab"].performed += LeftTab;
         playerInput.actions["RightTab"].performed += RightTab;
+        playerInput.actions["Interact"].performed += Interact;
         playerInput.actions["Fire"].performed += Fire;
         playerInput.actions["Fire"].canceled += Fire;
         playerInput.actions["Crouch"].performed += Crouch;
@@ -164,6 +164,7 @@ public class InputManager : MonoBehaviour
         onZoomCanceled = null;
         onLookPerformed = null;
         onLookCanceled = null;
+        onInteract = null;
 
         // Free the mouse
         if (isMouseAndKeyboard)
@@ -191,6 +192,11 @@ public class InputManager : MonoBehaviour
     private void RightTab(InputAction.CallbackContext ctx)
     {
         onRightTab?.Invoke(ctx);
+    }
+
+    private void Interact(InputAction.CallbackContext ctx)
+    {
+        onInteract?.Invoke(ctx);
     }
 
     private void Move(InputAction.CallbackContext ctx)

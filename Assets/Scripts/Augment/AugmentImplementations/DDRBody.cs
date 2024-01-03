@@ -73,13 +73,17 @@ public class DDRBody : GunBody
             gunController.Player.inputManager.onFirePerformed += Fire;
             gunController.Player.inputManager.onMovePerformed += ArrowSelect;
 
+            var delay = MusicTrackManager.Singleton.IsfadingOutPreviousTrack
+                ? MusicTrackManager.Singleton.TrackOffset
+                : secondsPerArrow - (MusicTrackManager.Singleton.TimeSinceTrackStart % secondsPerArrow);
+
             arrowMover = LeanTween.value(gameObject, SetArrowHeigth, startHeight, screenHeight, secondsPerUnitHeight * (screenHeight - startHeight))
-                .setDelay(MusicTrackManager.Singleton.TrackOffset)
+                .setDelay(delay)
                 .setRepeat(-1)
                 .setOnComplete(ResetArrow);
 
             LeanTween.value(gameObject, SetBackgroundZoom, 0.5f, 1.5f, musicPace)
-                .setDelay(MusicTrackManager.Singleton.TrackOffset)
+                .setDelay(delay)
                 .setLoopPingPong()
                 .setOnComplete(
                 () => animator.OnFire(gunController.stats));

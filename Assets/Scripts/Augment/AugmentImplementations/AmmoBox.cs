@@ -7,6 +7,7 @@ public class AmmoBox : MonoBehaviour
 {
     [SerializeField] private float respawnTime = 30;
     [SerializeField] private GameObject boxModel;
+    [SerializeField] private bool shouldAlwaysSpawn = false;
 
     private Collider collider;
     private MeshRenderer renderer;
@@ -16,7 +17,8 @@ public class AmmoBox : MonoBehaviour
     {
         collider = GetComponent<Collider>();
         renderer = boxModel.GetComponent<MeshRenderer>();
-        StartCoroutine(CheckForCollectors());
+        if (!shouldAlwaysSpawn)
+            StartCoroutine(CheckForCollectors());
 
         // Animate spin and bounce
         LeanTween.sequence()
@@ -39,7 +41,7 @@ public class AmmoBox : MonoBehaviour
     public static AmmoBox GetClosestAmmoBox(Vector3 from)
     {
         return ammoBoxes.Aggregate(
-            (ammoBox, next) => 
+            (ammoBox, next) =>
             Vector3.Distance(from, next.transform.position) < Vector3.Distance(from, ammoBox.transform.position) ? next : ammoBox);
     }
 
