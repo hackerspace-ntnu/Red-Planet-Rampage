@@ -12,6 +12,8 @@ public class PlayerManager : MonoBehaviour
 
     // Only Default and HitBox layers can be hit
     private static int hitMask = 1 | (1 << 3);
+
+    private const int defaultLayer = 1;
     public int HitMask => hitMask;
 
     [SerializeField]
@@ -44,6 +46,9 @@ public class PlayerManager : MonoBehaviour
     public Transform GunHolder;
     [SerializeField]
     public Transform GunOrigin;
+
+    [SerializeField]
+    private GameObject aimAssistCollider;
 
     [Header("Related objects")]
 
@@ -126,6 +131,7 @@ public class PlayerManager : MonoBehaviour
             killer = lastPlayerThatHitMe;
         }
         onDeath?.Invoke(killer, this);
+        aimAssistCollider.SetActive(false);
         TurnIntoRagdoll(info);
         hudController.DisplayDeathScreen(killer.identity);
     }
@@ -200,6 +206,13 @@ public class PlayerManager : MonoBehaviour
         Vector3 cameraCenter = inputManager.transform.position;
         Vector3 cameraDirection = inputManager.transform.forward;
         Vector3 startPoint = cameraCenter + cameraDirection * targetStartOffset;
+        if (Physics.Raycast(cameraCenter, cameraDirection, out RaycastHit hitInfo, targetStartOffset, defaultLayer))
+        {
+            gunController.target = hitInfo.point;
+            GunController.TargetIsTooClose = true;
+            return;
+        }
+        GunController.TargetIsTooClose = false;
         if (Physics.Raycast(startPoint, cameraDirection, out RaycastHit hit, maxHitDistance, hitMask))
         {
             gunController.target = hit.point;

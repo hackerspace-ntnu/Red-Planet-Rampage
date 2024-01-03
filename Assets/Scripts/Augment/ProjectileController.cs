@@ -49,7 +49,6 @@ public class ProjectileState
 
     public float damage = 0f;
 
-    // TODO: Make this to anything
     public float size = 0f;
 
     // Dictionary for storing properties that a projectile modifier might need, see SpiralPathModifier for an example
@@ -95,6 +94,9 @@ public abstract class ProjectileController : MonoBehaviour
     [HideInInspector]
     public PlayerManager player;
 
+    // Checks the extra large Hitboxes intended for aim assist
+    public bool HitAssist = false;
+
     // PLEASE READ
     // This is how the event-system of the guns work, all of these delegate are "hooks" that additional effects can be applied to
     // Each implementation of a projectile type must also describe when these events are triggered
@@ -128,6 +130,7 @@ public abstract class ProjectileController : MonoBehaviour
 
     protected virtual void Awake()
     {
+
         collisionLayers = LayerMask.GetMask("Default", "HitBox");
 
         gunController = transform.parent.GetComponent<GunController>();
@@ -142,6 +145,9 @@ public abstract class ProjectileController : MonoBehaviour
         }
         gunController.onInitializeGun += OnInitialize;
         gunController.onReload += OnReload;
+        HitAssist = !gunController.Player.inputManager.IsMouseAndKeyboard;
+        if (HitAssist)
+            collisionLayers |= LayerMask.GetMask("AimAssist");
     }
 
     protected virtual void OnDestroy()
