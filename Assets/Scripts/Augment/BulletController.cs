@@ -23,8 +23,6 @@ public class BulletController : ProjectileController
     private VisualEffect trail;
     public GameObject Trail => trail.gameObject;
 
-    private bool hitAssist = false;
-
     [SerializeField]
     private AugmentAnimator animator;
 
@@ -37,7 +35,6 @@ public class BulletController : ProjectileController
             return;
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
         animator.OnShotFiredAnimation += FireProjectile;
-        hitAssist = !gunController.Player.inputManager.IsMouseAndKeyboard;
     }
 
     private void Start()
@@ -117,11 +114,10 @@ public class BulletController : ProjectileController
                         if (hitbox.health.Player == player && projectile.distanceTraveled < player.GunController.OutputTransitionDistance)
                             continue;
 
+                    projectile.position = collisions[0].point;
                     if (hitbox != null)
                         OnHitboxCollision?.Invoke(hitbox, ref projectile);
-
                     OnColliderHit?.Invoke(collider, ref projectile);
-                    projectile.position = collisions[0].point;
                     projectile.active = false;
                     if (sampleNum < collisionSamples)
                         TrySetTextureValue(sampleNum * vfxPositionsPerSample + k * vfxPositionsPerSample * collisionSamples, projectile.position);

@@ -34,8 +34,6 @@ public class GunController : MonoBehaviour
     public bool triggerHeld, triggerPressed;
     public Vector3 target;
     public bool TargetIsTooClose;
-    // Extra margin for hit detection intended for aim assist
-    public bool HitAssist = false;
 
     public delegate void GunEvent(GunStats gunStats);
 
