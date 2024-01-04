@@ -61,9 +61,15 @@ public class PlayerHUDController : MonoBehaviour
     [SerializeField]
     private AnimationCurve speedLineEase;
     private Material speedLinesMaterial;
+    private float oldLargeVelocity = 0f;
+    private const float lineDampeningVelocity = 11f;
+    private const float lineRemovalMultiplier = 0.8f;
+    private const float lineVelocityDampeningX = 0.25f;
+    private const float lineVelocityDampeningY = 0.1f;
 
     [SerializeField]
     private RectTransform scopeZoom;
+
 
     void Start()
     {
@@ -86,15 +92,25 @@ public class PlayerHUDController : MonoBehaviour
     public void SetSpeedLines(Vector3 velocity)
     {
         var magnitude = velocity.magnitude;
-        if (magnitude < 1)
+        if (magnitude < lineDampeningVelocity)
         {
-            speedLinesMaterial.SetFloat("_LineRemovalRadius", 1f);
+            if (oldLargeVelocity < lineDampeningVelocity)
+            {
+                speedLinesMaterial.SetFloat("_LineRemovalRadius", 1f);
+                return;
+            }
+
+            var lerpedMagnitude = Mathf.Lerp(oldLargeVelocity, 1f, Time.fixedDeltaTime);
+            speedLinesMaterial.SetFloat("_LineRemovalRadius", speedLineEase.Evaluate(1 / lerpedMagnitude) * lineRemovalMultiplier);
             speedLinesMaterial.SetVector("_Center", new Vector4(0.5f, 0.5f));
+            oldLargeVelocity = lerpedMagnitude;
             return;
         }
+
         var direction = velocity.normalized;
-        speedLinesMaterial.SetVector("_Center", new Vector4(0.5f + Vector3.Dot(transform.parent.right, direction) * 0.25f, 0.5f + Vector3.Dot(transform.parent.up, direction) * 0.25f));
-        speedLinesMaterial.SetFloat("_LineRemovalRadius", speedLineEase.Evaluate(1 / magnitude));
+        speedLinesMaterial.SetVector("_Center", new Vector4(0.5f + Vector3.Dot(transform.parent.right, direction) * lineVelocityDampeningX, 0.5f + Vector3.Dot(transform.parent.up, direction) * lineVelocityDampeningY));
+        speedLinesMaterial.SetFloat("_LineRemovalRadius", speedLineEase.Evaluate(1 / magnitude) * lineRemovalMultiplier);
+        oldLargeVelocity = magnitude;
     }
 
     public void OnDamageTaken(float damage, float currentHealth, float maxHealth)
