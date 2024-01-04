@@ -36,7 +36,8 @@ public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
     private void KnockAwayTargets(HitboxController controller, ref ProjectileState state)
     {
         Vector3 normal = gunController.transform.forward;
-
-        controller.health.GetComponent<Rigidbody>().AddForce(normal * calculatedPushPower * 2f, ForceMode.Impulse);
+        var body = controller.health.GetComponent<Rigidbody>();
+        if (body)
+            body.AddForce(normal * calculatedPushPower * 2f, ForceMode.Impulse);
     }
 }

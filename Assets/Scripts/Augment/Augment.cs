@@ -30,7 +30,8 @@ public abstract class Augment : MonoBehaviour
                 
             if (modifier.name == "OverrideMagazineSize")
             {
-                gunStats.MagazineSize = Mathf.RoundToInt(modifier.addition);
+                if (modifier.addition > 0)
+                    gunStats.MagazineSize = Mathf.RoundToInt(modifier.addition);
                 continue;
             }
 

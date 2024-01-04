@@ -43,8 +43,6 @@ public class RecoilModifier : MonoBehaviour, ProjectileModifier
 
         Vector3 normal = -gunController.transform.forward;
 
-        float calculatedPushPowerForPlayer = (calculatedPushPower / stats.Firerate) * (baseFireRateAdder + (float)Math.Log(stats.Firerate));
-
-        gunController.Player.GetComponent<Rigidbody>().AddForce(normal * calculatedPushPowerForPlayer, ForceMode.Impulse);
+        gunController.Player.GetComponent<Rigidbody>().AddForce(normal * calculatedPushPower, ForceMode.Impulse);
     }
 }

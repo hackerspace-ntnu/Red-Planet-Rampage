@@ -21,7 +21,7 @@ public class SolarBody : GunBody
     private Transform globalLightDirection;
 
     private const float maxObscuringCheckDistance = 15f;
-    private const float coolDownSeconds = 0.5f;
+    private const float coolDownSeconds = 2f;
     private const float chargeUpSeconds = 1; 
     private bool isCooldown = false;
 
