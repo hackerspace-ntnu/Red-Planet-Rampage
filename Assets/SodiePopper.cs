@@ -51,6 +51,8 @@ public class SodiePopper : GunBody
     [SerializeField]
     private Animator anim;
 
+    private float lastDiff;
+
     public override void Start()
     {
         gunController = transform.parent?.GetComponent<GunController>();
@@ -107,7 +109,9 @@ public class SodiePopper : GunBody
         if ((lastPos - meassurementPoint.position).magnitude > offsetMagnitude)
         {
             Vector3 diff = lastPos - meassurementPoint.position;
-            if (diff.magnitude >= shakeCorrectionReloadThreshold && Time.fixedTime - lastReload > reload_delay)
+            var accelerationDiff = Mathf.Abs(lastDiff - diff.magnitude);
+            // TODO: subtract scaled rigidbody velocity from accelerationDiff (to tune playermovement contribution vs. look Orientation change contribution)
+            if (accelerationDiff >= shakeCorrectionReloadThreshold && Time.fixedTime - lastReload > reload_delay)
             {
                 lastReload = Time.fixedTime;
 
@@ -115,7 +119,7 @@ public class SodiePopper : GunBody
             }
 
             lastPos = meassurementPoint.position + diff.normalized * offsetMagnitude;
-
+            lastDiff = diff.magnitude;
         }
         offsetTarget.position = lastPos;
 
