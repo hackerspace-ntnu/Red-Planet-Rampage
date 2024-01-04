@@ -22,6 +22,18 @@ public abstract class Augment : MonoBehaviour
     {
         foreach (var modifier in statModifiers)
         {
+            if (modifier.name == "OverrideAmmo")
+            {
+                gunStats.Ammo = Mathf.RoundToInt(modifier.addition);
+                continue;
+            }
+                
+            if (modifier.name == "OverrideMagazineSize")
+            {
+                gunStats.MagazineSize = Mathf.RoundToInt(modifier.addition);
+                continue;
+            }
+
             try
             {
                 ModifiableFloat stat = (ModifiableFloat)typeof(GunStats).GetProperty(modifier.name).GetValue(gunStats, null);

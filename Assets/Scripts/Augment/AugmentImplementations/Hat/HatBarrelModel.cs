@@ -27,7 +27,7 @@ public class HatBarrelModel : AugmentAnimator
         if (ammunition.Count > 0)
             return;
         animator.speed = Mathf.Max(stats.Firerate, 1f);
-        magazineSize = stats.magazineSize;
+        magazineSize = stats.MagazineSize;
         for (int i = 0; i < magazineSize; i++)
         {
             ammunition.Add(Instantiate(hatPrefab, ammunitionHolder.transform));

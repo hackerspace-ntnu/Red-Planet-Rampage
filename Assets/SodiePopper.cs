@@ -74,7 +74,7 @@ public class SodiePopper : GunBody
     {
         if (gunController != null)
         {
-            anim.SetFloat("Ammo", (float)gunController.stats.Ammo / (float)gunController.stats.magazineSize);
+            anim.SetFloat("Ammo", (float)gunController.stats.Ammo / (float)gunController.stats.MagazineSize);
         }
     }
 

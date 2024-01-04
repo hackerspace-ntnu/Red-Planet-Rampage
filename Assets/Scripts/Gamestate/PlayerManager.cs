@@ -260,14 +260,14 @@ public class PlayerManager : MonoBehaviour
     {
         // stats variables must be dereferenced
         float ammo = stats.Ammo;
-        float magazine = stats.magazineSize;
+        float magazine = stats.MagazineSize;
         hudController.UpdateOnFire(ammo / magazine);
     }
 
     private void UpdateHudReload(GunStats stats)
     {
         float ammo = stats.Ammo;
-        float magazine = stats.magazineSize;
+        float magazine = stats.MagazineSize;
         hudController.UpdateOnReload(ammo / magazine);
     }
 
