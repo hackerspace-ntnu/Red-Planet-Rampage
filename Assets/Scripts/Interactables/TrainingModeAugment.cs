@@ -1,6 +1,4 @@
-using System.Linq;
 using UnityEngine;
-using UnityEngine.VFX;
 
 public class TrainingModeAugment : MonoBehaviour, Interactable
 {
@@ -28,19 +26,7 @@ public class TrainingModeAugment : MonoBehaviour, Interactable
         augmentModel.transform.localScale = Vector3.one * 2;
         augmentModel.transform.localPosition = Vector3.zero;
 
-        switch (item.augmentType)
-        {
-            case AugmentType.Body:
-                augmentModel.GetComponent<GunBody>().enabled = false;
-                break;
-            case AugmentType.Barrel:
-                augmentModel.GetComponent<ProjectileController>().enabled = false;
-                augmentModel.GetComponentsInChildren<VisualEffect>().Select(vfx => vfx.enabled = false);
-                break;
-            case AugmentType.Extension:
-                augmentModel.GetComponent<GunExtension>().enabled = false;
-                break;
-        }
+        Augment.DisableInstance(augmentModel, item.augmentType);
     }
 
     public void Interact(PlayerManager player)
