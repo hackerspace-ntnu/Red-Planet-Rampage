@@ -156,7 +156,7 @@ public class BiddingPlatform : MonoBehaviour
     private void UpdateTimer()
     {
         timerText.text = Mathf.Round(auctionTimer.WaitTime - auctionTimer.ElapsedTime).ToString();
-        radialUI.material.SetFloat("_Arc1", 360f - 360f*((auctionTimer.WaitTime - auctionTimer.ElapsedTime) / auctionTimer.WaitTime));
+        radialUI.material.SetFloat("_Arc1", 360f - 360f * ((auctionTimer.WaitTime - auctionTimer.ElapsedTime) / auctionTimer.WaitTime));
     }
 
     private void EndAuction()
@@ -175,15 +175,16 @@ public class BiddingPlatform : MonoBehaviour
         itemNameText.text = item.displayName;
         itemDescriptionText.text = item.displayDescription;
         itemCostText.text = chips.ToString();
+
         augmentModel = Instantiate(item.augment, modelHolder.transform);
         augmentModel.transform.localScale = Vector3.one / 20.0f;
         augmentModel.transform.localPosition = Vector3.zero;
+        Augment.DisableInstance(augmentModel, item.augmentType);
 
         modelHolder.transform.Rotate(new Vector3(90f, 0f));
         LeanTween.sequence()
             .append(LeanTween.rotateAroundLocal(augmentModel, Vector3.up, 360, 2.5f).setLoopCount(-1))
             .append(LeanTween.moveLocalY(augmentModel, 0.01f, 3.0f).setLoopPingPong().setEaseInOutSine());
-
 
 #if UNITY_EDITOR
         auctionTimer.StartTimer(10);

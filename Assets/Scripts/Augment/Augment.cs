@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.VFX;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -42,4 +43,20 @@ public abstract class Augment : MonoBehaviour
         return GetComponents<ProjectileModifier>().ToList();
     }
 
+    public static void DisableInstance(GameObject instance, AugmentType type)
+    {
+        switch (type)
+        {
+            case AugmentType.Body:
+                instance.GetComponent<GunBody>().enabled = false;
+                break;
+            case AugmentType.Barrel:
+                instance.GetComponent<ProjectileController>().enabled = false;
+                instance.GetComponentsInChildren<VisualEffect>().Select(vfx => vfx.enabled = false);
+                break;
+            case AugmentType.Extension:
+                instance.GetComponent<GunExtension>().enabled = false;
+                break;
+        }
+    }
 }

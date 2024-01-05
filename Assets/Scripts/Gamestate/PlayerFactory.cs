@@ -127,7 +127,7 @@ public class PlayerFactory : MonoBehaviour
         spawnInterval += 10000f;
         GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position + new Vector3(spawnInterval, spawnInterval, 0), spawnPoint.rotation);
         Camera playerCamera = inputManager.GetComponent<Camera>();
-        playerCamera.transform.position = player.GetComponent<ItemSelectManager>().cameraPosition.transform.position;
-        StartCoroutine(player.GetComponent<ItemSelectManager>().SpawnItems(inputManager));
+        playerCamera.transform.position = player.GetComponent<ItemSelectMenu>().CameraPosition.transform.position;
+        StartCoroutine(player.GetComponent<ItemSelectMenu>().SpawnItems(inputManager));
     }
 }

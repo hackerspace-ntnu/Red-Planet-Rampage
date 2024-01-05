@@ -27,7 +27,8 @@ public class SolarBody : GunBody
 
     private const float maxObscuringCheckDistance = 15f;
     private const float coolDownSeconds = 2f;
-    private const float chargeUpSeconds = 1; 
+    private const float chargeUpSeconds = 1;
+
     private bool isCooldown = false;
 
     private const int solarPanelMaterialIndex = 3;
@@ -80,8 +81,11 @@ public class SolarBody : GunBody
         solarPanelMaterial.SetFloat("_EmissionStrength", strength);
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
+        if (!gunController)
+            return;
+
         if (!Physics.Raycast(rayCastOrigin.position, -globalLightDirection.forward, maxObscuringCheckDistance, obscuringLayers.value))
         {
             Reload(gunController.stats);
