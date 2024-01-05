@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Rendering.Universal;
 
 public class PlayerHUDController : MonoBehaviour
 {
@@ -55,12 +56,30 @@ public class PlayerHUDController : MonoBehaviour
     [SerializeField]
     private PopupSpammer popupSpammer;
     public PopupSpammer PopupSpammer => popupSpammer;
+    [SerializeField]
+    private Image speedLines;
+    [SerializeField]
+    private AnimationCurve speedLineEase;
+    private Material speedLinesMaterial;
+    private float oldLargeVelocity = 0f;
+    // At which velocity speedlines should start fading out
+    private const float lineDampeningVelocity = 11f;
+    // Scale to what degree lines are removed from center with velocity
+    private const float lineRemovalMultiplier = 0.8f;
+    // Dampen how much horizontal velocity should influence center of speedlines
+    private const float lineVelocityDampeningX = 0.25f;
+    // Dampen how much vertical velocity should influence center of speedlines
+    private const float lineVelocityDampeningY = 0.1f;
 
     [SerializeField]
     private RectTransform scopeZoom;
 
+
     void Start()
     {
+        speedLines.material = Instantiate(speedLines.material);
+        speedLinesMaterial = speedLines.material;
+        speedLines.gameObject.SetActive(true);
         var image = GetComponent<RawImage>();
         // Prevent material properties from being handled globally
         damageBorder = Instantiate(image.material);
@@ -72,6 +91,30 @@ public class PlayerHUDController : MonoBehaviour
         ammoCapacityMaterial.SetFloat("_Arc2", 0);
 
         healthBarScaleX = healthBar.localScale.x;
+    }
+
+    public void SetSpeedLines(Vector3 velocity)
+    {
+        var magnitude = velocity.magnitude;
+        if (magnitude < lineDampeningVelocity)
+        {
+            if (oldLargeVelocity < lineDampeningVelocity)
+            {
+                speedLinesMaterial.SetFloat("_LineRemovalRadius", 1f);
+                return;
+            }
+
+            var dampenedMagnitude = Mathf.Lerp(oldLargeVelocity, 1f, Time.fixedDeltaTime);
+            speedLinesMaterial.SetFloat("_LineRemovalRadius", speedLineEase.Evaluate(1 / dampenedMagnitude) * lineRemovalMultiplier);
+            speedLinesMaterial.SetVector("_Center", new Vector4(0.5f, 0.5f));
+            oldLargeVelocity = dampenedMagnitude;
+            return;
+        }
+
+        var direction = velocity.normalized;
+        speedLinesMaterial.SetVector("_Center", new Vector4(0.5f + Vector3.Dot(transform.parent.right, direction) * lineVelocityDampeningX, 0.5f + Vector3.Dot(transform.parent.up, direction) * lineVelocityDampeningY));
+        speedLinesMaterial.SetFloat("_LineRemovalRadius", speedLineEase.Evaluate(1 / magnitude) * lineRemovalMultiplier);
+        oldLargeVelocity = magnitude;
     }
 
     public void OnDamageTaken(float damage, float currentHealth, float maxHealth)
@@ -142,6 +185,7 @@ public class PlayerHUDController : MonoBehaviour
         deathText.color = killer.color;
         deathScreen.SetActive(true);
         ammoHud.parent.gameObject.SetActive(false);
+        speedLines.gameObject.SetActive(false);
     }
 
     // x and y expected to be in range [-1, 1]

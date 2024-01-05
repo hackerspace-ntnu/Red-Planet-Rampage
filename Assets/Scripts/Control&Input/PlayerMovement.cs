@@ -110,8 +110,10 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector2 aimAngle = Vector2.zero;
 
-    private delegate void MovementEvent();
-    private MovementEvent onLanding;
+    public delegate void MovementEvent();
+    public MovementEvent onLanding;
+    public delegate void MovementEventBody(Rigidbody body);
+    public MovementEventBody onMove;
 
     void Start()
     {
@@ -358,6 +360,7 @@ public class PlayerMovement : MonoBehaviour
     {
         UpdateRotation();
         UpdateAnimatorParameters();
+        onMove(body);
     }
 
     private void OnDestroy()
