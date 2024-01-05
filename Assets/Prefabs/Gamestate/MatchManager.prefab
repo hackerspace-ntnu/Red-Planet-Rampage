@@ -51,10 +51,10 @@ MonoBehaviour:
   roundEndDelay: 15
   biddingEndDelay: 1
   matchEndDelay: 5
-  chipStartAmount: 5
-  chipBaseReward: 2
-  chipKillReward: 1
-  chipWinReward: 1
+  startAmount: 5
+  rewardWin: 1
+  rewardKill: 1
+  rewardBase: 2
   roundTimer: {fileID: 7042748633319679116}
   globalHUDController: {fileID: 1760732758}
 --- !u!114 &7042748633319679116
@@ -88,6 +88,7 @@ MonoBehaviour:
   spawnPoints: []
   playerSelectItemPrefab: {fileID: 6596575034333967962, guid: 6f9988a3327983940a8001c11c3fe0e7, type: 3}
   globalHUDController: {fileID: 1760732758}
+  overrideMatchManager: 1
 --- !u!1001 &3272573476935254913
 PrefabInstance:
   m_ObjectHideFlags: 0
