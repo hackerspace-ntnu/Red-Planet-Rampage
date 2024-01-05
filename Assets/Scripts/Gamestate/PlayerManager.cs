@@ -160,7 +160,7 @@ public class PlayerManager : MonoBehaviour
         identity = inputManager.GetComponent<PlayerIdentity>();
         var playerMovement = GetComponent<PlayerMovement>();
         playerMovement.SetPlayerInput(inputManager);
-        playerMovement.onMove += UpdateHudLeap;
+        playerMovement.onMove += UpdateHudOnMove;
         // Subscribe relevant input events
         inputManager.onFirePerformed += Fire;
         inputManager.onFireCanceled += FireEnd;
@@ -190,7 +190,7 @@ public class PlayerManager : MonoBehaviour
         }
         if (TryGetComponent(out PlayerMovement playerMovement))
         {
-            playerMovement.onMove -= UpdateHudLeap;
+            playerMovement.onMove -= UpdateHudOnMove;
         }
 
     }
@@ -221,7 +221,7 @@ public class PlayerManager : MonoBehaviour
         StartCoroutine(UnpressTrigger());
     }
 
-    private void UpdateHudLeap(Rigidbody body)
+    private void UpdateHudOnMove(Rigidbody body)
     {
         hudController.SetSpeedLines(body.velocity);
     }

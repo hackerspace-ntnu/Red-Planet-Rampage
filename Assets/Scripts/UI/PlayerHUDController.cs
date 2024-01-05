@@ -62,9 +62,13 @@ public class PlayerHUDController : MonoBehaviour
     private AnimationCurve speedLineEase;
     private Material speedLinesMaterial;
     private float oldLargeVelocity = 0f;
+    // At which velocity speedlines should start fading out
     private const float lineDampeningVelocity = 11f;
+    // Scale to what degree lines are removed from center with velocity
     private const float lineRemovalMultiplier = 0.8f;
+    // Dampen how much horizontal velocity should influence center of speedlines
     private const float lineVelocityDampeningX = 0.25f;
+    // Dampen how much vertical velocity should influence center of speedlines
     private const float lineVelocityDampeningY = 0.1f;
 
     [SerializeField]
@@ -100,10 +104,10 @@ public class PlayerHUDController : MonoBehaviour
                 return;
             }
 
-            var lerpedMagnitude = Mathf.Lerp(oldLargeVelocity, 1f, Time.fixedDeltaTime);
-            speedLinesMaterial.SetFloat("_LineRemovalRadius", speedLineEase.Evaluate(1 / lerpedMagnitude) * lineRemovalMultiplier);
+            var dampenedMagnitude = Mathf.Lerp(oldLargeVelocity, 1f, Time.fixedDeltaTime);
+            speedLinesMaterial.SetFloat("_LineRemovalRadius", speedLineEase.Evaluate(1 / dampenedMagnitude) * lineRemovalMultiplier);
             speedLinesMaterial.SetVector("_Center", new Vector4(0.5f, 0.5f));
-            oldLargeVelocity = lerpedMagnitude;
+            oldLargeVelocity = dampenedMagnitude;
             return;
         }
 
