@@ -15,6 +15,7 @@ public class PlayerMovement : MonoBehaviour
 {
     private InputManager inputManager;
     private Rigidbody body;
+    public Rigidbody Body => body;
     private Collider hitbox;
     private Camera playerCamera;
 
@@ -92,6 +93,7 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField, ReadOnly]
     private PlayerState state = PlayerState.GROUNDED;
+    public bool StateIsAir => state == PlayerState.IN_AIR;
 
     [SerializeField]
     private Animator animator;
