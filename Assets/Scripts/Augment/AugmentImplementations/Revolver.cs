@@ -7,7 +7,9 @@ public class Revolver : GunBody
     [SerializeField]
     private ParticleSystem steamParticles;
     [SerializeField]
-    private PlayerHand playerHand;
+    private PlayerHand playerHandLeft;
+    [SerializeField]
+    private PlayerHand playerHandRight;
 
     private GunBarrel barrel;
     private GunExtension extension;
@@ -22,8 +24,11 @@ public class Revolver : GunBody
         }
         gunController.onFireEnd += Reload;
 
-        if (gunController.Player)
-            playerHand.SetPlayer(gunController.Player);
+        if (!gunController.Player)
+            return;
+        playerHandLeft.SetPlayer(gunController.Player);
+        playerHandRight.SetPlayer(gunController.Player);
+        playerHandRight.gameObject.SetActive(true);
     }
 
     protected override void Reload(GunStats stats)
@@ -51,9 +56,9 @@ public class Revolver : GunBody
 
     public void ToggleArm()
     {
-        if (!playerHand)
+        if (!playerHandLeft)
             return;
-        playerHand.gameObject.SetActive(!playerHand.gameObject.activeInHierarchy);
+        playerHandLeft.gameObject.SetActive(!playerHandLeft.gameObject.activeInHierarchy);
     }
 
     public void ResetReload()

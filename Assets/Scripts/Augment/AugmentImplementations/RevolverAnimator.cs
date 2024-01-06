@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class RevolverAnimator : AugmentAnimator
@@ -16,8 +17,8 @@ public class RevolverAnimator : AugmentAnimator
     public override void OnInitialize(GunStats stats)
     {
         animator = GetComponent<Animator>();
-        var playerHand = GetComponentInChildren<PlayerHand>(includeInactive: true);
-        Destroy(playerHand);
+        var playerHands = GetComponentsInChildren<PlayerHand>(includeInactive: true);
+        playerHands.ToList().ForEach(hand => Destroy(hand));
         barrel = transform.parent.gameObject.GetComponentInChildren<GunBarrel>();
         extension = transform.parent.gameObject.GetComponentInChildren<GunExtension>();
         if (!animator)
