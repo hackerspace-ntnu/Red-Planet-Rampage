@@ -13,6 +13,11 @@ public class SolarBody : GunBody
     [SerializeField]
     private LayerMask obscuringLayers;
 
+    [SerializeField]
+    private PlayerHand playerHandRight;
+    [SerializeField]
+    private PlayerHand playerHandLeft;
+
     private Material solarPanelMaterial;
 
     [SerializeField, Range(0, 1)]
@@ -40,6 +45,13 @@ public class SolarBody : GunBody
             Debug.Log("SolarBody not attached to gun parent!");
             return;
         }
+
+        if (!gunController.Player)
+            return;
+        playerHandRight.SetPlayer(gunController.Player);
+        playerHandRight.gameObject.SetActive(true);
+        playerHandLeft.SetPlayer(gunController.Player);
+        playerHandLeft.gameObject.SetActive(true);
     }
 
 

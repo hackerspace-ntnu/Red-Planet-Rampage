@@ -28,6 +28,11 @@ public class DDRBody : GunBody
     [SerializeField]
     private AugmentAnimator animator;
 
+    [SerializeField]
+    private PlayerHand playerHandLeft;
+    [SerializeField]
+    private PlayerHand playerHandRight;
+
     private Material ddrMaterial;
 
     private const int screenMaterialIndex = 2;
@@ -90,6 +95,10 @@ public class DDRBody : GunBody
 
             animator.OnInitialize(gunController.stats);
 
+            playerHandLeft.SetPlayer(gunController.Player);
+            playerHandLeft.gameObject.SetActive(true);
+            playerHandRight.SetPlayer(gunController.Player);
+            playerHandRight.gameObject.SetActive(true);
         }
 
     }

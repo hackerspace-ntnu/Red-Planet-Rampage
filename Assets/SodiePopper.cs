@@ -40,6 +40,9 @@ public class SodiePopper : GunBody
     [SerializeField]
     private Animator anim;
 
+    [SerializeField]
+    private PlayerHand playerHandRight;
+
     private float lastDiff;
 
     private Rigidbody playerBody;
@@ -60,6 +63,8 @@ public class SodiePopper : GunBody
             return;
 
         playerBody = gunController.Player.GetComponent<PlayerMovement>().Body;
+        playerHandRight.SetPlayer(gunController.Player);
+        playerHandRight.gameObject.SetActive(true);
     }
 
     private void Update()
