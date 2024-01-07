@@ -27,9 +27,13 @@ public class GunStats : ScriptableObject
 
 
     //How many projectiles in a clip
-    public int MagazineSize = 20;
-
-    public int Ammo = 20;
+    [SerializeField]
+    private ModifiableFloat magazine = new ModifiableFloat(20f);
+    public ModifiableFloat Magazine { get => magazine; }
+    [HideInInspector]
+    public int MagazineSize { get => Mathf.Max(1, Mathf.RoundToInt(magazine.Value())); }
+    [HideInInspector]
+    public int Ammo = 0;
 
     // Damage of each projectile
     [SerializeField]
