@@ -162,13 +162,20 @@ public class MeshProjectileController : ProjectileController
 
         if (collisions.Length <= 0) return;
 
+
+
         if (collisions[0].TryGetComponent<HitboxController>(out HitboxController hitbox))
         {
+            var hasHitYourselfTooEarly = hitbox.health.Player == player && state.distanceTraveled < player.GunController.OutputTransitionDistance;
+            if (hasHitYourselfTooEarly)
+                return;
+
             OnColliderHit?.Invoke(collisions[0], ref state);
             OnHitboxCollision?.Invoke(hitbox, ref state);
             state.active = false;
             return;
         }
+
         if (shouldRicochet && state.distanceTraveled < maxDistanceBeforeStuck)
         {
             OnRicochet?.Invoke(collisions[0], ref state);
