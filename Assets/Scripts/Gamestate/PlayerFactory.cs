@@ -38,6 +38,7 @@ public class PlayerFactory : MonoBehaviour
             SceneManager.LoadSceneAsync("Menu");
             return;
         }
+
         playerInputManagerController = PlayerInputManagerController.Singleton;
 
         // Enable splitscreen
@@ -49,6 +50,7 @@ public class PlayerFactory : MonoBehaviour
 
         if (!overrideMatchManager)
             return;
+
         playerInputManagerController.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         InstantiatePlayersFPS();
     }

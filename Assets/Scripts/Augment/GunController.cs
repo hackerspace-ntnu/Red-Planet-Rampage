@@ -79,6 +79,9 @@ public class GunController : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (!barrelAnimator)
+            return;
+
         if (HasRecoil)
             barrelAnimator.OnShotFiredAnimation -= PlayRecoil;
         barrelAnimator.OnShotFiredAnimation -= ShotFired;
@@ -152,7 +155,7 @@ public class GunController : MonoBehaviour
         // Output become camera when distance hit is closer than weaponOutput
         if (Player)
             projectile.projectileOutput = TargetIsTooClose ? Player.inputManager.transform : outputs[0];
-        
+
         // Aim at target but lerp in original direction if target is close
         Vector3 targetedOutput = (target - projectile.projectileOutput.position).normalized;
         Vector3 defaultOutput = projectile.projectileOutput.forward;

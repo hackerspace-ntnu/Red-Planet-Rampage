@@ -28,9 +28,6 @@ public class ScoreboardManager : MonoBehaviour
     [Range(0f, 5f)]
     private float newCrimeDelay = 1f;
 
-    [SerializeField]
-    private float delayBeforeMatchResults = 3f;
-
     private int step = 0;
     private int maxSteps = 0;
 
@@ -42,11 +39,11 @@ public class ScoreboardManager : MonoBehaviour
 
     // Refrences
     private MatchController matchController;
-    
+
 
     private void Awake()
     {
-    #region Singleton boilerplate
+        #region Singleton boilerplate
 
         if (Singleton != null)
         {
@@ -57,7 +54,7 @@ public class ScoreboardManager : MonoBehaviour
                 return;
             }
         }
-        
+
         Singleton = this;
 
         #endregion Singleton boilerplate    
@@ -99,10 +96,6 @@ public class ScoreboardManager : MonoBehaviour
 
     public IEnumerator ShowMatchResults()
     {
-        matchController.GlobalHUD.RoundTimer.enabled = false;
-        // Delay first so we can see who killed who
-        yield return new WaitForSeconds(delayBeforeMatchResults);
-
         // Animate the after battle scene
         Camera.main.transform.parent = transform;
         Camera.main.GetComponent<Animator>().SetTrigger("ScoreboardZoom");
@@ -117,7 +110,7 @@ public class ScoreboardManager : MonoBehaviour
         // Do not start adding crimes before the camera has finished the animation
         int delay = Mathf.RoundToInt(Camera.main.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
         yield return new WaitForSeconds(delay);
-        
+
         maxSteps = MaxNumberOfCrimes();
 
         StartCoroutine(NextCrime());
