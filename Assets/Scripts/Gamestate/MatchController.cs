@@ -31,6 +31,7 @@ public class MatchController : MonoBehaviour
 
     public delegate void MatchEvent();
 
+    public MatchEvent onOutcomeDecided;
     public MatchEvent onRoundEnd;
     public MatchEvent onRoundStart;
     public MatchEvent onBiddingStart;
@@ -39,6 +40,9 @@ public class MatchController : MonoBehaviour
     [Header("Timing")]
     [SerializeField]
     private float roundLength;
+
+    [SerializeField]
+    private float delayBeforeRoundResults = 3f;
 
     [SerializeField]
     private float roundEndDelay;
@@ -156,11 +160,21 @@ public class MatchController : MonoBehaviour
 
     public void EndActiveRound()
     {
-        onRoundEnd?.Invoke();
+        onOutcomeDecided?.Invoke();
         roundTimer.OnTimerUpdate -= AdjustMusic;
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
         AssignRewards();
+        GlobalHUD.RoundTimer.enabled = false;
+        StartCoroutine(WaitAndShowResults());
+    }
+
+    private IEnumerator WaitAndShowResults()
+    {
+        // Delay first so we can see who killed who
+        yield return new WaitForSeconds(delayBeforeRoundResults);
+        // Scoreboard subscribes here
+        onRoundEnd?.Invoke();
     }
 
     public IEnumerator WaitAndStartNextBidding()

@@ -99,7 +99,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private AudioGroup extraHitSounds;
 
-    void Start()
+    private void Start()
     {
         healthController = GetComponent<HealthController>();
         healthController.onDamageTaken += OnDamageTaken;
@@ -188,8 +188,11 @@ public class PlayerManager : MonoBehaviour
 
     void OnDestroy()
     {
-        healthController.onDamageTaken -= OnDamageTaken;
-        healthController.onDeath -= OnDeath;
+        if (healthController)
+        {
+            healthController.onDamageTaken -= OnDamageTaken;
+            healthController.onDeath -= OnDeath;
+        }
         if (gunController)
         {
             gunController.onFireStart -= UpdateAimTarget;
