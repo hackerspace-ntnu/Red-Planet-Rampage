@@ -1,3 +1,6 @@
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem.Utilities;
 
@@ -14,12 +17,21 @@ public class TrainingModeAugmentPlacer : MonoBehaviour
 
     private void Start()
     {
-        SpawnLine(transform.position, StaticInfo.Singleton.Bodies);
-        SpawnLine(transform.position + transform.rotation * columnSpace, StaticInfo.Singleton.Barrels);
-        SpawnLine(transform.position + transform.rotation * columnSpace * 2, StaticInfo.Singleton.Extensions);
+        var bodies = new List<Item>();
+        bodies.Add(StaticInfo.Singleton.StartingBody);
+        bodies.AddRange(StaticInfo.Singleton.Bodies);
+        SpawnLine(transform.position, bodies);
+
+        var barrels = new List<Item>();
+        barrels.Add(StaticInfo.Singleton.StartingBarrel);
+        barrels.AddRange(StaticInfo.Singleton.Barrels);
+        SpawnLine(transform.position + transform.rotation * columnSpace, barrels);
+
+        var extensions = StaticInfo.Singleton.Extensions.ToList();
+        SpawnLine(transform.position + transform.rotation * columnSpace * 2, extensions);
     }
 
-    private void SpawnLine(Vector3 position, ReadOnlyArray<Item> items)
+    private void SpawnLine(Vector3 position, List<Item> items)
     {
         for (var i = 0; i < items.Count; i++)
         {
