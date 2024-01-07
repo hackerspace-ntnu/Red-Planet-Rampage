@@ -6,6 +6,8 @@ public class ExplodingBarrel : MonoBehaviour
 {
     [SerializeField] private MeshRenderer barrelMesh;
 
+    [SerializeField] private ExplosionController explosion;
+
     [SerializeField] private DecalProjector explosionMark;
 
     [SerializeField] private LayerMask explosionMarkMask;
@@ -13,12 +15,10 @@ public class ExplodingBarrel : MonoBehaviour
     [SerializeField] private float explosionMarkLifeTime = 60;
 
     private HealthController healthController;
-    private ExplosionController explosionController;
 
     private void Start()
     {
         healthController = GetComponent<HealthController>();
-        explosionController = GetComponent<ExplosionController>();
         healthController.onDeath += Explode;
     }
 
@@ -32,7 +32,7 @@ public class ExplodingBarrel : MonoBehaviour
     {
         barrelMesh.enabled = false;
         GetComponentsInChildren<Collider>().ToList().ForEach(c => c.enabled = false);
-        explosionController.Explode(info.sourcePlayer);
+        explosion.Explode(info.sourcePlayer);
         LeaveMark();
         Destroy(gameObject, 4);
     }
@@ -41,7 +41,7 @@ public class ExplodingBarrel : MonoBehaviour
     {
         // TODO This assumes that down is down on all maps. Refactor if gravity is made to work differently sometime.
         // The raycast should start approximately in the center of the barrel, thus the + transform.up
-        if (!Physics.Raycast(transform.position + transform.up, Vector3.down, out var hit, explosionController.Radius, explosionMarkMask))
+        if (!Physics.Raycast(transform.position + transform.up, Vector3.down, out var hit, explosion.Radius, explosionMarkMask))
             return;
 
         var position = hit.point + .5f * explosionMark.size.z * Vector3.up;
