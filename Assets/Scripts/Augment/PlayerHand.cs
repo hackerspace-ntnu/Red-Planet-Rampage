@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerHand : MonoBehaviour
@@ -36,11 +34,12 @@ public class PlayerHand : MonoBehaviour
 
     private void DisableHand(PlayerManager killer, PlayerManager victim)
     {
-        gameObject.SetActive(false);
+        DisableHand();
     }
 
     private void DisableHand()
     {
-        gameObject.SetActive(false);
+        if (this && gameObject)
+            gameObject.SetActive(false);
     }
 }
