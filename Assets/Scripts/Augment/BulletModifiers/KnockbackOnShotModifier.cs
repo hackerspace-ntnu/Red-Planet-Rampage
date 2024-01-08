@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
+public class KnockbackOnShotModifier : MonoBehaviour, ProjectileModifier
 {
     [SerializeField]
     private float pushPower;
@@ -36,8 +36,10 @@ public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
     private void KnockAwayTargets(HitboxController controller, ref ProjectileState state)
     {
         Vector3 normal = gunController.transform.forward;
-        var body = controller.health.GetComponent<Rigidbody>();
-        if (body)
-            body.AddForce(normal * calculatedPushPower * 2f, ForceMode.Impulse);
+
+        if (controller.health.TryGetComponent<Rigidbody>(out var rigidbody))
+        {
+            rigidbody.AddForce(normal * calculatedPushPower * 2f, ForceMode.Impulse);
+        }
     }
 }
