@@ -9,12 +9,11 @@ public class LawnMower : GunBody
     [SerializeField]
     private float maxArrowDegrees;
     [SerializeField]
-    private float failDegrees = 60f;
-    [SerializeField]
-    private AnimationCurve targetRateOfChange;
+    private float failDegrees = 50f;
     private const float minArrowTravelTime = 6f;
-    private const float maxArrowTravelTime = 8f;
-    private const float degreeStepSize = 25f;
+    private const float maxArrowTravelTime = 10f;
+    private const float degreeStepSize = 45f;
+    private const float stepSizeFirerateMultiplier = 3f;
 
     [Header("Sub Components")]
     [SerializeField]
@@ -57,7 +56,7 @@ public class LawnMower : GunBody
         gunController.onFireStart += Fire;
         gunController.onFireEnd += FireEnd;
 
-        mowerScreen.SetFloat("_ArrowDegrees", maxArrowDegrees);
+        mowerScreen.SetFloat("_ArrowDegrees", minArrowDegrees);
         StartArrowWobbleTween();
 
         if (!gunController.Player)
@@ -80,6 +79,8 @@ public class LawnMower : GunBody
 
     private void LateUpdate()
     {
+        if (!handString || !lineStart || !LineHoldingPoint)
+            return;
         handString.SetPosition(0, lineStart.position);
         handString.SetPosition(1, LineHoldingPoint.position);
     }
@@ -94,7 +95,8 @@ public class LawnMower : GunBody
         if (currentDegrees < failDegrees)
         {
             success = true;
-            currentDegrees += degreeStepSize;
+            currentDegrees += degreeStepSize - stepSizeFirerateMultiplier * stats.Firerate.Value();
+            currentDegrees = Mathf.Min(currentDegrees, maxArrowDegrees);
             Reload(stats);
         }
         else
