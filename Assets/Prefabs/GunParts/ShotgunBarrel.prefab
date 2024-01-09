@@ -588,7 +588,7 @@ MonoBehaviour:
   - name: Firerate
     addition: 0
     multiplier: 0
-    exponential: 0.5
+    exponential: 0.3
   - name: ProjectileSpread
     addition: 0.05
     multiplier: 0
@@ -601,6 +601,10 @@ MonoBehaviour:
     addition: 0
     multiplier: 10
     exponential: 1
+  - name: Magazine
+    addition: 0
+    multiplier: 0
+    exponential: 0.3
   outputs:
   - {fileID: 5765902433490691002}
   attachmentPoints:
@@ -622,10 +626,10 @@ MonoBehaviour:
   projectileRotation: {x: 0, y: 0, z: 0, w: 1}
   stats: {fileID: 0}
   player: {fileID: 0}
+  HitAssist: 0
   maxDistance: 15
   collisionSamplesPerUnit: 3
   trail: {fileID: 1393106611541694855}
-  flash: {fileID: 261841362781268065}
   animator: {fileID: 6403918129687704287}
 --- !u!114 &7327065496144923300
 MonoBehaviour:
@@ -761,7 +765,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49ba4bdeb4a0c8548b6b50d2d03dc38a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pushPower: 20
+  pushPower: 30
   baseFireRateAdder: 2
 --- !u!114 &8123546184178421821
 MonoBehaviour:

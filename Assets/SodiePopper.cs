@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class SodiePopper : GunBody
 {
-    // Start is called before the first frame update
-
-    Vector3 currentOffset = Vector3.zero;
 
     [SerializeField]
     float offsetMagnitude = 0.1f;
@@ -14,15 +11,9 @@ public class SodiePopper : GunBody
     // Prevents the players movement from being too dominant in the shaking
     [SerializeField]
     float playermovementRelativeAdjustment = 0.4f;
-    Transform playerTransform;
-    Vector3 playerLastPos;
-    Vector3 playerLastLastPos;
-
 
     Vector3 lastPos = Vector3.zero;
     Vector3 lastLastPos = Vector3.zero;
-
-    Vector3 lastMeassurementPos = Vector3.zero;
 
     [SerializeField]
     float shakeCorrectionReloadThreshold = 0.003f;
@@ -35,8 +26,6 @@ public class SodiePopper : GunBody
 
     float lastReload = 0f;
 
-    [SerializeField]
-    float offsetScaling = 0.1f;
     [SerializeField]
     float velocityDamping = 0.1f;
     [SerializeField]
@@ -51,10 +40,18 @@ public class SodiePopper : GunBody
     [SerializeField]
     private Animator anim;
 
+    [SerializeField]
+    private PlayerHand playerHandRight;
+
+    private float lastDiff;
+
+    private Rigidbody playerBody;
+
+    private float lastPlayerDiff = 0f;
+
     public override void Start()
     {
         gunController = transform.parent?.GetComponent<GunController>();
-        lastMeassurementPos = meassurementPoint.position;
 
         lastPos = lastLastPos = meassurementPoint.position;
 
@@ -64,57 +61,48 @@ public class SodiePopper : GunBody
 
         if (!gunController.Player)
             return;
-        playerLastPos = playerLastLastPos = gunController.Player.transform.position;
+
+        playerBody = gunController.Player.GetComponent<PlayerMovement>().Body;
+        playerHandRight.SetPlayer(gunController.Player);
+        playerHandRight.gameObject.SetActive(true);
     }
 
     private void Update()
     {
         if (gunController != null)
         {
-            anim.SetFloat("Ammo", (float)gunController.stats.Ammo / (float)gunController.stats.magazineSize);
+            anim.SetFloat("Ammo", (float)gunController.stats.Ammo / (float)gunController.stats.MagazineSize);
         }
     }
 
     private void FixedUpdate()
     {
-        Vector3 positionDiff = meassurementPoint.position - lastMeassurementPos;
-
-        lastMeassurementPos = meassurementPoint.position;
-
         Vector3 offsetVelocity = (lastPos - lastLastPos) / Time.fixedDeltaTime;
 
         offsetVelocity -= offsetVelocity * velocityDamping * Time.fixedDeltaTime;
 
         offsetVelocity += (meassurementPoint.position - lastPos) * springStrength * Time.fixedDeltaTime;
 
-        if (playerTransform)
-        {
-            Vector3 playerSpeedDiff = (playerLastLastPos - 2 * playerLastPos + playerTransform.position) / Time.fixedDeltaTime;
-            offsetVelocity += playerSpeedDiff * playermovementRelativeAdjustment;
-
-            playerLastLastPos = playerLastPos;
-            playerLastPos = playerTransform.position;
-        }
-
         lastLastPos = lastPos;
 
         lastPos += offsetVelocity * Time.fixedDeltaTime;
-
         if ((lastPos - meassurementPoint.position).magnitude > offsetMagnitude)
         {
             Vector3 diff = lastPos - meassurementPoint.position;
-
-            if (diff.magnitude >= shakeCorrectionReloadThreshold && Time.fixedTime - lastReload > reload_delay)
+            float playerDiff = 0f;
+            if (playerBody)
+                playerDiff = Mathf.Abs(lastPlayerDiff - playerBody.velocity.magnitude);
+            var accelerationDiff = Mathf.Abs(lastDiff - diff.magnitude);
+            if (accelerationDiff - playerDiff * playermovementRelativeAdjustment >= shakeCorrectionReloadThreshold && Time.fixedTime - lastReload > reload_delay)
             {
                 lastReload = Time.fixedTime;
 
                 gunController?.Reload(reload_ammount);
             }
-
             lastPos = meassurementPoint.position + diff.normalized * offsetMagnitude;
-
+            lastDiff = diff.magnitude;
+            lastPlayerDiff = playerDiff;
         }
         offsetTarget.position = lastPos;
-
     }
 }

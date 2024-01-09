@@ -9,13 +9,11 @@ public class LawnMower : GunBody
     [SerializeField]
     private float maxArrowDegrees;
     [SerializeField]
-    private float arrowHitSpan = 5f;
-    [SerializeField]
-    private AnimationCurve targetRateOfChange;
-    private const float minArrowTravelTime = 4f;
-    private const float maxArrowTravelTime = 6f;
-    private const float degreeStepSize = 5f;
-    private float currentTarget;
+    private float failDegrees = 50f;
+    private const float minArrowTravelTime = 6f;
+    private const float maxArrowTravelTime = 10f;
+    private const float degreeStepSize = 45f;
+    private const float stepSizeFirerateMultiplier = 3f;
 
     [Header("Sub Components")]
     [SerializeField]
@@ -25,7 +23,9 @@ public class LawnMower : GunBody
     [SerializeField]
     private ParticleSystem failedExhaustParticles;
     [SerializeField]
-    private PlayerHand playerHand;
+    private PlayerHand playerHandLeft;
+    [SerializeField]
+    private PlayerHand playerHandRight;
     [SerializeField]
     private Transform lineStart;
     [SerializeField]
@@ -56,18 +56,18 @@ public class LawnMower : GunBody
         gunController.onFireStart += Fire;
         gunController.onFireEnd += FireEnd;
 
-        currentTarget = maxArrowDegrees;
-        mowerScreen.SetFloat("_TargetDegrees", currentTarget);
-        mowerScreen.SetFloat("_ArrowDegrees", maxArrowDegrees);
+        mowerScreen.SetFloat("_ArrowDegrees", minArrowDegrees);
         StartArrowWobbleTween();
 
         if (!gunController.Player)
             return;
 
-        playerHand.gameObject.SetActive(true);
-        playerHand.SetPlayer(gunController.Player);
+        playerHandLeft.gameObject.SetActive(true);
+        playerHandLeft.SetPlayer(gunController.Player);
+        playerHandRight.gameObject.SetActive(true);
+        playerHandRight.SetPlayer(gunController.Player);
         handAnimator = GetComponent<Animator>();
-        LineHoldingPoint = playerHand.HoldingPoint;
+        LineHoldingPoint = playerHandLeft.HoldingPoint;
         handString.gameObject.SetActive(true);
 
         if (MatchController.Singleton)
@@ -79,6 +79,8 @@ public class LawnMower : GunBody
 
     private void LateUpdate()
     {
+        if (!handString || !lineStart || !LineHoldingPoint)
+            return;
         handString.SetPosition(0, lineStart.position);
         handString.SetPosition(1, LineHoldingPoint.position);
     }
@@ -90,31 +92,25 @@ public class LawnMower : GunBody
         handAnimator.SetTrigger("Pull");
         exhaustParticles.Play();
         var currentDegrees = mowerScreen.GetFloat("_ArrowDegrees");
-        var isInLowerTreshold = currentDegrees < currentTarget + arrowHitSpan;
-        var isInHigherTreshold = currentDegrees > currentTarget - arrowHitSpan;
-        if (isInLowerTreshold && isInHigherTreshold)
+        if (currentDegrees < failDegrees)
         {
             success = true;
-            var deltaDegrees = targetRateOfChange.Evaluate(Mathf.InverseLerp(minArrowDegrees, maxArrowDegrees, currentTarget - degreeStepSize));
-            currentTarget = Mathf.Lerp(minArrowDegrees, maxArrowDegrees, deltaDegrees);
-            mowerScreen.SetFloat("_TargetDegrees", currentTarget);
+            currentDegrees += degreeStepSize - stepSizeFirerateMultiplier * stats.Firerate.Value();
+            currentDegrees = Mathf.Min(currentDegrees, maxArrowDegrees);
             Reload(stats);
         }
         else
         {
             success = false;
-            mowerScreen.SetFloat("_TargetDegrees", maxArrowDegrees);
             failedExhaustParticles.Play();
         }
 
         gameObject.LeanValue(
             (degree) => mowerScreen.SetFloat("_ArrowDegrees", degree),
-            minArrowDegrees, maxArrowDegrees,
+            currentDegrees, minArrowDegrees,
             MathF.Max(minArrowTravelTime, maxArrowTravelTime - stats.Firerate.Value()))
             .setOnComplete(() =>
             {
-                currentTarget = maxArrowDegrees;
-                mowerScreen.SetFloat("_TargetDegrees", currentTarget);
                 Reload(stats);
                 StartArrowWobbleTween();
             });
@@ -133,7 +129,7 @@ public class LawnMower : GunBody
     private void StartArrowWobbleTween()
     {
         gameObject.LeanValue(
-            (degree) => mowerScreen.SetFloat("_ArrowDegrees", degree), maxArrowDegrees + 4f, maxArrowDegrees - 4f, 0.15f)
+            (degree) => mowerScreen.SetFloat("_ArrowDegrees", degree), minArrowDegrees + 4f, minArrowDegrees - 4f, 0.15f)
             .setLoopPingPong();
     }
 

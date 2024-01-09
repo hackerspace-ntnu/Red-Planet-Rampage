@@ -64,8 +64,7 @@ public class GunController : MonoBehaviour
     {
         var barrel = GetComponentInChildren<GunBarrel>();
         barrelAnimator = barrel.GetComponentInChildren<AugmentAnimator>();
-        if (HasRecoil)
-            barrelAnimator.OnShotFiredAnimation += PlayRecoil;
+        barrelAnimator.OnShotFiredAnimation += PlayRecoil;
         barrelAnimator.OnShotFiredAnimation += ShotFired;
         barrelAnimator.OnAnimationEnd += FireEnd;
 
@@ -109,8 +108,8 @@ public class GunController : MonoBehaviour
     /// <param name="fractionNormalized">Percentage of ammunition to be reloaded.</param>
     public void Reload(float fractionNormalized)
     {
-        int amount = Mathf.Max(1, Mathf.FloorToInt(stats.magazineSize * fractionNormalized));
-        stats.Ammo = Mathf.Min(stats.Ammo + amount, stats.magazineSize);
+        int amount = Mathf.Max(1, Mathf.FloorToInt(stats.MagazineSize * fractionNormalized));
+        stats.Ammo = Mathf.Min(stats.Ammo + amount, stats.MagazineSize);
         onReload?.Invoke(stats);
     }
 
@@ -159,7 +158,8 @@ public class GunController : MonoBehaviour
 
     public void PlayRecoil()
     {
-        PlayRecoil(stats);
+        if (HasRecoil)
+            PlayRecoil(stats);
     }
 
     public void PlayRecoil(GunStats stats)
@@ -182,7 +182,7 @@ public class GunController : MonoBehaviour
 
     private void FireEnd()
     {
-        stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.magazineSize);
+        stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.MagazineSize);
         isFiring = false;
         onFireEnd?.Invoke(stats);
     }

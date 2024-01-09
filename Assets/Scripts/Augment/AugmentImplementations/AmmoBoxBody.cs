@@ -10,6 +10,10 @@ public class AmmoBoxBody : GunBody
     [SerializeField]
     private float radarRotationSpeed = 5f;
     private AmmoBox selectedAmmoBox;
+    [SerializeField]
+    private PlayerHand playerHandLeft;
+    [SerializeField]
+    private PlayerHand playerHandRight;
 
     public override void Start()
     {
@@ -21,6 +25,12 @@ public class AmmoBoxBody : GunBody
         }
         gunController.onFireStart += Reload;
         StartCoroutine(SetClosestAmmoBox());
+        if (!gunController.Player)
+            return;
+        playerHandRight.SetPlayer(gunController.Player);
+        playerHandRight.gameObject.SetActive(true);
+        playerHandLeft.SetPlayer(gunController.Player);
+        playerHandLeft.gameObject.SetActive(true);
     }
 
     private void OnDestroy()

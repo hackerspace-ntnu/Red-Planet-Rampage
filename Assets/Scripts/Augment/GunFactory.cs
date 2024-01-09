@@ -241,6 +241,8 @@ public class GunFactory : MonoBehaviour
                 gunController.fireRateController = new FullAutoFirerateController(gunController.stats.Firerate);
                 break;
         }
+        // Ensure ammo == magazineSize after all modifiers are applied
+        gunController.Reload(1);
     }
 }
 

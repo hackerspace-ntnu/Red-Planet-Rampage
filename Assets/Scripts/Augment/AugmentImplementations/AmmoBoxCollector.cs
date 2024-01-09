@@ -29,7 +29,7 @@ public class AmmoBoxCollector : MonoBehaviour
         StartCoroutine(CheckForAmmoBoxBody());
     }
 
-    public bool HasFullMagazine => player.GunController.stats.Ammo >= player.GunController.stats.magazineSize;
+    public bool HasFullMagazine => player.GunController.stats.Ammo >= player.GunController.stats.MagazineSize;
 
     public void Reload()
     {
