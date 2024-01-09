@@ -24,7 +24,7 @@ public class PlayerFactory : MonoBehaviour
 
     private void Awake()
     {
-        if (PlayerInputManagerController.Singleton == null && overrideMatchManager)
+        if (PlayerInputManagerController.Singleton == null)
         {
             // We most likely started the game in the game scene, reload menu instead
             SceneManager.LoadSceneAsync("Menu");
