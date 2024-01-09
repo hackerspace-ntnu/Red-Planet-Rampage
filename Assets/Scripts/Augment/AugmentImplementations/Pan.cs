@@ -10,7 +10,7 @@ public class Pan : GunExtension
     private PlayerMovement playerMovement;
     private const float skateJumpForce = 5f;
     private GunController gunController;
-
+    private const int hitBoxLayer = 3;
     void Start()
     {
         gunController = transform.parent.GetComponent<GunController>();
@@ -19,7 +19,6 @@ public class Pan : GunExtension
         if (!gunController.Player)
         {
             gameObject.transform.localScale = new Vector3(2f, 2f, 2f);
-            var hitBoxLayer = 3;
             hitboxCollider.gameObject.layer = hitBoxLayer;
             return;
         }
