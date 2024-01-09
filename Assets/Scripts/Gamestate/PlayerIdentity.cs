@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CollectionExtensions;
 using UnityEngine;
 
 public class PlayerIdentity : MonoBehaviour
@@ -25,8 +26,7 @@ public class PlayerIdentity : MonoBehaviour
     public List<Item> Extensions { get; private set; } = new List<Item>();
 
     public int chips { get; private set; } = 0;
-
-    public int bounty = 5;
+    public int score { get; private set; } = 0;
 
     public delegate void ChipEvent(int amount);
     public delegate void ItemEvent(Item item);
@@ -34,6 +34,7 @@ public class PlayerIdentity : MonoBehaviour
     public ChipEvent onChipGain;
     public ChipEvent onChipSpent;
     public ChipEvent onChipChange;
+    public ChipEvent onScoreChange;
     public ItemEvent onInventoryChange;
 
     void Start()
@@ -50,8 +51,27 @@ public class PlayerIdentity : MonoBehaviour
         {
             Extensions.Add(extension);
         }
+    }
 
-        bounty += 5;
+    public void AssignReward(Reward reward)
+    {
+        switch (reward.Type)
+        {
+            case RewardType.Chips:
+                UpdateChip(reward.Amount);
+                break;
+            case RewardType.Score:
+                score += reward.Amount;
+                break;
+        }
+    }
+
+    public void UpdateScore(int amount)
+    {
+        if (amount == 0) return;
+        score += amount;
+
+        onScoreChange?.Invoke(score);
     }
 
     public void UpdateChip(int amount)
@@ -102,9 +122,33 @@ public class PlayerIdentity : MonoBehaviour
         Bodies = new List<Item>();
         Barrels = new List<Item>();
         Extensions = new List<Item>();
-        body = StaticInfo.Singleton.StartingBody;
-        barrel = StaticInfo.Singleton.StartingBarrel;
-        extension = StaticInfo.Singleton.StartingExtension;
+
+        switch (MatchRules.Singleton.Rules.StartingWeapon.type)
+        {
+            case StartingWeaponType.Standard:
+                body = StaticInfo.Singleton.StartingBody;
+                barrel = StaticInfo.Singleton.StartingBarrel;
+                extension = StaticInfo.Singleton.StartingExtension;
+                break;
+
+            // TODO implement shared random somehow?
+            case StartingWeaponType.IndividualRandom:
+                body = StaticInfo.Singleton.Bodies.RandomElement();
+                barrel = StaticInfo.Singleton.Barrels.RandomElement();
+                extension = StaticInfo.Singleton.Extensions.RandomElement();
+                break;
+
+            case StartingWeaponType.SharedRandom:
+            case StartingWeaponType.Specific:
+                body = MatchRules.Singleton.Rules.StartingWeapon.body;
+                barrel = MatchRules.Singleton.Rules.StartingWeapon.barrel;
+                extension = MatchRules.Singleton.Rules.StartingWeapon.extension;
+                break;
+        }
+
+        Bodies.Add(body);
+        Barrels.Add(barrel);
+        Extensions.Add(extension);
         chips = 0;
     }
 

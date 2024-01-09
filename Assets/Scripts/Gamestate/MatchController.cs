@@ -188,15 +188,29 @@ public class MatchController : MonoBehaviour
     private void AssignRewards()
     {
         var lastRound = rounds.Last();
+        var rules = MatchRules.Singleton.Rules;
         foreach (Player player in players)
         {
-            // Base reward and kill bonus
-            var reward = rewardBase + lastRound.KillCount(player.playerManager) * rewardKill;
-            // Win bonus
-            if (lastRound.IsWinner(player.playerManager.identity))
-                reward += rewardWin;
-
-            player.playerManager.identity.UpdateChip(reward);
+            foreach (Reward reward in rules.Rewards)
+            {
+                switch (reward.Condition)
+                {
+                    case RewardCondition.Survive:
+                        player.playerManager.identity.AssignReward(reward);
+                        break;
+                    case RewardCondition.Kill:
+                        var calculatedReward = reward;
+                        calculatedReward.Amount = lastRound.KillCount(player.playerManager);
+                        player.playerManager.identity.AssignReward(calculatedReward);
+                        break;
+                    case RewardCondition.Win:
+                        if (lastRound.IsWinner(player.playerManager.identity))
+                            player.playerManager.identity.AssignReward(reward);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 
@@ -215,11 +229,13 @@ public class MatchController : MonoBehaviour
 
     private bool IsWin()
     {
+        // TODO This assumes win count is win condition.
         var winner = rounds.Last().Winner;
         if (winner == null) { return false; }
         var wins = rounds.Where(round => round.IsWinner(winner)).Count();
         Debug.Log($"Current winner ({winner}) has {wins} wins.");
-        if (wins >= 3)
+        var requiredWins = MatchRules.Singleton.Rules.MatchWinCondition.Amount;
+        if (wins >= requiredWins)
         {
             // We have a winner!
             StartCoroutine(DisplayWinScreenAndRestart(winner));
