@@ -131,7 +131,10 @@ public class MatchController : MonoBehaviour
             var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
             players.Add(new Player(playerIdentity, playerStateController, startAmount));
         });
-
+        if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
+        {
+            playerFactory.InstantiateAIOpponents(3);
+        }
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
         onRoundStart?.Invoke();
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));

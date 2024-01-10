@@ -12,6 +12,8 @@ public class PlayerFactory : MonoBehaviour
     private Transform[] spawnPoints;
     [SerializeField]
     private GameObject playerSelectItemPrefab;
+    [SerializeField]
+    private GameObject aIOpponent;
     private float spawnInterval = 0f;
     private PlayerInputManagerController playerInputManagerController;
 
@@ -58,6 +60,24 @@ public class PlayerFactory : MonoBehaviour
         playerInputManagerController.ChangeInputMaps("Menu");
         InstantiateInputsOnSpawnpoints(InstantiateItemSelectPlayer);
 
+    }
+
+    public void InstantiateAIOpponents(int amount)
+    {
+        var shuffledSpawnPoints = new List<Transform>(spawnPoints);
+        // Fisher-Yates shuffle
+        for (int i = spawnPoints.Length - 1; i > 0; i--)
+        {
+            var k = random.Next(i);
+            var firstSwapped = shuffledSpawnPoints[i];
+            shuffledSpawnPoints[i] = shuffledSpawnPoints[k];
+            shuffledSpawnPoints[k] = firstSwapped;
+        }
+        for (int i = 0; i < amount; i++)
+        {
+            var spawnPoint = shuffledSpawnPoints[i % spawnPoints.Length];
+            Instantiate(aIOpponent, spawnPoint.position, spawnPoint.rotation);
+        }
     }
 
     private void InstantiateInputsOnSpawnpoints(Action<InputManager, Transform> instantiate)
