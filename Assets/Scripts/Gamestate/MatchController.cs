@@ -114,7 +114,7 @@ public class MatchController : MonoBehaviour
         // Makes shooting end quickly if testing with 1 player
 #if UNITY_EDITOR
         if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
-            roundLength = 5f;
+            roundLength = 100f;
 #endif
 
         StartNextRound();
@@ -133,7 +133,7 @@ public class MatchController : MonoBehaviour
         });
         if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
         {
-            playerFactory.InstantiateAIOpponents(3);
+            playerFactory.InstantiateAIOpponents(3, players[0].playerManager.gameObject);
         }
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
         onRoundStart?.Invoke();

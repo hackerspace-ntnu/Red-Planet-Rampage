@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 7607358150439154286}
   - component: {fileID: 435425937908780799}
   - component: {fileID: 6811708168417660278}
+  - component: {fileID: 1009988235457434939}
   m_Layer: 0
   m_Name: AIOpponent
   m_TagString: Untagged
@@ -180,7 +181,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 71015680234268067}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b92c430e6e288cc42a9a091e7fefacaf, type: 3}
   m_Name: 
@@ -363,7 +364,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 71015680234268067}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a737b49bcd7bb1458b85cb60c9c5167, type: 3}
   m_Name: 
@@ -379,11 +380,11 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 30
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 0
+  m_StoppingDistance: 10
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -391,6 +392,20 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &1009988235457434939
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71015680234268067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e86b20ac9f969e49a2c5f6e36f48984, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainPlayer: {fileID: 0}
+  animator: {fileID: 289053663840324231}
 --- !u!1 &345906872987025452
 GameObject:
   m_ObjectHideFlags: 0
@@ -1231,7 +1246,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3570743071879246586
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2368,6 +2383,10 @@ PrefabInstance:
       value: YiiHaw
       objectReference: {fileID: 0}
     - target: {fileID: 3195995323192703229, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3195995323192703229, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
       propertyPath: leftHandIKTransform
       value: 
       objectReference: {fileID: 3680236445534610840}
@@ -2446,7 +2465,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 3287810421515891185}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2d1f5bb1a04322349807c81d0d3116b5, type: 3}
   m_Name: 

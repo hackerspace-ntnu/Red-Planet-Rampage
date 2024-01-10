@@ -62,7 +62,7 @@ public class PlayerFactory : MonoBehaviour
 
     }
 
-    public void InstantiateAIOpponents(int amount)
+    public void InstantiateAIOpponents(int amount, GameObject player)
     {
         var shuffledSpawnPoints = new List<Transform>(spawnPoints);
         // Fisher-Yates shuffle
@@ -76,7 +76,8 @@ public class PlayerFactory : MonoBehaviour
         for (int i = 0; i < amount; i++)
         {
             var spawnPoint = shuffledSpawnPoints[i % spawnPoints.Length];
-            Instantiate(aIOpponent, spawnPoint.position, spawnPoint.rotation);
+            var aiOpponent = Instantiate(aIOpponent, spawnPoint.position, spawnPoint.rotation);
+            aiOpponent.GetComponent<AIManager>().mainPlayer = player.transform;
         }
     }
 
