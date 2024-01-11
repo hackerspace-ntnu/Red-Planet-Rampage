@@ -9,13 +9,26 @@ public class AIManager : MonoBehaviour
     public Transform mainPlayer;
     [SerializeField]
     private Animator animator;
+    [SerializeField]
+    private GunFactory gunFactory;
+    [SerializeField]
+    private GunController gun;
+    public PlayerIdentity Identity;
     private Rigidbody body;
-    private float maxVelocityBeforeExtraDamping = 1f;
+    [SerializeField]
+    private GameObject meshBase;
 
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         body = GetComponent<Rigidbody>();
+        Identity = GetComponent<PlayerIdentity>();
+        gunFactory.Body = StaticInfo.Singleton.StartingBody;
+        gunFactory.Barrel = StaticInfo.Singleton.StartingBarrel;
+        gun.triggerPressed = true;
+        gun.triggerHeld = true;
+        gunFactory.InitializeGun();
+        meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = Identity.color;
     }
 
     void Update()

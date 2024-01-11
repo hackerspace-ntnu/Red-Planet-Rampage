@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 435425937908780799}
   - component: {fileID: 6811708168417660278}
   - component: {fileID: 1009988235457434939}
+  - component: {fileID: 6800567944559662504}
   m_Layer: 0
   m_Name: AIOpponent
   m_TagString: Untagged
@@ -406,6 +407,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainPlayer: {fileID: 0}
   animator: {fileID: 289053663840324231}
+  gunFactory: {fileID: 2798034521173301447}
+  gun: {fileID: 180929155250404221}
+  Identity: {fileID: 0}
+  meshBase: {fileID: 631494708426531851}
+--- !u!114 &6800567944559662504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71015680234268067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fa6481de280fb5489fa0e0e0d7a7026, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  color: {r: 0, g: 0, b: 0, a: 0}
+  playerName: Cogsworth
+  body: {fileID: 11400000, guid: bf9666eedd80829a0a6b59278813ba72, type: 2}
+  barrel: {fileID: 11400000, guid: 89eab92daa1634e84ace980d00e1880e, type: 2}
+  extension: {fileID: 0}
+  bounty: 5
 --- !u!1 &345906872987025452
 GameObject:
   m_ObjectHideFlags: 0
@@ -1478,8 +1501,8 @@ MonoBehaviour:
   RightHandTarget: {fileID: 0}
   LeftHandTarget: {fileID: 0}
   HasRecoil: 1
-  triggerHeld: 0
-  triggerPressed: 0
+  triggerHeld: 1
+  triggerPressed: 1
   target: {x: 0, y: 0, z: 0}
   TargetIsTooClose: 0
 --- !u!114 &2798034521173301447
@@ -1494,8 +1517,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a5d153951108c144a246beccd96ee7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Body: {fileID: 0}
-  Barrel: {fileID: 0}
+  Body: {fileID: 11400000, guid: bf9666eedd80829a0a6b59278813ba72, type: 2}
+  Barrel: {fileID: 11400000, guid: 89eab92daa1634e84ace980d00e1880e, type: 2}
   Extension: {fileID: 0}
 --- !u!1 &4536483048541249167
 GameObject:
@@ -2464,7 +2487,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3195995323192703229, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
   m_PrefabInstance: {fileID: 3287810421515891185}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 631494708426531851}
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2d1f5bb1a04322349807c81d0d3116b5, type: 3}
@@ -2478,6 +2501,11 @@ Transform:
 --- !u!95 &289053663840324231 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 3000042688875756406, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
+  m_PrefabInstance: {fileID: 3287810421515891185}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &631494708426531851 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2694035758976947706, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
   m_PrefabInstance: {fileID: 3287810421515891185}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &800741041111796087 stripped

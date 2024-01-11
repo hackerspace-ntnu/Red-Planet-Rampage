@@ -64,6 +64,8 @@ public class GunController : MonoBehaviour
     private void Start()
     {
         var barrel = GetComponentInChildren<GunBarrel>();
+        if (!barrel)
+            return;
         barrelAnimator = barrel.GetComponentInChildren<AugmentAnimator>();
         barrelAnimator.OnShotFiredAnimation += PlayRecoil;
         barrelAnimator.OnShotFiredAnimation += ShotFired;
