@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 71015680234268065}
   - component: {fileID: 9672907109803670}
   - component: {fileID: 71015680234268068}
-  - component: {fileID: -437592331247616425}
   - component: {fileID: 6717855691676836013}
   - component: {fileID: 3252978923923797766}
   - component: {fileID: 7607358150439154286}
@@ -175,36 +174,6 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &-437592331247616425
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 71015680234268067}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b92c430e6e288cc42a9a091e7fefacaf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  interactMask:
-    serializedVersion: 2
-    m_Bits: 1
-  maxHitDistance: 100
-  targetStartOffset: 0.9
-  overrideAimTarget: 0
-  ammoMaskItem: {fileID: 11400000, guid: a99e4b806f963ac45a0635c34182107a, type: 2}
-  GunHolder: {fileID: 2192650951514295549}
-  GunOrigin: {fileID: 5285924196574601758}
-  aimAssistCollider: {fileID: 712417654543469888}
-  inputManager: {fileID: 0}
-  identity: {fileID: 0}
-  hudController: {fileID: 555885729091202788}
-  meshBase: {fileID: 5330336945653279977}
-  playerIK: {fileID: 142658303258642700}
-  deathKnockbackForceMultiplier: 10
-  hitSounds: {fileID: 11400000, guid: 90b0dc5583765d64f81545c255b0fa3a, type: 2}
-  extraHitSounds: {fileID: 11400000, guid: c5daa2802fa89a54986d53f2fc13cb8f, type: 2}
 --- !u!114 &6717855691676836013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -365,7 +334,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 71015680234268067}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6a737b49bcd7bb1458b85cb60c9c5167, type: 3}
   m_Name: 
@@ -405,12 +374,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e86b20ac9f969e49a2c5f6e36f48984, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactMask:
+    serializedVersion: 2
+    m_Bits: 0
+  maxHitDistance: 100
+  targetStartOffset: 0.28
+  overrideAimTarget: 0
+  ammoMaskItem: {fileID: 11400000, guid: a99e4b806f963ac45a0635c34182107a, type: 2}
+  GunHolder: {fileID: 2192650951514295549}
+  GunOrigin: {fileID: 5285924196574601758}
+  aimAssistCollider: {fileID: 712417654543469888}
+  inputManager: {fileID: 0}
+  identity: {fileID: 6800567944559662504}
+  hudController: {fileID: 0}
+  meshBase: {fileID: 631494708426531851}
+  playerIK: {fileID: 142658303258642700}
+  deathKnockbackForceMultiplier: 10
+  hitSounds: {fileID: 0}
+  extraHitSounds: {fileID: 0}
   mainPlayer: {fileID: 0}
   animator: {fileID: 289053663840324231}
-  gunFactory: {fileID: 2798034521173301447}
-  gun: {fileID: 180929155250404221}
-  Identity: {fileID: 0}
-  meshBase: {fileID: 631494708426531851}
 --- !u!114 &6800567944559662504
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -423,7 +406,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fa6481de280fb5489fa0e0e0d7a7026, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  color: {r: 0, g: 0, b: 0, a: 0}
+  color: {r: 1, g: 0.088679194, b: 0.7682906, a: 0}
   playerName: Cogsworth
   body: {fileID: 11400000, guid: bf9666eedd80829a0a6b59278813ba72, type: 2}
   barrel: {fileID: 11400000, guid: 89eab92daa1634e84ace980d00e1880e, type: 2}
@@ -2407,7 +2390,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3195995323192703229, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3195995323192703229, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
       propertyPath: leftHandIKTransform
@@ -2488,7 +2471,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 3287810421515891185}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 631494708426531851}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2d1f5bb1a04322349807c81d0d3116b5, type: 3}
   m_Name: 
@@ -2631,10 +2614,5 @@ Transform:
 --- !u!4 &4604144610022740314 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1316620135651827883, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
-  m_PrefabInstance: {fileID: 3287810421515891185}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &5330336945653279977 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7230968032871701784, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
   m_PrefabInstance: {fileID: 3287810421515891185}
   m_PrefabAsset: {fileID: 0}

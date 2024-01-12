@@ -47,6 +47,8 @@ public class GunController : MonoBehaviour
     public void SetPlayer(PlayerManager player)
     {
         Player = player;
+        if (!Player.inputManager)
+            return;
         Player.inputManager.onZoomPerformed += OnZoom;
         Player.inputManager.onZoomCanceled += OnZoomCanceled;
 

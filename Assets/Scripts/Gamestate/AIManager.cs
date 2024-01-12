@@ -3,32 +3,61 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class AIManager : MonoBehaviour
+public class AIManager : PlayerManager
 {
     private NavMeshAgent agent;
     public Transform mainPlayer;
     [SerializeField]
     private Animator animator;
-    [SerializeField]
-    private GunFactory gunFactory;
-    [SerializeField]
-    private GunController gun;
-    public PlayerIdentity Identity;
-    private Rigidbody body;
-    [SerializeField]
-    private GameObject meshBase;
 
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        body = GetComponent<Rigidbody>();
-        Identity = GetComponent<PlayerIdentity>();
-        gunFactory.Body = StaticInfo.Singleton.StartingBody;
-        gunFactory.Barrel = StaticInfo.Singleton.StartingBarrel;
-        gun.triggerPressed = true;
-        gun.triggerHeld = true;
-        gunFactory.InitializeGun();
-        meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = Identity.color;
+        identity = GetComponent<PlayerIdentity>();
+        healthController = GetComponent<HealthController>();
+        healthController.onDamageTaken += OnDamageTaken;
+        healthController.onDeath += OnDeath;
+        SetGun(GunHolder);
+        GunController.triggerPressed = true;
+        GunController.triggerHeld = true;
+        meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
+    }
+
+    public override void SetGun(Transform offset)
+    {
+        overrideAimTarget = false;
+        var gun = GunFactory.InstantiateGunAI(identity.Body, identity.Barrel, identity?.Extension, this, offset);
+        gunController = gun.GetComponent<GunController>();
+        gunController.onFireStart += UpdateAimTarget;
+        gunController.onFire += UpdateAimTarget;
+        playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
+        if (gunController.RightHandTarget)
+            playerIK.RightHandIKTarget = gunController.RightHandTarget;
+        GetComponent<AmmoBoxCollector>().CheckForAmmoBoxBodyAgain();
+    }
+
+    private void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
+    {
+        if (info.sourcePlayer != this)
+        {
+            lastPlayerThatHitMe = info.sourcePlayer;
+        }
+    }
+    void OnDeath(HealthController healthController, float damage, DamageInfo info)
+    {
+        var killer = info.sourcePlayer;
+        if (info.sourcePlayer == this && lastPlayerThatHitMe)
+        {
+            killer = lastPlayerThatHitMe;
+        }
+        onDeath?.Invoke(killer, this);
+        aimAssistCollider.SetActive(false);
+        TurnIntoRagdoll(info);
+    }
+
+    private void UpdateAimTarget(GunStats stats)
+    {
+
     }
 
     void Update()

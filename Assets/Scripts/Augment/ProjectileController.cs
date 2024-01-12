@@ -145,7 +145,8 @@ public abstract class ProjectileController : MonoBehaviour
         }
         gunController.onInitializeGun += OnInitialize;
         gunController.onReload += OnReload;
-        HitAssist = !gunController.Player.inputManager.IsMouseAndKeyboard;
+        if (gunController.Player.inputManager)
+            HitAssist = !gunController.Player.inputManager.IsMouseAndKeyboard;
         if (HitAssist)
             collisionLayers |= LayerMask.GetMask("AimAssist");
     }

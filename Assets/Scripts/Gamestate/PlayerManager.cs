@@ -34,7 +34,7 @@ public class PlayerManager : MonoBehaviour
 
     public HitEvent onDeath;
 
-    private PlayerManager lastPlayerThatHitMe;
+    protected PlayerManager lastPlayerThatHitMe;
 
     public delegate void BiddingPlatformEvent(BiddingPlatform platform);
     public BiddingPlatformEvent onSelectedBiddingPlatformChange;
@@ -48,7 +48,7 @@ public class PlayerManager : MonoBehaviour
     public Transform GunOrigin;
 
     [SerializeField]
-    private GameObject aimAssistCollider;
+    protected GameObject aimAssistCollider;
 
     [Header("Related objects")]
 
@@ -63,10 +63,10 @@ public class PlayerManager : MonoBehaviour
     [Header("Physics")]
 
     [SerializeField]
-    private GameObject meshBase;
+    protected GameObject meshBase;
 
     [SerializeField]
-    private PlayerIK playerIK;
+    protected PlayerIK playerIK;
     public PlayerIK PlayerIK => playerIK;
 
     [SerializeField]
@@ -84,10 +84,10 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    private GunController gunController;
+    protected GunController gunController;
     public GunController GunController => gunController;
 
-    private HealthController healthController;
+    protected HealthController healthController;
 
     [Header("Hit sounds")]
 
@@ -115,7 +115,8 @@ public class PlayerManager : MonoBehaviour
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
-        hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
+        if (hudController)
+            hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
         PlayOnHit();
         if (info.sourcePlayer != this)
         {
@@ -136,7 +137,7 @@ public class PlayerManager : MonoBehaviour
         hudController.DisplayDeathScreen(killer.identity);
     }
 
-    void TurnIntoRagdoll(DamageInfo info)
+    protected void TurnIntoRagdoll(DamageInfo info)
     {
         GetComponent<Rigidbody>().GetAccumulatedForce();
         // Disable components
@@ -152,8 +153,8 @@ public class PlayerManager : MonoBehaviour
         // TODO: Make accurate hitbox forces for the different limbs of the player
 
         var ragdollController = GetComponent<RagdollController>();
-
-        ragdollController.ReparentCamera(inputManager.transform);
+        if (inputManager)
+            ragdollController.ReparentCamera(inputManager.transform);
 
         var force = info.force.normalized * info.damage * deathKnockbackForceMultiplier;
         ragdollController.EnableRagdoll(force);
@@ -311,7 +312,7 @@ public class PlayerManager : MonoBehaviour
         SetLayerOnSubtree(meshBase, playerLayer);
     }
 
-    public void SetGun(Transform offset)
+    public virtual void SetGun(Transform offset)
     {
         overrideAimTarget = false;
         var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, this, offset);
