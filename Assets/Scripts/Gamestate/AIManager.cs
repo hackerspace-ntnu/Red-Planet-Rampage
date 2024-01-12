@@ -6,7 +6,7 @@ using UnityEngine.AI;
 public class AIManager : PlayerManager
 {
     private NavMeshAgent agent;
-    public Transform mainPlayer;
+    public Transform TargetedPlayer;
     [SerializeField]
     private Animator animator;
 
@@ -21,6 +21,15 @@ public class AIManager : PlayerManager
         GunController.triggerPressed = true;
         GunController.triggerHeld = true;
         meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
+        aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
+        aiTargetCollider.Owner = this;
+    }
+
+    public override void SetLayer(int playerIndex)
+    {
+        int playerLayer = LayerMask.NameToLayer("Player " + playerIndex);
+
+        gameObject.layer = playerLayer;
     }
 
     public override void SetGun(Transform offset)
@@ -53,18 +62,19 @@ public class AIManager : PlayerManager
         onDeath?.Invoke(killer, this);
         aimAssistCollider.SetActive(false);
         TurnIntoRagdoll(info);
+        agent.enabled = false;
     }
 
     private void UpdateAimTarget(GunStats stats)
     {
-
+        gunController.target = TargetedPlayer.position;
     }
 
     void Update()
     {
-        if (!mainPlayer)
+        if (!TargetedPlayer)
             return;
-        agent.SetDestination(mainPlayer.position);
+        agent.SetDestination(TargetedPlayer.position);
         animator.SetFloat("Forward", Vector3.Dot(agent.velocity, transform.forward) / agent.speed);
         animator.SetFloat("Right", Vector3.Dot(agent.velocity, transform.right) / agent.speed);
     }

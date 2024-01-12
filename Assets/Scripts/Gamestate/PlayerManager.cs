@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 public class PlayerManager : MonoBehaviour
 {
     // Layers 12 through 15 are gun layers.
-    private static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
+    protected static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
     // Only Default and HitBox layers can be hit
     private static int hitMask = 1 | (1 << 3);
@@ -40,7 +40,7 @@ public class PlayerManager : MonoBehaviour
     public BiddingPlatformEvent onSelectedBiddingPlatformChange;
 
     [SerializeField]
-    private Item ammoMaskItem;
+    protected Item ammoMaskItem;
 
     [SerializeField]
     public Transform GunHolder;
@@ -58,6 +58,19 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private PlayerHUDController hudController;
     public PlayerHUDController HUDController => hudController;
+
+    [SerializeField]
+    protected GameObject aiTarget;
+    protected AITarget aiTargetCollider;
+    public Transform AiTarget
+    {   
+        get 
+        {
+            if (!aiTargetCollider)
+                return transform;
+            return aiTargetCollider.transform;
+        }
+    }
 
 
     [Header("Physics")]
@@ -105,6 +118,8 @@ public class PlayerManager : MonoBehaviour
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
         audioSource = GetComponent<AudioSource>();
+        aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
+        aiTargetCollider.Owner = this;
     }
 
     private void Update()
@@ -289,7 +304,7 @@ public class PlayerManager : MonoBehaviour
         gunController.triggerHeld = false;
     }
 
-    public void SetLayer(int playerIndex)
+    public virtual void SetLayer(int playerIndex)
     {
         int playerLayer = LayerMask.NameToLayer("Player " + playerIndex);
 
@@ -344,7 +359,7 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    private void SetLayerOnSubtree(GameObject node, int layer)
+    protected void SetLayerOnSubtree(GameObject node, int layer)
     {
         node.layer = layer;
         foreach (Transform child in node.transform)

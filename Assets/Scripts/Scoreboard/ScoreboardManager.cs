@@ -110,7 +110,8 @@ public class ScoreboardManager : MonoBehaviour
         for (int i = 0; i < scoreboards.Count; i++)
         {
             // Disable player camera
-            players[i].playerManager.inputManager.GetComponent<Camera>().enabled = false;
+            if (players[i].playerManager.inputManager)
+                players[i].playerManager.inputManager.GetComponent<Camera>().enabled = false;
         }
 
         // Do not start adding crimes before the camera has finished the animation
