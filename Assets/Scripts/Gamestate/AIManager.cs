@@ -1,17 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class AIManager : PlayerManager
 {
     private NavMeshAgent agent;
-    public Transform TargetedPlayer;
+    public Transform DestinationTarget;
+    public Transform ShootingTarget;
     public List<PlayerManager> TrackedPlayers;
     [SerializeField]
     private Animator animator;
     private bool isDead = false;
-
+    private int collisionLayers;
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -26,12 +28,13 @@ public class AIManager : PlayerManager
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
+        collisionLayers = LayerMask.GetMask("Default", "HitBox");
+        StartCoroutine(LookForTargets());
     }
 
     public override void SetLayer(int playerIndex)
     {
         int playerLayer = LayerMask.NameToLayer("Player " + playerIndex);
-
         gameObject.layer = playerLayer;
     }
 
@@ -64,13 +67,16 @@ public class AIManager : PlayerManager
         }
         onDeath?.Invoke(killer, this);
         aimAssistCollider.SetActive(false);
+        aiTarget.SetActive(false);
         TurnIntoRagdoll(info);
         agent.enabled = false;
     }
 
     private void UpdateAimTarget(GunStats stats)
     {
-        gunController.target = TargetedPlayer.position;
+        if (!ShootingTarget)
+            return;
+        gunController.target = ShootingTarget.position;
     }
 
     private IEnumerator LookForTargets()
@@ -78,17 +84,47 @@ public class AIManager : PlayerManager
         if (!isDead)
         {
             yield return new WaitForSeconds(5f);
-            // TODO: raycast for close players
-            LookForTargets();
+            Transform closestPlayer = null;
+            float closestDistance = -1f;
+            for (int i = 0; i < TrackedPlayers.Count - 1; i++)
+            {
+                if (!TrackedPlayers[i].AiTarget.gameObject.activeInHierarchy)
+                    continue;
+                if (!Physics.Raycast(transform.position, TrackedPlayers[i].AiTarget.transform.position - transform.position, out RaycastHit hit, 30f))
+                    continue;
+                if (hit.distance < closestDistance)
+                    continue;
+                closestPlayer = TrackedPlayers[i].AiTarget.transform;
+                closestDistance = hit.distance;
+                DestinationTarget = closestPlayer;
+                ShootingTarget = TrackedPlayers[i].transform;
+            }
+            if (closestPlayer != null)
+                Debug.Log("CHASING " + closestPlayer.name);
+            if (closestPlayer == null)
+            {
+                ShootingTarget = null;
+                if (DestinationTarget == null || (!DestinationTarget.gameObject.GetComponent<PlayerManager>() && !DestinationTarget.gameObject.activeInHierarchy))
+                {
+                    var target = MatchController.Singleton.GetRandomActiveChip();
+                    if (target != null)
+                        DestinationTarget = target;
+                }
+            }
+
+            StartCoroutine(LookForTargets());
         }
     }
 
     void Update()
     {
-        if (!TargetedPlayer)
+        //Debug.DrawRay(transform.position, TrackedPlayers[0].AiTarget.transform.position - transform.position, Color.red, 30f);
+        if (!DestinationTarget || !agent.enabled)
             return;
-        agent.SetDestination(TargetedPlayer.position);
+        agent.SetDestination(DestinationTarget.position);
         animator.SetFloat("Forward", Vector3.Dot(agent.velocity, transform.forward) / agent.speed);
         animator.SetFloat("Right", Vector3.Dot(agent.velocity, transform.right) / agent.speed);
+        if (ShootingTarget)
+            GunOrigin.LookAt(ShootingTarget.position, transform.up);
     }
 }

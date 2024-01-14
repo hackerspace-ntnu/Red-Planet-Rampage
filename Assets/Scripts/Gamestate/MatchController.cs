@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 using System;
+using CollectionExtensions;
 
 /// <summary>
 /// Wrapper struct for tying refference to Player class with the in-game player.
@@ -74,6 +75,7 @@ public class MatchController : MonoBehaviour
 
     private List<Player> players = new List<Player>();
     public List<Player> Players { get { return players; } }
+    private List<CollectableChip> collectableChips;
 
     private static List<Round> rounds = new List<Round>();
     public Round GetLastRound { get { return rounds[rounds.Count - 1]; } }
@@ -122,6 +124,7 @@ public class MatchController : MonoBehaviour
 
     public void StartNextRound()
     {
+        collectableChips = FindObjectsOfType<CollectableChip>().ToList();
         // Setup of playerInputs
         playerFactory.InstantiatePlayersFPS();
 
@@ -133,7 +136,7 @@ public class MatchController : MonoBehaviour
         });
         if (PlayerInputManagerController.Singleton.playerInputs.Count < 4)
         {
-            playerFactory.InstantiateAIOpponents(4 - PlayerInputManagerController.Singleton.playerInputs.Count, players[0].playerManager.gameObject)
+            playerFactory.InstantiateAIOpponents(4 - PlayerInputManagerController.Singleton.playerInputs.Count)
                 .ForEach(ai => players.Add(new Player(ai.identity, ai, startAmount)));
         }
 
@@ -241,6 +244,16 @@ public class MatchController : MonoBehaviour
         {
             return false;
         }
+    }
+    public void RemoveChip(CollectableChip chip)
+    {
+        collectableChips.Remove(chip);
+    }
+    public Transform? GetRandomActiveChip()
+    {
+        if (collectableChips.Count == 0)
+            return null;
+        return collectableChips.RandomElement().transform;
     }
 
     private IEnumerator DisplayWinScreenAndRestart(PlayerIdentity winner)

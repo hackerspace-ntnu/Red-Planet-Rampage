@@ -150,6 +150,7 @@ public class PlayerManager : MonoBehaviour
         onDeath?.Invoke(killer, this);
         aimAssistCollider.SetActive(false);
         TurnIntoRagdoll(info);
+        aiTarget.SetActive(false);
         hudController.DisplayDeathScreen(killer.identity);
     }
 

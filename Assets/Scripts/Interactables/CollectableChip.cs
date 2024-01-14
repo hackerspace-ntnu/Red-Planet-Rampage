@@ -25,6 +25,7 @@ public class CollectableChip : MonoBehaviour
         audioSource.Play();
         GetComponent<Collider>().enabled = false;
         chipModel.SetActive(false);
+        MatchController.Singleton.RemoveChip(this);
         Destroy(gameObject, audioSource.clip.length);
     }
 }
