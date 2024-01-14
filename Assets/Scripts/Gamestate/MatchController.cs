@@ -136,6 +136,14 @@ public class MatchController : MonoBehaviour
             playerFactory.InstantiateAIOpponents(4 - PlayerInputManagerController.Singleton.playerInputs.Count, players[0].playerManager.gameObject)
                 .ForEach(ai => players.Add(new Player(ai.identity, ai, startAmount)));
         }
+
+        players.Where(player => player.playerManager is AIManager)
+            .Select(player => player.playerManager)
+            .Cast<AIManager>()
+            .ToList().ForEach(ai => 
+                ai.TrackedPlayers = players.Select(player => player.playerManager)
+                .Where(player => player != ai).ToList());
+
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
         onRoundStart?.Invoke();
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));

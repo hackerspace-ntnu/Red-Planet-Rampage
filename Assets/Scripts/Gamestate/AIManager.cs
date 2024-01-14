@@ -7,8 +7,10 @@ public class AIManager : PlayerManager
 {
     private NavMeshAgent agent;
     public Transform TargetedPlayer;
+    public List<PlayerManager> TrackedPlayers;
     [SerializeField]
     private Animator animator;
+    private bool isDead = false;
 
     private void Start()
     {
@@ -23,6 +25,7 @@ public class AIManager : PlayerManager
         meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
         aiTargetCollider.Owner = this;
+        aiTargetCollider.transform.position = transform.position;
     }
 
     public override void SetLayer(int playerIndex)
@@ -68,6 +71,16 @@ public class AIManager : PlayerManager
     private void UpdateAimTarget(GunStats stats)
     {
         gunController.target = TargetedPlayer.position;
+    }
+
+    private IEnumerator LookForTargets()
+    {
+        if (!isDead)
+        {
+            yield return new WaitForSeconds(5f);
+            // TODO: raycast for close players
+            LookForTargets();
+        }
     }
 
     void Update()

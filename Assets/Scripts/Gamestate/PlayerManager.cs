@@ -120,6 +120,7 @@ public class PlayerManager : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
         aiTargetCollider.Owner = this;
+        aiTargetCollider.transform.position = transform.position;
     }
 
     private void Update()
