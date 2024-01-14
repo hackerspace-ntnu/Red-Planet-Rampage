@@ -62,6 +62,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     protected GameObject aiTarget;
     protected AITarget aiTargetCollider;
+    public Transform AiAimSpot;
     public Transform AiTarget
     {   
         get 
@@ -150,7 +151,7 @@ public class PlayerManager : MonoBehaviour
         onDeath?.Invoke(killer, this);
         aimAssistCollider.SetActive(false);
         TurnIntoRagdoll(info);
-        aiTarget.SetActive(false);
+        aiTargetCollider.gameObject.SetActive(false);
         hudController.DisplayDeathScreen(killer.identity);
     }
 
@@ -295,7 +296,7 @@ public class PlayerManager : MonoBehaviour
         selectedBiddingPlatform.TryPlaceBid(identity);
     }
 
-    IEnumerator UnpressTrigger()
+    protected IEnumerator UnpressTrigger()
     {
         yield return new WaitForFixedUpdate();
         gunController.triggerPressed = false;

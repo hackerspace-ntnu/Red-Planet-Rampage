@@ -13,7 +13,6 @@ public class AIManager : PlayerManager
     [SerializeField]
     private Animator animator;
     private bool isDead = false;
-    private int collisionLayers;
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -22,13 +21,10 @@ public class AIManager : PlayerManager
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
         SetGun(GunHolder);
-        GunController.triggerPressed = true;
-        GunController.triggerHeld = true;
         meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
-        collisionLayers = LayerMask.GetMask("Default", "HitBox");
         StartCoroutine(LookForTargets());
     }
 
@@ -67,9 +63,10 @@ public class AIManager : PlayerManager
         }
         onDeath?.Invoke(killer, this);
         aimAssistCollider.SetActive(false);
-        aiTarget.SetActive(false);
+        aiTargetCollider.gameObject.SetActive(false);
         TurnIntoRagdoll(info);
         agent.enabled = false;
+        isDead = true;
     }
 
     private void UpdateAimTarget(GunStats stats)
@@ -83,7 +80,6 @@ public class AIManager : PlayerManager
     {
         if (!isDead)
         {
-            yield return new WaitForSeconds(5f);
             Transform closestPlayer = null;
             float closestDistance = -1f;
             for (int i = 0; i < TrackedPlayers.Count - 1; i++)
@@ -97,10 +93,9 @@ public class AIManager : PlayerManager
                 closestPlayer = TrackedPlayers[i].AiTarget.transform;
                 closestDistance = hit.distance;
                 DestinationTarget = closestPlayer;
-                ShootingTarget = TrackedPlayers[i].transform;
+                if (hit.distance < 20)
+                    ShootingTarget = TrackedPlayers[i].AiAimSpot;
             }
-            if (closestPlayer != null)
-                Debug.Log("CHASING " + closestPlayer.name);
             if (closestPlayer == null)
             {
                 ShootingTarget = null;
@@ -111,20 +106,31 @@ public class AIManager : PlayerManager
                         DestinationTarget = target;
                 }
             }
-
+            if (DestinationTarget)
+                agent.SetDestination(DestinationTarget.position);
+            yield return new WaitForSeconds(2.5f);
             StartCoroutine(LookForTargets());
         }
     }
 
     void Update()
     {
-        //Debug.DrawRay(transform.position, TrackedPlayers[0].AiTarget.transform.position - transform.position, Color.red, 30f);
         if (!DestinationTarget || !agent.enabled)
             return;
-        agent.SetDestination(DestinationTarget.position);
         animator.SetFloat("Forward", Vector3.Dot(agent.velocity, transform.forward) / agent.speed);
         animator.SetFloat("Right", Vector3.Dot(agent.velocity, transform.right) / agent.speed);
-        if (ShootingTarget)
-            GunOrigin.LookAt(ShootingTarget.position, transform.up);
+        if (!ShootingTarget)
+            return;
+        GunOrigin.LookAt(ShootingTarget.position, transform.up);
+        Fire();
+    }
+
+    private void Fire()
+    {
+        if (!gunController)
+            return;
+        gunController.triggerHeld = true;
+        gunController.triggerPressed = true;
+        StartCoroutine(UnpressTrigger());
     }
 }
