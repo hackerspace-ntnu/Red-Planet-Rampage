@@ -104,7 +104,8 @@ public class PlayerHUDController : MonoBehaviour
                 return;
             }
 
-            var dampenedMagnitude = Mathf.Lerp(oldLargeVelocity, 1f, Time.fixedDeltaTime);
+            // Dampen larger speeds faster w/log factor
+            var dampenedMagnitude = Mathf.Lerp(oldLargeVelocity, 1f, Time.fixedDeltaTime * Mathf.Log(oldLargeVelocity) * .5f);
             speedLinesMaterial.SetFloat("_LineRemovalRadius", speedLineEase.Evaluate(1 / dampenedMagnitude) * lineRemovalMultiplier);
             speedLinesMaterial.SetVector("_Center", new Vector4(0.5f, 0.5f));
             oldLargeVelocity = dampenedMagnitude;
