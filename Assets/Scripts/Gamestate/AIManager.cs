@@ -1,3 +1,4 @@
+using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,8 @@ public class AIManager : PlayerManager
     [SerializeField]
     private Animator animator;
     private bool isDead = false;
+    [SerializeField]
+    private LayerMask ignoreMask;
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -26,6 +29,13 @@ public class AIManager : PlayerManager
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
         StartCoroutine(LookForTargets());
+        TrackedPlayers.ForEach(player => player.onDeath += RemovePlayer);
+    }
+
+    private void RemovePlayer(PlayerManager killer, PlayerManager victim)
+    {
+        TrackedPlayers.Remove(victim);
+        victim.onDeath -= RemovePlayer;
     }
 
     public override void SetLayer(int playerIndex)
@@ -84,24 +94,25 @@ public class AIManager : PlayerManager
             float closestDistance = -1f;
             for (int i = 0; i < TrackedPlayers.Count - 1; i++)
             {
-                Debug.DrawRay(transform.position, TrackedPlayers[i].AiTarget.transform.position - transform.position, Color.red);
                 // Is the tracked player still alive?
-                if (!TrackedPlayers[i].AiTarget.gameObject.activeInHierarchy) { 
+                if (!TrackedPlayers[i].AiTarget.gameObject.activeInHierarchy)
                     continue;
                 // Is the tracked player in front of me? (viewable)
-                if (Vector3.Dot(transform.forward, TrackedPlayers[i].AiTarget.transform.position - transform.position) < 0)
+                var playerDirection = TrackedPlayers[i].AiTarget.transform.position - transform.position;
+                if (Vector3.Dot(transform.forward, playerDirection) < 0)
                     continue;
+                var hitDistance = playerDirection.magnitude;
                 // Is there a line of sight to a tracked player?
-                if (!Physics.Raycast(transform.position, TrackedPlayers[i].AiTarget.transform.position - transform.position, out RaycastHit hit, 20f))
+                if (Physics.Raycast(transform.position, playerDirection, hitDistance - 0.1f, ignoreMask))
                     continue;
                 // Is there another tracked player who is closer?
-                if (hit.distance < closestDistance)
+                if (hitDistance < closestDistance)
                     continue;
                 closestPlayer = TrackedPlayers[i].AiTarget.transform;
-                closestDistance = hit.distance;
+                closestDistance = hitDistance;
                 DestinationTarget = closestPlayer;
                 // Close enough to shoot!
-                if (hit.distance < 15)
+                if (hitDistance < 15)
                     ShootingTarget = TrackedPlayers[i].AiAimSpot;
             }
 
@@ -111,8 +122,14 @@ public class AIManager : PlayerManager
                 if (DestinationTarget == null || (!DestinationTarget.gameObject.GetComponent<PlayerManager>() && !DestinationTarget.gameObject.activeInHierarchy))
                 {
                     var target = MatchController.Singleton.GetRandomActiveChip();
-                    if (target != null)
-                        DestinationTarget = target;
+                    if (target == null)
+                    {
+                        var player = TrackedPlayers.RandomElement();
+                        target = player.AiTarget;
+                        ShootingTarget = player.AiAimSpot;
+                    }
+                        
+                    DestinationTarget = target;
                 }
             }
             if (DestinationTarget)
