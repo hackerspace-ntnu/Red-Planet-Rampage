@@ -380,7 +380,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnDestroy()
     {
-        ResetZoom();
+        if (inputManager)
+            ResetZoom();
         inputManager.onSelect -= OnJump;
         inputManager.onCrouchPerformed -= OnCrouch;
         inputManager.onCrouchCanceled -= OnCrouch;

@@ -1,10 +1,8 @@
 using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
-using static UnityEngine.GraphicsBuffer;
 
 public class AIManager : PlayerManager
 {
@@ -12,15 +10,14 @@ public class AIManager : PlayerManager
     public Transform DestinationTarget;
     public Transform ShootingTarget;
     public List<PlayerManager> TrackedPlayers;
-    private float autoAwareRadius = 25f;
-    private float ignoreAwareRadius = 100f;
+    private const float autoAwareRadius = 25f;
+    private const float ignoreAwareRadius = 100f;
     [SerializeField]
     private Animator animator;
     private bool isDead = false;
     [SerializeField]
     private LayerMask ignoreMask;
-    [SerializeField]
-    private LayerMask playerMask;
+
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
