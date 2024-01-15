@@ -84,18 +84,27 @@ public class AIManager : PlayerManager
             float closestDistance = -1f;
             for (int i = 0; i < TrackedPlayers.Count - 1; i++)
             {
-                if (!TrackedPlayers[i].AiTarget.gameObject.activeInHierarchy)
+                Debug.DrawRay(transform.position, TrackedPlayers[i].AiTarget.transform.position - transform.position, Color.red);
+                // Is the tracked player still alive?
+                if (!TrackedPlayers[i].AiTarget.gameObject.activeInHierarchy) { 
                     continue;
-                if (!Physics.Raycast(transform.position, TrackedPlayers[i].AiTarget.transform.position - transform.position, out RaycastHit hit, 30f))
+                // Is the tracked player in front of me? (viewable)
+                if (Vector3.Dot(transform.forward, TrackedPlayers[i].AiTarget.transform.position - transform.position) < 0)
                     continue;
+                // Is there a line of sight to a tracked player?
+                if (!Physics.Raycast(transform.position, TrackedPlayers[i].AiTarget.transform.position - transform.position, out RaycastHit hit, 20f))
+                    continue;
+                // Is there another tracked player who is closer?
                 if (hit.distance < closestDistance)
                     continue;
                 closestPlayer = TrackedPlayers[i].AiTarget.transform;
                 closestDistance = hit.distance;
                 DestinationTarget = closestPlayer;
-                if (hit.distance < 20)
+                // Close enough to shoot!
+                if (hit.distance < 15)
                     ShootingTarget = TrackedPlayers[i].AiAimSpot;
             }
+
             if (closestPlayer == null)
             {
                 ShootingTarget = null;
