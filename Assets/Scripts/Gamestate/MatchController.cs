@@ -128,19 +128,6 @@ public class MatchController : MonoBehaviour
         // Setup of playerInputs
         playerFactory.InstantiatePlayersFPS(4 - PlayerInputManagerController.Singleton.playerInputs.Count)
             .ForEach(player => players.Add(new Player(player.identity, player, startAmount))); ;
-        /*
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput =>
-        {
-            var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
-            var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
-            players.Add(new Player(playerIdentity, playerStateController, startAmount));
-        });
-        if (PlayerInputManagerController.Singleton.playerInputs.Count < 4)
-        {
-            playerFactory.InstantiateAIOpponents(4 - PlayerInputManagerController.Singleton.playerInputs.Count)
-                .ForEach(ai => players.Add(new Player(ai.identity, ai, startAmount)));
-        }
-        */
 
         players.Where(player => player.playerManager is AIManager)
             .Select(player => player.playerManager)
@@ -251,6 +238,7 @@ public class MatchController : MonoBehaviour
     {
         collectableChips.Remove(chip);
     }
+
     public Transform? GetRandomActiveChip()
     {
         if (collectableChips.Count == 0)
