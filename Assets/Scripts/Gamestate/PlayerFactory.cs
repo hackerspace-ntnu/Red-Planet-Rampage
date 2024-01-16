@@ -14,6 +14,8 @@ public class PlayerFactory : MonoBehaviour
     private GameObject playerSelectItemPrefab;
     [SerializeField]
     private GameObject aIOpponent;
+    [SerializeField]
+    private GameObject aIBidder;
     private float spawnInterval = 0f;
     private PlayerInputManagerController playerInputManagerController;
 
@@ -47,13 +49,13 @@ public class PlayerFactory : MonoBehaviour
     public List<PlayerManager> InstantiatePlayersFPS(int aiPlayerCount = 0)
     {
         playerInputManagerController.ChangeInputMaps("FPS");
-        return InstantiateInputsOnSpawnpoints(InstantiateFPSPlayer, aiPlayerCount);
+        return InstantiateInputsOnSpawnpoints(InstantiateFPSPlayer, InstantiateFPSAI, aiPlayerCount);
     }
 
-    public void InstantiatePlayersBidding()
+    public void InstantiatePlayersBidding(int aiPLayerCount = 0)
     {
         playerInputManagerController.ChangeInputMaps("Bidding");
-        InstantiateInputsOnSpawnpoints(InstantiateBiddingPlayer);
+        InstantiateInputsOnSpawnpoints(InstantiateBiddingPlayer, InstantiateBiddingAI, aiPLayerCount);
     }
     public void InstantiatePlayerSelectItems()
     {
@@ -61,7 +63,7 @@ public class PlayerFactory : MonoBehaviour
         InstantiateInputsOnSpawnpoints(InstantiateItemSelectPlayer);
     }
 
-    private List<PlayerManager> InstantiateInputsOnSpawnpoints(Func<InputManager, Transform, PlayerManager> instantiate, int aiPlayerCount = 0)
+    private List<PlayerManager> InstantiateInputsOnSpawnpoints(Func<InputManager, Transform, PlayerManager> instantiate, Func<int, Transform, AIManager> instantiateAI = null, int aiPlayerCount = 0)
     {
         var shuffledSpawnPoints = new List<Transform>(spawnPoints);
         // Fisher-Yates shuffle
@@ -80,10 +82,7 @@ public class PlayerFactory : MonoBehaviour
         for (int i = playerInputManagerController.playerInputs.Count; i < playerInputManagerController.playerInputs.Count + aiPlayerCount; i++)
         {
             var spawnPoint = shuffledSpawnPoints[i % spawnPoints.Length];
-            var aiOpponent = Instantiate(aIOpponent, spawnPoint.position, spawnPoint.rotation);
-            AIManager manager = aiOpponent.GetComponent<AIManager>();
-            manager.SetLayer(i);
-            playerList.Add(manager);
+            playerList.Add(instantiateAI(i, spawnPoint));
         }
         return playerList;
     }
@@ -134,6 +133,7 @@ public class PlayerFactory : MonoBehaviour
         player.GetComponent<HealthController>().enabled = false;
         return playerManager;
     }
+
     private PlayerManager InstantiateItemSelectPlayer(InputManager inputManager, Transform spawnPoint)
     {
         inputManager.GetComponent<Camera>().enabled = true;
@@ -143,5 +143,21 @@ public class PlayerFactory : MonoBehaviour
         playerCamera.transform.position = player.GetComponent<ItemSelectMenu>().CameraPosition.transform.position;
         StartCoroutine(player.GetComponent<ItemSelectMenu>().SpawnItems(inputManager));
         return null;
+    }
+
+    private AIManager InstantiateFPSAI(int index, Transform spawnPoint)
+    {
+        var aiOpponent = Instantiate(aIOpponent, spawnPoint.position, spawnPoint.rotation);
+        AIManager manager = aiOpponent.GetComponent<AIManager>();
+        manager.SetLayer(index);
+        return manager;
+    }
+
+    private AIManager InstantiateBiddingAI(int index, Transform spawnPoint)
+    {
+        var aiOpponent = Instantiate(aIBidder, spawnPoint.position, spawnPoint.rotation);
+        AIManager manager = aiOpponent.GetComponent<AIManager>();
+        manager.SetLayer(index);
+        return manager;
     }
 }

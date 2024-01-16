@@ -126,7 +126,7 @@ public class PlayerManager : MonoBehaviour
 
     private void Update()
     {
-        if (GunHolder)
+        if (GunHolder && inputManager)
             GunHolder.transform.forward = inputManager.transform.forward;
     }
 

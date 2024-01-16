@@ -13,12 +13,15 @@ GameObject:
   - component: {fileID: 71015680234268065}
   - component: {fileID: 9672907109803670}
   - component: {fileID: 71015680234268068}
+  - component: {fileID: 4784570542154467995}
   - component: {fileID: -437592331247616425}
   - component: {fileID: 6717855691676836013}
   - component: {fileID: 3252978923923797766}
   - component: {fileID: 7607358150439154286}
+  - component: {fileID: 181978900810785054}
+  - component: {fileID: 7050382375070386138}
   m_Layer: 0
-  m_Name: PlayerBidding
+  m_Name: AIBidding
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -49,7 +52,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 71015680234268067}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe68c66043cf4fa30b1b60bfdcd38608, type: 3}
   m_Name: 
@@ -166,10 +169,49 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &4784570542154467995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71015680234268067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e86b20ac9f969e49a2c5f6e36f48984, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  interactMask:
+    serializedVersion: 2
+    m_Bits: 0
+  maxHitDistance: 100
+  targetStartOffset: 0.28
+  overrideAimTarget: 0
+  ammoMaskItem: {fileID: 0}
+  GunHolder: {fileID: 6507685450046118291}
+  GunOrigin: {fileID: 6507685450046118291}
+  aimAssistCollider: {fileID: 0}
+  inputManager: {fileID: 0}
+  identity: {fileID: 0}
+  hudController: {fileID: 0}
+  aiTarget: {fileID: 8325754837701600379, guid: c133d38b202cbc94dbc1e02d7ee2e7ba, type: 3}
+  AiAimSpot: {fileID: 0}
+  meshBase: {fileID: 0}
+  playerIK: {fileID: 142658303258642700}
+  deathKnockbackForceMultiplier: 10
+  hitSounds: {fileID: 0}
+  extraHitSounds: {fileID: 0}
+  DestinationTarget: {fileID: 0}
+  ShootingTarget: {fileID: 0}
+  TrackedPlayers: []
+  animator: {fileID: 0}
+  ignoreMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &-437592331247616425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -195,7 +237,7 @@ MonoBehaviour:
   inputManager: {fileID: 0}
   identity: {fileID: 0}
   hudController: {fileID: 555885729091202788}
-  aiTarget: {fileID: 8325754837701600379, guid: c133d38b202cbc94dbc1e02d7ee2e7ba, type: 3}
+  aiTarget: {fileID: 0}
   AiAimSpot: {fileID: 0}
   meshBase: {fileID: 5330336945653279977}
   playerIK: {fileID: 142658303258642700}
@@ -355,6 +397,46 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!195 &181978900810785054
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71015680234268067}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &7050382375070386138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71015680234268067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fa6481de280fb5489fa0e0e0d7a7026, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  color: {r: 0, g: 0, b: 0, a: 0}
+  playerName: 
+  body: {fileID: 0}
+  barrel: {fileID: 0}
+  extension: {fileID: 0}
+  bounty: 5
 --- !u!1 &650044701630506088
 GameObject:
   m_ObjectHideFlags: 0
@@ -2533,7 +2615,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 2694035758976947706, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2074033252611582274}
+      addedObject: {fileID: 8854033448041854585}
   m_SourcePrefab: {fileID: 100100000, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
 --- !u!114 &142658303258642700 stripped
 MonoBehaviour:
@@ -2561,7 +2643,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2694035758976947706, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
   m_PrefabInstance: {fileID: 3287810421515891185}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2074033252611582274
+--- !u!114 &8854033448041854585
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2570,10 +2652,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 631494708426531851}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c85ae4dc2c19fa34f8629863582cad91, type: 3}
+  m_Script: {fileID: 11500000, guid: 052d455433a3d704bb18b5659f74ef7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerManager: {fileID: -437592331247616425}
+  playerManager: {fileID: 4784570542154467995}
   sign: {fileID: 3171690087129508767}
   signMesh: {fileID: 1762523489350611194}
   signTarget: {fileID: 245175930824897565}
