@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 9672907109803670}
   - component: {fileID: 71015680234268068}
   - component: {fileID: 4784570542154467995}
-  - component: {fileID: -437592331247616425}
   - component: {fileID: 6717855691676836013}
   - component: {fileID: 3252978923923797766}
   - component: {fileID: 7607358150439154286}
@@ -196,7 +195,7 @@ MonoBehaviour:
   GunOrigin: {fileID: 6507685450046118291}
   aimAssistCollider: {fileID: 0}
   inputManager: {fileID: 0}
-  identity: {fileID: 0}
+  identity: {fileID: 7050382375070386138}
   hudController: {fileID: 0}
   aiTarget: {fileID: 8325754837701600379, guid: c133d38b202cbc94dbc1e02d7ee2e7ba, type: 3}
   AiAimSpot: {fileID: 0}
@@ -212,38 +211,6 @@ MonoBehaviour:
   ignoreMask:
     serializedVersion: 2
     m_Bits: 0
---- !u!114 &-437592331247616425
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 71015680234268067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b92c430e6e288cc42a9a091e7fefacaf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  interactMask:
-    serializedVersion: 2
-    m_Bits: 0
-  maxHitDistance: 100
-  targetStartOffset: 0.28
-  overrideAimTarget: 0
-  ammoMaskItem: {fileID: 0}
-  GunHolder: {fileID: 6507685450046118291}
-  GunOrigin: {fileID: 6507685450046118291}
-  aimAssistCollider: {fileID: 0}
-  inputManager: {fileID: 0}
-  identity: {fileID: 0}
-  hudController: {fileID: 555885729091202788}
-  aiTarget: {fileID: 0}
-  AiAimSpot: {fileID: 0}
-  meshBase: {fileID: 5330336945653279977}
-  playerIK: {fileID: 142658303258642700}
-  deathKnockbackForceMultiplier: 10
-  hitSounds: {fileID: 11400000, guid: 90b0dc5583765d64f81545c255b0fa3a, type: 2}
-  extraHitSounds: {fileID: 11400000, guid: c5daa2802fa89a54986d53f2fc13cb8f, type: 2}
 --- !u!114 &6717855691676836013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -407,11 +374,11 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3.5
-  m_Acceleration: 8
+  m_Speed: 15
+  m_Acceleration: 15
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 0
+  m_StoppingDistance: 0.5
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -431,8 +398,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fa6481de280fb5489fa0e0e0d7a7026, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  color: {r: 0, g: 0, b: 0, a: 0}
-  playerName: 
+  color: {r: 1, g: 0.09019608, b: 0.76862746, a: 0}
+  playerName: Cogsworth
   body: {fileID: 0}
   barrel: {fileID: 0}
   extension: {fileID: 0}
@@ -2769,11 +2736,6 @@ Rigidbody:
 --- !u!136 &3287810422978762219 stripped
 CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 1496441882, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
-  m_PrefabInstance: {fileID: 3287810421515891185}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &5330336945653279977 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7230968032871701784, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
   m_PrefabInstance: {fileID: 3287810421515891185}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4192459392183155686

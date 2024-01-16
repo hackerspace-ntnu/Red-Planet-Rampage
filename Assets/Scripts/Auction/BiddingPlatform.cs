@@ -62,6 +62,7 @@ public class BiddingPlatform : MonoBehaviour
 
     public delegate void BiddingEvent(BiddingPlatform biddingPlatform);
 
+    public BiddingEvent onItemSet;
     public BiddingEvent onBiddingExtended;
     public BiddingEvent onBiddingEnd;
     public BiddingEvent onBidPlaced;
@@ -185,7 +186,7 @@ public class BiddingPlatform : MonoBehaviour
         LeanTween.sequence()
             .append(LeanTween.rotateAroundLocal(augmentModel, Vector3.up, 360, 2.5f).setLoopCount(-1))
             .append(LeanTween.moveLocalY(augmentModel, 0.01f, 3.0f).setLoopPingPong().setEaseInOutSine());
-
+        onItemSet.Invoke(this);
 #if UNITY_EDITOR
         auctionTimer.StartTimer(10);
 #else
