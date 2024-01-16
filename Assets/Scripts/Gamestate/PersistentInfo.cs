@@ -39,11 +39,13 @@ public struct EditorCombinationWins
     public int KillCount;
 }
 
+// Container for List of structs
 [System.Serializable]
 public class WinData
 {
     public List<CombinationWins> Data = new List<CombinationWins>();
 }
+
 public class PersistentInfo : MonoBehaviour
 {
     public static PersistentInfo Singleton { get; private set; }

@@ -61,30 +61,6 @@ public class PlayerFactory : MonoBehaviour
         InstantiateInputsOnSpawnpoints(InstantiateItemSelectPlayer);
     }
 
-    public List<AIManager> InstantiateAIOpponents(int amount)
-    {
-        var shuffledSpawnPoints = new List<Transform>(spawnPoints);
-        // Fisher-Yates shuffle
-        for (int i = spawnPoints.Length - 1; i > 0; i--)
-        {
-            var k = random.Next(i);
-            var firstSwapped = shuffledSpawnPoints[i];
-            shuffledSpawnPoints[i] = shuffledSpawnPoints[k];
-            shuffledSpawnPoints[k] = firstSwapped;
-        }
-        var aiList = new List<AIManager>();
-        int realPlayerCount = PlayerInputManagerController.Singleton.playerInputs.Count;
-        for (int i = 0; i < amount; i++)
-        {
-            var spawnPoint = shuffledSpawnPoints[i % spawnPoints.Length];
-            var aiOpponent = Instantiate(aIOpponent, spawnPoint.position, spawnPoint.rotation);
-            AIManager manager = aiOpponent.GetComponent<AIManager>();
-            manager.SetLayer(realPlayerCount + i);
-            aiList.Add(manager);
-        }
-        return aiList;
-    }
-
     private List<PlayerManager> InstantiateInputsOnSpawnpoints(Func<InputManager, Transform, PlayerManager> instantiate, int aiPlayerCount = 0)
     {
         var shuffledSpawnPoints = new List<Transform>(spawnPoints);
