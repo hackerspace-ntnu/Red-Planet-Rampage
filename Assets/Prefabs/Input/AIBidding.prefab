@@ -18,7 +18,6 @@ GameObject:
   - component: {fileID: 3252978923923797766}
   - component: {fileID: 7607358150439154286}
   - component: {fileID: 181978900810785054}
-  - component: {fileID: 7050382375070386138}
   m_Layer: 0
   m_Name: AIBidding
   m_TagString: Untagged
@@ -195,11 +194,11 @@ MonoBehaviour:
   GunOrigin: {fileID: 6507685450046118291}
   aimAssistCollider: {fileID: 0}
   inputManager: {fileID: 0}
-  identity: {fileID: 7050382375070386138}
+  identity: {fileID: 0}
   hudController: {fileID: 0}
   aiTarget: {fileID: 8325754837701600379, guid: c133d38b202cbc94dbc1e02d7ee2e7ba, type: 3}
   AiAimSpot: {fileID: 0}
-  meshBase: {fileID: 0}
+  meshBase: {fileID: 631494708426531851}
   playerIK: {fileID: 142658303258642700}
   deathKnockbackForceMultiplier: 10
   hitSounds: {fileID: 0}
@@ -211,6 +210,7 @@ MonoBehaviour:
   ignoreMask:
     serializedVersion: 2
     m_Bits: 0
+  biddingAI: {fileID: 8854033448041854585}
 --- !u!114 &6717855691676836013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -386,24 +386,6 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &7050382375070386138
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 71015680234268067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7fa6481de280fb5489fa0e0e0d7a7026, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  color: {r: 1, g: 0.09019608, b: 0.76862746, a: 0}
-  playerName: Cogsworth
-  body: {fileID: 0}
-  barrel: {fileID: 0}
-  extension: {fileID: 0}
-  bounty: 5
 --- !u!1 &650044701630506088
 GameObject:
   m_ObjectHideFlags: 0
@@ -2628,6 +2610,7 @@ MonoBehaviour:
   signTarget: {fileID: 245175930824897565}
   chipText: {fileID: 4500721799630237402}
   signCross: {fileID: 7511152295122280948}
+  agent: {fileID: 181978900810785054}
 --- !u!136 &2815208169435112715 stripped
 CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 770404444716995834, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}

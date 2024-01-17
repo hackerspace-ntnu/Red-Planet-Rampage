@@ -17,21 +17,29 @@ public class AIManager : PlayerManager
     private bool isDead = false;
     [SerializeField]
     private LayerMask ignoreMask;
+    public BiddingAI biddingAI;
 
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        identity = GetComponent<PlayerIdentity>();
         healthController = GetComponent<HealthController>();
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
-        SetGun(GunHolder);
-        meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
         StartCoroutine(LookForTargets());
         TrackedPlayers.ForEach(player => player.onDeath += RemovePlayer);
+    }
+
+    public void SetIdentity(PlayerIdentity identity)
+    {
+        this.identity = identity;
+        if (!biddingAI)
+            SetGun(GunHolder);
+        meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
+        if (biddingAI)
+            biddingAI.SetIdentity(identity);
     }
 
     private void RemovePlayer(PlayerManager killer, PlayerManager victim)

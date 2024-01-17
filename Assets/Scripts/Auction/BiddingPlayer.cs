@@ -30,7 +30,7 @@ public class BiddingPlayer : MonoBehaviour
         GetComponent<PlayerIK>().RightHandIKTarget = signTarget;
     }
 
-    protected void AnimateBid(InputAction.CallbackContext ctx)
+    private void AnimateBid(InputAction.CallbackContext ctx)
     {
         if (LeanTween.isTweening(signMesh.gameObject) || !currentPlatform)
             return;
@@ -72,7 +72,7 @@ public class BiddingPlayer : MonoBehaviour
         LeanTween.value(signCross.gameObject, (alpha) => signCross.alpha = alpha, 0f, 1f, 0.5f).setLoopPingPong();
     }
 
-    private void AnimateChipStatus(int chips)
+    protected void AnimateChipStatus(int chips)
     {
         chipText.text = chips.ToString();
     }
