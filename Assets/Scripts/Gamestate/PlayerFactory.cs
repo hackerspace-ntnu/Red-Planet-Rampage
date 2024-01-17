@@ -159,7 +159,7 @@ public class PlayerFactory : MonoBehaviour
 
         PlayerIdentity identity = null;
 
-        if (MatchController.Singleton.AIs.Count == 0)
+        if (existingAiIdentities.Count == 0)
         {
             var identityObject = Instantiate(aiIdentity);
             identity = identityObject.GetComponent<PlayerIdentity>();
@@ -169,7 +169,7 @@ public class PlayerFactory : MonoBehaviour
         var aiOpponent = Instantiate(aIOpponent, spawnPoint.position, spawnPoint.rotation);
         AIManager manager = aiOpponent.GetComponent<AIManager>();
         manager.SetLayer(index);
-        manager.SetIdentity(identity ? identity : MatchController.Singleton.AIs[index - playerInputManagerController.playerInputs.Count]);
+        manager.SetIdentity(identity ? identity : existingAiIdentities[index - playerInputManagerController.playerInputs.Count]);
         return manager;
     }
 

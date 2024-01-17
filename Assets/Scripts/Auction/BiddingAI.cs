@@ -89,7 +89,7 @@ public class BiddingAI : BiddingPlayer
     {
         if (!currentDestination)
             return;
-        if (agent.remainingDistance > 0.1f)
+        if (agent.remainingDistance > 0.01f)
             return;
         AnimateBid();
         currentDestination.TryPlaceBid(playerManager.identity);

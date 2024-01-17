@@ -75,7 +75,6 @@ public class MatchController : MonoBehaviour
 
     private List<Player> players = new List<Player>();
     public List<Player> Players { get { return players; } }
-    public List<PlayerIdentity> AIs = new List<PlayerIdentity>();
     private List<CollectableChip> collectableChips;
 
     private static List<Round> rounds = new List<Round>();
@@ -138,8 +137,6 @@ public class MatchController : MonoBehaviour
         aiPLayers.ForEach(ai => 
                 ai.TrackedPlayers = players.Select(player => player.playerManager)
                     .Where(player => player != ai).ToList());
-        if (AIs.Count > 0)
-            AIs = aiPLayers.Select(ai => ai.identity).ToList();
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
         onRoundStart?.Invoke();
