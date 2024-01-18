@@ -259,8 +259,12 @@ public class MatchController : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
-        // Update playerInputs in preperation for Menu scene
+        // Update playerInputs / identities in preperation for Menu scene
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
+        // Remove AI identities
+        FindObjectsOfType<PlayerIdentity>()
+            .Where(identity => !identity.GetComponent<InputManager>())
+            .ToList().ForEach(aiIdentity => Destroy(aiIdentity));
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
         rounds = new List<Round>();

@@ -373,11 +373,11 @@ NavMeshAgent:
   m_GameObject: {fileID: 71015680234268067}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.5
-  m_Speed: 15
+  m_Radius: 1
+  m_Speed: 30
   m_Acceleration: 15
   avoidancePriority: 50
-  m_AngularSpeed: 120
+  m_AngularSpeed: 320
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
@@ -2611,6 +2611,8 @@ MonoBehaviour:
   chipText: {fileID: 4500721799630237402}
   signCross: {fileID: 7511152295122280948}
   agent: {fileID: 181978900810785054}
+  animator: {fileID: 289053663840324231}
+  currentDestination: {fileID: 0}
 --- !u!136 &2815208169435112715 stripped
 CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 770404444716995834, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}

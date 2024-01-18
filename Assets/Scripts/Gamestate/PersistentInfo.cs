@@ -70,7 +70,7 @@ public class PersistentInfo : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
-
+        CreateDefaultFile();
         if (File.Exists(Application.persistentDataPath + "/PersistentInfo.dat") == true)
         {
             LoadPersistentFile();
@@ -112,7 +112,7 @@ public class PersistentInfo : MonoBehaviour
         FileStream persistentDataStream = File.Create(Application.persistentDataPath + "/PersistentInfo.dat");
         var dataContainer = new WinData();
         DefaultCombinationStats.ToList()
-            .Select(entry => new CombinationWins(entry.Barrel, entry.Barrel, entry.Extension, entry.KillCount))
+            .Select(entry => new CombinationWins(entry.Body, entry.Barrel, entry.Extension, entry.KillCount))
             .ToList()
             .ForEach(entry => dataContainer.Data.Add(entry));
         persistentDataFormatter.Serialize(persistentDataStream, dataContainer);

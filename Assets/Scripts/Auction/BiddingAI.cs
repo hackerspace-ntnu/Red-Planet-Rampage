@@ -9,7 +9,10 @@ public class BiddingAI : BiddingPlayer
 {
     [SerializeField]
     private NavMeshAgent agent;
-    private List<(BiddingPlatform, int)> priorities = new List<(BiddingPlatform, int)>();
+    [SerializeField]
+    private Animator animator;
+    private Dictionary<BiddingPlatform, int> priorities = new Dictionary<BiddingPlatform, int>();
+    [SerializeField]
     private BiddingPlatform currentDestination;
     void Start()
     {
@@ -18,40 +21,51 @@ public class BiddingAI : BiddingPlayer
         foreach (var platform in AuctionDriver.Singleton.BiddingPlatforms)
         {
             platform.onItemSet += EvaluateItem;
+            platform.onItemSet += EvaluatePlatformStates;
             platform.onBidPlaced += EvaluatePlatformStates;
             platform.onBiddingEnd += EvaluatePlatformStates;
         }
-
+        playerManager.onSelectedBiddingPlatformChange += OnBiddingPlatformChange;
         playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
     }
 
     public void SetIdentity(PlayerIdentity identity)
     {
-        chipText.text = playerManager.identity.chips.ToString();
-        playerManager.identity.onChipChange += AnimateChipStatus;
+        chipText.text = identity.chips.ToString();
+        identity.onChipChange += AnimateChipStatus;
     }
 
     private void EvaluatePlatformStates(BiddingPlatform platform)
     {
         if (platform.LeadingBidder == playerManager.identity)
             return;
+        /*
+        priorities.(platformTupple =>
+        {
+            if (platformTupple.Item1.chips >= playerManager.identity.chips) 
+            {
+                platformTupple.Item1.onBidPlaced -= EvaluateItem;
+                platformTupple.Item1.onBidPlaced -= EvaluatePlatformStates;
+                platformTupple.Item2 = -1;
+            }});
+            
+        priorities.OrderByDescending(priority => priority.Item2)
+            .ToList().ForEach(x => Debug.Log("item: " + x.Item1.Item.displayName + "Prio : "+ x.Item2));
+        currentDestination = priorities.OrderByDescending(priority => priority.Item2)
+            .Select(priority => priority.Item1).FirstOrDefault();
+            */
         if (platform.chips >= playerManager.identity.chips)
-        {
-            var platformToRemove = priorities.Where(entry => entry.Item1 == platform).FirstOrDefault();
-            priorities.Remove(platformToRemove);
-            platform.onBidPlaced -= EvaluateItem;
-        }
+            priorities[platform] = -1;
 
-        var targets = priorities.OrderByDescending(priority => priority.Item2);
+        currentDestination = priorities.ToList()
+            .OrderByDescending(x => x.Value)
+            .Select(x => x.Key).First();
 
-        if (targets.Count() <= 0)
-        {
-            currentDestination = null;
-            return;
-        }
+        if (currentDestination)
+            agent.SetDestination(currentDestination.transform.position);
 
-        currentDestination = targets.First().Item1;
-
+        if (currentDestination == playerManager.SelectedBiddingPlatform)
+            OnBiddingPlatformChange(currentDestination);
     }
 
     private void EvaluateItem(BiddingPlatform platform)
@@ -60,19 +74,20 @@ public class BiddingAI : BiddingPlayer
         switch (platform.Item.augmentType)
         {
             case AugmentType.Body:
-                priority = PersistentInfo.CombinationStats.Where(stat => stat.Body == platform.Item.name)
+                priority = PersistentInfo.CombinationStats.Where(stat => stat.Body.Equals(platform.Item.displayName))
                     .Sum((augment) => augment.KillCount);
                 break;
             case AugmentType.Barrel:
-                priority = PersistentInfo.CombinationStats.Where(stat => stat.Barrel == platform.Item.name)
+                priority = PersistentInfo.CombinationStats.Where(stat => stat.Barrel.Equals(platform.Item.displayName))
                     .Sum((augment) => augment.KillCount);
                 break;
             case AugmentType.Extension:
-                priority = PersistentInfo.CombinationStats.Where(stat => stat.Extension == platform.Item.name)
+                priority = PersistentInfo.CombinationStats.Where(stat => stat.Extension.Equals(platform.Item.displayName))
                     .Sum((augment) => augment.KillCount);
                 break;
         }
-        priorities.Add((platform, priority));
+        priorities.Add(platform, priority);
+        agent.SetDestination(platform.transform.position);
     }
 
     private void AnimateBid()
@@ -85,14 +100,21 @@ public class BiddingAI : BiddingPlayer
             .append(LeanTween.rotateAroundLocal(signMesh.gameObject, Vector3.right, -90, 0.4f));
     }
 
+    private void OnBiddingPlatformChange(BiddingPlatform platform)
+    {
+        if (platform != currentDestination)
+            return;
+
+        AnimateBid();
+        currentDestination.TryPlaceBid(playerManager.identity);
+        currentDestination = null;
+    }
+
     private void Update()
     {
         if (!currentDestination)
             return;
-        if (agent.remainingDistance > 0.01f)
-            return;
-        AnimateBid();
-        currentDestination.TryPlaceBid(playerManager.identity);
-        currentDestination = null;
+        animator.SetFloat("Forward", Vector3.Dot(agent.velocity, transform.forward) / agent.speed);
+        animator.SetFloat("Right", Vector3.Dot(agent.velocity, transform.right) / agent.speed);
     }
 }
