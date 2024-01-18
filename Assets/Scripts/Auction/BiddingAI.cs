@@ -39,21 +39,7 @@ public class BiddingAI : BiddingPlayer
     {
         if (platform.LeadingBidder == playerManager.identity)
             return;
-        /*
-        priorities.(platformTupple =>
-        {
-            if (platformTupple.Item1.chips >= playerManager.identity.chips) 
-            {
-                platformTupple.Item1.onBidPlaced -= EvaluateItem;
-                platformTupple.Item1.onBidPlaced -= EvaluatePlatformStates;
-                platformTupple.Item2 = -1;
-            }});
-            
-        priorities.OrderByDescending(priority => priority.Item2)
-            .ToList().ForEach(x => Debug.Log("item: " + x.Item1.Item.displayName + "Prio : "+ x.Item2));
-        currentDestination = priorities.OrderByDescending(priority => priority.Item2)
-            .Select(priority => priority.Item1).FirstOrDefault();
-            */
+
         if (platform.chips >= playerManager.identity.chips)
             priorities[platform] = -1;
 
