@@ -6,6 +6,8 @@ public class MatchRules : MonoBehaviour
 
     public Ruleset Rules;
 
+    public void Initialize() => Rules.Initialize();
+
     private void Awake()
     {
         #region Singleton boilerplate

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using CollectionExtensions;
 using UnityEngine;
 
@@ -131,7 +132,6 @@ public class PlayerIdentity : MonoBehaviour
                 extension = StaticInfo.Singleton.StartingExtension;
                 break;
 
-            // TODO implement shared random somehow?
             case StartingWeaponType.IndividualRandom:
                 body = StaticInfo.Singleton.Bodies.RandomElement();
                 barrel = StaticInfo.Singleton.Barrels.RandomElement();
@@ -149,7 +149,11 @@ public class PlayerIdentity : MonoBehaviour
         Bodies.Add(body);
         Barrels.Add(barrel);
         Extensions.Add(extension);
-        chips = 0;
+
+        foreach (var reward in MatchRules.Singleton.Rules.Rewards.Where(r => r.Condition == RewardCondition.Start))
+        {
+            AssignReward(reward);
+        }
     }
 
     public void SetLoadout(Item body, Item barrel, Item extension)

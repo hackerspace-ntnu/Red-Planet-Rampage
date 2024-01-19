@@ -43,11 +43,8 @@ public class Round
     private readonly List<PlayerManager> livingPlayers = new List<PlayerManager>();
     public readonly ReadOnlyCollection<PlayerManager> LivingPlayers;
 
-    private readonly RoundWinCondition winCondition;
-
     public Round(IEnumerable<PlayerManager> roundPlayers)
     {
-        winCondition = MatchRules.Singleton.Rules.RoundWinCondition;
         players = new List<PlayerManager>(roundPlayers);
         livingPlayers = new List<PlayerManager>(roundPlayers);
         kills = new ReadOnlyDictionary<PlayerManager, List<PlayerManager>>(players.ToDictionary(

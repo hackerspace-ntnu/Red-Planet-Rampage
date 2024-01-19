@@ -1,7 +1,7 @@
 using CollectionExtensions;
 using UnityEngine;
 
-// TODO we need a stopcondition as well, actually!
+// TODO we need a stop condition as well, actually!
 public enum MatchWinConditionType
 {
     Wins,

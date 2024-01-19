@@ -11,7 +11,7 @@ using System;
 [Serializable]
 public struct Player
 {
-    public Player(PlayerIdentity playerIdentity, PlayerManager playerManager, int startAmount)
+    public Player(PlayerIdentity playerIdentity, PlayerManager playerManager)
     {
         this.playerIdentity = playerIdentity;
         this.playerManager = playerManager;
@@ -48,21 +48,6 @@ public class MatchController : MonoBehaviour
 
     [SerializeField]
     private float matchEndDelay = 5;
-
-
-    [Header("Chip rewards")]
-    [SerializeField]
-    private int startAmount = 5;
-    public int StartAmount => startAmount;
-    [SerializeField]
-    private int rewardWin = 1;
-    public int RewardWin => rewardWin;
-    [SerializeField]
-    private int rewardKill = 1;
-    public int RewardKill => rewardKill;
-    [SerializeField]
-    private int rewardBase = 2;
-    public int RewardBase => rewardBase;
 
     public Timer roundTimer;
 
@@ -129,7 +114,7 @@ public class MatchController : MonoBehaviour
         {
             var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
             var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
-            players.Add(new Player(playerIdentity, playerStateController, startAmount));
+            players.Add(new Player(playerIdentity, playerStateController));
         });
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
@@ -200,7 +185,7 @@ public class MatchController : MonoBehaviour
                         break;
                     case RewardCondition.Kill:
                         var calculatedReward = reward;
-                        calculatedReward.Amount = lastRound.KillCount(player.playerManager);
+                        calculatedReward.Amount = reward.Amount * lastRound.KillCount(player.playerManager);
                         player.playerManager.identity.AssignReward(calculatedReward);
                         break;
                     case RewardCondition.Win:
