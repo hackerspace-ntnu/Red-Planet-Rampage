@@ -88,8 +88,6 @@ public class Round
         MatchController.Singleton.onRoundEnd -= OnRoundEnd;
     }
 
-    //TODO: Create struct for damagecontext with info about who was killed as parameter instead
-    // (Currently waiting for damage/basic gunplay)
     private void OnDeath(PlayerManager killer, PlayerManager victim)
     {
 #if DEBUG
@@ -108,6 +106,7 @@ public class Round
             kills[killer].Add(victim);
             CheckWinCondition(killer);
         }
+
         // If it was a suicide, we should give the surviving player the win if there's only one
         else if (livingPlayers.Count < 2)
         {
