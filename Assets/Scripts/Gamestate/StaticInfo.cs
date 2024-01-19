@@ -55,6 +55,11 @@ public class StaticInfo : MonoBehaviour
     public ReadOnlyArray<Item> Extensions;
     public ReadOnlyArray<OverrideName> SecretNames;
 
+    [Header("Settings")]
+    [SerializeField]
+    private float cameraFov;
+    public float CameraFov => cameraFov;
+
     void Start()
     {
         #region Singleton boilerplate

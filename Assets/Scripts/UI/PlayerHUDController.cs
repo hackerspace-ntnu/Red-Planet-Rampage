@@ -30,6 +30,8 @@ public class PlayerHUDController : MonoBehaviour
     private const float ammoSpinDegrees = 30;
     private const float availableDegrees = 270;
 
+    private int ammoTween;
+
 
     [Header("Death")]
 
@@ -73,6 +75,7 @@ public class PlayerHUDController : MonoBehaviour
 
     [SerializeField]
     private RectTransform scopeZoom;
+    private int scopeTween;
 
 
     void Start()
@@ -127,16 +130,16 @@ public class PlayerHUDController : MonoBehaviour
 
     public void UpdateOnFire(float ammoPercent)
     {
-        if (LeanTween.isTweening(ammoHud.gameObject))
+        if (LeanTween.isTweening(ammoTween))
         {
-            LeanTween.cancel(ammoHud.gameObject);
+            LeanTween.cancel(ammoTween);
             ammoBar.gameObject.transform.eulerAngles = new Vector3(ammoBar.gameObject.transform.eulerAngles.x, ammoBar.gameObject.transform.eulerAngles.y, 0);
         }
 
         ammoCapacityMaterial.SetFloat("_Arc2", (1 - ammoPercent) * availableDegrees);
-        ammoHud.gameObject.LeanRotateAroundLocal(Vector3.forward, ammoSpinDegrees, 0.5f).setEaseSpring()
+        ammoTween = ammoHud.gameObject.LeanRotateAroundLocal(Vector3.forward, ammoSpinDegrees, 0.5f).setEaseSpring()
             .setOnStart(
-            () => ammoBar.gameObject.transform.Rotate(new Vector3(0, 0, -ammoSpinDegrees)));
+            () => ammoBar.gameObject.transform.Rotate(new Vector3(0, 0, -ammoSpinDegrees))).id;
     }
 
     public void UpdateOnReload(float ammoPercent)
@@ -160,7 +163,9 @@ public class PlayerHUDController : MonoBehaviour
 
     public void TweenScope(float alpha, float seconds)
     {
-        scopeZoom.LeanAlpha(alpha, seconds).setEaseInOutCubic();
+        if (LeanTween.isTweening(scopeTween))
+            LeanTween.cancel(scopeTween);
+        scopeTween = scopeZoom.LeanAlpha(alpha, seconds).setEaseInOutCubic().id;
     }
 
     public void UpdateDamageBorder(float intensity)

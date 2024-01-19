@@ -359,7 +359,7 @@ public class PlayerManager : MonoBehaviour
 
     private void PlayOnHit()
     {
-        if (Random.Range(0, 1000) > 5)
+        if (Random.Range(0, 10000) > 5)
         {
             hitSounds.Play(audioSource);
         }
