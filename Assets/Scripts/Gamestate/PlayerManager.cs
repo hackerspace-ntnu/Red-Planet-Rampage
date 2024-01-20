@@ -174,7 +174,7 @@ public class PlayerManager : MonoBehaviour
         if (inputManager)
             ragdollController.ReparentCamera(inputManager.transform);
 
-        var force = info.force.normalized * info.damage * deathKnockbackForceMultiplier;
+        var force = info.force.normalized * Mathf.Log(info.damage) * deathKnockbackForceMultiplier;
         ragdollController.EnableRagdoll(force);
     }
 
