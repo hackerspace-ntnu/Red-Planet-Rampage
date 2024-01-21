@@ -47,6 +47,8 @@ public class GunController : MonoBehaviour
     public void SetPlayer(PlayerManager player)
     {
         Player = player;
+        if (!Player.inputManager)
+            return;
         Player.inputManager.onZoomPerformed += OnZoom;
         Player.inputManager.onZoomCanceled += OnZoomCanceled;
 
@@ -64,6 +66,8 @@ public class GunController : MonoBehaviour
     private void Start()
     {
         var barrel = GetComponentInChildren<GunBarrel>();
+        if (!barrel)
+            return;
         barrelAnimator = barrel.GetComponentInChildren<AugmentAnimator>();
         barrelAnimator.OnShotFiredAnimation += PlayRecoil;
         barrelAnimator.OnShotFiredAnimation += ShotFired;

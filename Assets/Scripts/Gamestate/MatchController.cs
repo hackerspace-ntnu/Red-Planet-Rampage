@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 using System;
+using CollectionExtensions;
 
 /// <summary>
 /// Wrapper struct for tying refference to Player class with the in-game player.
@@ -74,6 +75,7 @@ public class MatchController : MonoBehaviour
 
     private List<Player> players = new List<Player>();
     public List<Player> Players { get { return players; } }
+    private List<CollectableChip> collectableChips;
 
     private static List<Round> rounds = new List<Round>();
     public Round GetLastRound { get { return rounds[rounds.Count - 1]; } }
@@ -114,7 +116,7 @@ public class MatchController : MonoBehaviour
         // Makes shooting end quickly if testing with 1 player
 #if UNITY_EDITOR
         if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
-            roundLength = 5f;
+            roundLength = 100f;
 #endif
 
         StartNextRound();
@@ -122,15 +124,19 @@ public class MatchController : MonoBehaviour
 
     public void StartNextRound()
     {
+        collectableChips = FindObjectsOfType<CollectableChip>().ToList();
         // Setup of playerInputs
-        playerFactory.InstantiatePlayersFPS();
+        playerFactory.InstantiatePlayersFPS(4 - PlayerInputManagerController.Singleton.playerInputs.Count)
+            .ForEach(player => players.Add(new Player(player.identity, player, startAmount)));
 
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput =>
-        {
-            var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
-            var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
-            players.Add(new Player(playerIdentity, playerStateController, startAmount));
-        });
+        var aiPLayers = players.Where(player => player.playerManager is AIManager)
+            .Select(player => player.playerManager)
+            .Cast<AIManager>()
+            .ToList();
+
+        aiPLayers.ForEach(ai => 
+                ai.TrackedPlayers = players.Select(player => player.playerManager)
+                    .Where(player => player != ai).ToList());
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
         onRoundStart?.Invoke();
@@ -230,6 +236,17 @@ public class MatchController : MonoBehaviour
             return false;
         }
     }
+    public void RemoveChip(CollectableChip chip)
+    {
+        collectableChips.Remove(chip);
+    }
+
+    public Transform? GetRandomActiveChip()
+    {
+        if (collectableChips.Count == 0)
+            return null;
+        return collectableChips.RandomElement().transform;
+    }
 
     private IEnumerator DisplayWinScreenAndRestart(PlayerIdentity winner)
     {
@@ -242,8 +259,12 @@ public class MatchController : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
-        // Update playerInputs in preperation for Menu scene
+        // Update playerInputs / identities in preperation for Menu scene
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
+        // Remove AI identities
+        FindObjectsOfType<PlayerIdentity>()
+            .Where(identity => identity.IsAI)
+            .ToList().ForEach(aiIdentity => Destroy(aiIdentity));
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
         rounds = new List<Round>();

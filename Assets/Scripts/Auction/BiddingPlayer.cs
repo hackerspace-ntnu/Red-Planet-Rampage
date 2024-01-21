@@ -5,19 +5,19 @@ using UnityEngine.InputSystem;
 public class BiddingPlayer : MonoBehaviour
 {
     [SerializeField]
-    private PlayerManager playerManager;
+    protected PlayerManager playerManager;
     [SerializeField]
-    private Transform sign;
+    protected Transform sign;
     [SerializeField]
-    private Transform signMesh;
+    protected Transform signMesh;
     [SerializeField]
-    private Transform signTarget;
+    protected Transform signTarget;
 
     [SerializeField]
-    private TMP_Text chipText;
+    protected TMP_Text chipText;
     [SerializeField]
-    private TMP_Text signCross;
-    private BiddingPlatform currentPlatform = null;
+    protected TMP_Text signCross;
+    protected BiddingPlatform currentPlatform = null;
 
     private void Start()
     {
@@ -29,6 +29,7 @@ public class BiddingPlayer : MonoBehaviour
         chipText.text = playerManager.identity.chips.ToString();
         GetComponent<PlayerIK>().RightHandIKTarget = signTarget;
     }
+
     private void AnimateBid(InputAction.CallbackContext ctx)
     {
         if (LeanTween.isTweening(signMesh.gameObject) || !currentPlatform)
@@ -39,7 +40,7 @@ public class BiddingPlayer : MonoBehaviour
             .append(LeanTween.rotateAroundLocal(signMesh.gameObject, Vector3.right, -90, 0.4f));
     }
 
-    private void AnimateChipStatus(BiddingPlatform platform)
+    protected void AnimateChipStatus(BiddingPlatform platform)
     {
         if (currentPlatform)
             currentPlatform.onBidPlaced -= AnimateSign;
@@ -57,7 +58,7 @@ public class BiddingPlayer : MonoBehaviour
         AnimateSign(platform);
     }
 
-    private void AnimateSign(BiddingPlatform platform)
+    protected void AnimateSign(BiddingPlatform platform)
     {
         bool isLeaderAndCanBid = (platform.LeadingBidder == playerManager.identity) && (playerManager.identity.chips > 0);
         if (platform.chips < playerManager.identity.chips || isLeaderAndCanBid)
@@ -71,7 +72,7 @@ public class BiddingPlayer : MonoBehaviour
         LeanTween.value(signCross.gameObject, (alpha) => signCross.alpha = alpha, 0f, 1f, 0.5f).setLoopPingPong();
     }
 
-    private void AnimateChipStatus(int chips)
+    protected void AnimateChipStatus(int chips)
     {
         chipText.text = chips.ToString();
     }

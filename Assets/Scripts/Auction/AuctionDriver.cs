@@ -19,6 +19,8 @@ public class AuctionDriver : MonoBehaviour
 
     [SerializeField]
     private BiddingPlatform[] biddingPlatforms;
+    [HideInInspector]
+    public BiddingPlatform[] BiddingPlatforms => biddingPlatforms;
     private RandomisedAuctionStage[] availableAuctionStages;
 
     [SerializeField]
@@ -79,7 +81,7 @@ public class AuctionDriver : MonoBehaviour
         };
 
         playerFactory = GetComponent<PlayerFactory>();
-        playerFactory.InstantiatePlayersBidding();
+        playerFactory.InstantiatePlayersBidding(4 - PlayerInputManagerController.Singleton.playerInputs.Count);
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
 
         AnimateAuctionStart();

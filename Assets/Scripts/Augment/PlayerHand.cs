@@ -15,10 +15,12 @@ public class PlayerHand : MonoBehaviour
     public void SetPlayer(PlayerManager player)
     {
         handMaterial.material.color = player.identity.color;
-        var cullingLayer = LayerMask.NameToLayer("Gun " + player.inputManager.playerInput.playerIndex);
-        gameObject.layer = cullingLayer;
-        mesh.layer = cullingLayer;
-
+        if (player.inputManager)
+        {
+            var cullingLayer = LayerMask.NameToLayer("Gun " + player.inputManager.playerInput.playerIndex);
+            gameObject.layer = cullingLayer;
+            mesh.layer = cullingLayer;
+        }
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += DisableHand;
         player.onDeath += DisableHand;

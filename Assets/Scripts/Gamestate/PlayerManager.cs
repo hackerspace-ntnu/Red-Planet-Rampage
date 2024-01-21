@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 public class PlayerManager : MonoBehaviour
 {
     // Layers 12 through 15 are gun layers.
-    private static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
+    protected static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
     // Only Default and HitBox layers can be hit
     private static int hitMask = 1 | (1 << 3);
@@ -34,13 +34,13 @@ public class PlayerManager : MonoBehaviour
 
     public HitEvent onDeath;
 
-    private PlayerManager lastPlayerThatHitMe;
+    protected PlayerManager lastPlayerThatHitMe;
 
     public delegate void BiddingPlatformEvent(BiddingPlatform platform);
     public BiddingPlatformEvent onSelectedBiddingPlatformChange;
 
     [SerializeField]
-    private Item ammoMaskItem;
+    protected Item ammoMaskItem;
 
     [SerializeField]
     public Transform GunHolder;
@@ -48,7 +48,7 @@ public class PlayerManager : MonoBehaviour
     public Transform GunOrigin;
 
     [SerializeField]
-    private GameObject aimAssistCollider;
+    protected GameObject aimAssistCollider;
 
     [Header("Related objects")]
 
@@ -59,14 +59,28 @@ public class PlayerManager : MonoBehaviour
     private PlayerHUDController hudController;
     public PlayerHUDController HUDController => hudController;
 
+    [SerializeField]
+    protected GameObject aiTarget;
+    protected AITarget aiTargetCollider;
+    public Transform AiAimSpot;
+    public Transform AiTarget
+    {   
+        get 
+        {
+            if (!aiTargetCollider)
+                return transform;
+            return aiTargetCollider.transform;
+        }
+    }
+
 
     [Header("Physics")]
 
     [SerializeField]
-    private GameObject meshBase;
+    protected GameObject meshBase;
 
     [SerializeField]
-    private PlayerIK playerIK;
+    protected PlayerIK playerIK;
     public PlayerIK PlayerIK => playerIK;
 
     [SerializeField]
@@ -84,10 +98,10 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    private GunController gunController;
+    protected GunController gunController;
     public GunController GunController => gunController;
 
-    private HealthController healthController;
+    protected HealthController healthController;
 
     [Header("Hit sounds")]
 
@@ -105,17 +119,21 @@ public class PlayerManager : MonoBehaviour
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
         audioSource = GetComponent<AudioSource>();
+        aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
+        aiTargetCollider.Owner = this;
+        aiTargetCollider.transform.position = transform.position;
     }
 
     private void Update()
     {
-        if (GunHolder)
+        if (GunHolder && inputManager)
             GunHolder.transform.forward = inputManager.transform.forward;
     }
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
-        hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
+        if (hudController)
+            hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
         PlayOnHit();
         if (info.sourcePlayer != this)
         {
@@ -133,10 +151,11 @@ public class PlayerManager : MonoBehaviour
         onDeath?.Invoke(killer, this);
         aimAssistCollider.SetActive(false);
         TurnIntoRagdoll(info);
+        aiTargetCollider.gameObject.SetActive(false);
         hudController.DisplayDeathScreen(killer.identity);
     }
 
-    void TurnIntoRagdoll(DamageInfo info)
+    protected void TurnIntoRagdoll(DamageInfo info)
     {
         GetComponent<Rigidbody>().GetAccumulatedForce();
         // Disable components
@@ -152,8 +171,8 @@ public class PlayerManager : MonoBehaviour
         // TODO: Make accurate hitbox forces for the different limbs of the player
 
         var ragdollController = GetComponent<RagdollController>();
-
-        ragdollController.ReparentCamera(inputManager.transform);
+        if (inputManager)
+            ragdollController.ReparentCamera(inputManager.transform);
 
         var force = info.force.normalized * info.damage * deathKnockbackForceMultiplier;
         ragdollController.EnableRagdoll(force);
@@ -277,7 +296,7 @@ public class PlayerManager : MonoBehaviour
         selectedBiddingPlatform.TryPlaceBid(identity);
     }
 
-    IEnumerator UnpressTrigger()
+    protected IEnumerator UnpressTrigger()
     {
         yield return new WaitForFixedUpdate();
         gunController.triggerPressed = false;
@@ -288,7 +307,7 @@ public class PlayerManager : MonoBehaviour
         gunController.triggerHeld = false;
     }
 
-    public void SetLayer(int playerIndex)
+    public virtual void SetLayer(int playerIndex)
     {
         int playerLayer = LayerMask.NameToLayer("Player " + playerIndex);
 
@@ -311,7 +330,7 @@ public class PlayerManager : MonoBehaviour
         SetLayerOnSubtree(meshBase, playerLayer);
     }
 
-    public void SetGun(Transform offset)
+    public virtual void SetGun(Transform offset)
     {
         overrideAimTarget = false;
         var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, this, offset);
@@ -343,7 +362,7 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    private void SetLayerOnSubtree(GameObject node, int layer)
+    protected void SetLayerOnSubtree(GameObject node, int layer)
     {
         node.layer = layer;
         foreach (Transform child in node.transform)

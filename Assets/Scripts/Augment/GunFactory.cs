@@ -56,6 +56,17 @@ public class GunFactory : MonoBehaviour
         return gun;
     }
 
+    public static GameObject InstantiateGunAI(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, AIManager owner, Transform parent)
+    {
+        GunFactory displayGun = owner.GunOrigin.gameObject.AddComponent<GunFactory>();
+        displayGun.Body = bodyPrefab;
+        displayGun.Barrel = barrelPrefab;
+        displayGun.Extension = extensionPrefab;
+        displayGun.InitializeGun(owner);
+
+        return displayGun.gameObject;
+    }
+
     private static void SetGunLayer(GunFactory gunFactory, int cullingLayer)
     {
         gunFactory.gameObject.layer = cullingLayer;
