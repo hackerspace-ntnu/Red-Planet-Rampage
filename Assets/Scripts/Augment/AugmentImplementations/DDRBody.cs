@@ -50,7 +50,10 @@ public class DDRBody : GunBody
     [SerializeField]
     private Precision[] precisionsGoodToBad;
 
-    LTDescr arrowMover;
+    int arrowMoverTween;
+    int screenFlasherTween;
+    int screenPulseAnimatorTween;
+    int textAnimatorTween;
 
     private float secondsPerUnitHeight;
     private float musicPace;
@@ -82,16 +85,16 @@ public class DDRBody : GunBody
                 ? MusicTrackManager.Singleton.TrackOffset
                 : secondsPerArrow - (MusicTrackManager.Singleton.TimeSinceTrackStart % secondsPerArrow);
 
-            arrowMover = LeanTween.value(gameObject, SetArrowHeigth, startHeight, screenHeight, secondsPerUnitHeight * (screenHeight - startHeight))
+            arrowMoverTween = LeanTween.value(gameObject, SetArrowHeigth, startHeight, screenHeight, secondsPerUnitHeight * (screenHeight - startHeight))
                 .setDelay(delay)
                 .setRepeat(-1)
-                .setOnComplete(ResetArrow);
+                .setOnComplete(ResetArrow).id;
 
-            LeanTween.value(gameObject, SetBackgroundZoom, 0.5f, 1.5f, musicPace)
+            screenPulseAnimatorTween = LeanTween.value(gameObject, SetBackgroundZoom, 0.5f, 1.5f, musicPace)
                 .setDelay(delay)
                 .setLoopPingPong()
                 .setOnComplete(
-                () => animator.OnFire(gunController.stats));
+                () => animator.OnFire(gunController.stats)).id;
 
             animator.OnInitialize(gunController.stats);
 
@@ -118,16 +121,18 @@ public class DDRBody : GunBody
 
         if (!precision.HasValue)
             return;
-
+        if (LeanTween.isTweening(textAnimatorTween))
+            LeanTween.cancel(textAnimatorTween);
         precisionText.enabled = true;
         precisionText.text = precision.Value.text;
         precisionText.color = precision.Value.color;
-        precisionText.gameObject.LeanScale(new Vector3(1.1f, 1.1f, 1.1f), 0.5f)
+        textAnimatorTween = LeanTween.scale(precisionText.gameObject, new Vector3(1.1f, 1.1f, 1.1f), 0.5f)
             .setEasePunch()
             .setOnComplete(
-            () => precisionText.enabled = false);
-
-        LeanTween.value(gameObject, SetFlashFactor, 0, 50f, 0.5f).setEasePunch();
+            () => precisionText.enabled = false).id;
+        if (LeanTween.isTweening(screenFlasherTween))
+            LeanTween.cancel(screenFlasherTween);
+        screenFlasherTween = LeanTween.value(gameObject, SetFlashFactor, 0, 50f, 0.5f).setEasePunch().id;
 
         gunController.Reload(reloadEfficiencyPercentage * precision.Value.awardFactor);
         animator.OnReload(gunController.stats);
@@ -169,11 +174,12 @@ public class DDRBody : GunBody
 
     private void ResetAndStartArrowTween()
     {
-        LeanTween.cancel(arrowMover.id);
+        if (LeanTween.isTweening(arrowMoverTween))
+            LeanTween.cancel(arrowMoverTween);
         ResetArrow();
-        arrowMover = LeanTween.value(gameObject, SetArrowHeigth, arrowHeight, screenHeight, secondsPerUnitHeight * (screenHeight - arrowHeight))
+        arrowMoverTween = LeanTween.value(gameObject, SetArrowHeigth, arrowHeight, screenHeight, secondsPerUnitHeight * (screenHeight - arrowHeight))
             .setRepeat(-1)
-            .setOnComplete(ResetArrow);
+            .setOnComplete(ResetArrow).id;
     }
 
     private void SetArrowHeigth(float heigth)

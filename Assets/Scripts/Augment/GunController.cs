@@ -58,7 +58,8 @@ public class GunController : MonoBehaviour
 
     private bool isFiring = false;
 
-    private LTDescr recoilTween;
+    private int recoilTween;
+    private int zoomTween;
 
     private void Start()
     {
@@ -164,14 +165,14 @@ public class GunController : MonoBehaviour
 
     public void PlayRecoil(GunStats stats)
     {
-        if (recoilTween != null)
+        if (LeanTween.isTweening(recoilTween))
         {
-            LeanTween.cancel(recoilTween.id);
+            LeanTween.cancel(recoilTween);
             transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, localGunZOffset);
         }
         var moveAmount = Player != null ? 0.3f : 0.6f;
         // TODO reduce tween time based on fire rate
-        recoilTween = gameObject.LeanMoveLocalZ(moveAmount, 0.2f).setEasePunch();
+        recoilTween = gameObject.LeanMoveLocalZ(moveAmount, 0.2f).setEasePunch().id;
     }
 
     private void ShotFired()

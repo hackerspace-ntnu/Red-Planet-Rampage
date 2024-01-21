@@ -117,6 +117,11 @@ public class PlayerMovement : MonoBehaviour
     public delegate void MovementEventBody(Rigidbody body);
     public MovementEventBody onMove;
 
+    private int gunCrouchPerformedTween;
+    private int cameraCrouchPerformedTween;
+    private int gunCrouchCanceledTween;
+    private int cameraCrouchCanceledTween;
+
     void Start()
     {
         body = GetComponent<Rigidbody>();
@@ -142,7 +147,7 @@ public class PlayerMovement : MonoBehaviour
         localGunHolderX = gunHolder.transform.localPosition.x;
         localGunHolderHeight = gunHolder.transform.localPosition.y;
         playerCamera = inputManager.GetComponent<Camera>();
-        startingFov = playerCamera.fieldOfView;
+        startingFov = StaticInfo.Singleton.CameraFov;
 
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += ResetZoom;
@@ -199,9 +204,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnCrouch(InputAction.CallbackContext ctx)
     {
-        if (LeanTween.isTweening(inputManager.gameObject))
+        if (LeanTween.isTweening(cameraCrouchCanceledTween))
         {
-            LeanTween.cancel(inputManager.gameObject);
+            LeanTween.cancel(cameraCrouchCanceledTween);
+            LeanTween.cancel(gunCrouchCanceledTween);
+            inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localCameraHeight, inputManager.transform.localPosition.z);
+            gunHolder.transform.localPosition = new Vector3(gunHolder.transform.localPosition.x, localGunHolderHeight, gunHolder.transform.localPosition.z);
+        }
+        if (LeanTween.isTweening(cameraCrouchPerformedTween))
+        {
+            LeanTween.cancel(cameraCrouchPerformedTween);
+            LeanTween.cancel(gunCrouchPerformedTween);
             inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localCameraHeight, inputManager.transform.localPosition.z);
             gunHolder.transform.localPosition = new Vector3(gunHolder.transform.localPosition.x, localGunHolderHeight, gunHolder.transform.localPosition.z);
         }
@@ -220,8 +233,8 @@ public class PlayerMovement : MonoBehaviour
         {
             animator.SetBool("Crouching", false);
             strafeForce = strafeForceGrounded;
-            inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f);
-            gunHolder.LeanMoveLocalY(localGunHolderHeight, 0.2f);
+            cameraCrouchCanceledTween = inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f).id;
+            gunCrouchCanceledTween = gunHolder.LeanMoveLocalY(localGunHolderHeight, 0.2f).id;
             isDashing = false;
             onLanding -= StartCrouch;
         }
@@ -232,8 +245,8 @@ public class PlayerMovement : MonoBehaviour
     {
         animator.SetBool("Crouching", true);
         strafeForce = strafeForceCrouched;
-        inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
-        gunHolder.LeanMoveLocalY(localGunHolderHeight - crouchedHeightGunOffset, 0.2f);
+        cameraCrouchPerformedTween = inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f).id;
+        gunCrouchCanceledTween = gunHolder.LeanMoveLocalY(localGunHolderHeight - crouchedHeightGunOffset, 0.2f).id;
     }
 
     private void EnableDash()
