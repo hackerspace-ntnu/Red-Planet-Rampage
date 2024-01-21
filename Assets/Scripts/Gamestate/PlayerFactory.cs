@@ -45,7 +45,7 @@ public class PlayerFactory : MonoBehaviour
         playerInputManagerController.playerInputManager.splitScreen = true;
 
         existingAiIdentities = FindObjectsOfType<PlayerIdentity>()
-            .Where(identity => !identity.GetComponent<InputManager>()).ToList();
+            .Where(identity => identity.IsAI).ToList();
 
         if (!overrideMatchManager)
             return;

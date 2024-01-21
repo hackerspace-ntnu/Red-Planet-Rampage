@@ -6,6 +6,9 @@ public class PlayerIdentity : MonoBehaviour
     [Header("Cosmetics")]
     public Color color;
     public string playerName;
+    [SerializeField]
+    private bool isAI = false;
+    public bool IsAI => isAI;
 
     [Header("Augments")]
     [SerializeField]

@@ -103,60 +103,60 @@ public class AIManager : PlayerManager
 
     private IEnumerator LookForTargets()
     {
-        if (!isDead)
+        if (isDead)
+            yield break;
+
+        Transform closestPlayer = null;
+        float closestDistance = ignoreAwareRadius;
+        foreach (var player in TrackedPlayers)
         {
-            Transform closestPlayer = null;
-            float closestDistance = -1f;
-            foreach (var player in TrackedPlayers)
+            var targetDirection = player.AiTarget.transform.position - transform.position;
+            var hitDistance = targetDirection.magnitude;
+            var playerDistance = (player.transform.position - transform.position).magnitude;
+            // Is the player nearby?
+            if (playerDistance > ignoreAwareRadius)
+                continue;
+            if (playerDistance > autoAwareRadius)
             {
-                var targetDirection = player.AiTarget.transform.position - transform.position;
-                var hitDistance = targetDirection.magnitude;
-                var playerDistance = (player.transform.position - transform.position).magnitude;
-                // Is the player nearby?
-                if (playerDistance > ignoreAwareRadius)
+                // Is the tracked player in front of me? (viewable)
+                if (Vector3.Dot(transform.forward, targetDirection) < 0)
                     continue;
-                if (playerDistance > autoAwareRadius)
-                {
-                    // Is the tracked player in front of me? (viewable)
-                    if (Vector3.Dot(transform.forward, targetDirection) < 0)
-                        continue;
-                    // Is there a line of sight to a tracked player?
-                    if (Physics.Raycast(transform.position, targetDirection, hitDistance - 0.1f, ignoreMask))
-                        continue;
-                    // Is there another tracked player who is closer?
-                    if (hitDistance < closestDistance)
-                        continue;
-                }
-
-                closestPlayer = player.AiTarget.transform;
-                closestDistance = hitDistance;
-                DestinationTarget = closestPlayer;
-                // Close enough to shoot!
-                if ((player.transform.position - transform.position).magnitude < 15)
-                    ShootingTarget = player.AiAimSpot;
+                // Is there a line of sight to a tracked player?
+                if (Physics.Raycast(transform.position, targetDirection, hitDistance - 0.1f, ignoreMask))
+                    continue;
+                // Is there another tracked player who is closer?
+                if (hitDistance > closestDistance)
+                    continue;
             }
 
-            if (closestPlayer == null)
-            {
-                ShootingTarget = null;
-                if (DestinationTarget == null || (!DestinationTarget.gameObject.GetComponent<PlayerManager>() && !DestinationTarget.gameObject.activeInHierarchy))
-                {
-                    var target = MatchController.Singleton.GetRandomActiveChip();
-                    if (target != null)
-                        DestinationTarget = target;
-                }
-            }
-            if (!DestinationTarget)
-            {
-                var player = TrackedPlayers.RandomElement();
-                DestinationTarget = player.AiTarget;
+            closestPlayer = player.AiTarget.transform;
+            closestDistance = hitDistance;
+            DestinationTarget = closestPlayer;
+            // Close enough to shoot!
+            if ((player.transform.position - transform.position).magnitude < 15)
                 ShootingTarget = player.AiAimSpot;
-            }
-            agent.SetDestination(DestinationTarget.position);
-
-            yield return new WaitForSeconds(1f);
-            StartCoroutine(LookForTargets());
         }
+
+        if (closestPlayer == null)
+        {
+            ShootingTarget = null;
+            if (DestinationTarget == null || !DestinationTarget || (!DestinationTarget.gameObject.GetComponent<PlayerManager>() && !DestinationTarget.gameObject.activeInHierarchy))
+            {
+                var target = MatchController.Singleton.GetRandomActiveChip();
+                if (target != null)
+                    DestinationTarget = target;
+            }
+        }
+        if (!DestinationTarget)
+        {
+            var player = TrackedPlayers.RandomElement();
+            DestinationTarget = player.AiTarget;
+            ShootingTarget = player.AiAimSpot;
+        }
+        agent.SetDestination(DestinationTarget.position);
+
+        yield return new WaitForSeconds(1f);
+        StartCoroutine(LookForTargets());
     }
 
     void Update()

@@ -95,6 +95,7 @@ public class PersistentInfo : MonoBehaviour
             catch
             {
                 // File empty or corrupt, reseting to default
+                // TODO: Give users feedback that their persistent data file is corrupt!
                 persistentDataStream.Close();
                 CreateDefaultFile();
                 persistentDataStream = File.Open(Application.persistentDataPath + "/PersistentInfo.dat", FileMode.Open);

@@ -263,7 +263,7 @@ public class MatchController : MonoBehaviour
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
         // Remove AI identities
         FindObjectsOfType<PlayerIdentity>()
-            .Where(identity => !identity.GetComponent<InputManager>())
+            .Where(identity => identity.IsAI)
             .ToList().ForEach(aiIdentity => Destroy(aiIdentity));
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
