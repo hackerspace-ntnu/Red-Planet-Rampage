@@ -58,6 +58,15 @@ public class BiddingPlatform : MonoBehaviour
     [SerializeField]
     private Image radialUI;
 
+    [SerializeField]
+    private Image augmentSymbol;
+    [SerializeField]
+    private Sprite bodySymbol;
+    [SerializeField]
+    private Sprite barrelSymbol;
+    [SerializeField]
+    private Sprite extensionSymbol;
+
     private int playerCount = 0;
 
     private bool isActive = false;
@@ -180,6 +189,19 @@ public class BiddingPlatform : MonoBehaviour
         itemNameText.text = item.displayName;
         itemDescriptionText.text = item.displayDescription;
         itemCostText.text = chips.ToString();
+        switch (item.augmentType)
+        {
+            case AugmentType.Body:
+                augmentSymbol.sprite = bodySymbol;
+                break;
+            case AugmentType.Barrel:
+                augmentSymbol.sprite = barrelSymbol;
+                break;
+            case AugmentType.Extension:
+                augmentSymbol.sprite = extensionSymbol;
+                break;
+        }
+        
 
         augmentModel = Instantiate(item.augment, modelHolder.transform);
         augmentModel.transform.localScale = Vector3.one / 20.0f;
