@@ -1366,6 +1366,7 @@ GameObject:
   - component: {fileID: 6979951360617350381}
   - component: {fileID: 2607860677580255437}
   - component: {fileID: 3057968202906230676}
+  - component: {fileID: 8915430841399478025}
   m_Layer: 0
   m_Name: AIOpponent
   m_TagString: Untagged
@@ -1431,6 +1432,7 @@ MonoBehaviour:
   ignoreMask:
     serializedVersion: 2
     m_Bits: 65655
+  biddingAI: {fileID: 0}
 --- !u!114 &2119647889686324732
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1747,6 +1749,19 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &8915430841399478025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5961719937516333757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8df77ee5e94e96a21a1c251683e0d3a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damagePopup: {fileID: 3456343568974069144, guid: 216963e07a2087cc99a5e9c4e6b0454e, type: 3}
 --- !u!1 &6457795911598159032
 GameObject:
   m_ObjectHideFlags: 0

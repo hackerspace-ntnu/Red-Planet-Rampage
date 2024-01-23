@@ -24,7 +24,13 @@ public class DamagePopupEmitter : MonoBehaviour
         var position = info.position + Vector3.up * Random.Range(.3f, .5f) + horizontalAxis * Random.Range(-.2f, .2f);
         var popup = Instantiate(damagePopup, position, Quaternion.identity);
 
-        popup.Camera = info.sourcePlayer.inputManager.transform;
+        // Real players can only see their own damage numbers, all players can see AI damage numbers
+        // A player victim by AI damage cannot see damage done to them by AI popup (would obscure vision)
+        bool isPlayer = info.sourcePlayer.inputManager;
+        popup.gameObject.layer = isPlayer ? 
+            LayerMask.NameToLayer("Gun " + info.sourcePlayer.inputManager.playerInput.playerIndex) : gameObject.layer;
+
+        popup.Camera = info.sourcePlayer.GunHolder.transform;
         popup.Damage = damage;
     }
 }

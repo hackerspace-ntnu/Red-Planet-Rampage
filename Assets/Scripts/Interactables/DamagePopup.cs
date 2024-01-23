@@ -22,12 +22,12 @@ public class DamagePopup : MonoBehaviour
 
     private void Start()
     {
-        // TODO punch in, fade out or something and then destroy yourself
         var scale = transform.lossyScale;
-        var sequence = LeanTween.sequence();
-        sequence.append(LeanTween.scale(gameObject, scale * 1.5f, .4f).setEasePunch())
-                .append(3)
-                .append(LeanTween.scale(gameObject, Vector3.zero, .2f).setEaseOutQuad().setOnComplete(() => Destroy(gameObject)));
+        LeanTween.sequence()
+            .append(LeanTween.scale(gameObject, scale * 2f, .4f).setEasePunch())
+            .insert(LeanTween.moveY(gameObject, transform.position.y + 1f, 1).setEaseInOutExpo())
+            .append(LeanTween.scale(gameObject, Vector3.zero, .2f).setEaseOutQuad()
+            .setOnComplete(() => Destroy(gameObject)));
     }
 
     private void Update()
