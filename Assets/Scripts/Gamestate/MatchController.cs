@@ -122,7 +122,8 @@ public class MatchController : MonoBehaviour
         if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
             roundLength = 100f;
 #endif
-
+        GameObject mainLight = GameObject.FindGameObjectsWithTag("MainLight")[0];
+        RenderSettings.skybox.SetVector("_SunDirection", mainLight.transform.forward);
         StartNextRound();
     }
 
