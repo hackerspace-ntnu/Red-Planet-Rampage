@@ -72,10 +72,12 @@ public class PlayerHUDController : MonoBehaviour
     private const float lineVelocityDampeningX = 0.25f;
     // Dampen how much vertical velocity should influence center of speedlines
     private const float lineVelocityDampeningY = 0.1f;
+    private Vector3 defaultCrosshairScale;
 
     [SerializeField]
     private RectTransform scopeZoom;
     private int scopeTween;
+    private int hitMarkTween;
 
 
     void Start()
@@ -94,6 +96,7 @@ public class PlayerHUDController : MonoBehaviour
         ammoCapacityMaterial.SetFloat("_Arc2", 0);
 
         healthBarScaleX = healthBar.localScale.x;
+        defaultCrosshairScale = crosshair.localScale;
     }
 
     public void SetSpeedLines(Vector3 velocity)
@@ -201,5 +204,15 @@ public class PlayerHUDController : MonoBehaviour
         var halfHeight = hud.sizeDelta.y / 2;
 
         crosshair.anchoredPosition = (new Vector2(halfWidth * x, halfHeight * y));
+    }
+
+    public void HitmarkAnimation(HitboxController other, ref ProjectileState state)
+    {
+        if (LeanTween.isTweening(hitMarkTween))
+        {
+            LeanTween.cancel(hitMarkTween);
+            crosshair.localScale = defaultCrosshairScale;
+        }
+        hitMarkTween = crosshair.LeanScale(new Vector3(1.5f, 1.5f, 1.5f), 0.2f).setEasePunch().id;
     }
 }

@@ -343,6 +343,7 @@ public class PlayerManager : MonoBehaviour
         gunController.onFire += UpdateAimTarget;
         gunController.onFireEnd += UpdateHudFire;
         gunController.onReload += UpdateHudReload;
+        gunController.projectile.OnHitboxCollision += hudController.HitmarkAnimation;
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
         if (gunController.RightHandTarget)
             playerIK.RightHandIKTarget = gunController.RightHandTarget;
