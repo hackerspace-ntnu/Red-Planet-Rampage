@@ -51,7 +51,7 @@ public class GunController : MonoBehaviour
             return;
         Player.inputManager.onZoomPerformed += OnZoom;
         Player.inputManager.onZoomCanceled += OnZoomCanceled;
-
+        Player.inputManager.GetComponentInChildren<JiggleBone>().body = Player.GetComponent<PlayerMovement>().Body;
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += CancelZoom;
     }

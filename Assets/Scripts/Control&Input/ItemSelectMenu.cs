@@ -77,7 +77,7 @@ public class ItemSelectMenu : MonoBehaviour
         yield return null;
 
         this.inputManager = inputManager;
-        canvas.worldCamera = inputManager.GetComponent<Camera>();
+        canvas.worldCamera = inputManager.PlayerCamera;
 
         player = inputManager.GetComponent<PlayerIdentity>();
         playerStatUI.PlayerIdentity = player;

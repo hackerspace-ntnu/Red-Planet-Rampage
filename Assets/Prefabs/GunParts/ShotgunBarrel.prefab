@@ -546,6 +546,7 @@ GameObject:
   - component: {fileID: 1897810737203425439}
   - component: {fileID: 8521649310498747730}
   - component: {fileID: 8123546184178421821}
+  - component: {fileID: 1226237505050524260}
   m_Layer: 0
   m_Name: ShotgunBarrel
   m_TagString: Untagged
@@ -605,6 +606,10 @@ MonoBehaviour:
     addition: 0
     multiplier: 0
     exponential: 0.3
+  - name: ScreenShakeFactor
+    addition: 2
+    multiplier: 0
+    exponential: 1
   outputs:
   - {fileID: 5765902433490691002}
   attachmentPoints:
@@ -785,3 +790,23 @@ MonoBehaviour:
   stickToNormalFraction: 0.2
   angleVariation: 180
   lifetime: 60
+--- !u!114 &1226237505050524260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6861618831928518119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b0ba1bb34e28d142b759ea886c785ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stuckObject: {fileID: 4443407124464210628, guid: b9bbb710a484f04458322e51c5bb8171, type: 3}
+  stuckLifeTime: 1
+  triggerOnHit: 0
+  onHitInterval: 1
+  affectedLayers:
+    serializedVersion: 2
+    m_Bits: 65655
+  priority: 4

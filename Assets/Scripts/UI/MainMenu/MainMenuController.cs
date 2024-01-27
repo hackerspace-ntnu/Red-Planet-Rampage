@@ -114,7 +114,7 @@ public class MainMenuController : MonoBehaviour
     /// <param name="inputManager"></param>
     private void AddPlayer(InputManager inputManager)
     {
-        inputManager.GetComponent<Camera>().enabled = false;
+        inputManager.PlayerCamera.enabled = false;
         playerInputs.Add(inputManager);
 
         foreach (TabGroup t in tabGroups)

@@ -19,6 +19,8 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
     // How often does it trigger onHit (in seconds)?
     [SerializeField]
     private float onHitInterval = 1f;
+    [SerializeField]
+    private LayerMask affectedLayers = 0;
 
     [SerializeField]
     private Priority priority = Priority.ARBITRARY;
@@ -43,7 +45,9 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
 
     public void StickToTarget(Collider collider, ref ProjectileState state)
     {
-        var stuck = Instantiate(stuckObject, state.position, state.rotation, null);
+        if (!(affectedLayers == (affectedLayers | (1 << collider.gameObject.layer))))
+            return;
+        var stuck = Instantiate(stuckObject, state.position, state.rotation);
         stuck.transform.ParentUnscaled(collider.transform);
         if (stuck.TryGetComponent<ContinuousDamage>(out var continuousDamage))
         {

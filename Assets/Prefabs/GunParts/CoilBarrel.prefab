@@ -307,6 +307,7 @@ GameObject:
   - component: {fileID: 5073592139580318145}
   - component: {fileID: 1897810737203425439}
   - component: {fileID: 2663316941412716786}
+  - component: {fileID: 2867639114339987712}
   m_Layer: 0
   m_Name: CoilBarrel
   m_TagString: Untagged
@@ -354,6 +355,10 @@ MonoBehaviour:
     addition: 0
     multiplier: 0
     exponential: 0.5
+  - name: ScreenShakeFactor
+    addition: 0
+    multiplier: 0
+    exponential: 0
   outputs:
   - {fileID: 5765902433490691002}
   attachmentPoints:
@@ -375,6 +380,7 @@ MonoBehaviour:
   projectileRotation: {x: 0, y: 0, z: 0, w: 1}
   stats: {fileID: 0}
   player: {fileID: 0}
+  HitAssist: 0
   maxDistance: 100
   collisionSamplesPerUnit: 2
   trail: {fileID: 6753720039035056053}
@@ -533,6 +539,26 @@ MonoBehaviour:
   stickToNormalFraction: 0.2
   angleVariation: 180
   lifetime: 60
+--- !u!114 &2867639114339987712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6861618831928518119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b0ba1bb34e28d142b759ea886c785ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stuckObject: {fileID: 4443407124464210628, guid: b9bbb710a484f04458322e51c5bb8171, type: 3}
+  stuckLifeTime: 1
+  triggerOnHit: 0
+  onHitInterval: 1
+  affectedLayers:
+    serializedVersion: 2
+    m_Bits: 65655
+  priority: 4
 --- !u!1001 &1492273253223761825
 PrefabInstance:
   m_ObjectHideFlags: 0
