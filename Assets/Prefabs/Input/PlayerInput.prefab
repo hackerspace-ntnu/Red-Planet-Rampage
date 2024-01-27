@@ -111,6 +111,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 828818560594758653}
+  - component: {fileID: 115687810762533466}
   m_Layer: 0
   m_Name: FPSGun
   m_TagString: Untagged
@@ -133,6 +134,24 @@ Transform:
   m_Father: {fileID: 3554710591539111230}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &115687810762533466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4578288573561392664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84d69c7fde56e354080e082e1314d474, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  offsetMagnitude: 0.017
+  velocityDamping: 150
+  springStrength: 1
+  meassurementPoint: {fileID: 5385955070489759476}
+  offsetTarget: {fileID: 828818560594758653}
+  body: {fileID: 0}
 --- !u!1 &8602880480366401748
 GameObject:
   m_ObjectHideFlags: 0
