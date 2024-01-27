@@ -16,7 +16,7 @@ public class JiggleBone : MonoBehaviour
     float springStrength = 0.1f;
 
     [SerializeField]
-    Transform meassurementPoint = null;
+    Transform measurementPoint = null;
 
     [SerializeField]
     Transform offsetTarget = null;
@@ -31,18 +31,18 @@ public class JiggleBone : MonoBehaviour
 
         offsetVelocity -= offsetVelocity * velocityDamping * Time.fixedDeltaTime;
 
-        offsetVelocity += (meassurementPoint.position - lastPos) * springStrength * Time.fixedDeltaTime;
+        offsetVelocity += (measurementPoint.position - lastPos) * springStrength * Time.fixedDeltaTime;
 
         lastLastPos = lastPos;
 
         lastPos += offsetVelocity * Time.fixedDeltaTime;
-        if ((lastPos - meassurementPoint.position).magnitude > offsetMagnitude)
+        if ((lastPos - measurementPoint.position).magnitude > offsetMagnitude)
         {
-            Vector3 diff = lastPos - meassurementPoint.position;
+            Vector3 diff = lastPos - measurementPoint.position;
             float playerDiff = 0f;
             if (body)
                 playerDiff = Mathf.Abs(lastPlayerDiff - body.velocity.magnitude);
-            lastPos = meassurementPoint.position + diff.normalized * offsetMagnitude;
+            lastPos = measurementPoint.position + diff.normalized * offsetMagnitude;
             lastPlayerDiff = playerDiff;
         }
         offsetTarget.position = lastPos;
