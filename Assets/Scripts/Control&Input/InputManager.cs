@@ -45,6 +45,9 @@ public class InputManager : MonoBehaviour
     private float mouseLookScale = 0.02f;
     [SerializeField]
     private float gamepadLookScale = 0.75f;
+    [SerializeField]
+    private Camera playerCamera;
+    public Camera PlayerCamera => playerCamera;
 
     private bool isMouseAndKeyboard = false;
     public bool IsMouseAndKeyboard => isMouseAndKeyboard;

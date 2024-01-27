@@ -146,7 +146,7 @@ public class PlayerMovement : MonoBehaviour
         localCameraHeight = inputManager.transform.localPosition.y;
         localGunHolderX = gunHolder.transform.localPosition.x;
         localGunHolderHeight = gunHolder.transform.localPosition.y;
-        playerCamera = inputManager.GetComponent<Camera>();
+        playerCamera = inputManager.PlayerCamera;
         startingFov = StaticInfo.Singleton.CameraFov;
 
         if (MatchController.Singleton)

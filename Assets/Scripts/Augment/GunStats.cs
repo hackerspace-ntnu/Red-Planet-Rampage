@@ -96,4 +96,8 @@ public class GunStats : ScriptableObject
     private ModifiableFloat projectilesPerShot = new ModifiableFloat(1f);
     public ModifiableFloat ProjectilesPerShot => projectilesPerShot;
 
+    [Header("Visual/non-functional")]
+    [SerializeField]
+    private ModifiableFloat screenShakeFactor = new ModifiableFloat(1f);
+    public ModifiableFloat ScreenShakeFactor => screenShakeFactor;
 }

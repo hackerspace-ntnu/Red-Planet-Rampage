@@ -113,11 +113,11 @@ public class PlayerFactory : MonoBehaviour
         inputManager.transform.localPosition = cameraOffset.localPosition;
         inputManager.transform.rotation = player.transform.rotation;
         // Enable Camera
-        inputManager.GetComponent<Camera>().enabled = true;
+        inputManager.PlayerCamera.enabled = true;
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
         playerManager.SetPlayerInput(inputManager);
-        playerManager.SetGun(inputManager.transform);
+        playerManager.SetGun(inputManager.transform.GetChild(0));
         // Set unique layer for player
         playerManager.SetLayer(inputManager.playerInput.playerIndex);
         playerManager.GetComponent<PlayerMovement>().SetInitialRotation(spawnPoint.eulerAngles.y * Mathf.Deg2Rad);
@@ -135,7 +135,7 @@ public class PlayerFactory : MonoBehaviour
         inputManager.transform.localPosition = cameraOffset.localPosition;
         inputManager.transform.rotation = player.transform.rotation;
         // Disable Camera
-        inputManager.GetComponent<Camera>().enabled = false;
+        inputManager.PlayerCamera.enabled = false;
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
         playerManager.SetPlayerInput(inputManager);
@@ -145,11 +145,10 @@ public class PlayerFactory : MonoBehaviour
 
     private PlayerManager InstantiateItemSelectPlayer(InputManager inputManager, Transform spawnPoint)
     {
-        inputManager.GetComponent<Camera>().enabled = true;
+        inputManager.PlayerCamera.enabled = true;
         spawnInterval += 10000f;
         GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position + new Vector3(spawnInterval, spawnInterval, 0), spawnPoint.rotation);
-        Camera playerCamera = inputManager.GetComponent<Camera>();
-        playerCamera.transform.position = player.GetComponent<ItemSelectMenu>().CameraPosition.transform.position;
+        inputManager.transform.position = player.GetComponent<ItemSelectMenu>().CameraPosition.transform.position;
         StartCoroutine(player.GetComponent<ItemSelectMenu>().SpawnItems(inputManager));
         return null;
     }

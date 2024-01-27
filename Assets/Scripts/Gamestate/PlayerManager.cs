@@ -50,6 +50,8 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     protected GameObject aimAssistCollider;
 
+    private int screenShakeTween;
+
     [Header("Related objects")]
 
     public InputManager inputManager;
@@ -307,6 +309,18 @@ public class PlayerManager : MonoBehaviour
         gunController.triggerHeld = false;
     }
 
+    private void ScreenShake(GunStats stats)
+    {
+        if (!inputManager)
+            return;
+        if (LeanTween.isTweening(screenShakeTween))
+        {
+            LeanTween.cancel(screenShakeTween);
+            inputManager.PlayerCamera.gameObject.transform.localPosition = Vector3.zero;
+        }
+        screenShakeTween = inputManager.PlayerCamera.gameObject.LeanMoveLocal(new Vector3(0.02f, 0.02f, 0f) * stats.ScreenShakeFactor, 0.1f).setEaseShake().id;
+    }
+
     public virtual void SetLayer(int playerIndex)
     {
         int playerLayer = LayerMask.NameToLayer("Player " + playerIndex);
@@ -323,7 +337,7 @@ public class PlayerManager : MonoBehaviour
 
         var negatedMask = ((1 << 16) - 1) ^ (playerMask | gunMask | ammoMask);
 
-        inputManager.GetComponent<Camera>().cullingMask = negatedMask;
+        inputManager.PlayerCamera.cullingMask = negatedMask;
 
         // Set correct layer on self, mesh and gun (TODO)
         gameObject.layer = playerLayer;
@@ -341,6 +355,7 @@ public class PlayerManager : MonoBehaviour
         gunController = gun.GetComponent<GunController>();
         gunController.onFireStart += UpdateAimTarget;
         gunController.onFire += UpdateAimTarget;
+        gunController.onFireEnd += ScreenShake;
         gunController.onFireEnd += UpdateHudFire;
         gunController.onReload += UpdateHudReload;
         gunController.projectile.OnHitboxCollision += hudController.HitmarkAnimation;
