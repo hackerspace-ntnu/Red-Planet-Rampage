@@ -23,6 +23,8 @@ public class MainMenuController : MonoBehaviour
     private GameObject defaultMenu;
     [SerializeField]
     private GalleryMenu galleryMenu;
+    [SerializeField]
+    private GameObject playerSelectModel;
 
     [SerializeField]
     private string[] mapNames;
@@ -123,7 +125,14 @@ public class MainMenuController : MonoBehaviour
         }
 
         galleryMenu.SetPlayerInput(inputManager);
-
+        /*
+        for (int i = 0; i < playerInputs.Count; i++)
+        {
+            PlayerIdentity playerIdentity = playerInputs[i].GetComponent<PlayerIdentity>();
+            playerSelectModel.GetComponent<PlayerSelectManager>().setupPlayerSelectModels(playerIdentity.playerName, playerIdentity.color, i);
+        }
+        */
+        
         GameObject panel = Instantiate(playerBackgroundPanel, characterView);
         playerBackgrounds.Add(panel);
 
@@ -135,6 +144,7 @@ public class MainMenuController : MonoBehaviour
             // Update the visual loadout controller
             playerBackgrounds[i].GetComponent<CharacterMenuLoadout>().SetupPreview(playerIdentity.playerName, playerIdentity.color);
         }
+        
     }
 
     public void ReturnToMainMenu()
