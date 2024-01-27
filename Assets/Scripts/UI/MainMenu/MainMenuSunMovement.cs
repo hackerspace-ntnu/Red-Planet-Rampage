@@ -13,4 +13,9 @@ public class MainMenuSunMovement : MonoBehaviour
     {
         transform.LeanRotateAroundLocal(Vector3.up, RotationDegrees, RotationSeconds).setLoopCount(-1);
     }
+
+    private void Update()
+    {
+        RenderSettings.skybox.SetVector("_SunDirection", transform.forward);
+    }
 }
