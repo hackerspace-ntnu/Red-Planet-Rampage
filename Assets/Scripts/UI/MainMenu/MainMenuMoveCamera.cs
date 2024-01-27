@@ -23,6 +23,7 @@ public class MainMenuMoveCamera : MonoBehaviour
 
     public void MoveToDefault()
     {
+        playerSelectCamera.gameObject.SetActive(false);
         mainMenuCamera.gameObject.SetActive(true);
         directionalLight.SetActive(true);
 
@@ -30,12 +31,10 @@ public class MainMenuMoveCamera : MonoBehaviour
             .append(LeanTween.rotateY(mainMenuCamera.gameObject, 120, cameraSpeed).setEaseInOutQuart());
     }
 
-    /*
     public void MoveToPlayerSelect()
     {
         playerSelectCamera.gameObject.SetActive(true);
         mainMenuCamera.gameObject.SetActive(false);
         directionalLight.SetActive(false);
     }
-    */
 }
