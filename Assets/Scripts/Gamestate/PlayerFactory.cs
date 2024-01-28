@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using CollectionExtensions;
 
 public class PlayerFactory : MonoBehaviour
 {
@@ -74,15 +75,9 @@ public class PlayerFactory : MonoBehaviour
 
     private List<PlayerManager> InstantiateInputsOnSpawnpoints(Func<InputManager, Transform, PlayerManager> instantiate, Func<int, Transform, AIManager> instantiateAI = null, int aiPlayerCount = 0)
     {
-        var shuffledSpawnPoints = new List<Transform>(spawnPoints);
-        // Fisher-Yates shuffle
-        for (int i = spawnPoints.Length - 1; i > 0; i--)
-        {
-            var k = random.Next(i);
-            var firstSwapped = shuffledSpawnPoints[i];
-            shuffledSpawnPoints[i] = shuffledSpawnPoints[k];
-            shuffledSpawnPoints[k] = firstSwapped;
-        }
+
+        var shuffledSpawnPoints = spawnPoints.ShuffledCopy();
+
         var playerList = new List<PlayerManager>();
         for (int i = 0; i < playerInputManagerController.playerInputs.Count; i++)
         {
