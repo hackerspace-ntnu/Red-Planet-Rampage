@@ -81,9 +81,9 @@ public class DDRBody : GunBody
             gunController.Player.inputManager.onFirePerformed += Fire;
             gunController.Player.inputManager.onMovePerformed += ArrowSelect;
 
-            var delay = MusicTrackManager.Singleton.IsfadingOutPreviousTrack
+            var delay = (float)(MusicTrackManager.Singleton.IsfadingOutPreviousTrack
                 ? MusicTrackManager.Singleton.TrackOffset
-                : secondsPerArrow - (MusicTrackManager.Singleton.TimeSinceTrackStart % secondsPerArrow);
+                : secondsPerArrow - (MusicTrackManager.Singleton.TimeSinceTrackStart % secondsPerArrow));
 
             arrowMoverTween = LeanTween.value(gameObject, SetArrowHeigth, startHeight, screenHeight, secondsPerUnitHeight * (screenHeight - startHeight))
                 .setDelay(delay)
