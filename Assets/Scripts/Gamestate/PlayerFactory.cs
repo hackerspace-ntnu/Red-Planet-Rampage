@@ -164,6 +164,7 @@ public class PlayerFactory : MonoBehaviour
         {
             var identityObject = Instantiate(aiIdentity);
             identity = identityObject.GetComponent<PlayerIdentity>();
+            identity.playerName = $"HCU {index + 1}";
             DontDestroyOnLoad(identityObject);
         }
 
