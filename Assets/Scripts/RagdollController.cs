@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -67,13 +68,20 @@ public class RagdollController : MonoBehaviour
         camera.cullingMask = ragdollMask;
         this.camera = camera.transform;
         inputTransform = input;
+        StartCoroutine(WaitAndDisableCamera(camera));
+    }
+
+    private IEnumerator WaitAndDisableCamera(Camera camera)
+    {
+        yield return new WaitForSeconds(7f);
+        camera.enabled = false;
     }
 
     private void Update()
     {
         if (!camera)
             return;
-        camera.position = cameraParent.position + new Vector3(0, 0, -5f);
+        camera.position = cameraParent.position + new Vector3(0, 2, -5f);
         camera.LookAt(cameraParent);
     }
 
