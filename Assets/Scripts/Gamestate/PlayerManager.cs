@@ -345,6 +345,7 @@ public class PlayerManager : MonoBehaviour
         // Set correct layer on self, mesh and gun (TODO)
         gameObject.layer = playerLayer;
         SetLayerOnSubtree(meshBase, playerLayer);
+        SetLayerOnSubtree(hudController.gameObject, LayerMask.NameToLayer("Gun " + playerIndex));
     }
 
     public virtual void SetGun(Transform offset)
