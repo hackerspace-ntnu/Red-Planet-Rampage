@@ -174,7 +174,7 @@ public class PlayerManager : MonoBehaviour
 
         var ragdollController = GetComponent<RagdollController>();
         if (inputManager)
-            ragdollController.ReparentCamera(inputManager.transform);
+            ragdollController.AnimateCamera(inputManager.PlayerCamera, inputManager.transform);
 
         var force = info.force.normalized * Mathf.Log(info.damage) * deathKnockbackForceMultiplier;
         ragdollController.EnableRagdoll(force);
