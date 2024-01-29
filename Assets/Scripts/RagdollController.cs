@@ -62,9 +62,8 @@ public class RagdollController : MonoBehaviour
         rigidbodyToPush.AddForce(knockbackForce, ForceMode.Impulse);
     }
 
-    public void ReparentCamera(Camera camera, Transform input)
+    public void AnimateCamera(Camera camera, Transform input)
     {
-        //camera.transform.parent = cameraParent;
         camera.cullingMask = ragdollMask;
         this.camera = camera.transform;
         inputTransform = input;
