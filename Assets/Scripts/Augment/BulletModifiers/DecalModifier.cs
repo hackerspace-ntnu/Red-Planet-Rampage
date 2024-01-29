@@ -14,6 +14,7 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
 
     // Note that the decal has to be quite deep (like 1 unit or so) because of the somewhat imprecise colliders we have
     [SerializeField] private DecalProjector decal;
+    private ObjectPool<DecalProjector> decalPool;
 
     [Range(.2f, .8f)][SerializeField] private float depthOffsetFraction = .6f;
 
@@ -21,7 +22,11 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
 
     [Range(0f, 180f)][SerializeField] private float angleVariation = 180f;
 
-    [SerializeField] private float lifetime = 60;
+    private void Awake()
+    {
+        // TODO adjust amount?
+        decalPool = new ObjectPool<DecalProjector>(decal);
+    }
 
     public void Attach(ProjectileController projectile)
     {
@@ -58,19 +63,17 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
             if (hitbox.health && hitbox.health.TryGetComponent<PlayerManager>(out var _))
                 return;
 
+        var spawnedDecal = decalPool.Get();
 
         // Place the decal some distance away from the target so that it is more likely to be projected onto a surface
         var depthOffset = decal.size.z * depthOffsetFraction;
-        var position = target.ClosestPoint(state.position) - state.direction * depthOffset;
-        var rotation = DetermineRotation(target, state);
+        spawnedDecal.transform.position = target.ClosestPoint(state.position) - state.direction * depthOffset;
 
-        var spawnedDecal = Instantiate(decal, position, rotation);
+        spawnedDecal.transform.rotation = DetermineRotation(target, state);
         spawnedDecal.transform.parent = target.transform;
 
         // Rotate it randomly for basic variation
         spawnedDecal.transform.Rotate(Vector3.forward, Random.Range(-angleVariation, angleVariation));
-
-        Destroy(spawnedDecal, lifetime);
     }
 
     private Quaternion DetermineRotation(Collider target, ProjectileState state)
