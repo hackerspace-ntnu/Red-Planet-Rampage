@@ -47,24 +47,26 @@ public class HatBarrelModel : AugmentAnimator
     public override void OnFire(GunStats stats)
     {
         animator.SetTrigger("Fire");
-        for (int i = stats.Ammo; i < magazineSize; i++)
+        for (int i = stats.Ammo - 1; i < magazineSize; i++)
         {
             ammunition[i].SetActive(false);
         }
-        if (stats.Ammo == 0)
+        if (stats.Ammo == 1)
         {
-            ToggleBullet();
+            bullet.SetActive(false);
         }
     }
 
     // Called by animator!
-    public void ToggleBullet()
+    public void EnableBullet()
     {
-        bullet.SetActive(!bullet.activeInHierarchy);
-        if (!bullet.activeInHierarchy)
-        {
-            OnShotFiredAnimation?.Invoke();
-            OnAnimationEnd?.Invoke();
-        }
+        bullet.SetActive(ammunition[0].activeInHierarchy);
+    }
+
+    public void DisableBullet()
+    {
+        bullet.SetActive(false);
+        OnShotFiredAnimation?.Invoke();
+        OnAnimationEnd?.Invoke();
     }
 }
