@@ -7,6 +7,8 @@ public class Pan : GunExtension
 {
     [SerializeField]
     private MeshCollider hitboxCollider;
+    [SerializeField]
+    private Transform panModel;
     private PlayerMovement playerMovement;
     private const float skateJumpForce = 5f;
     private GunController gunController;
@@ -22,6 +24,8 @@ public class Pan : GunExtension
             hitboxCollider.gameObject.layer = hitBoxLayer;
             return;
         }
+        panModel.localScale = new Vector3(2.5f, 2.5f, 2.5f);
+        panModel.localPosition = new Vector3(panModel.localPosition.x, panModel.localPosition.y -0.3f, panModel.localPosition.z);
         gunController.Player.inputManager.onSelect += TryTrickJump;
         hitboxCollider.enabled = false;
         playerMovement = gunController.Player.GetComponent<PlayerMovement>();
