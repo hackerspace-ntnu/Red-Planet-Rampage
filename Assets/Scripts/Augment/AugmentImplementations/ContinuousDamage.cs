@@ -37,4 +37,10 @@ public class ContinuousDamage : MonoBehaviour
             lastDamageTime = Time.time;
         }
     }
+
+    private void OnDestroy()
+    {
+        if (hitbox && hitbox.health)
+            hitbox.health.onDeath -= OnDeath;
+    }
 }
