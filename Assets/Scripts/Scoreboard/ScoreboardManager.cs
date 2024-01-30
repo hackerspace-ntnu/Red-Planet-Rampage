@@ -12,6 +12,7 @@ public class ScoreboardManager : MonoBehaviour
 
     // Actions
     public event Action ShowNextCrime;
+    public event Action DisplayProgress;
 
     [Header("Variables")]
     private List<Player> players = new List<Player>();
@@ -140,8 +141,9 @@ public class ScoreboardManager : MonoBehaviour
         }
         else
         {
+            DisplayProgress?.Invoke();
             // Start next round
-            yield return new WaitForSeconds(newCrimeDelay);
+            yield return new WaitForSeconds(5f);
             matchController.StartNextBidding();
         }
     }

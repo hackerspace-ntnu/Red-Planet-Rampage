@@ -24,10 +24,16 @@ public class Scoreboard : MonoBehaviour
     [SerializeField]
     private TMP_Text subtitle;
 
+    [SerializeField]
+    private TMP_Text progressDescription;
+
     public Image photo;
 
     [SerializeField]
-    private Image background;
+    private GameObject wantedPoster;
+
+    [SerializeField]
+    private GameObject progressPoster;
 
     [SerializeField]
     private Transform crimeContent;
@@ -51,11 +57,13 @@ public class Scoreboard : MonoBehaviour
 
     public void SetupPoster(Player player, string subtitle)
     {
-        background.color = player.playerIdentity.color;
+        wantedPoster.GetComponent<Image>().color = player.playerIdentity.color;
+        progressPoster.GetComponent<Image>().color = player.playerIdentity.color;
         this.subtitle.text = subtitle;
         this.player = player;
 
         scoreboardManager.ShowNextCrime += NextStep;
+        scoreboardManager.DisplayProgress += ShowProgress;
     }
 
     public void AddPosterCrime(string crimeLabel, int Value)
@@ -94,5 +102,18 @@ public class Scoreboard : MonoBehaviour
     private IEnumerator DelayDisplayCrimes(int delay)
     {
         yield return new WaitForSeconds(delay);
+    }
+
+    private void ShowProgress()
+    {
+        StartCoroutine(DisplayProgress());
+    }
+
+    private IEnumerator DisplayProgress()
+    {
+        wantedPoster.SetActive(false);
+        progressPoster.SetActive(true);
+        progressDescription.text = MatchController.Singleton.PlayerWins(player.playerIdentity) + "/3";
+        yield return new WaitForSeconds(3f);
     }
 }
