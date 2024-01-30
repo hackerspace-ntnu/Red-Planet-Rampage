@@ -53,6 +53,11 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
         // TODO Add some way of determining which *other* objects to avoid placing decals on
         if (target.TryGetComponent<SodaCan>(out var _))
             return;
+        // Also avoid placing decals on players, as that leads to the heebie-jeebies
+        if (target.TryGetComponent<HitboxController>(out var hitbox))
+            if (hitbox.health && hitbox.health.TryGetComponent<PlayerManager>(out var _))
+                return;
+
 
         // Place the decal some distance away from the target so that it is more likely to be projected onto a surface
         var depthOffset = decal.size.z * depthOffsetFraction;
