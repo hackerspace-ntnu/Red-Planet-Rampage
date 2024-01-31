@@ -34,6 +34,9 @@ public class Scoreboard : MonoBehaviour
 
     [SerializeField]
     private GameObject progressPoster;
+    
+    [SerializeField]
+    private GameObject[] progressCrosses;
 
     [SerializeField]
     private Transform crimeContent;
@@ -58,9 +61,10 @@ public class Scoreboard : MonoBehaviour
     public void SetupPoster(Player player, string subtitle)
     {
         wantedPoster.GetComponent<Image>().color = player.playerIdentity.color;
-        progressPoster.GetComponent<Image>().color = player.playerIdentity.color;
         this.subtitle.text = subtitle;
         this.player = player;
+        progressPoster.GetComponent<Image>().color = player.playerIdentity.color;
+        progressDescription.text = player.playerIdentity.playerName;
 
         scoreboardManager.ShowNextCrime += NextStep;
         scoreboardManager.DisplayProgress += ShowProgress;
@@ -113,7 +117,12 @@ public class Scoreboard : MonoBehaviour
     {
         wantedPoster.SetActive(false);
         progressPoster.SetActive(true);
-        progressDescription.text = MatchController.Singleton.PlayerWins(player.playerIdentity) + "/3";
+        for (int i = 0; i < MatchController.Singleton.PlayerWins(player.playerIdentity); i++)
+        {
+            progressCrosses[i].SetActive(true);
+            progressCrosses[i].LeanScale(new Vector3(2f, 2f, 2f), 0.5f).setEasePunch();
+            yield return new WaitForSeconds(0.5f);
+        }
         yield return new WaitForSeconds(3f);
     }
 }
