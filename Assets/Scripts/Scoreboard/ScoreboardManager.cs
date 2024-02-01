@@ -12,6 +12,7 @@ public class ScoreboardManager : MonoBehaviour
 
     // Actions
     public event Action ShowNextCrime;
+    public event Action ShowVictoryProgress;
 
     [Header("Variables")]
     private List<Player> players = new List<Player>();
@@ -27,6 +28,9 @@ public class ScoreboardManager : MonoBehaviour
     [SerializeField]
     [Range(0f, 5f)]
     private float newCrimeDelay = 1f;
+
+    [SerializeField]
+    public float matchProgressDelay = 5f;
 
     private int step = 0;
     private int maxSteps = 0;
@@ -140,8 +144,9 @@ public class ScoreboardManager : MonoBehaviour
         }
         else
         {
+            ShowVictoryProgress?.Invoke();
             // Start next round
-            yield return new WaitForSeconds(newCrimeDelay);
+            yield return new WaitForSeconds(matchProgressDelay);
             matchController.StartNextBidding();
         }
     }
