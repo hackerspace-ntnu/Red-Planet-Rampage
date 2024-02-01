@@ -18,6 +18,8 @@ public class ItemSelectSlot : MonoBehaviour
     [SerializeField]
     private Transform itemHolder;
 
+    [SerializeField]
+    private GameObject[] itemSlots;
 
     [SerializeField]
     private TMP_Text label;
@@ -31,16 +33,17 @@ public class ItemSelectSlot : MonoBehaviour
     [SerializeField]
     private Color deselectedColor;
 
-    private Vector3 originalItemHolderPosition;
+    [SerializeField]
+    private GameObject missingObject;
 
     private List<Item> items;
+    private List<(GameObject, Vector3 originalPosition)> augmentModels = new List<(GameObject, Vector3 originalPosition)>();
 
     private int selectedIndex = 0;
     public Item SelectedItem => items.Count > 0 ? items[selectedIndex] : null;
 
     private void Start()
     {
-        originalItemHolderPosition = itemHolder.localPosition;
         background.color = deselectedColor;
     }
 
@@ -52,6 +55,14 @@ public class ItemSelectSlot : MonoBehaviour
         {
             items.Insert(0, null);
         }
+        int itemCount = items.Count;
+        if (itemCount < 6)
+        {
+            for (int i = 0; i < 6 - itemCount; i++)
+            {
+                items.Insert(itemCount + i, items[Mod((itemCount + i), itemCount)]);
+            }
+        }
 
         // After lots of tweaking, this formula seems to translate size correctly
         var transformedSpacing = spacing * (itemModelScale / spacing) / 2f;
@@ -60,15 +71,21 @@ public class ItemSelectSlot : MonoBehaviour
         // Instantiate all items at offset spacing down from holder
         for (var i = 0; i < items.Count; i++)
         {
-            if (items[i] == null) continue;
-
+            // Item is probably an empty extension slot!
+            if (items[i] == null) 
+            {
+                var missing = Instantiate(missingObject, itemHolder.position + Vector3.down * spacing * i, itemHolder.rotation, itemHolder);
+                missing.transform.position = itemHolder.position + Vector3.down * transformedSpacing * i;
+                augmentModels.Add((missing, missing.transform.localPosition));
+                continue;
+            }
             var rotation = Quaternion.Euler(new Vector3(0, 90, -20));
-
             var instance = Instantiate(items[i].augment, itemHolder.position + Vector3.down * spacing * i, rotation, itemHolder);
             instance.transform.ScaleAndParent(itemModelScale, itemHolder);
             instance.transform.position = itemHolder.position + Vector3.down * transformedSpacing * i;
 
             Augment.DisableInstance(instance, type);
+            augmentModels.Add((instance, instance.transform.localPosition));
         }
 
         selectedIndex = items.IndexOf(initialItem);
@@ -76,7 +93,7 @@ public class ItemSelectSlot : MonoBehaviour
         // For extensions, we may not find any available item
         if (selectedIndex < 0) selectedIndex = 0;
 
-        ChangeItemDisplayed(selectedIndex, false);
+        ChangeItemDisplayed(selectedIndex);
     }
 
     public void Select()
@@ -100,7 +117,7 @@ public class ItemSelectSlot : MonoBehaviour
         ChangeItemDisplayed((selectedIndex + 1) % items.Count);
     }
 
-    private void ChangeItemDisplayed(int nextIndex, bool animate = true)
+    private void ChangeItemDisplayed(int nextIndex)
     {
         if (nextIndex < 0 || nextIndex >= items.Count)
         {
@@ -110,15 +127,24 @@ public class ItemSelectSlot : MonoBehaviour
         selectedIndex = nextIndex;
 
         label.text = SelectedItem != null ? SelectedItem.displayName : "None";
+        for (int i = 0; i < augmentModels.Count; i++)
+        {
+            augmentModels[i].Item1.SetActive(false);
+            if (i == selectedIndex || i == Mod((selectedIndex + 1), itemSlots.Length) || i == Mod((selectedIndex - 1), itemSlots.Length))
+            {
+                augmentModels[i].Item1.SetActive(true);
+            }
+            LeanTween.move(augmentModels[i].Item1, itemSlots[Mod((selectedIndex - i), itemSlots.Length)].transform.position, .2f).setEaseInOutBounce();
+        }
+    }
 
-        var position = originalItemHolderPosition + Vector3.up * selectedIndex * spacing;
-        if (animate)
+    public static int Mod(float a, float b)
+    {
+        float c = a % b;
+        if ((c < 0 && b > 0) || (c > 0 && b < 0))
         {
-            LeanTween.moveLocal(itemHolder.gameObject, position, .2f).setEaseInOutBounce();
+            c += b;
         }
-        else
-        {
-            itemHolder.localPosition = position;
-        }
+        return (int) c;
     }
 }
