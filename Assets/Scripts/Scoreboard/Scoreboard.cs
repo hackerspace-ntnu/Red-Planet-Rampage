@@ -67,7 +67,7 @@ public class Scoreboard : MonoBehaviour
         progressDescription.text = player.playerIdentity.playerName;
 
         scoreboardManager.ShowNextCrime += NextStep;
-        scoreboardManager.DisplayProgress += ShowProgress;
+        scoreboardManager.ShowVictoryProgress += ShowVictoryProgress;
     }
 
     public void AddPosterCrime(string crimeLabel, int Value)
@@ -108,21 +108,22 @@ public class Scoreboard : MonoBehaviour
         yield return new WaitForSeconds(delay);
     }
 
-    private void ShowProgress()
+    private void ShowVictoryProgress()
     {
-        StartCoroutine(DisplayProgress());
+        StartCoroutine(AnimateVictoryProgress());
     }
 
-    private IEnumerator DisplayProgress()
+    private IEnumerator AnimateVictoryProgress()
     {
         wantedPoster.SetActive(false);
         progressPoster.SetActive(true);
+        var delayTime = 0.5f;
         for (int i = 0; i < MatchController.Singleton.PlayerWins(player.playerIdentity); i++)
         {
             progressCrosses[i].SetActive(true);
             progressCrosses[i].LeanScale(new Vector3(2f, 2f, 2f), 0.5f).setEasePunch();
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(delayTime);
         }
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(scoreboardManager.matchProgressDelay - delayTime * 3);
     }
 }
