@@ -96,9 +96,10 @@ public class ItemSelectSlot : MonoBehaviour
         ChangeItemDisplayed(selectedIndex);
     }
 
-    public void Select()
+    public void Select(out Item item)
     {
         background.color = selectedColor;
+        item = SelectedItem;
     }
 
     public void Deselect()
@@ -106,15 +107,17 @@ public class ItemSelectSlot : MonoBehaviour
         background.color = deselectedColor;
     }
 
-    public void Previous()
+    public void Previous(out Item item)
     {
         // +count to avoid negative numbers from modulo (C# is an oddball here)
         ChangeItemDisplayed((selectedIndex - 1 + items.Count) % items.Count);
+        item = SelectedItem;
     }
 
-    public void Next()
+    public void Next(out Item item)
     {
         ChangeItemDisplayed((selectedIndex + 1) % items.Count);
+        item = SelectedItem;
     }
 
     private void ChangeItemDisplayed(int nextIndex)
