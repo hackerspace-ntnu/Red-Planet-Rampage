@@ -104,6 +104,8 @@ public class MainMenuController : MonoBehaviour
     public void ChangeScene(string name)
     {
         playerInputManagerController.RemoveListeners();
+        Debug.Log("Changing scene");
+        //Instantiate(playerManager.identity.Barrel.augment, gunBody.attachmentSite.position, gunBody.attachmentSite.rotation, parent);
         SceneManager.LoadSceneAsync(name);
     }
 
