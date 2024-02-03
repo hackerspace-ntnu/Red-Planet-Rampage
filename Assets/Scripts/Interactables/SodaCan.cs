@@ -19,11 +19,19 @@ public class SodaCan : MonoBehaviour
     [SerializeField]
     private VisualEffect sprayEffect;
 
+    [SerializeField]
+    private ExplosionController explosion;
+
+    [SerializeField]
+    private Renderer mesh;
+
     private HealthController healthController;
     private Rigidbody body;
 
     private bool isFlying = false;
     private bool isEmptied = false;
+
+    private IEnumerator flyRoutine;
 
     private void Start()
     {
@@ -39,17 +47,37 @@ public class SodaCan : MonoBehaviour
 
     private void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
-        if (!isEmptied)
+        if (isFlying)
+            Explode(info);
+        else if (!isEmptied)
             StartCoroutine(StartFlyingEventually());
+    }
+
+    private void Explode(DamageInfo info)
+    {
+        StopFlying();
+        mesh.enabled = false;
+        body.isKinematic = true;
+        explosion.Explode(info.sourcePlayer);
     }
 
     private IEnumerator StartFlyingEventually()
     {
         yield return new WaitForSeconds(timeBeforeFlying);
+        StartFlying();
+        yield return new WaitForSeconds(timeSpentFlying);
+        StopFlying();
+    }
+
+    private void StartFlying()
+    {
         isFlying = true;
         sprayEffect.SendEvent(VisualEffectAsset.PlayEventID);
         sprayEffect.SetBool("IsSpraying", true);
-        yield return new WaitForSeconds(timeSpentFlying);
+    }
+
+    private void StopFlying()
+    {
         isFlying = false;
         isEmptied = true;
         sprayEffect.SetBool("IsSpraying", false);

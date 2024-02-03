@@ -22,6 +22,8 @@ public class HatBarrelModel : AugmentAnimator
 
     private int magazineSize = 5;
 
+    private bool isLastShot;
+
     public override void OnInitialize(GunStats stats)
     {
         if (ammunition.Count > 0)
@@ -47,24 +49,29 @@ public class HatBarrelModel : AugmentAnimator
     public override void OnFire(GunStats stats)
     {
         animator.SetTrigger("Fire");
-        for (int i = stats.Ammo; i < magazineSize; i++)
+        if (stats.Ammo - 1 == 0)
+        {
+            isLastShot = false;
+            return;
+        }
+            
+        isLastShot = stats.Ammo - 2 == 0;
+        for (int i = stats.Ammo - 2; i < magazineSize; i++)
         {
             ammunition[i].SetActive(false);
-        }
-        if (stats.Ammo == 0)
-        {
-            ToggleBullet();
         }
     }
 
     // Called by animator!
-    public void ToggleBullet()
+    public void EnableBullet()
     {
-        bullet.SetActive(!bullet.activeInHierarchy);
-        if (!bullet.activeInHierarchy)
-        {
-            OnShotFiredAnimation?.Invoke();
-            OnAnimationEnd?.Invoke();
-        }
+        bullet.SetActive(ammunition[0].activeInHierarchy || isLastShot);
+    }
+
+    public void DisableBullet()
+    {
+        bullet.SetActive(false);
+        OnShotFiredAnimation?.Invoke();
+        OnAnimationEnd?.Invoke();
     }
 }

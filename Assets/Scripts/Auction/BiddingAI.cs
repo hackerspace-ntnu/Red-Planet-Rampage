@@ -88,7 +88,7 @@ public class BiddingAI : BiddingPlayer
 
     private void OnBiddingPlatformChange(BiddingPlatform platform)
     {
-        if (platform != currentDestination)
+        if (!platform || !currentDestination || platform != currentDestination)
             return;
 
         AnimateBid();

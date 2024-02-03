@@ -23,8 +23,11 @@ public class MusicTrackManager : MonoBehaviour
     private AudioSource[] layers;
 
     [SerializeField]
-    private float fadeDuration = 0.5f;
-    public float TrackOffset => fadeDuration;
+    private AudioSource[] backupLayers;
+
+    [SerializeField]
+    private double fadeDuration = 0.5f;
+    public double TrackOffset => fadeDuration;
 
     private MusicTrack track;
     public float BeatsPerMinute => track ? track.BeatsPerMinute : 100;
@@ -44,11 +47,14 @@ public class MusicTrackManager : MonoBehaviour
     [SerializeField]
     private MusicTrack constructionFanfare;
 
-    private float trackStartTime;
-    public float TimeSinceTrackStart => Time.realtimeSinceStartup - trackStartTime;
+    private double trackStartTime;
+    public double TimeSinceTrackStart => AudioSettings.dspTime - trackStartTime;
 
     private bool isFadingOutPreviousTrack = false;
     public bool IsfadingOutPreviousTrack => isFadingOutPreviousTrack;
+
+    private bool shouldSwap = false;
+    private double nextSwapTime;
 
     private Coroutine trackSwitchingRoutine;
 
@@ -74,7 +80,7 @@ public class MusicTrackManager : MonoBehaviour
         #endregion Singleton boilerplate
 
         track = menuTheme;
-        trackStartTime = Time.realtimeSinceStartup;
+        trackStartTime = AudioSettings.dspTime;
         AssignPlayedLayers(menuTheme);
 
         DontDestroyOnLoad(gameObject);
@@ -96,12 +102,33 @@ public class MusicTrackManager : MonoBehaviour
         }
     }
 
+    private void SwapLayers()
+    {
+        // Swap references
+        var temp = layers;
+        layers = backupLayers;
+        backupLayers = temp;
+
+        // Swap which layers are audible
+        for (int i = 0; i < layers.Count(); i++)
+        {
+            if (i < track.Layers.Count())
+            {
+                // Enable layers that are part of the track
+                layers[i].volume = track.EnabledLayers[i] ? 1 : 0;
+            }
+            // Disable and reset all backup layers
+            backupLayers[i].volume = 0;
+            backupLayers[i].clip = null;
+        }
+    }
+
+    // Should only be used in Start()
     private void AssignPlayedLayers(MusicTrack track, bool loopStart = false)
     {
         AudioClip[] trackLayers = loopStart ? track.LoopLayers : track.Layers;
         for (int i = 0; i < layers.Count(); i++)
         {
-            layers[i].Stop();
             if (i < trackLayers.Count())
             {
                 layers[i].clip = trackLayers[i];
@@ -113,6 +140,29 @@ public class MusicTrackManager : MonoBehaviour
                 layers[i].volume = 0;
             }
             layers[i].Play();
+        }
+    }
+
+    // Switches tracks at the requested time, see Update()
+    private void ScheduleLayers(MusicTrack track, double time, bool loopStart = false)
+    {
+        shouldSwap = true;
+        nextSwapTime = time;
+        AudioClip[] trackLayers = loopStart ? track.LoopLayers : track.Layers;
+        for (int i = 0; i < layers.Count(); i++)
+        {
+            backupLayers[i].volume = 0;
+            if (i < trackLayers.Count())
+            {
+                // TODO set looping or nah
+                backupLayers[i].clip = trackLayers[i];
+                // TODO set looping or nah
+                backupLayers[i].PlayScheduled(time);
+            }
+            else
+            {
+                backupLayers[i].clip = null;
+            }
         }
     }
 
@@ -153,14 +203,14 @@ public class MusicTrackManager : MonoBehaviour
 
     private IEnumerator Fade(float startVolume, float endVolume, string channel = "musicVolume")
     {
-        float startTime = Time.time;
+        double startTime = AudioSettings.dspTime;
         float logarithmicStartVolume = Mathf.Max(0.0001f, Mathf.Pow(10, startVolume / exponentialReductionFactor));
         float logarithmicEndVolume = Mathf.Max(0.0001f, Mathf.Pow(10, endVolume / exponentialReductionFactor));
 
-        while (Time.time - startTime < fadeDuration)
+        while (AudioSettings.dspTime - startTime < fadeDuration)
         {
             // Fade volume logarithmically (yeah I used a tutorial here, but I do see what's going on, yo)
-            float newVolume = Mathf.Lerp(logarithmicStartVolume, logarithmicEndVolume, (Time.time - startTime) / fadeDuration);
+            float newVolume = Mathf.Lerp(logarithmicStartVolume, logarithmicEndVolume, (float)((AudioSettings.dspTime - startTime) / fadeDuration));
             mixer.SetFloat(channel, Mathf.Log10(newVolume) * exponentialReductionFactor);
             yield return null;
         }
@@ -184,18 +234,26 @@ public class MusicTrackManager : MonoBehaviour
     {
         mixer.GetFloat("musicVolume", out float startVolume);
         isFadingOutPreviousTrack = true;
+        ScheduleLayers(track, AudioSettings.dspTime + fadeDuration);
         yield return FadeOut();
-
-        // Reset volume and switch track
-        AssignPlayedLayers(track);
         mixer.SetFloat("musicVolume", startVolume);
-        trackStartTime = Time.realtimeSinceStartup;
         isFadingOutPreviousTrack = false;
     }
 
-    private IEnumerator WaitThenSwitchToLoop(MusicTrack track, float time)
+    private IEnumerator WaitThenSwitchToLoop(MusicTrack track, double waitTime)
     {
-        yield return new WaitForSecondsRealtime(time);
-        AssignPlayedLayers(track, true);
+        var time = AudioSettings.dspTime + waitTime;
+        yield return new WaitForSecondsRealtime((float)waitTime - 2);
+        ScheduleLayers(track, time, true);
+    }
+
+    private void Update()
+    {
+        if (shouldSwap && AudioSettings.dspTime >= nextSwapTime)
+        {
+            SwapLayers();
+            trackStartTime = nextSwapTime;
+            shouldSwap = false;
+        }
     }
 }

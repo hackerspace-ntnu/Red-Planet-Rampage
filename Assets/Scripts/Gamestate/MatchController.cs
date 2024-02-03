@@ -238,7 +238,7 @@ public class MatchController : MonoBehaviour
     {
         var winner = rounds.Last().Winner;
         if (winner == null) { return false; }
-        var wins = rounds.Where(round => round.IsWinner(winner)).Count();
+        var wins = PlayerWins(winner);
         Debug.Log($"Current winner ({winner}) has {wins} wins.");
         if (wins >= 3)
         {
@@ -251,6 +251,12 @@ public class MatchController : MonoBehaviour
             return false;
         }
     }
+
+    public int PlayerWins(PlayerIdentity player)
+    {
+        return rounds.Where(round => round.IsWinner(player)).Count();
+    }
+
     public void RemoveChip(CollectableChip chip)
     {
         collectableChips.Remove(chip);
