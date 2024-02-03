@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using TransformExtensions;
+using UnityEngine.UIElements;
 
 public class ItemSelectSlot : MonoBehaviour
 {
@@ -25,7 +26,7 @@ public class ItemSelectSlot : MonoBehaviour
     private TMP_Text label;
 
     [SerializeField]
-    private Image background;
+    private SpriteRenderer background;
 
     [SerializeField]
     private Color selectedColor;
@@ -35,6 +36,9 @@ public class ItemSelectSlot : MonoBehaviour
 
     [SerializeField]
     private GameObject missingObject;
+
+    [SerializeField]
+    private GameObject tileHolder;
 
     private List<Item> items;
     private List<(GameObject, Vector3 originalPosition)> augmentModels = new List<(GameObject, Vector3 originalPosition)>();
@@ -111,12 +115,18 @@ public class ItemSelectSlot : MonoBehaviour
     {
         // +count to avoid negative numbers from modulo (C# is an oddball here)
         ChangeItemDisplayed((selectedIndex - 1 + items.Count) % items.Count);
+        LeanTween.moveLocal(tileHolder, itemSlots[5].transform.localPosition, .2f)
+            .setEaseInOutBounce()
+            .setOnComplete(() => tileHolder.transform.localPosition = Vector3.zero);
         item = SelectedItem;
     }
 
     public void Next(out Item item)
     {
         ChangeItemDisplayed((selectedIndex + 1) % items.Count);
+        LeanTween.moveLocal(tileHolder, itemSlots[3].transform.localPosition, .2f)
+            .setEaseInOutBounce()
+            .setOnComplete(() => tileHolder.transform.localPosition = Vector3.zero);
         item = SelectedItem;
     }
 
