@@ -13,6 +13,11 @@ public class PlayerSelectManager : MonoBehaviour
     [SerializeField]
     private List<TMP_Text> nameTags;
 
+    [SerializeField]
+    private float minimumTime = 20f;
+    [SerializeField]
+    private float maximumTime = 30f;
+
     private PlayerInputManagerController playerInputManagerController;
     private List<TMP_Text> playerNames;
     private List<Animator> playerAnimators;
@@ -87,6 +92,7 @@ public class PlayerSelectManager : MonoBehaviour
     /// </summary>
     IEnumerator PlayRandomAnimation()
     {
+        yield return new WaitForSeconds(20f);
         while (true)
         {
             int randomAnimatorNumber = Random.Range(0, playerInputManagerController.playerInputs.Count); // Choose random playermodel to animate
@@ -127,7 +133,7 @@ public class PlayerSelectManager : MonoBehaviour
                 randomAnimator.SetTrigger(randomTrigger);
             }
 
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(Random.Range(minimumTime, maximumTime));
         }
     }
     
