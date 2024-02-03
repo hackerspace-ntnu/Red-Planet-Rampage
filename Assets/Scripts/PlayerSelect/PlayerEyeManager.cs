@@ -2,12 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
-public class PlayerSelectAnimationManager : MonoBehaviour
+public class PlayerEyeManager : MonoBehaviour
 {
-
-    [SerializeField]
-    private Animator animator;
 
     private Material eyeMaterial;
 
@@ -17,7 +15,6 @@ public class PlayerSelectAnimationManager : MonoBehaviour
         SkinnedMeshRenderer eyeRenderer = transform.GetChild(0).GetComponent<SkinnedMeshRenderer>();
         eyeMaterial = eyeRenderer.materials[1];
         resetEyePosition();
-        animator.SetTrigger("cardPeek");
     }
 
     /// <summary>
@@ -39,21 +36,30 @@ public class PlayerSelectAnimationManager : MonoBehaviour
     /// <summary>
     /// Moves the eyes to the players left.
     /// </summary>
-    /// <param name="position"></param>
-    public void lookLeft(float position)
+    /// <param name="targetPosition"></param>
+    public void lookLeft(float targetPosition)
     {
-        eyeMaterial.SetVector("_RightEye", new Vector4(position, 0.0f));
-        eyeMaterial.SetVector("_LeftEye", new Vector4(position, 0.0f));
+        eyeMaterial.SetVector("_RightEye", new Vector4(targetPosition, 0.0f));
+        eyeMaterial.SetVector("_LeftEye", new Vector4(targetPosition, 0.0f));
 
     }
 
     /// <summary>
     /// Moves the eyes to the players right.
     /// </summary>
-    /// <param name="seconds"></param>
-    public void lookRight(float seconds)
+    /// <param name="targetPosition"></param>
+    public void lookRight(float targetPosition)
     {
-        eyeMaterial.SetVector("_RightEye", new Vector4(0.0f, 0.6f));
-        eyeMaterial.SetVector("_LeftEye", new Vector4(0.0f, 0.6f));
+        eyeMaterial.SetVector("_RightEye", new Vector4(-targetPosition, 0.0f));
+        eyeMaterial.SetVector("_LeftEye", new Vector4(-targetPosition, 0.0f));
+    }
+
+    /// <summary>
+    /// Sets the tilt of players eyelid. Positive value = anger, negative value = sad times.
+    /// </summary>
+    /// <param name="angery"></param>
+    public void setAngery(float angery)
+    {
+        eyeMaterial.SetFloat("_Angery", angery);
     }
 }
