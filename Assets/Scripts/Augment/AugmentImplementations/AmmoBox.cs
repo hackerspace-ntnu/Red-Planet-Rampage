@@ -2,15 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class AmmoBox : MonoBehaviour
 {
     [SerializeField] private float respawnTime = 30;
     [SerializeField] private GameObject boxModel;
+    [SerializeField] private VisualEffect effect;
     [SerializeField] private bool shouldAlwaysSpawn = false;
 
     private Collider collider;
     private MeshRenderer renderer;
+
     private static List<AmmoBox> ammoBoxes = new List<AmmoBox>();
 
     private void Start()
@@ -22,7 +25,7 @@ public class AmmoBox : MonoBehaviour
 
         // Animate spin and bounce
         LeanTween.sequence()
-            .append(LeanTween.moveLocalY(boxModel, 0.08f, 0.5f)
+            .append(LeanTween.moveLocalY(boxModel, 0.4f, 0.5f)
                 .setLoopPingPong().setEaseInOutCubic())
             .insert(LeanTween.rotateAroundLocal(boxModel, Vector3.forward, boxModel.transform.eulerAngles.y + 360, 1.5f)
                 .setLoopType(LeanTweenType.easeInOutCubic).setLoopCount(-1));
@@ -63,6 +66,7 @@ public class AmmoBox : MonoBehaviour
         yield return new WaitForSeconds(respawnTime);
         collider.enabled = true;
         renderer.enabled = true;
+        effect.enabled = true;
         ammoBoxes.Add(this);
     }
 
@@ -78,6 +82,7 @@ public class AmmoBox : MonoBehaviour
 
         collider.enabled = false;
         renderer.enabled = false;
+        effect.enabled = false;
         ammoBoxes.Remove(this);
         StartCoroutine(RespawnAfterTimeout());
     }
