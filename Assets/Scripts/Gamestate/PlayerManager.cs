@@ -66,8 +66,8 @@ public class PlayerManager : MonoBehaviour
     protected AITarget aiTargetCollider;
     public Transform AiAimSpot;
     public Transform AiTarget
-    {   
-        get 
+    {
+        get
         {
             if (!aiTargetCollider)
                 return transform;
@@ -124,6 +124,7 @@ public class PlayerManager : MonoBehaviour
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
+        identity.onChipChange += hudController.OnChipChange;
     }
 
     private void Update()
@@ -227,7 +228,7 @@ public class PlayerManager : MonoBehaviour
         {
             playerMovement.onMove -= UpdateHudOnMove;
         }
-
+        identity.onChipChange -= hudController.OnChipChange;
     }
 
     private void UpdateAimTarget(GunStats stats)
