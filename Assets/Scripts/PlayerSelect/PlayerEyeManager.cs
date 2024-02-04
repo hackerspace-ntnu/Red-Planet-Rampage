@@ -27,8 +27,8 @@ public class PlayerEyeManager : MonoBehaviour
         eyeMaterial.SetFloat("_RightUpperLid", 0.12f);
         eyeMaterial.SetFloat("_RightLowerLid", 0.2f);
 
-        eyeMaterial.SetVector("_LeftEye", new Vector4(0, 0));
-        eyeMaterial.SetVector("_RightEye", new Vector4(0, 0));
+        eyeMaterial.SetVector("_LeftEye", new Vector4(0, -0.5f));
+        eyeMaterial.SetVector("_RightEye", new Vector4(0, -0.5f));
 
         eyeMaterial.SetFloat("_Angery", 0.2f);
     }
@@ -45,6 +45,17 @@ public class PlayerEyeManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Moves the eyes to the players left and a little bit down.
+    /// </summary>
+    /// <param name="targetPosition"></param>
+    public void peekLeft(float targetPosition)
+    {
+        eyeMaterial.SetVector("_RightEye", new Vector4(targetPosition, -0.3f));
+        eyeMaterial.SetVector("_LeftEye", new Vector4(targetPosition, -0.3f));
+
+    }
+
+    /// <summary>
     /// Moves the eyes to the players right.
     /// </summary>
     /// <param name="targetPosition"></param>
@@ -52,6 +63,16 @@ public class PlayerEyeManager : MonoBehaviour
     {
         eyeMaterial.SetVector("_RightEye", new Vector4(-targetPosition, 0.0f));
         eyeMaterial.SetVector("_LeftEye", new Vector4(-targetPosition, 0.0f));
+    }
+
+    /// <summary>
+    /// Moves the eyes to the players right and a little bit down.
+    /// </summary>
+    /// <param name="targetPosition"></param>
+    public void peekRight(float targetPosition)
+    {
+        eyeMaterial.SetVector("_RightEye", new Vector4(-targetPosition, -0.3f));
+        eyeMaterial.SetVector("_LeftEye", new Vector4(-targetPosition, -0.3f));
     }
 
     /// <summary>

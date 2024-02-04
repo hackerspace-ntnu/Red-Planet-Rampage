@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerSelectManager : MonoBehaviour
 {
@@ -22,14 +23,17 @@ public class PlayerSelectManager : MonoBehaviour
     private List<TMP_Text> playerNames;
     private List<Animator> playerAnimators;
     private int cardPeekCounter = 0;
-    private bool animationPlaying = false;
 
     public void Awake()
     {
-        playerInputManagerController = PlayerInputManagerController.Singleton;
+        
         playerNames = new List<TMP_Text>();
         playerAnimators = new List<Animator>();
+    }
 
+    private void Start()
+    {
+        playerInputManagerController = PlayerInputManagerController.Singleton;
         for (int i = 0; i < playerModels.Count; i++)
         {
             playerAnimators.Add(playerModels[i].GetComponentInChildren<Animator>()); // Add all animators to list
@@ -78,12 +82,23 @@ public class PlayerSelectManager : MonoBehaviour
             name.text = playerName; // Sets the text of the nametag
             playerNames.Add(name); // Adds TMP_text object to list for monitoring
         }
+    }
 
-        if(!animationPlaying)
+    /// <summary>
+    /// Starts or stops the playerselect animations coroutine. Called by "Start" and "Back" buttons in menu.
+    /// </summary>
+    /// <param name="play"></param>
+    public void controlAnimations(bool play)
+    {
+        if(play)
         {
-            // Play random animations in playerselect
-            StartCoroutine(PlayRandomAnimation());
-            animationPlaying = true;
+            // Start random animations coroutine for playerselect
+            StartCoroutine("PlayRandomAnimation");
+        }
+        else
+        {
+            // Stop random animations coroutine for playerselect
+            StopCoroutine("PlayRandomAnimation");
         }
     }
 
@@ -92,29 +107,34 @@ public class PlayerSelectManager : MonoBehaviour
     /// </summary>
     IEnumerator PlayRandomAnimation()
     {
-        yield return new WaitForSeconds(20f);
+        yield return new WaitForSeconds(5f);
         while (true)
         {
             int randomAnimatorNumber = Random.Range(0, playerInputManagerController.playerInputs.Count); // Choose random playermodel to animate
 
             Animator randomAnimator = playerAnimators[randomAnimatorNumber]; // Get the animator for one of the players that has a connected input
-            string randomTrigger = randomAnimator.GetParameter(Random.Range(0, randomAnimator.parameterCount)).name; // Choose a random trigger to set
+
+            // If randomAnimatorNumber is player all the way to the right, don't include cardpeek trigger
+            string randomTrigger = "";
+            if (randomAnimatorNumber == playerInputManagerController.playerInputs.Count - 1)
+            {
+                randomTrigger = randomAnimator.GetParameter(Random.Range(2, randomAnimator.parameterCount)).name; // Choose a random trigger to set, excluding CardPeek
+            }
+            else if(randomAnimatorNumber == 0)
+            {
+                while(randomTrigger != "CardPeekReaction")
+                {
+                    randomTrigger = randomAnimator.GetParameter(Random.Range(0, randomAnimator.parameterCount)).name; // Choose a random trigger to set, excluding CardPeekReaction
+                }
+            }
+            else
+            {
+                randomTrigger = randomAnimator.GetParameter(Random.Range(0, randomAnimator.parameterCount)).name; // Choose a random trigger
+            }
             
 
             if ((randomTrigger == "CardPeek" || randomTrigger == "CardPeekReaction") && (playerInputManagerController.playerInputs.Count > 1) && (cardPeekCounter == 0))
             {
-                if(randomAnimatorNumber == playerInputManagerController.playerInputs.Count - 1 && randomTrigger == "CardPeek")
-                {
-                    randomAnimatorNumber--; // Make sure Cardpeek animation cannot be played on the left player
-                    randomAnimator = playerAnimators[randomAnimatorNumber]; // Set new random animator to mach newly chosen player model
-                }
-                else if (randomAnimatorNumber == 0 && randomTrigger == "CardPeekReaction")
-                {
-                    randomAnimatorNumber++; // Make sure Cardpeekreaction animation cannot be played on the right player
-                    randomAnimator = playerAnimators[randomAnimatorNumber]; // Set new random animator to mach newly chosen player model
-                }
-                
-
                 randomAnimator.SetTrigger("CardPeek");
                 playerAnimators[randomAnimatorNumber + 1].SetTrigger("CardPeekReaction");
 
@@ -132,7 +152,6 @@ public class PlayerSelectManager : MonoBehaviour
                 cardPeekCounter = 0;
                 randomAnimator.SetTrigger(randomTrigger);
             }
-
             yield return new WaitForSeconds(Random.Range(minimumTime, maximumTime));
         }
     }

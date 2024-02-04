@@ -125,7 +125,6 @@ public class MainMenuController : MonoBehaviour
         }
 
         galleryMenu.SetPlayerInput(inputManager);
-        Debug.Log(playerInputs.Count);
         for (int i = 0; i < playerInputs.Count; i++)
         {
             PlayerIdentity playerIdentity = playerInputs[i].GetComponent<PlayerIdentity>();
