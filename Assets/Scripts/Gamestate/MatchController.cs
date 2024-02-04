@@ -86,6 +86,9 @@ public class MatchController : MonoBehaviour
 
     public int RoundCount { get => rounds.Count(); }
 
+    [SerializeField]
+    private GameObject loadingScreen;
+
     private void Awake()
     {
         #region Singleton boilerplate
@@ -160,11 +163,17 @@ public class MatchController : MonoBehaviour
         PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
         onBiddingStart?.Invoke();
-        // TODO: Add Destroy on match win
+        // TODO: Add Destroy on match win   
+        //playerInputManagerController.RemoveListeners();
+        StartCoroutine(ShowLoadingScreen());
+    }   
+    private IEnumerator ShowLoadingScreen(){
+        loadingScreen.SetActive(true);
+        yield return new WaitForSeconds(5);
         SceneManager.LoadSceneAsync("Bidding");
         PlayerInputManagerController.Singleton.playerInputManager.splitScreen = false;
-    }
 
+    }
     public void EndActiveRound()
     {
         onOutcomeDecided?.Invoke();
@@ -187,6 +196,7 @@ public class MatchController : MonoBehaviour
     public IEnumerator WaitAndStartNextBidding()
     {
         yield return new WaitForSeconds(roundEndDelay);
+
         StartNextBidding();
     }
 
