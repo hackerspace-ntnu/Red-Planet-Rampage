@@ -24,7 +24,7 @@ public class PlayerSelectManager : MonoBehaviour
     private int cardPeekCounter = 0;
     private bool animationPlaying = false;
 
-    public void Start()
+    public void Awake()
     {
         playerInputManagerController = PlayerInputManagerController.Singleton;
         playerNames = new List<TMP_Text>();

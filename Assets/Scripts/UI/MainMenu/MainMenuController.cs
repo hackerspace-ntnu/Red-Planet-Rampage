@@ -125,26 +125,12 @@ public class MainMenuController : MonoBehaviour
         }
 
         galleryMenu.SetPlayerInput(inputManager);
-        
+        Debug.Log(playerInputs.Count);
         for (int i = 0; i < playerInputs.Count; i++)
         {
             PlayerIdentity playerIdentity = playerInputs[i].GetComponent<PlayerIdentity>();
             playerSelectModel.GetComponent<PlayerSelectManager>().setupPlayerSelectModels(playerIdentity.playerName, playerIdentity.color, i);
         }
-        
-        /*
-        GameObject panel = Instantiate(playerBackgroundPanel, characterView);
-        playerBackgrounds.Add(panel);
-
-        //Update all panels color
-        for (int i = 0; i < playerBackgrounds.Count; i++)
-        {
-            // Access the player identity
-            PlayerIdentity playerIdentity = playerInputs[i].GetComponent<PlayerIdentity>();
-            // Update the visual loadout controller
-            playerBackgrounds[i].GetComponent<CharacterMenuLoadout>().SetupPreview(playerIdentity.playerName, playerIdentity.color);
-        }
-        */
     }
 
     public void ReturnToMainMenu()
