@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 using TransformExtensions;
 using UnityEngine.UIElements;
+using System.Collections;
 
 public class ItemSelectSlot : MonoBehaviour
 {
@@ -68,28 +69,24 @@ public class ItemSelectSlot : MonoBehaviour
             }
         }
 
-        // After lots of tweaking, this formula seems to translate size correctly
-        var transformedSpacing = spacing * (itemModelScale / spacing) / 2f;
-
-
         // Instantiate all items at offset spacing down from holder
         for (var i = 0; i < items.Count; i++)
         {
             // Item is probably an empty extension slot!
             if (items[i] == null) 
             {
-                var missing = Instantiate(missingObject, itemHolder.position + Vector3.down * spacing * i, itemHolder.rotation, itemHolder);
-                missing.transform.position = itemHolder.position + Vector3.down * transformedSpacing * i;
+                var missing = Instantiate(missingObject, Vector3.zero, itemHolder.rotation, itemHolder);
+                missing.transform.localPosition = Vector3.zero;
                 augmentModels.Add((missing, missing.transform.localPosition));
                 continue;
             }
             var rotation = Quaternion.Euler(new Vector3(0, 90, -20));
-            var instance = Instantiate(items[i].augment, itemHolder.position + Vector3.down * spacing * i, rotation, itemHolder);
+            var instance = Instantiate(items[i].augment, Vector3.zero, rotation, itemHolder);
             instance.transform.ScaleAndParent(itemModelScale, itemHolder);
-            instance.transform.position = itemHolder.position + Vector3.down * transformedSpacing * i;
+            instance.transform.localPosition = itemSlots[i].transform.position;
 
             Augment.DisableInstance(instance, type);
-            augmentModels.Add((instance, instance.transform.localPosition));
+            augmentModels.Add((instance, instance.transform.position));
         }
 
         selectedIndex = items.IndexOf(initialItem);
@@ -97,6 +94,12 @@ public class ItemSelectSlot : MonoBehaviour
         // For extensions, we may not find any available item
         if (selectedIndex < 0) selectedIndex = 0;
 
+        StartCoroutine(WaitAndSetWeapons());
+    }
+
+    private IEnumerator WaitAndSetWeapons()
+    {
+        yield return new WaitForSeconds(0.1f);
         ChangeItemDisplayed(selectedIndex);
     }
 
