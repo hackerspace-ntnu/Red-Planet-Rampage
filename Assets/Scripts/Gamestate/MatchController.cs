@@ -78,7 +78,10 @@ public class MatchController : MonoBehaviour
     private string currentMapName;
 
     private List<Player> players = new List<Player>();
-    public List<Player> Players { get { return players; } }
+    public List<Player> Players => players;
+    public IEnumerable<Player> AIPlayers => players.Where(p => p.playerManager is AIManager);
+    public IEnumerable<Player> HumanPlayers => players.Where(p => p.playerManager is not AIManager);
+
     private List<CollectableChip> collectableChips;
 
     private static List<Round> rounds = new List<Round>();
@@ -139,7 +142,7 @@ public class MatchController : MonoBehaviour
             .Cast<AIManager>()
             .ToList();
 
-        aiPLayers.ForEach(ai => 
+        aiPLayers.ForEach(ai =>
                 ai.TrackedPlayers = players.Select(player => player.playerManager)
                     .Where(player => player != ai).ToList());
 
@@ -171,7 +174,6 @@ public class MatchController : MonoBehaviour
         roundTimer.OnTimerUpdate -= AdjustMusic;
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
-        AssignRewards();
         GlobalHUD.RoundTimer.enabled = false;
         StartCoroutine(WaitAndShowResults());
     }
@@ -180,6 +182,7 @@ public class MatchController : MonoBehaviour
     {
         // Delay first so we can see who killed who
         yield return new WaitForSeconds(delayBeforeRoundResults);
+        AssignRewards();
         // Scoreboard subscribes here
         onRoundEnd?.Invoke();
     }

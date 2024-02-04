@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 using TMPro;
-using UnityEngine.Rendering.Universal;
 
 public class PlayerHUDController : MonoBehaviour
 {
@@ -32,6 +32,16 @@ public class PlayerHUDController : MonoBehaviour
 
     private int ammoTween;
 
+    [SerializeField]
+    private RectTransform chipBox;
+
+    [SerializeField]
+    private TMP_Text chipAmount;
+
+    private int chipTween;
+
+    private float originalChipY;
+    private float originalChipX;
 
     [Header("Death")]
 
@@ -97,6 +107,21 @@ public class PlayerHUDController : MonoBehaviour
 
         healthBarScaleX = healthBar.localScale.x;
         defaultCrosshairScale = crosshair.localScale;
+
+        originalChipY = chipBox.anchoredPosition.y;
+        // Anchor to top right if there's only one player.
+        // This keeps the chip counter from conflicting with the 
+        if (MatchController.Singleton.HumanPlayers.Count() == 1)
+        {
+            chipBox.anchorMin = Vector2.one;
+            chipBox.anchorMax = Vector2.one;
+            originalChipX = -chipBox.sizeDelta.x / 2f - 10;
+        }
+        else
+        {
+            originalChipX = 0;
+        }
+        chipBox.anchoredPosition = new Vector2(originalChipX, -originalChipY);
     }
 
     public void SetSpeedLines(Vector3 velocity)
@@ -130,6 +155,24 @@ public class PlayerHUDController : MonoBehaviour
         LeanTween.value(gameObject, UpdateDamageBorder, 0f, 1f, damageBorderFlashDuration);
         // Leave a persistent red border at low health, softly increasing as the player inches closer to death
         persistentDamageBorder = Mathf.Clamp01(Mathf.Log10(1.2f * maxHealth / (currentHealth + maxHealth * .01f)));
+    }
+
+    public void OnChipChange(int amount)
+    {
+        chipAmount.text = amount.ToString();
+        if (LeanTween.isTweening(chipTween))
+        {
+            LeanTween.cancel(chipTween);
+        }
+        chipTween = LeanTween.sequence()
+            .append(LeanTween.value(chipBox.gameObject, SetChipBoxPosition, 1f, 0f, .15f).setEaseInBounce())
+            .append(2)
+            .append(LeanTween.value(chipBox.gameObject, SetChipBoxPosition, 0f, 1f, .15f).setEaseOutBounce()).id;
+    }
+
+    private void SetChipBoxPosition(float height)
+    {
+        chipBox.anchoredPosition = new Vector2(originalChipX, originalChipY - height * 2 * originalChipY);
     }
 
     public void UpdateOnFire(float ammoPercent)
