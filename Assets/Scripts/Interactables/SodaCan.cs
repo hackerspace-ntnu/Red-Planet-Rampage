@@ -2,6 +2,13 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.VFX;
 
+enum SodaCanState
+{
+    Inert,
+    Flying,
+    Emptied,
+}
+
 public class SodaCan : MonoBehaviour
 {
     [SerializeField]
@@ -28,10 +35,9 @@ public class SodaCan : MonoBehaviour
     private HealthController healthController;
     private Rigidbody body;
 
-    private bool isFlying = false;
-    private bool isEmptied = false;
+    private SodaCanState state = SodaCanState.Inert;
 
-    private IEnumerator flyRoutine;
+    private Coroutine flyRoutine;
 
     private void Start()
     {
@@ -47,15 +53,16 @@ public class SodaCan : MonoBehaviour
 
     private void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
-        if (isFlying)
+        if (state is SodaCanState.Inert && flyRoutine == null)
+            flyRoutine = StartCoroutine(StartFlyingEventually());
+        else if (state is SodaCanState.Flying)
             Explode(info);
-        else if (!isEmptied)
-            StartCoroutine(StartFlyingEventually());
     }
 
     private void Explode(DamageInfo info)
     {
         StopFlying();
+        StopCoroutine(flyRoutine);
         mesh.enabled = false;
         body.isKinematic = true;
         explosion.Explode(info.sourcePlayer);
@@ -71,21 +78,20 @@ public class SodaCan : MonoBehaviour
 
     private void StartFlying()
     {
-        isFlying = true;
+        state = SodaCanState.Flying;
         sprayEffect.SendEvent(VisualEffectAsset.PlayEventID);
         sprayEffect.SetBool("IsSpraying", true);
     }
 
     private void StopFlying()
     {
-        isFlying = false;
-        isEmptied = true;
+        state = SodaCanState.Emptied;
         sprayEffect.SetBool("IsSpraying", false);
     }
 
     private void FixedUpdate()
     {
-        if (!isFlying) return;
+        if (state is not SodaCanState.Flying) return;
 
         var flyingDirection = (-transform.up + flyingDirectionOffset).normalized;
         body.AddForce(flyingDirection * flyingForce, ForceMode.VelocityChange);
@@ -93,7 +99,7 @@ public class SodaCan : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (!isFlying) return;
+        if (state is not SodaCanState.Flying) return;
 
         var contact = collision.GetContact(0);
         var flyingDirection = (-transform.up + flyingDirectionOffset).normalized;
