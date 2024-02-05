@@ -5,14 +5,12 @@ using TMPro;
 using TransformExtensions;
 using UnityEngine.UIElements;
 using System.Collections;
+using OperatorExtensions;
 
 public class ItemSelectSlot : MonoBehaviour
 {
     [SerializeField]
     private AugmentType type;
-
-    [SerializeField]
-    private float spacing = 4;
 
     [SerializeField]
     private float itemModelScale = 50;
@@ -57,17 +55,12 @@ public class ItemSelectSlot : MonoBehaviour
         this.items = items;
 
         if (type == AugmentType.Extension)
-        {
             items.Insert(0, null);
-        }
+
         int itemCount = items.Count;
         if (itemCount < 6)
-        {
             for (int i = 0; i < 6 - itemCount; i++)
-            {
-                items.Insert(itemCount + i, items[Mod((itemCount + i), itemCount)]);
-            }
-        }
+                items.Insert(itemCount + i, items[(itemCount + i).Mod(itemCount)]);
 
         // Instantiate all items at offset spacing down from holder
         for (var i = 0; i < items.Count; i++)
@@ -99,14 +92,14 @@ public class ItemSelectSlot : MonoBehaviour
 
     private IEnumerator WaitAndSetWeapons()
     {
-        yield return new WaitForSeconds(0.1f);
+        // Skip a frame to let the splitscreen change UI aspect ratio and scale first
+        yield return null;
         ChangeItemDisplayed(selectedIndex);
     }
 
-    public void Select(out Item item)
+    public void Select()
     {
         background.color = selectedColor;
-        item = SelectedItem;
     }
 
     public void Deselect()
@@ -114,31 +107,27 @@ public class ItemSelectSlot : MonoBehaviour
         background.color = deselectedColor;
     }
 
-    public void Previous(out Item item)
+    public void Previous()
     {
-        // +count to avoid negative numbers from modulo (C# is an oddball here)
-        ChangeItemDisplayed((selectedIndex - 1 + items.Count) % items.Count);
+        ChangeItemDisplayed((selectedIndex - 1).Mod(items.Count));
         LeanTween.moveLocal(tileHolder, itemSlots[5].transform.localPosition, .2f)
             .setEaseInOutBounce()
             .setOnComplete(() => tileHolder.transform.localPosition = Vector3.zero);
-        item = SelectedItem;
     }
 
-    public void Next(out Item item)
+    public void Next()
     {
-        ChangeItemDisplayed((selectedIndex + 1) % items.Count);
+        ChangeItemDisplayed((selectedIndex + 1).Mod(items.Count));
         LeanTween.moveLocal(tileHolder, itemSlots[3].transform.localPosition, .2f)
             .setEaseInOutBounce()
             .setOnComplete(() => tileHolder.transform.localPosition = Vector3.zero);
-        item = SelectedItem;
     }
 
     private void ChangeItemDisplayed(int nextIndex)
     {
         if (nextIndex < 0 || nextIndex >= items.Count)
-        {
             return;
-        }
+
 
         selectedIndex = nextIndex;
 
@@ -146,21 +135,10 @@ public class ItemSelectSlot : MonoBehaviour
         for (int i = 0; i < augmentModels.Count; i++)
         {
             augmentModels[i].Item1.SetActive(false);
-            if (i == selectedIndex || i == Mod((selectedIndex + 1), itemSlots.Length) || i == Mod((selectedIndex - 1), itemSlots.Length))
-            {
+            if (i == selectedIndex || i == (selectedIndex + 1).Mod(itemSlots.Length) || i == (selectedIndex - 1).Mod(itemSlots.Length))
                 augmentModels[i].Item1.SetActive(true);
-            }
-            LeanTween.move(augmentModels[i].Item1, itemSlots[Mod((selectedIndex - i), itemSlots.Length)].transform.position, .2f).setEaseInOutBounce();
-        }
-    }
 
-    public static int Mod(float a, float b)
-    {
-        float c = a % b;
-        if ((c < 0 && b > 0) || (c > 0 && b < 0))
-        {
-            c += b;
+            LeanTween.move(augmentModels[i].Item1, itemSlots[(selectedIndex - i).Mod(itemSlots.Length)].transform.position, .2f).setEaseInOutBounce();
         }
-        return (int) c;
     }
 }

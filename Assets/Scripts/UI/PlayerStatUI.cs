@@ -73,37 +73,6 @@ public class PlayerStatUI : MonoBehaviour
         SetBaseGunStats(GunFactory.GetGunStats(StaticInfo.Singleton.StartingBody, StaticInfo.Singleton.StartingBarrel, StaticInfo.Singleton.StartingExtension));
     }
 
-    private void OnBiddingPlatformChange(BiddingPlatform platform)
-    {
-        Item body = playerIdentity.Body;
-        Item barrel = playerIdentity.Barrel;
-        Item extension = playerIdentity.Extension;
-
-        if (platform == null || platform.Item == null)
-        {
-            ResetNewGunStats();
-            SetGunName(playerIdentity.GetGunName());
-            return;
-        }
-
-        switch (platform.Item.augmentType)
-        {
-            case AugmentType.Body:
-                body = platform.Item;
-                break;
-            case AugmentType.Barrel:
-                barrel = platform.Item;
-                break;
-            case AugmentType.Extension:
-                extension = platform.Item;
-                break;
-            default:
-                Debug.Log($"No appropritate augmentType ({platform.Item.augmentType}) found in item.");
-                break;
-        }
-        UpdateStats();
-    }
-
     public void UpdateStats()
     {
         GunStats stats = GunFactory.GetGunStats(playerIdentity.Body, playerIdentity.Barrel, playerIdentity.Extension);
