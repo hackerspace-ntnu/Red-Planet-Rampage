@@ -213,7 +213,7 @@ public class BiddingPlatform : MonoBehaviour
             .append(LeanTween.rotateAroundLocal(augmentModel, Vector3.up, 360, 2.5f).setLoopCount(-1))
             .append(LeanTween.moveLocalY(augmentModel, 0.01f, 3.0f).setLoopPingPong().setEaseInOutSine());
         isActive = true;
-        onItemSet.Invoke(this);
+        onItemSet?.Invoke(this);
 #if UNITY_EDITOR
         auctionTimer.StartTimer(10);
 #else
