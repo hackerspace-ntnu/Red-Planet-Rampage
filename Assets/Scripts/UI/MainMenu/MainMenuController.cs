@@ -24,7 +24,7 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private GalleryMenu galleryMenu;
     [SerializeField]
-    private GameObject playerSelectModel;
+    private PlayerSelectManager playerSelectManager;
 
     [SerializeField]
     private string[] mapNames;
@@ -128,7 +128,7 @@ public class MainMenuController : MonoBehaviour
         for (int i = 0; i < playerInputs.Count; i++)
         {
             PlayerIdentity playerIdentity = playerInputs[i].GetComponent<PlayerIdentity>();
-            playerSelectModel.GetComponent<PlayerSelectManager>().setupPlayerSelectModels(playerIdentity.playerName, playerIdentity.color, i);
+            playerSelectManager.SetupPlayerSelectModels(playerIdentity.playerName, playerIdentity.color, i);
         }
     }
 

@@ -1,5 +1,7 @@
+using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -22,13 +24,14 @@ public class PlayerSelectManager : MonoBehaviour
     private PlayerInputManagerController playerInputManagerController;
     private List<TMP_Text> playerNames;
     private List<Animator> playerAnimators;
+    private List<string> animatorParameters;
     private int cardPeekCounter = 0;
 
     public void Awake()
     {
-        
         playerNames = new List<TMP_Text>();
         playerAnimators = new List<Animator>();
+        animatorParameters = new List<string>();
     }
 
     private void Start()
@@ -38,6 +41,11 @@ public class PlayerSelectManager : MonoBehaviour
         {
             playerAnimators.Add(playerModels[i].GetComponentInChildren<Animator>()); // Add all animators to list
         }
+
+        for (int i = 0; i < playerAnimators[0].parameterCount; i++)
+        {
+            animatorParameters.Add(playerAnimators[0].GetParameter(i).name);
+        }
     }
 
     /// <summary>
@@ -46,12 +54,12 @@ public class PlayerSelectManager : MonoBehaviour
     /// <param name="playerName"></param>
     /// <param name="color"></param>
     /// <param name="playerID"></param>
-    public void setupPlayerSelectModels(string playerName, Color color, int playerID)
+    public void SetupPlayerSelectModels(string playerName, Color color, int playerID)
     {
         playerModels[playerID].GetComponentInChildren<SkinnedMeshRenderer>().material.color = color; // Set player model color
         playerModels[playerID].SetActive(true); // Show corresponding player model
         playerModels[playerID].transform.LookAt(new Vector3(playerSelectCam.transform.position.x, playerModels[playerID].transform.position.y, playerSelectCam.transform.position.z)); // Orient player model to look at camera
-        setPlayerNameTag(playerModels[playerID], playerName, playerID); // Create and display player nametag
+        SetPlayerNameTag(playerModels[playerID], playerName, playerID); // Create and display player nametag
     }
 
     /// <summary>
@@ -60,17 +68,10 @@ public class PlayerSelectManager : MonoBehaviour
     /// <param name="player"></param>
     /// <param name="playerName"></param>
     /// <param name="playerID"></param>
-    public void setPlayerNameTag(GameObject player, string playerName, int playerID)
+    public void SetPlayerNameTag(GameObject player, string playerName, int playerID)
     {
         // Check if nameTag exists already
-        bool nameExists = false;
-        for (int i = 0; i < playerNames.Count; i++)
-        {
-            if (playerNames[i].text == playerName)
-            {
-                nameExists = true;
-            }
-        }
+        bool nameExists = playerNames.Any(x => x.name == playerName);
 
         // If it doesn't, create new nametag based on player name
         if (!nameExists)
@@ -85,21 +86,21 @@ public class PlayerSelectManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Starts or stops the playerselect animations coroutine. Called by "Start" and "Back" buttons in menu.
+    /// Stops the coroutine responsible for animating players in playerSelectMenu. To be called by "Start" in main menu.
     /// </summary>
-    /// <param name="play"></param>
-    public void controlAnimations(bool play)
+    public void PlayAnimations()
     {
-        if(play)
-        {
-            // Start random animations coroutine for playerselect
-            StartCoroutine("PlayRandomAnimation");
-        }
-        else
-        {
-            // Stop random animations coroutine for playerselect
-            StopCoroutine("PlayRandomAnimation");
-        }
+        // Start random animations coroutine for playerselect
+        StartCoroutine("PlayRandomAnimation");
+    }
+
+    /// <summary>
+    /// Stops the coroutine responsible for animating players in playerSelectMenu. To be called by "Back" button in playerSelectMenu.
+    /// </summary>
+    public void StopAnimations()
+    {
+        // Stop random animations coroutine for playerselect
+        StopCoroutine("PlayRandomAnimation");
     }
 
     /// <summary>
@@ -107,6 +108,9 @@ public class PlayerSelectManager : MonoBehaviour
     /// </summary>
     IEnumerator PlayRandomAnimation()
     {
+        List<string> excludeCardPeekReaction = animatorParameters;
+        excludeCardPeekReaction.Remove("CardPeekReaction");
+
         yield return new WaitForSeconds(5f);
         while (true)
         {
@@ -122,10 +126,7 @@ public class PlayerSelectManager : MonoBehaviour
             }
             else if(randomAnimatorNumber == 0)
             {
-                while(randomTrigger != "CardPeekReaction")
-                {
-                    randomTrigger = randomAnimator.GetParameter(Random.Range(0, randomAnimator.parameterCount)).name; // Choose a random trigger to set, excluding CardPeekReaction
-                }
+                randomTrigger = excludeCardPeekReaction.RandomElement(); // Choose a random trigger to set, excluding CardPeekReaction
             }
             else
             {
