@@ -98,6 +98,8 @@ public class ItemSelectMenu : MonoBehaviour
         SetLoadout();
 
         bodySlot.Select();
+        var selectedItem = bodySlot.SelectedItem;
+        playerStatUI.SetDescription(selectedItem == null ? "" : selectedItem.displayDescription);
 
         yield return null;
         yield return null;
@@ -189,17 +191,23 @@ public class ItemSelectMenu : MonoBehaviour
         barrelSlot.Deselect();
         extensionSlot.Deselect();
         selectedSlot.Select();
+        var selectedItem = selectedSlot.SelectedItem;
+        playerStatUI.SetDescription(selectedItem == null ? "" : selectedItem.displayDescription);
     }
 
     private void MoveUpPerformed()
     {
         selectedSlot.Previous();
+        var selectedItem = selectedSlot.SelectedItem;
+        playerStatUI.SetDescription(selectedItem == null ? "" : selectedItem.displayDescription);
         SetLoadout();
     }
 
     private void MoveDownPerformed()
     {
         selectedSlot.Next();
+        var selectedItem = selectedSlot.SelectedItem;
+        playerStatUI.SetDescription(selectedItem == null ? "" : selectedItem.displayDescription);
         SetLoadout();
     }
 
