@@ -126,6 +126,10 @@ public class PlayerHUDController : MonoBehaviour
 
     public void SetSpeedLines(Vector3 velocity)
     {
+        // TODO replace this by actually not having any UI stuff whatsoever for the AI/bidding players
+        if (!speedLinesMaterial)
+            return;
+
         var magnitude = velocity.magnitude;
         if (magnitude < lineDampeningVelocity)
         {
@@ -159,6 +163,10 @@ public class PlayerHUDController : MonoBehaviour
 
     public void OnChipChange(int amount)
     {
+        // TODO replace by not requiring UI stuff on the bidding players
+        if (!chipAmount)
+            return;
+
         chipAmount.text = amount.ToString();
         if (LeanTween.isTweening(chipTween))
         {

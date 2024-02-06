@@ -388,8 +388,11 @@ public class PlayerMovement : MonoBehaviour
         inputManager.onZoomPerformed -= OnZoom;
         inputManager.onZoomCanceled -= OnZoomCanceled;
         var playerManager = GetComponent<PlayerManager>();
-        inputManager.onZoomPerformed -= playerManager.GunController.OnZoom;
-        inputManager.onZoomCanceled -= playerManager.GunController.OnZoomCanceled;
+        if (playerManager?.GunController)
+        {
+            inputManager.onZoomPerformed -= playerManager.GunController.OnZoom;
+            inputManager.onZoomCanceled -= playerManager.GunController.OnZoomCanceled;
+        }
 
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd -= ResetZoom;

@@ -32,6 +32,13 @@ public class AIManager : PlayerManager
         TrackedPlayers.ForEach(player => player.onDeath += RemovePlayer);
     }
 
+    private void OnDestroy()
+    {
+        healthController.onDamageTaken -= OnDamageTaken;
+        healthController.onDeath -= OnDeath;
+        TrackedPlayers.ForEach(player => player.onDeath -= RemovePlayer);
+    }
+
     public void SetIdentity(PlayerIdentity identity)
     {
         this.identity = identity;

@@ -310,6 +310,8 @@ public class PlayerManager : MonoBehaviour
 
     private void FireEnd(InputAction.CallbackContext ctx)
     {
+        if (!gunController)
+            return;
         gunController.triggerHeld = false;
     }
 
