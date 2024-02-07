@@ -19,6 +19,7 @@ public class ExplosionController : MonoBehaviour
     [SerializeField] private LayerMask hitBoxLayers;
 
     private VisualEffect visualEffect;
+    private AudioSource soundEffect;
 
     // Makes sure a player doesn't take damage for each hitbox
     private HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
@@ -33,6 +34,7 @@ public class ExplosionController : MonoBehaviour
     {
         visualEffect = GetComponent<VisualEffect>();
         visualEffect.enabled = false;
+        soundEffect = GetComponent<AudioSource>();
     }
 
     public void OnDrawGizmos()
@@ -45,6 +47,7 @@ public class ExplosionController : MonoBehaviour
     {
         visualEffect.enabled = true;
         visualEffect.SendEvent(VisualEffectAsset.PlayEventID);
+        soundEffect?.Play();
         var targets = Physics.OverlapSphere(transform.position, radius, hitBoxLayers);
         foreach (var target in targets)
         {
