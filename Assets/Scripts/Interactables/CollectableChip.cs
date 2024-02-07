@@ -31,7 +31,7 @@ public class CollectableChip : MonoBehaviour
         GetComponent<Collider>().enabled = false;
         chipModel.GetComponent<Renderer>().enabled = false;
         effect.enabled = false;
-        MatchController.Singleton.RemoveChip(this);
+        MatchController.Singleton?.RemoveChip(this);
         Destroy(gameObject, audioSource.clip.length);
     }
 }
