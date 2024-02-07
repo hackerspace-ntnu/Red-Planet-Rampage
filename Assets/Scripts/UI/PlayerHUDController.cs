@@ -111,7 +111,7 @@ public class PlayerHUDController : MonoBehaviour
         originalChipY = chipBox.anchoredPosition.y;
         // Anchor to top right if there's only one player.
         // This keeps the chip counter from conflicting with the 
-        if (MatchController.Singleton.HumanPlayers.Count() == 1)
+        if (!MatchController.Singleton || MatchController.Singleton.HumanPlayers.Count() == 1)
         {
             chipBox.anchorMin = Vector2.one;
             chipBox.anchorMax = Vector2.one;

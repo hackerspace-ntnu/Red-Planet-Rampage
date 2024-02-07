@@ -55,7 +55,8 @@ public class ExplosionController : MonoBehaviour
 
     private void DealDamage(Collider target, PlayerManager sourcePlayer)
     {
-        var hitbox = target.GetComponent<HitboxController>();
+        if (!target.TryGetComponent<HitboxController>(out var hitbox))
+            return;
         bool hasHealth = hitbox.health;
         if (hasHealth && !hitHealthControllers.Contains(hitbox.health))
         {
