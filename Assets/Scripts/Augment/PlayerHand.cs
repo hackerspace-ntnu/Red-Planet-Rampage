@@ -21,6 +21,10 @@ public class PlayerHand : MonoBehaviour
             gameObject.layer = cullingLayer;
             mesh.layer = cullingLayer;
         }
+        else
+        {
+            handMaterial.enabled = false;
+        }
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += DisableHand;
         player.onDeath += DisableHand;

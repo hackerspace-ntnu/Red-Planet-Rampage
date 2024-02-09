@@ -100,7 +100,9 @@ public class AIManager : PlayerManager
     {
         if (!ShootingTarget)
             return;
-        gunController.target = ShootingTarget.position;
+        gunController.target = ShootingTarget.position 
+            + new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)) 
+                * (transform.position - ShootingTarget.position).magnitude * 0.1f;
     }
     public void OnDrawGizmos()
     {
@@ -139,9 +141,7 @@ public class AIManager : PlayerManager
             closestPlayer = player.AiTarget.transform;
             closestDistance = hitDistance;
             DestinationTarget = closestPlayer;
-            // Close enough to shoot!
-            if ((player.transform.position - transform.position).magnitude < 15)
-                ShootingTarget = player.AiAimSpot;
+            ShootingTarget = player.AiAimSpot;
         }
 
         if (closestPlayer == null)
