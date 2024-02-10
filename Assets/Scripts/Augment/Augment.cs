@@ -63,4 +63,16 @@ public abstract class Augment : MonoBehaviour
                 break;
         }
     }
+
+    public static Transform Midpoint(GameObject instance, AugmentType type)
+    {
+        if (type == AugmentType.Body)
+        {
+            return instance.GetComponent<GunBody>().midpoint;
+        }
+        else
+        {
+            return instance.GetComponent<Augment>().midpoint;
+        }
+    }
 }

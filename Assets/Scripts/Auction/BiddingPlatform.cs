@@ -201,17 +201,17 @@ public class BiddingPlatform : MonoBehaviour
                 augmentSymbol.sprite = extensionSymbol;
                 break;
         }
-        
+
 
         augmentModel = Instantiate(item.augment, modelHolder.transform);
-        augmentModel.transform.localScale = Vector3.one / 20.0f;
-        augmentModel.transform.localPosition = Vector3.zero;
+        augmentModel.transform.localScale = Vector3.one / 20f;
+        augmentModel.transform.localPosition = -Augment.Midpoint(augmentModel, item.augmentType).localPosition / 20f;
         Augment.DisableInstance(augmentModel, item.augmentType);
 
-        modelHolder.transform.Rotate(new Vector3(90f, 0f));
+        modelHolder.transform.parent.Rotate(new Vector3(90f, 0f));
         LeanTween.sequence()
-            .append(LeanTween.rotateAroundLocal(augmentModel, Vector3.up, 360, 2.5f).setLoopCount(-1))
-            .append(LeanTween.moveLocalY(augmentModel, 0.01f, 3.0f).setLoopPingPong().setEaseInOutSine());
+            .append(LeanTween.rotateAroundLocal(modelHolder, Vector3.up, 360, 2.5f).setLoopCount(-1))
+            .append(LeanTween.moveLocalY(modelHolder, 0.01f, 3.0f).setLoopPingPong().setEaseInOutSine());
         isActive = true;
         onItemSet?.Invoke(this);
 #if UNITY_EDITOR
