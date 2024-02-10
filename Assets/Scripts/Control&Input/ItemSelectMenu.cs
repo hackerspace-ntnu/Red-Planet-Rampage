@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using TMPro;
 using SecretName;
 
@@ -10,6 +11,8 @@ public class ItemSelectMenu : MonoBehaviour
     [SerializeField]
     private Canvas canvas;
 
+    [Header("Timer")]
+
     [SerializeField]
     private Timer timer;
 
@@ -17,8 +20,13 @@ public class ItemSelectMenu : MonoBehaviour
     private TMP_Text timerText;
 
     [SerializeField]
+    private Image timerRadialProgress;
+
+    [SerializeField]
     private Transform cameraPosition;
     public Transform CameraPosition => cameraPosition;
+
+    [Header("Item slots")]
 
     [SerializeField]
     private ItemSelectSlot bodySlot;
@@ -112,6 +120,9 @@ public class ItemSelectMenu : MonoBehaviour
         timer.StartTimer(20f);
         timer.OnTimerUpdate += OnTimerUpdate;
         timer.OnTimerRunCompleted += OnTimerRunCompleted;
+
+        timerRadialProgress.material = Instantiate(timerRadialProgress.material);
+        timerRadialProgress.material.SetFloat("_Arc2", 0);
     }
 
 
@@ -248,10 +259,11 @@ public class ItemSelectMenu : MonoBehaviour
         OnReady?.Invoke(this);
     }
 
-    // TODO Move timer up to manager
+    // TODO Move timer up to manager?
     private void OnTimerUpdate()
     {
         timerText.text = Mathf.Round(timer.WaitTime - timer.ElapsedTime).ToString();
+        timerRadialProgress.material.SetFloat("_Arc1", 360f - 360f * ((timer.WaitTime - timer.ElapsedTime) / timer.WaitTime));
     }
 }
 
