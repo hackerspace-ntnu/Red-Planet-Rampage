@@ -159,6 +159,7 @@ public class MatchController : MonoBehaviour
     {
         if (IsWin())
             return;
+        collectableChips = new List<CollectableChip>();
 
         PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
