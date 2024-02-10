@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.VFX;
 using System.Linq;
 using System.Collections.Generic;
@@ -18,6 +19,9 @@ public abstract class Augment : MonoBehaviour
 
     // Where to shoot bullets
     public Transform[] outputs;
+
+    // For displaying items with correct alignment
+    public Transform midpoint;
 
     public virtual void BuildStats(GunStats gunStats)
     {

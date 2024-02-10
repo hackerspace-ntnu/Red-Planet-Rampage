@@ -171,7 +171,7 @@ GameObject:
   - component: {fileID: 2789145164633129729}
   - component: {fileID: 1204770057262295902}
   m_Layer: 0
-  m_Name: lawnMower
+  m_Name: LawnMowerBody
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -197,6 +197,7 @@ Transform:
   - {fileID: 670605451257736924}
   - {fileID: 6979518490569761604}
   - {fileID: 6677584860343120710}
+  - {fileID: 1670967186181035241}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -214,6 +215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: ed4e735ad892c924f83cd52e7590ab02, type: 2}
   attachmentSite: {fileID: 4393314981897995506}
+  midpoint: {fileID: 1670967186181035241}
   RightHandTarget: {fileID: 4828178755023173497}
   LeftHandTarget: {fileID: 2967651853744741510}
   reloadEfficiencyPercentage: 1
@@ -268,6 +270,37 @@ MonoBehaviour:
   animator: {fileID: 7075965889028507396}
   handAnimator: {fileID: 2789145164633129729}
   exhaustParticles: {fileID: 571917691106623531}
+--- !u!1 &2037390768082544009
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1670967186181035241}
+  m_Layer: 0
+  m_Name: Midpoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1670967186181035241
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2037390768082544009}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.06, y: -0.05, z: 0.194}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6114546431771368496}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2480505416070711020
 GameObject:
   m_ObjectHideFlags: 0
