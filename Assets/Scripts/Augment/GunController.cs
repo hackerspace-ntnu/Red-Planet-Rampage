@@ -87,7 +87,7 @@ public class GunController : MonoBehaviour
         barrelAnimator.OnShotFiredAnimation -= ShotFired;
         barrelAnimator.OnAnimationEnd -= FireEnd;
 
-        if (!Player)
+        if (!Player || !Player.inputManager)
             return;
 
         Player.inputManager.onZoomPerformed -= OnZoom;
