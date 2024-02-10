@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 using TransformExtensions;
-using UnityEngine.UIElements;
 using System.Collections;
 using OperatorExtensions;
 
@@ -40,7 +38,7 @@ public class ItemSelectSlot : MonoBehaviour
     private GameObject tileHolder;
 
     private List<Item> items;
-    private List<(GameObject, Vector3 originalPosition)> augmentModels = new List<(GameObject, Vector3 originalPosition)>();
+    private List<(GameObject instance, Vector3 originalPosition, Vector3 offset)> augmentModels = new List<(GameObject instance, Vector3 originalPosition, Vector3 offset)>();
 
     private int selectedIndex = 0;
     public Item SelectedItem => items.Count > 0 ? items[selectedIndex] : null;
@@ -66,20 +64,32 @@ public class ItemSelectSlot : MonoBehaviour
         for (var i = 0; i < items.Count; i++)
         {
             // Item is probably an empty extension slot!
-            if (items[i] == null) 
+            if (items[i] == null)
             {
                 var missing = Instantiate(missingObject, Vector3.zero, itemHolder.rotation, itemHolder);
                 missing.transform.localPosition = Vector3.zero;
-                augmentModels.Add((missing, missing.transform.localPosition));
+                augmentModels.Add((missing, missing.transform.localPosition, Vector3.zero));
                 continue;
             }
+
+            // Item is an augment
             var rotation = Quaternion.Euler(new Vector3(0, 90, -20));
             var instance = Instantiate(items[i].augment, Vector3.zero, rotation, itemHolder);
             instance.transform.ScaleAndParent(itemModelScale, itemHolder);
-            instance.transform.localPosition = itemSlots[i].transform.position;
+            Transform itemCenter;
+            if (items[i].augmentType == AugmentType.Body)
+            {
+                itemCenter = instance.GetComponent<GunBody>().midpoint;
+            }
+            else
+            {
+                itemCenter = instance.GetComponent<Augment>().midpoint;
+            }
+            var offset = instance.transform.position - itemCenter.transform.position;
+            instance.transform.localPosition = itemSlots[i].transform.position + offset / itemModelScale;
 
             Augment.DisableInstance(instance, type);
-            augmentModels.Add((instance, instance.transform.position));
+            augmentModels.Add((instance, itemSlots[i].transform.position, offset / itemModelScale));
         }
 
         selectedIndex = items.IndexOf(initialItem);
@@ -134,11 +144,12 @@ public class ItemSelectSlot : MonoBehaviour
         label.text = SelectedItem != null ? SelectedItem.displayName : "None";
         for (int i = 0; i < augmentModels.Count; i++)
         {
-            augmentModels[i].Item1.SetActive(false);
+            var model = augmentModels[i];
+            model.instance.SetActive(false);
             if (i == selectedIndex || i == (selectedIndex + 1).Mod(itemSlots.Length) || i == (selectedIndex - 1).Mod(itemSlots.Length))
-                augmentModels[i].Item1.SetActive(true);
+                model.instance.SetActive(true);
 
-            LeanTween.move(augmentModels[i].Item1, itemSlots[(selectedIndex - i).Mod(itemSlots.Length)].transform.position, .2f).setEaseInOutBounce();
+            LeanTween.move(augmentModels[i].Item1, itemSlots[(selectedIndex - i).Mod(itemSlots.Length)].transform.position + model.offset, .2f).setEaseInOutBounce();
         }
     }
 }
