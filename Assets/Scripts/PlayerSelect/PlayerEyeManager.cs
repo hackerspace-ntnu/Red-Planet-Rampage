@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -14,14 +15,8 @@ public class PlayerEyeManager : MonoBehaviour
     {
         // Find eye material
         SkinnedMeshRenderer eyeRenderer = transform.GetChild(0).GetComponent<SkinnedMeshRenderer>();
-        Material[] playerMaterials = eyeRenderer.materials;
-        foreach (Material playerMaterial in playerMaterials)
-        {
-            if (playerMaterial.name == "PlayerEyesMaterial (Instance)") { 
-            eyeMaterial = playerMaterial;
-                break;
-            }
-        }
+        eyeMaterial = eyeRenderer.materials.Single(material => material.name == "PlayerEyesMaterial (Instance)");
+        
         ResetEyePosition();
     }
 
