@@ -1,6 +1,7 @@
 using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -18,21 +19,18 @@ public class AIManager : PlayerManager
     [SerializeField]
     private LayerMask ignoreMask;
     public BiddingAI biddingAI;
-    private NavMeshPath navMeshPath;
-    private int navMeshCornerIndex = 1;
-    private AIMovement aiMovement;
+    private Rigidbody body;
 
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        body = GetComponent<Rigidbody>();
         healthController = GetComponent<HealthController>();
-        aiMovement = GetComponent<AIMovement>();
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
-        navMeshPath = new NavMeshPath();
         StartCoroutine(LookForTargets());
         TrackedPlayers.ForEach(player => player.onDeath += RemovePlayer);
     }
@@ -85,7 +83,19 @@ public class AIManager : PlayerManager
         {
             lastPlayerThatHitMe = info.sourcePlayer;
         }
+        Debug.Log(info.force.magnitude);
+        agent.enabled = false;
+        body.isKinematic = false;
+        StartCoroutine(WaitAndEnableAgent());
     }
+
+    private IEnumerator WaitAndEnableAgent()
+    {
+        yield return new WaitForSeconds(0.5f);
+        body.isKinematic = true;
+        agent.enabled = true;
+    }
+
     void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
         var killer = info.sourcePlayer;
@@ -96,8 +106,9 @@ public class AIManager : PlayerManager
         onDeath?.Invoke(killer, this);
         aimAssistCollider.SetActive(false);
         aiTargetCollider.gameObject.SetActive(false);
-        TurnIntoRagdoll(info);
         agent.enabled = false;
+        body.isKinematic = false;
+        TurnIntoRagdoll(info);
         isDead = true;
     }
 
@@ -105,8 +116,8 @@ public class AIManager : PlayerManager
     {
         if (!ShootingTarget)
             return;
-        gunController.target = ShootingTarget.position 
-            + new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f)) 
+        gunController.target = ShootingTarget.position
+            + new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f))
                 * (transform.position - ShootingTarget.position).magnitude * 0.1f;
     }
     public void OnDrawGizmos()
@@ -165,10 +176,9 @@ public class AIManager : PlayerManager
             DestinationTarget = player.AiTarget;
             ShootingTarget = player.AiAimSpot;
         }
-        agent.enabled = true;
-        agent.CalculatePath(DestinationTarget.position, navMeshPath);
-        agent.enabled = false;
-        navMeshCornerIndex = 1;
+        if (agent.enabled)
+            agent.SetDestination(DestinationTarget.position);
+
         yield return new WaitForSeconds(1f);
         StartCoroutine(LookForTargets());
     }
@@ -181,33 +191,17 @@ public class AIManager : PlayerManager
             Debug.DrawLine(transform.position, player.transform.position, Color.blue);
         }
 #endif
-        if (!DestinationTarget)
+        if (!DestinationTarget || !agent.enabled)
             return;
 #if UNITY_EDITOR
         Debug.DrawLine(transform.position, DestinationTarget.position, Color.green);
 #endif
-        //animator.SetFloat("Forward", Vector3.Dot(agent.velocity, transform.forward) / agent.speed);
-        //animator.SetFloat("Right", Vector3.Dot(agent.velocity, transform.right) / agent.speed);
+        animator.SetFloat("Forward", Vector3.Dot(agent.velocity, transform.forward) / agent.speed);
+        animator.SetFloat("Right", Vector3.Dot(agent.velocity, transform.right) / agent.speed);
         if (!ShootingTarget)
             return;
         GunOrigin.LookAt(ShootingTarget.position, transform.up);
         Fire();
-    }
-
-    private void FixedUpdate()
-    {
-        if (navMeshPath.corners.Length < 2)
-        {
-            aiMovement.MoveDirection = Vector3.zero;
-            return;
-        }
-            
-        var distanceToNextCorner = Vector3.Distance(transform.position, navMeshPath.corners[navMeshCornerIndex + 1]);
-        // TODO: recalculate path if distance is too long
-        if (distanceToNextCorner < 1)
-            navMeshCornerIndex++;
-        var direction = (navMeshPath.corners[navMeshCornerIndex] - transform.position).normalized;
-        aiMovement.MoveDirection = new Vector3(direction.x, 0, direction.z);
     }
 
     private void Fire()

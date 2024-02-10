@@ -158,7 +158,7 @@ public class PlayerMovement : MonoBehaviour
         aimAngle = new Vector2(radians, aimAngle.y);
     }
 
-    protected void OnJump(InputAction.CallbackContext ctx)
+    private void OnJump(InputAction.CallbackContext ctx)
     {
         if (!(state == PlayerState.GROUNDED))
             return;
