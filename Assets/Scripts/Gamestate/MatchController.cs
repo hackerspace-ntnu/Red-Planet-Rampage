@@ -169,7 +169,7 @@ public class MatchController : MonoBehaviour
     }   
     private IEnumerator ShowLoadingScreen(){
         loadingScreen.SetActive(true);
-        yield return new WaitForSeconds(5);
+        yield return new WaitForSeconds(6);
         SceneManager.LoadSceneAsync("Bidding");
         PlayerInputManagerController.Singleton.playerInputManager.splitScreen = false;
 

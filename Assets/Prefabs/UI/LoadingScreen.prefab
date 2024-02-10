@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 843044480842383413}
   - component: {fileID: 4530345120936655184}
   m_Layer: 5
-  m_Name: RadialTimer
+  m_Name: Timer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -85,6 +85,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7800017457875967080}
+  - component: {fileID: 3609441333921946679}
   m_Layer: 0
   m_Name: LoadingScreen
   m_TagString: Untagged
@@ -108,6 +109,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3609441333921946679
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 174770792394613555}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 584785fa795d9b043b7a4aeadbcfc3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radialTimer: {fileID: 4530345120936655184}
 --- !u!1 &6301720042595100339
 GameObject:
   m_ObjectHideFlags: 0
@@ -263,7 +277,7 @@ GameObject:
   - component: {fileID: 2560653360517484319}
   - component: {fileID: 5995851825244352634}
   m_Layer: 5
-  m_Name: BarBoarder
+  m_Name: LoadingHUD
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -362,6 +376,6 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -320, y: -137}
+  m_AnchoredPosition: {x: -299, y: -134}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}

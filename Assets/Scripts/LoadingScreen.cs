@@ -1,18 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LoadingScreen : MonoBehaviour
 {
-    // Start is called before the first frame update
+    [SerializeField]
+    private Image radialTimer;
+
+    private float incrementTimer = 360f;
+    
+
     void Start()
     {
-        
+        StartCoroutine(UpdateTimer());
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+    private IEnumerator UpdateTimer(){
+        radialTimer.material = Instantiate(radialTimer.material);
+        for(int i = 0; i < 6;i++){
+            yield return new WaitForSeconds(1);
+            incrementTimer -= 60f;
+            radialTimer.material.SetFloat("_Arc2",incrementTimer);
+        }
     }
 }
