@@ -18,16 +18,21 @@ public class AIManager : PlayerManager
     [SerializeField]
     private LayerMask ignoreMask;
     public BiddingAI biddingAI;
+    private NavMeshPath navMeshPath;
+    private int navMeshCornerIndex = 1;
+    private AIMovement aiMovement;
 
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         healthController = GetComponent<HealthController>();
+        aiMovement = GetComponent<AIMovement>();
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
+        navMeshPath = new NavMeshPath();
         StartCoroutine(LookForTargets());
         TrackedPlayers.ForEach(player => player.onDeath += RemovePlayer);
     }
@@ -160,8 +165,10 @@ public class AIManager : PlayerManager
             DestinationTarget = player.AiTarget;
             ShootingTarget = player.AiAimSpot;
         }
-        agent.SetDestination(DestinationTarget.position);
-
+        agent.enabled = true;
+        agent.CalculatePath(DestinationTarget.position, navMeshPath);
+        agent.enabled = false;
+        navMeshCornerIndex = 1;
         yield return new WaitForSeconds(1f);
         StartCoroutine(LookForTargets());
     }
@@ -174,17 +181,33 @@ public class AIManager : PlayerManager
             Debug.DrawLine(transform.position, player.transform.position, Color.blue);
         }
 #endif
-        if (!DestinationTarget || !agent.enabled)
+        if (!DestinationTarget)
             return;
 #if UNITY_EDITOR
         Debug.DrawLine(transform.position, DestinationTarget.position, Color.green);
 #endif
-        animator.SetFloat("Forward", Vector3.Dot(agent.velocity, transform.forward) / agent.speed);
-        animator.SetFloat("Right", Vector3.Dot(agent.velocity, transform.right) / agent.speed);
+        //animator.SetFloat("Forward", Vector3.Dot(agent.velocity, transform.forward) / agent.speed);
+        //animator.SetFloat("Right", Vector3.Dot(agent.velocity, transform.right) / agent.speed);
         if (!ShootingTarget)
             return;
         GunOrigin.LookAt(ShootingTarget.position, transform.up);
         Fire();
+    }
+
+    private void FixedUpdate()
+    {
+        if (navMeshPath.corners.Length < 2)
+        {
+            aiMovement.MoveDirection = Vector3.zero;
+            return;
+        }
+            
+        var distanceToNextCorner = Vector3.Distance(transform.position, navMeshPath.corners[navMeshCornerIndex + 1]);
+        // TODO: recalculate path if distance is too long
+        if (distanceToNextCorner < 1)
+            navMeshCornerIndex++;
+        var direction = (navMeshPath.corners[navMeshCornerIndex] - transform.position).normalized;
+        aiMovement.MoveDirection = new Vector3(direction.x, 0, direction.z);
     }
 
     private void Fire()

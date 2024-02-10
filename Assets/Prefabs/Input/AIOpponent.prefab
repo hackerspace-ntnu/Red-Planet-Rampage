@@ -491,6 +491,8 @@ MonoBehaviour:
   ammoBar: {fileID: 7291983410227568658}
   crosshair: {fileID: 1996473838909155284}
   tweenDuration: 0.07
+  chipBox: {fileID: 0}
+  chipAmount: {fileID: 0}
   deathScreen: {fileID: 5699210204196915673}
   deathText: {fileID: 6617133218407997872}
   damageBorderFlashDuration: 0.2
@@ -1357,7 +1359,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2993170450959144241}
   - component: {fileID: 849208052834681901}
-  - component: {fileID: 2119647889686324732}
+  - component: {fileID: 4388086492469747923}
   - component: {fileID: 2071132601125607186}
   - component: {fileID: 6976461023633963097}
   - component: {fileID: 32895726769149077}
@@ -1433,16 +1435,16 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 65655
   biddingAI: {fileID: 0}
---- !u!114 &2119647889686324732
+--- !u!114 &4388086492469747923
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5961719937516333757}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe68c66043cf4fa30b1b60bfdcd38608, type: 3}
+  m_Script: {fileID: 11500000, guid: 1712cffc789e5514fa3b842662fadba7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ignoreMask:
@@ -1454,7 +1456,7 @@ MonoBehaviour:
   airDrag: 1
   maxVelocityBeforeExtraDamping: 10
   extraDamping: 25
-  strafeForceGrounded: 60
+  strafeForceGrounded: 40
   strafeForceCrouched: 30
   strafeForceInAir: 30
   jumpForce: 10
@@ -1471,6 +1473,8 @@ MonoBehaviour:
   state: 1
   animator: {fileID: 1738601778441408649}
   ZoomFov: 30
+  MoveDirection: {x: 0, y: 0, z: 0}
+  state: 1
 --- !u!23 &2071132601125607186
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1557,7 +1561,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 0
@@ -1618,6 +1622,9 @@ MonoBehaviour:
   animatorToDisable: {fileID: 1738601778441408649}
   rigidbodyToPush: {fileID: 3567567739895265682}
   cameraParent: {fileID: 1675022821789340537}
+  ragdollMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!82 &6979951360617350381
 AudioSource:
   m_ObjectHideFlags: 0
