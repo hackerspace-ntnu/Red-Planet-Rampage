@@ -32,18 +32,24 @@ public class SodaCan : MonoBehaviour
     [SerializeField]
     private Renderer mesh;
 
+    [SerializeField]
+    private AudioGroup sound;
+
+    private AudioSource audioSource;
     private HealthController healthController;
     private Rigidbody body;
 
     private SodaCanState state = SodaCanState.Inert;
 
     private Coroutine flyRoutine;
+    private Coroutine audioRoutine;
 
     private void Start()
     {
         body = GetComponent<Rigidbody>();
         healthController = GetComponent<HealthController>();
         healthController.onDeath += OnDeath;
+        audioSource = GetComponent<AudioSource>();
     }
 
     private void OnDestroy()
@@ -79,13 +85,26 @@ public class SodaCan : MonoBehaviour
     private void StartFlying()
     {
         state = SodaCanState.Flying;
+        audioRoutine = StartCoroutine(PlayLoop());
         sprayEffect.SendEvent(VisualEffectAsset.PlayEventID);
         sprayEffect.SetBool("IsSpraying", true);
+    }
+
+    private IEnumerator PlayLoop()
+    {
+        while (true)
+        {
+            sound.Play(audioSource);
+            while (audioSource.isPlaying)
+                yield return null;
+        }
     }
 
     private void StopFlying()
     {
         state = SodaCanState.Emptied;
+        StopCoroutine(audioRoutine);
+        audioSource.Stop();
         sprayEffect.SetBool("IsSpraying", false);
     }
 
