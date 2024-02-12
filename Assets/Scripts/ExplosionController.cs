@@ -65,7 +65,7 @@ public class ExplosionController : MonoBehaviour
         {
             hitHealthControllers.Add(hitbox.health);
             var scaledDamage = damage * damageCurve.Evaluate(Vector3.Distance(target.transform.position, transform.position) / radius);
-            hitbox.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage, target.transform.position, (target.transform.position - transform.position).normalized));
+            hitbox.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage, target.transform.position, (target.transform.position - transform.position).normalized, DamageType.Explosion));
         }
 
         if (hasHealth && hitbox.health.TryGetComponent<Rigidbody>(out var rigidbody))

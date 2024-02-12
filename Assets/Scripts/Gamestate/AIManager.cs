@@ -83,14 +83,15 @@ public class AIManager : PlayerManager
         {
             lastPlayerThatHitMe = info.sourcePlayer;
         }
-        Debug.Log(info.force.magnitude);
-        agent.enabled = false;
-        body.isKinematic = false;
-        StartCoroutine(WaitAndEnableAgent());
+        if (info.damageType != DamageType.Explosion)
+            return;
+        StartCoroutine(WaitAndToggleAgent());
     }
 
-    private IEnumerator WaitAndEnableAgent()
+    public IEnumerator WaitAndToggleAgent()
     {
+        agent.enabled = false;
+        body.isKinematic = false;
         yield return new WaitForSeconds(0.5f);
         body.isKinematic = true;
         agent.enabled = true;
@@ -117,7 +118,7 @@ public class AIManager : PlayerManager
         if (!ShootingTarget)
             return;
         gunController.target = ShootingTarget.position
-            + new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), Random.Range(-1f, 1f))
+            + new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f))
                 * (transform.position - ShootingTarget.position).magnitude * 0.1f;
     }
     public void OnDrawGizmos()
