@@ -20,12 +20,21 @@ public class AIManager : PlayerManager
     private LayerMask ignoreMask;
     public BiddingAI biddingAI;
     private Rigidbody body;
+    [SerializeField]
+    private AnimationCurve jumpYoffset;
+
+    private delegate void NavMeshEvent();
+    private NavMeshEvent onLinkStart;
+    private NavMeshEvent onLinkEnd;
 
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         body = GetComponent<Rigidbody>();
         healthController = GetComponent<HealthController>();
+        agent.autoTraverseOffMeshLink = false;
+        onLinkStart += AnimateOffMesh;
+        onLinkEnd += AnimateStopCrouch;
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
@@ -184,6 +193,36 @@ public class AIManager : PlayerManager
         StartCoroutine(LookForTargets());
     }
 
+    private void AnimateOffMesh()
+    {
+        animator.SetBool("Crouching", true);
+        animator.SetTrigger("Leap");
+        StartCoroutine(AnimateJumpCurve(0.7f));
+    }
+
+    private void AnimateStopCrouch()
+    {
+        animator.SetBool("Crouching", false);
+    }
+
+    IEnumerator AnimateJumpCurve(float duration)
+    {
+        OffMeshLinkData data = agent.currentOffMeshLinkData;
+        Vector3 startPos = agent.transform.position;
+        Vector3 endPos = data.endPos + Vector3.up * agent.baseOffset;
+        transform.LookAt(new Vector3(endPos.x, transform.position.y, endPos.z), transform.up);
+        float normalizedTime = 0.0f;
+        while (normalizedTime < 1.0f)
+        {
+            float yOffset = jumpYoffset.Evaluate(normalizedTime);
+            agent.transform.position = Vector3.Lerp(startPos, endPos, normalizedTime) + yOffset * Vector3.up;
+            normalizedTime += Time.deltaTime / duration;
+            yield return null;
+        }
+        agent.CompleteOffMeshLink();
+        onLinkEnd?.Invoke();
+    }
+
     void Update()
     {
 #if UNITY_EDITOR
@@ -199,6 +238,8 @@ public class AIManager : PlayerManager
 #endif
         animator.SetFloat("Forward", Vector3.Dot(agent.velocity, transform.forward) / agent.speed);
         animator.SetFloat("Right", Vector3.Dot(agent.velocity, transform.right) / agent.speed);
+        if (agent.isOnOffMeshLink)
+            onLinkStart?.Invoke();
         if (!ShootingTarget)
             return;
         GunOrigin.LookAt(ShootingTarget.position, transform.up);
