@@ -11,6 +11,9 @@ public class ItemSelectMenu : MonoBehaviour
     [SerializeField]
     private Canvas canvas;
 
+    [SerializeField]
+    private GameObject handleModel;
+
     [Header("Timer")]
 
     [SerializeField]
@@ -72,6 +75,12 @@ public class ItemSelectMenu : MonoBehaviour
 
     private bool isReady = false;
     public bool IsReady => isReady;
+
+    private int handleTween;
+    [SerializeField]
+    private Vector3 handleStartRotation;
+    [SerializeField]
+    private Vector3 handleEndRotation;
 
     private void Start()
     {
@@ -245,10 +254,16 @@ public class ItemSelectMenu : MonoBehaviour
         {
             readyIndicator.gameObject.SetActive(true);
             LeanTween.scale(readyIndicator.gameObject, 1.4f * Vector3.one, .3f).setEasePunch();
+            if (LeanTween.isTweening(handleTween))
+                handleModel.LeanCancel(handleTween, true);
+            handleTween = handleModel.LeanRotateAroundLocal(Vector3.up, 140f, 0.5f).setEaseOutBounce().setOnComplete(() => handleModel.transform.localRotation = Quaternion.Euler(handleEndRotation)).id;
             OnReady?.Invoke(this);
         }
         else
         {
+            if (LeanTween.isTweening(handleTween))
+                handleModel.LeanCancel(handleTween, true);
+            handleTween = handleModel.LeanRotateAroundLocal(Vector3.up, -140f, 0.5f).setEaseOutBounce().setOnComplete(() => handleModel.transform.localRotation = Quaternion.Euler(handleStartRotation)).id;
             readyIndicator.gameObject.SetActive(false);
         }
     }
