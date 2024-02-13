@@ -42,6 +42,8 @@ public class AIManager : PlayerManager
         aiTargetCollider.transform.position = transform.position;
         StartCoroutine(LookForTargets());
         TrackedPlayers.ForEach(player => player.onDeath += RemovePlayer);
+        agent.enabled = false;
+        agent.enabled = true;
     }
 
     private void OnDestroy()

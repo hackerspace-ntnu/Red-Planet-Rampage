@@ -82,6 +82,7 @@ public class MatchController : MonoBehaviour
     public IEnumerable<Player> AIPlayers => players.Where(p => p.playerManager is AIManager);
     public IEnumerable<Player> HumanPlayers => players.Where(p => p.playerManager is not AIManager);
 
+    [SerializeField]
     private List<CollectableChip> collectableChips;
 
     private static List<Round> rounds = new List<Round>();
@@ -132,7 +133,8 @@ public class MatchController : MonoBehaviour
 
     public void StartNextRound()
     {
-        collectableChips = FindObjectsOfType<CollectableChip>().ToList();
+        if (collectableChips.Count == 0)
+            collectableChips = FindObjectsOfType<CollectableChip>().ToList();
         // Setup of playerInputs
         playerFactory.InstantiatePlayersFPS(4 - PlayerInputManagerController.Singleton.playerInputs.Count)
             .ForEach(player => players.Add(new Player(player.identity, player, startAmount)));
