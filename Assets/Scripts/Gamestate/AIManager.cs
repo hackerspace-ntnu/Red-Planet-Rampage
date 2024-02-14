@@ -142,7 +142,7 @@ public class AIManager : PlayerManager
     {
         if (isDead)
             yield break;
-
+        var previousDestination = DestinationTarget;
         Transform closestPlayer = null;
         float closestDistance = ignoreAwareRadius;
         foreach (var player in TrackedPlayers)
@@ -191,7 +191,7 @@ public class AIManager : PlayerManager
         if (agent.enabled)
             agent.SetDestination(DestinationTarget.position);
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(3f);
         StartCoroutine(LookForTargets());
     }
 
