@@ -30,6 +30,7 @@ public class AIManager : PlayerManager
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        agent.updatePosition = false;
         body = GetComponent<Rigidbody>();
         healthController = GetComponent<HealthController>();
         agent.autoTraverseOffMeshLink = false;
@@ -42,8 +43,6 @@ public class AIManager : PlayerManager
         aiTargetCollider.transform.position = transform.position;
         StartCoroutine(LookForTargets());
         TrackedPlayers.ForEach(player => player.onDeath += RemovePlayer);
-        agent.enabled = false;
-        agent.enabled = true;
     }
 
     private void OnDestroy()
@@ -188,8 +187,7 @@ public class AIManager : PlayerManager
             DestinationTarget = player.AiTarget;
             ShootingTarget = player.AiAimSpot;
         }
-        if (agent.enabled)
-            agent.SetDestination(DestinationTarget.position);
+        agent.SetDestination(DestinationTarget.position);
 
         yield return new WaitForSeconds(3f);
         StartCoroutine(LookForTargets());
@@ -246,6 +244,13 @@ public class AIManager : PlayerManager
             return;
         GunOrigin.LookAt(ShootingTarget.position, transform.up);
         Fire();
+    }
+
+    private void FixedUpdate()
+    {
+        var nextPosition = agent.nextPosition;
+        transform.position = Vector3.Lerp(transform.position, nextPosition, agent.speed * Time.fixedDeltaTime);
+        transform.LookAt(new Vector3(nextPosition.x, transform.position.y, nextPosition.z), transform.up);
     }
 
     private void Fire()
