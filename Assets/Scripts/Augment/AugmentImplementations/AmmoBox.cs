@@ -43,6 +43,8 @@ public class AmmoBox : MonoBehaviour
 
     public static AmmoBox GetClosestAmmoBox(Vector3 from)
     {
+        if (ammoBoxes.Count() == 0)
+            return null;
         return ammoBoxes.Aggregate(
             (ammoBox, next) =>
             Vector3.Distance(from, next.transform.position) < Vector3.Distance(from, ammoBox.transform.position) ? next : ammoBox);
