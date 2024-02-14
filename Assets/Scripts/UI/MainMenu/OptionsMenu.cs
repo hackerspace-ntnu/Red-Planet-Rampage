@@ -66,6 +66,7 @@ public class OptionsMenu : MonoBehaviour
         qualityNames = QualitySettings.names;
         qualityDropdown.AddOptions(qualityNames.Reverse().ToList());
         qualityDropdown.value = QualitySettings.GetQualityLevel() - qualityNames.Length - 1;
+        qualityDropdown.RefreshShownValue();
     }
 
     private float LinearToLogarithmicVolume(float volume)
