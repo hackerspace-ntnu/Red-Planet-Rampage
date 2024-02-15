@@ -17,6 +17,7 @@ public class AIMovement : PlayerMovement
         UpdateAnimatorParameters();
     }
 
+    // TODO: Strafe, jump, and keep distance from target player #459
     private void FixedUpdate()
     {
     }

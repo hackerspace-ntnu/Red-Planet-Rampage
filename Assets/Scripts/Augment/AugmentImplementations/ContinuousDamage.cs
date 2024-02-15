@@ -33,7 +33,7 @@ public class ContinuousDamage : MonoBehaviour
     {
         if (hitbox && Time.time - lastDamageTime > 1 / damageRate)
         {
-            hitbox.DamageCollider(new DamageInfo(source, damage, transform.position, -hitbox.transform.forward, DamageType.Continous));
+            hitbox.DamageCollider(new DamageInfo(source, damage, transform.position, -hitbox.transform.forward, DamageType.Continuous));
             lastDamageTime = Time.time;
         }
     }

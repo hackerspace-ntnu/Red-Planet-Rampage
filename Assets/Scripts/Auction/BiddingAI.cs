@@ -14,6 +14,7 @@ public class BiddingAI : BiddingPlayer
     private Dictionary<BiddingPlatform, int> priorities = new Dictionary<BiddingPlatform, int>();
     [SerializeField]
     private BiddingPlatform currentDestination;
+    private bool shouldEvaluate = true;
     void Start()
     {
         GetComponent<PlayerIK>().RightHandIKTarget = signTarget;
@@ -80,8 +81,11 @@ public class BiddingAI : BiddingPlayer
         }
         priorities.Add(platform, priority);
         agent.SetDestination(platform.transform.position);
-        StopCoroutine(WaitAndEvaluate());
+
+        if (!shouldEvaluate)
+            return;
         StartCoroutine(WaitAndEvaluate());
+        shouldEvaluate = false;
     }
 
     private void AnimateBid()

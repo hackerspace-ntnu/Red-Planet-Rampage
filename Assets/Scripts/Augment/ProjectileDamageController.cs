@@ -5,7 +5,7 @@ public enum DamageType
     Weapon,
     Explosion,
     Falling,
-    Continous,
+    Continuous,
 }
 
 public struct DamageInfo

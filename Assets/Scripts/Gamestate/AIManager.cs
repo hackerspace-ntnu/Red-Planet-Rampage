@@ -43,7 +43,7 @@ public class AIManager : PlayerManager
         colliderBox.isTrigger = true;
         healthController = GetComponent<HealthController>();
         agent.autoTraverseOffMeshLink = false;
-        onLinkStart += AnimateOffMesh;
+        onLinkStart += AnimateJump;
         onLinkEnd += AnimateStopCrouch;
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
@@ -205,7 +205,7 @@ public class AIManager : PlayerManager
         StartCoroutine(LookForTargets());
     }
 
-    private void AnimateOffMesh()
+    private void AnimateJump()
     {
         animator.SetBool("Crouching", true);
         animator.SetTrigger("Leap");
@@ -266,8 +266,11 @@ public class AIManager : PlayerManager
             return;
         var nextPosition = agent.nextPosition;
         transform.position = Vector3.Lerp(transform.position, nextPosition, agent.speed * Time.fixedDeltaTime);
-        if (updateRotation)
-            transform.LookAt(new Vector3(ShootingTarget ? ShootingTarget.position.x : nextPosition.x, transform.position.y, ShootingTarget ? ShootingTarget.position.z : nextPosition.z), transform.up);
+
+        if (!updateRotation)
+            return;
+        var targetPosition = ShootingTarget ? ShootingTarget.position : nextPosition;
+        transform.LookAt(new Vector3(targetPosition.x, transform.position.y, targetPosition.z), transform.up);
     }
 
     private void Fire()
