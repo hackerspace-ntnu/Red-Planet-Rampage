@@ -491,6 +491,8 @@ MonoBehaviour:
   ammoBar: {fileID: 7291983410227568658}
   crosshair: {fileID: 1996473838909155284}
   tweenDuration: 0.07
+  chipBox: {fileID: 0}
+  chipAmount: {fileID: 0}
   deathScreen: {fileID: 5699210204196915673}
   deathText: {fileID: 6617133218407997872}
   damageBorderFlashDuration: 0.2
@@ -1357,7 +1359,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2993170450959144241}
   - component: {fileID: 849208052834681901}
-  - component: {fileID: 2119647889686324732}
+  - component: {fileID: 4388086492469747923}
   - component: {fileID: 2071132601125607186}
   - component: {fileID: 6976461023633963097}
   - component: {fileID: 32895726769149077}
@@ -1422,7 +1424,7 @@ MonoBehaviour:
   AiAimSpot: {fileID: 5484086920825501824}
   meshBase: {fileID: 1504669339656912389}
   playerIK: {fileID: 2150749357154718466}
-  deathKnockbackForceMultiplier: 10
+  deathKnockbackForceMultiplier: 150
   hitSounds: {fileID: 0}
   extraHitSounds: {fileID: 0}
   DestinationTarget: {fileID: 0}
@@ -1433,7 +1435,33 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 65655
   biddingAI: {fileID: 0}
---- !u!114 &2119647889686324732
+  jumpYoffset:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 7.832236
+      outSlope: 7.832236
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.016666668
+    - serializedVersion: 3
+      time: 1
+      value: 0.0009422302
+      inSlope: -0.84825814
+      outSlope: -0.84825814
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.16666669
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  itemStoppingDistance: 0.5
+  shootingStoppingDistance: 5
+--- !u!114 &4388086492469747923
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1442,7 +1470,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5961719937516333757}
   m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe68c66043cf4fa30b1b60bfdcd38608, type: 3}
+  m_Script: {fileID: 11500000, guid: 1712cffc789e5514fa3b842662fadba7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ignoreMask:
@@ -1454,7 +1482,7 @@ MonoBehaviour:
   airDrag: 1
   maxVelocityBeforeExtraDamping: 10
   extraDamping: 25
-  strafeForceGrounded: 60
+  strafeForceGrounded: 40
   strafeForceCrouched: 30
   strafeForceInAir: 30
   jumpForce: 10
@@ -1528,7 +1556,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -1543,7 +1571,7 @@ Rigidbody:
   m_GameObject: {fileID: 5961719937516333757}
   serializedVersion: 4
   m_Mass: 5
-  m_Drag: 0
+  m_Drag: 5
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -1618,6 +1646,9 @@ MonoBehaviour:
   animatorToDisable: {fileID: 1738601778441408649}
   rigidbodyToPush: {fileID: 3567567739895265682}
   cameraParent: {fileID: 1675022821789340537}
+  ragdollMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!82 &6979951360617350381
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1737,14 +1768,14 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 15
+  m_Speed: 5
   m_Acceleration: 15
   avoidancePriority: 50
   m_AngularSpeed: 500
   m_StoppingDistance: 0.5
   m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 1
-  m_AutoRepath: 1
+  m_AutoBraking: 0
+  m_AutoRepath: 0
   m_Height: 2
   m_BaseOffset: 0
   m_WalkableMask: 4294967295

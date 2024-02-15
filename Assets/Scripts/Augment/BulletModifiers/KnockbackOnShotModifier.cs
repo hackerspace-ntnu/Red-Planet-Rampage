@@ -39,6 +39,9 @@ public class KnockbackOnShotModifier : MonoBehaviour, ProjectileModifier
 
         if (controller.health.TryGetComponent<Rigidbody>(out var rigidbody))
         {
+            // If AI, enable physics for a small time frame
+            if (rigidbody.isKinematic)
+                StartCoroutine(((AIManager)controller.health.Player).WaitAndToggleAgent());
             rigidbody.AddForce(normal * calculatedPushPower * 2f, ForceMode.Impulse);
         }
     }

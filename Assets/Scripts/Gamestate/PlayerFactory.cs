@@ -169,6 +169,7 @@ public class PlayerFactory : MonoBehaviour
         AIManager manager = aiOpponent.GetComponent<AIManager>();
         manager.SetLayer(index);
         manager.SetIdentity(identity ? identity : existingAiIdentities[index - playerInputManagerController.playerInputs.Count]);
+        manager.GetComponent<AIMovement>().SetInitialRotation(spawnPoint.eulerAngles.y * Mathf.Deg2Rad);
         return manager;
     }
 

@@ -9,6 +9,8 @@ public class GiantFanController : MonoBehaviour
     {
         if (other.gameObject.TryGetComponent<Rigidbody>(out Rigidbody rigidbodyPlayer))
         {
+            if (rigidbodyPlayer.isKinematic)
+                StartCoroutine(rigidbodyPlayer.GetComponent<AIManager>().WaitAndToggleAgent());
             rigidbodyPlayer.AddForce(Vector3.up * airForce, ForceMode.Acceleration);
         }
 

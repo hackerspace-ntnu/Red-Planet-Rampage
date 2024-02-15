@@ -14,13 +14,13 @@ enum PlayerState
 public class PlayerMovement : MonoBehaviour
 {
     private InputManager inputManager;
-    private Rigidbody body;
+    protected Rigidbody body;
     public Rigidbody Body => body;
-    private Collider hitbox;
+    protected Collider hitbox;
     private Camera playerCamera;
 
     [SerializeField]
-    private LayerMask ignoreMask;
+    protected LayerMask ignoreMask;
 
     [SerializeField]
     private float lookSpeed = 3;
@@ -30,52 +30,52 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Drag")]
     [SerializeField]
-    private float groundDrag = 6f;
+    protected float groundDrag = 6f;
 
     [SerializeField]
-    private float airDrag = 2f;
+    protected float airDrag = 2f;
 
     [SerializeField]
-    private float maxVelocityBeforeExtraDamping = 20f;
+    protected float maxVelocityBeforeExtraDamping = 20f;
 
     [SerializeField]
-    private float extraDamping = 25f;
+    protected float extraDamping = 25f;
 
-    private float dragForce = 0;
+    protected float dragForce = 0;
 
     [Header("Strafe")]
     [SerializeField]
-    private float strafeForceGrounded = 60;
+    protected float strafeForceGrounded = 60;
 
     [SerializeField]
-    private float strafeForceCrouched = 30;
+    protected float strafeForceCrouched = 30;
 
     [SerializeField]
-    private float strafeForceInAir = 16;
+    protected float strafeForceInAir = 16;
 
-    private float strafeForce;
+    protected float strafeForce;
 
     [Header("Jumping")]
     [SerializeField]
-    private float jumpForce = 10;
+    protected float jumpForce = 10;
 
     [SerializeField]
-    private float leapForce = 12.5f;
+    protected float leapForce = 12.5f;
 
     [SerializeField]
-    private float leapTimeout = 0.25f;
+    protected float leapTimeout = 0.25f;
 
     [SerializeField]
-    private float dashHeightMultiplier = 0.5f;
+    protected float dashHeightMultiplier = 0.5f;
 
     [SerializeField]
-    private float dashForwardMultiplier = 1.5f;
+    protected float dashForwardMultiplier = 1.5f;
 
     [SerializeField]
-    private float dashDamping = 4f;
+    protected float dashDamping = 4f;
 
     [SerializeField]
-    private float minDashVelocity = 8f;
+    protected float minDashVelocity = 8f;
 
     private bool isDashing = false;
 
@@ -89,28 +89,28 @@ public class PlayerMovement : MonoBehaviour
     private float airThreshold = 0.4f;
 
     [SerializeField]
-    private float slopeAngleThreshold = 50;
+    protected float slopeAngleThreshold = 50;
 
     [SerializeField, ReadOnly]
     private PlayerState state = PlayerState.GROUNDED;
     public bool StateIsAir => state == PlayerState.IN_AIR;
 
     [SerializeField]
-    private Animator animator;
+    protected Animator animator;
 
-    private GameObject gunHolder;
+    protected GameObject gunHolder;
 
-    private const float MarsGravity = 3.7f;
+    protected const float MarsGravity = 3.7f;
 
     private float localCameraHeight;
-    private float localGunHolderHeight;
-    private float localGunHolderX;
+    protected float localGunHolderHeight;
+    protected float localGunHolderX;
 
     [SerializeField]
     public float ZoomFov = 30f;
     private float startingFov;
 
-    private Vector2 aimAngle = Vector2.zero;
+    protected Vector2 aimAngle = Vector2.zero;
 
     public delegate void MovementEvent();
     public MovementEvent onLanding;
@@ -241,7 +241,7 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
-    private void StartCrouch()
+    protected virtual void StartCrouch()
     {
         animator.SetBool("Crouching", true);
         strafeForce = strafeForceCrouched;
@@ -268,7 +268,7 @@ public class PlayerMovement : MonoBehaviour
         return !Physics.BoxCast(hitbox.bounds.center, 0.5f * Vector3.one, Vector3.down, Quaternion.identity, 0.5f + airThreshold, ignoreMask); ;
     }
 
-    private Vector3 GroundNormal()
+    protected Vector3 GroundNormal()
     {
         // Cast a box to detect (partial) ground. See OnDrawGizmos for what I think is the extent of the box cast.
         // No, this does not work if the cast start at the bottom.
@@ -282,7 +282,7 @@ public class PlayerMovement : MonoBehaviour
         return Vector3.up;
     }
 
-    private void UpdatePosition(Vector3 input)
+    protected void UpdatePosition(Vector3 input)
     {
         // Modify input to addforce with relation to current rotation.
         input = transform.forward * input.z + transform.right * input.x;
@@ -337,7 +337,7 @@ public class PlayerMovement : MonoBehaviour
         inputManager.transform.localRotation = Quaternion.AngleAxis(aimAngle.y * Mathf.Rad2Deg, Vector3.left);
     }
 
-    private void UpdateAnimatorParameters()
+    protected void UpdateAnimatorParameters()
     {
         animator.SetFloat("Forward", Vector3.Dot(body.velocity, transform.forward) / maxVelocityBeforeExtraDamping);
         animator.SetFloat("Right", Vector3.Dot(body.velocity, transform.right) / maxVelocityBeforeExtraDamping);

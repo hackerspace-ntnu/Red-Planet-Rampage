@@ -14,16 +14,14 @@ public class BiddingAI : BiddingPlayer
     private Dictionary<BiddingPlatform, int> priorities = new Dictionary<BiddingPlatform, int>();
     [SerializeField]
     private BiddingPlatform currentDestination;
+    private bool shouldEvaluate = true;
     void Start()
     {
         GetComponent<PlayerIK>().RightHandIKTarget = signTarget;
-
+        agent.updateRotation = false;
         foreach (var platform in AuctionDriver.Singleton.BiddingPlatforms)
         {
             platform.onItemSet += EvaluateItem;
-            platform.onItemSet += EvaluatePlatformStates;
-            platform.onBidPlaced += EvaluatePlatformStates;
-            platform.onBiddingEnd += EvaluatePlatformStates;
         }
         playerManager.onSelectedBiddingPlatformChange += OnBiddingPlatformChange;
         playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
@@ -33,6 +31,15 @@ public class BiddingAI : BiddingPlayer
     {
         chipText.text = identity.chips.ToString();
         identity.onChipChange += AnimateChipStatus;
+    }
+
+    private IEnumerator WaitAndEvaluate()
+    {
+        foreach (BiddingPlatform platform in AuctionDriver.Singleton.BiddingPlatforms)
+            if (platform.IsActive)
+                EvaluatePlatformStates(platform);
+        yield return new WaitForSeconds(2);
+        StartCoroutine(WaitAndEvaluate());
     }
 
     private void EvaluatePlatformStates(BiddingPlatform platform)
@@ -74,6 +81,11 @@ public class BiddingAI : BiddingPlayer
         }
         priorities.Add(platform, priority);
         agent.SetDestination(platform.transform.position);
+
+        if (!shouldEvaluate)
+            return;
+        StartCoroutine(WaitAndEvaluate());
+        shouldEvaluate = false;
     }
 
     private void AnimateBid()
@@ -88,7 +100,7 @@ public class BiddingAI : BiddingPlayer
 
     private void OnBiddingPlatformChange(BiddingPlatform platform)
     {
-        if (!platform || !currentDestination || platform != currentDestination)
+        if (!platform || !currentDestination || platform != currentDestination || platform.LeadingBidder == playerManager.identity)
             return;
 
         AnimateBid();
@@ -99,7 +111,11 @@ public class BiddingAI : BiddingPlayer
     private void Update()
     {
         if (!currentDestination)
+        {
+            animator.SetFloat("Forward", 0f);
+            animator.SetFloat("Right", 0f);
             return;
+        }
         animator.SetFloat("Forward", Vector3.Dot(agent.velocity, transform.forward) / agent.speed);
         animator.SetFloat("Right", Vector3.Dot(agent.velocity, transform.right) / agent.speed);
     }
