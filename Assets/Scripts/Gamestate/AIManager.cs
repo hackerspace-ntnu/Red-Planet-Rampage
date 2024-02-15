@@ -20,8 +20,15 @@ public class AIManager : PlayerManager
     private LayerMask ignoreMask;
     public BiddingAI biddingAI;
     private Rigidbody body;
+    private Collider colliderBox;
     [SerializeField]
     private AnimationCurve jumpYoffset;
+    [SerializeField]
+    private float itemStoppingDistance = 0.5f;
+    [SerializeField]
+    private float shootingStoppingDistance = 5f;
+    [SerializeField]
+    private bool updateRotation = true;
 
     private delegate void NavMeshEvent();
     private NavMeshEvent onLinkStart;
@@ -32,6 +39,8 @@ public class AIManager : PlayerManager
         agent = GetComponent<NavMeshAgent>();
         agent.updatePosition = false;
         body = GetComponent<Rigidbody>();
+        colliderBox = GetComponent<Collider>();
+        colliderBox.isTrigger = true;
         healthController = GetComponent<HealthController>();
         agent.autoTraverseOffMeshLink = false;
         onLinkStart += AnimateOffMesh;
@@ -102,9 +111,11 @@ public class AIManager : PlayerManager
     {
         agent.enabled = false;
         body.isKinematic = false;
+        colliderBox.isTrigger = false;
         yield return new WaitForSeconds(0.5f);
         body.isKinematic = true;
         agent.enabled = true;
+        colliderBox.isTrigger = true;
     }
 
     void OnDeath(HealthController healthController, float damage, DamageInfo info)
@@ -141,7 +152,7 @@ public class AIManager : PlayerManager
     {
         if (isDead)
             yield break;
-        var previousDestination = DestinationTarget;
+
         Transform closestPlayer = null;
         float closestDistance = ignoreAwareRadius;
         foreach (var player in TrackedPlayers)
@@ -187,6 +198,7 @@ public class AIManager : PlayerManager
             DestinationTarget = player.AiTarget;
             ShootingTarget = player.AiAimSpot;
         }
+        agent.stoppingDistance = ShootingTarget ? shootingStoppingDistance : itemStoppingDistance;
         agent.SetDestination(DestinationTarget.position);
 
         yield return new WaitForSeconds(3f);
@@ -197,7 +209,7 @@ public class AIManager : PlayerManager
     {
         animator.SetBool("Crouching", true);
         animator.SetTrigger("Leap");
-        StartCoroutine(AnimateJumpCurve(0.7f));
+        StartCoroutine(AnimateJumpCurve(0.6f));
     }
 
     private void AnimateStopCrouch()
@@ -207,6 +219,8 @@ public class AIManager : PlayerManager
 
     IEnumerator AnimateJumpCurve(float duration)
     {
+        if (!agent.enabled)
+            yield return null;
         OffMeshLinkData data = agent.currentOffMeshLinkData;
         Vector3 startPos = agent.transform.position;
         Vector3 endPos = data.endPos + Vector3.up * agent.baseOffset;
@@ -248,9 +262,12 @@ public class AIManager : PlayerManager
 
     private void FixedUpdate()
     {
+        if (isDead || !agent.enabled)
+            return;
         var nextPosition = agent.nextPosition;
         transform.position = Vector3.Lerp(transform.position, nextPosition, agent.speed * Time.fixedDeltaTime);
-        transform.LookAt(new Vector3(nextPosition.x, transform.position.y, nextPosition.z), transform.up);
+        if (updateRotation)
+            transform.LookAt(new Vector3(ShootingTarget ? ShootingTarget.position.x : nextPosition.x, transform.position.y, ShootingTarget ? ShootingTarget.position.z : nextPosition.z), transform.up);
     }
 
     private void Fire()

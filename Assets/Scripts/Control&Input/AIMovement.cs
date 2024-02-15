@@ -19,7 +19,6 @@ public class AIMovement : PlayerMovement
 
     private void FixedUpdate()
     {
-        UpdateRotation();
     }
 
     public void Jump()

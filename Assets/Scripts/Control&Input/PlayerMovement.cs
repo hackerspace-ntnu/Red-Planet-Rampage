@@ -320,7 +320,7 @@ public class PlayerMovement : MonoBehaviour
         body.AddForce(-dragForce * body.mass * new Vector3(body.velocity.x, yDrag, body.velocity.z), ForceMode.Force);
     }
 
-    protected virtual void UpdateRotation()
+    private void UpdateRotation()
     {
         var lookSpeedFactor = inputManager.ZoomActive ? LookSpeedZoom : lookSpeed;
         var lookInput = inputManager.IsMouseAndKeyboard ? inputManager.lookInput : inputManager.lookInput * Time.deltaTime;
