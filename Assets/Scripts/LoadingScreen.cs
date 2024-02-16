@@ -10,6 +10,9 @@ public class LoadingScreen : MonoBehaviour
     private Image radialTimer;
 
     [SerializeField]
+    private GameObject LoadingBar;
+
+    [SerializeField]
     private TMP_Text tipsText;
 
     private float incrementTimer = 360f;
@@ -25,9 +28,9 @@ public class LoadingScreen : MonoBehaviour
 
     private List<string> tips; 
 
-
+    private float rotateSpeed = 60;
     void Start()
-    {       
+    {   
         tips = new List<string>{dash, leap, weaponCombinations, skate, auctionContest, explosiveBarrels, saveChips}; 
         int randomIndex = Random.Range(0, tips.Count);
         currentTip = tips[randomIndex];
@@ -43,6 +46,13 @@ public class LoadingScreen : MonoBehaviour
             yield return new WaitForSeconds(1);
             incrementTimer -= 60f;
             radialTimer.material.SetFloat("_Arc2",incrementTimer);
+
+            if(i == 4){
+                rotateSpeed *= 2;
+            }
         }
+    }
+    void Update(){
+        LoadingBar.transform.Rotate(Vector3.forward, Time.deltaTime * rotateSpeed);
     }
 }
