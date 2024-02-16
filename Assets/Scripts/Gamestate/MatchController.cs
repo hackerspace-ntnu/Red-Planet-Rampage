@@ -128,6 +128,7 @@ public class MatchController : MonoBehaviour
 #endif
         GameObject mainLight = GameObject.FindGameObjectsWithTag("MainLight")[0];
         RenderSettings.skybox.SetVector("_SunDirection", mainLight.transform.forward);
+        RenderSettings.skybox.SetFloat("_MaxGradientTreshold", 0.25f);
         StartNextRound();
     }
 
