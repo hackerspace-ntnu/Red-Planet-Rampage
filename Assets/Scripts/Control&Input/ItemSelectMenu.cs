@@ -72,6 +72,7 @@ public class ItemSelectMenu : MonoBehaviour
     public delegate void SelectionEvent(ItemSelectMenu menu);
 
     public SelectionEvent OnReady;
+    public SelectionEvent OnNotReady;
 
     private bool isReady = false;
     public bool IsReady => isReady;
@@ -158,28 +159,34 @@ public class ItemSelectMenu : MonoBehaviour
         if (moveInput.y > 1 - errorMarginInput && gamepadMoveReady)
         {
             MoveUpPerformed();
-            gamepadMoveReady = false;
-            StartCoroutine(GamepadMoveDelay());
+            DelayIfGamepad();
         }
         else if (moveInput.y < -1 + errorMarginInput && gamepadMoveReady)
         {
             MoveDownPerformed();
-            gamepadMoveReady = false;
-            StartCoroutine(GamepadMoveDelay());
-
+            DelayIfGamepad();
         }
         else if (moveInput.x < -1 + errorMarginInput && gamepadMoveReady)
         {
             MoveLeftPerformed();
-            gamepadMoveReady = false;
+            DelayIfGamepad();
+
+            gamepadMoveReady = !inputManager.IsMouseAndKeyboard;
             StartCoroutine(GamepadMoveDelay());
         }
         else if (moveInput.x > 1 - errorMarginInput && gamepadMoveReady)
         {
             MoveRightPerformed();
-            gamepadMoveReady = false;
-            StartCoroutine(GamepadMoveDelay());
+            DelayIfGamepad();
         }
+    }
+
+    private void DelayIfGamepad()
+    {
+        if (inputManager.IsMouseAndKeyboard)
+            return;
+        gamepadMoveReady = false;
+        StartCoroutine(GamepadMoveDelay());
     }
 
     private IEnumerator GamepadMoveDelay()
@@ -265,6 +272,7 @@ public class ItemSelectMenu : MonoBehaviour
                 handleModel.LeanCancel(handleTween, true);
             handleTween = handleModel.LeanRotateAroundLocal(Vector3.up, -140f, 0.5f).setEaseOutBounce().setOnComplete(() => handleModel.transform.localRotation = Quaternion.Euler(handleStartRotation)).id;
             readyIndicator.gameObject.SetActive(false);
+            OnNotReady?.Invoke(this);
         }
     }
 
