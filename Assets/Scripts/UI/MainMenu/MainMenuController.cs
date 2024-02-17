@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -27,6 +28,10 @@ public class MainMenuController : MonoBehaviour
     private CreditsMenu creditsMenu;
     [SerializeField]
     private PlayerSelectManager playerSelectManager;
+    [SerializeField]
+    private ToggleButton aIButton;
+    [SerializeField] 
+    private Button startButton;
 
     [SerializeField]
     private string[] mapNames;
@@ -97,7 +102,10 @@ public class MainMenuController : MonoBehaviour
         currentMenu.SetActive(false);
         menu.SetActive(true);
         currentMenu = menu;
-        SelectControl(menu.GetComponentInChildren<Selectable>());
+        SelectControl(
+            menu.GetComponentsInChildren<Selectable>()
+            .Where((selectable) => selectable.GetComponent<Button>().enabled)
+            .FirstOrDefault());
     }
 
     /// <summary>
@@ -120,7 +128,8 @@ public class MainMenuController : MonoBehaviour
     {
         inputManager.PlayerCamera.enabled = false;
         playerInputs.Add(inputManager);
-
+        if (playerInputs.Count > 1)
+            startButton.enabled = true;
         foreach (TabGroup t in tabGroups)
         {
             t.SetPlayerInput(inputManager);
@@ -139,6 +148,15 @@ public class MainMenuController : MonoBehaviour
     public void ReturnToMainMenu()
     {
         SwitchToMenu(defaultMenu);
+    }
+
+    public void ToggleAI()
+    {
+        aIButton.Toggle();
+        SelectControl(aIButton.Button);
+        playerInputManagerController.MatchHasAI = !playerInputManagerController.MatchHasAI;
+        bool canPlay = (playerInputManagerController.MatchHasAI || playerInputs.Count > 1);
+        startButton.enabled = canPlay;
     }
 
     public void Quit()

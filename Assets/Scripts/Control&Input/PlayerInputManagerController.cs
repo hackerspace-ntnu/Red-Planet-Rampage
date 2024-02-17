@@ -20,6 +20,8 @@ public class PlayerInputManagerController : MonoBehaviour
 
     public JoinEvent onPlayerInputJoined;
 
+    public bool MatchHasAI = false;
+
     void Awake()
     {
         #region Singleton boilerplate
