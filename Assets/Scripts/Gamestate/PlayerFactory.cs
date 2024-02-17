@@ -111,6 +111,7 @@ public class PlayerFactory : MonoBehaviour
         inputManager.transform.rotation = player.transform.rotation;
         // Enable Camera
         inputManager.PlayerCamera.enabled = true;
+        inputManager.PlayerCamera.orthographic = false;
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
         playerManager.SetPlayerInput(inputManager);
@@ -143,6 +144,7 @@ public class PlayerFactory : MonoBehaviour
     private PlayerManager InstantiateItemSelectPlayer(InputManager inputManager, Transform spawnPoint)
     {
         inputManager.PlayerCamera.enabled = true;
+        inputManager.PlayerCamera.orthographic = true;
         spawnInterval += 10000f;
         GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position + new Vector3(spawnInterval, spawnInterval, 0), spawnPoint.rotation);
         inputManager.transform.position = player.GetComponent<ItemSelectMenu>().CameraPosition.transform.position;
@@ -167,6 +169,7 @@ public class PlayerFactory : MonoBehaviour
         AIManager manager = aiOpponent.GetComponent<AIManager>();
         manager.SetLayer(index);
         manager.SetIdentity(identity ? identity : existingAiIdentities[index - playerInputManagerController.playerInputs.Count]);
+        manager.GetComponent<AIMovement>().SetInitialRotation(spawnPoint.eulerAngles.y * Mathf.Deg2Rad);
         return manager;
     }
 

@@ -24,10 +24,19 @@ public class Scoreboard : MonoBehaviour
     [SerializeField]
     private TMP_Text subtitle;
 
+    [SerializeField]
+    private TMP_Text progressDescription;
+
     public Image photo;
 
     [SerializeField]
-    private Image background;
+    private GameObject wantedPoster;
+
+    [SerializeField]
+    private GameObject progressPoster;
+    
+    [SerializeField]
+    private GameObject[] progressCrosses;
 
     [SerializeField]
     private Transform crimeContent;
@@ -51,11 +60,14 @@ public class Scoreboard : MonoBehaviour
 
     public void SetupPoster(Player player, string subtitle)
     {
-        background.color = player.playerIdentity.color;
+        wantedPoster.GetComponent<Image>().color = player.playerIdentity.color;
         this.subtitle.text = subtitle;
         this.player = player;
+        progressPoster.GetComponent<Image>().color = player.playerIdentity.color;
+        progressDescription.text = player.playerIdentity.playerName;
 
         scoreboardManager.ShowNextCrime += NextStep;
+        scoreboardManager.ShowVictoryProgress += ShowVictoryProgress;
     }
 
     public void AddPosterCrime(string crimeLabel, int Value)
@@ -94,5 +106,24 @@ public class Scoreboard : MonoBehaviour
     private IEnumerator DelayDisplayCrimes(int delay)
     {
         yield return new WaitForSeconds(delay);
+    }
+
+    private void ShowVictoryProgress()
+    {
+        StartCoroutine(AnimateVictoryProgress());
+    }
+
+    private IEnumerator AnimateVictoryProgress()
+    {
+        wantedPoster.SetActive(false);
+        progressPoster.SetActive(true);
+        var delayTime = 0.5f;
+        for (int i = 0; i < MatchController.Singleton.PlayerWins(player.playerIdentity); i++)
+        {
+            progressCrosses[i].SetActive(true);
+            progressCrosses[i].LeanScale(new Vector3(2f, 2f, 2f), 0.5f).setEasePunch();
+            yield return new WaitForSeconds(delayTime);
+        }
+        yield return new WaitForSeconds(scoreboardManager.matchProgressDelay - delayTime * 3);
     }
 }

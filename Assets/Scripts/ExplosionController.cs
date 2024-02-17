@@ -19,6 +19,7 @@ public class ExplosionController : MonoBehaviour
     [SerializeField] private LayerMask hitBoxLayers;
 
     private VisualEffect visualEffect;
+    private AudioSource soundEffect;
 
     // Makes sure a player doesn't take damage for each hitbox
     private HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
@@ -33,6 +34,7 @@ public class ExplosionController : MonoBehaviour
     {
         visualEffect = GetComponent<VisualEffect>();
         visualEffect.enabled = false;
+        soundEffect = GetComponent<AudioSource>();
     }
 
     public void OnDrawGizmos()
@@ -45,6 +47,7 @@ public class ExplosionController : MonoBehaviour
     {
         visualEffect.enabled = true;
         visualEffect.SendEvent(VisualEffectAsset.PlayEventID);
+        soundEffect?.Play();
         var targets = Physics.OverlapSphere(transform.position, radius, hitBoxLayers);
         foreach (var target in targets)
         {
@@ -55,13 +58,14 @@ public class ExplosionController : MonoBehaviour
 
     private void DealDamage(Collider target, PlayerManager sourcePlayer)
     {
-        var hitbox = target.GetComponent<HitboxController>();
+        if (!target.TryGetComponent<HitboxController>(out var hitbox))
+            return;
         bool hasHealth = hitbox.health;
         if (hasHealth && !hitHealthControllers.Contains(hitbox.health))
         {
             hitHealthControllers.Add(hitbox.health);
             var scaledDamage = damage * damageCurve.Evaluate(Vector3.Distance(target.transform.position, transform.position) / radius);
-            hitbox.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage, target.transform.position, (target.transform.position - transform.position).normalized));
+            hitbox.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage, target.transform.position, (target.transform.position - transform.position).normalized, DamageType.Explosion));
         }
 
         if (hasHealth && hitbox.health.TryGetComponent<Rigidbody>(out var rigidbody))

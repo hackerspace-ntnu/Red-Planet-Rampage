@@ -11,6 +11,9 @@ public class GunBody : MonoBehaviour
     // Where to attach barrel
     public Transform attachmentSite;
 
+    // For displaying items with correct alignment
+    public Transform midpoint;
+
     // Where to attach player hands
     public Transform RightHandTarget;
     public Transform LeftHandTarget;

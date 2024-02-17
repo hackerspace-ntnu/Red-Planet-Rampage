@@ -211,6 +211,15 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   biddingAI: {fileID: 8854033448041854585}
+  jumpYoffset:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  itemStoppingDistance: 0.5
+  shootingStoppingDistance: 5
+  updateRotation: 0
 --- !u!114 &6717855691676836013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -268,6 +277,9 @@ MonoBehaviour:
   animatorToDisable: {fileID: 289053663840324231}
   rigidbodyToPush: {fileID: 0}
   cameraParent: {fileID: 0}
+  ragdollMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!82 &7607358150439154286
 AudioSource:
   m_ObjectHideFlags: 0
@@ -374,7 +386,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 1
-  m_Speed: 30
+  m_Speed: 10
   m_Acceleration: 15
   avoidancePriority: 50
   m_AngularSpeed: 320
@@ -1196,6 +1208,8 @@ MonoBehaviour:
   ammoBar: {fileID: 4001729099187883475}
   crosshair: {fileID: 0}
   tweenDuration: 0.07
+  chipBox: {fileID: 0}
+  chipAmount: {fileID: 0}
   deathScreen: {fileID: 1029316632486890240}
   deathText: {fileID: 9172283963218471322}
   damageBorderFlashDuration: 0.2

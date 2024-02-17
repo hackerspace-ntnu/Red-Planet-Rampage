@@ -1,6 +1,7 @@
 using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -18,11 +19,32 @@ public class AIManager : PlayerManager
     [SerializeField]
     private LayerMask ignoreMask;
     public BiddingAI biddingAI;
+    private Rigidbody body;
+    private Collider colliderBox;
+    [SerializeField]
+    private AnimationCurve jumpYoffset;
+    [SerializeField]
+    private float itemStoppingDistance = 0.5f;
+    [SerializeField]
+    private float shootingStoppingDistance = 5f;
+    [SerializeField]
+    private bool updateRotation = true;
+
+    private delegate void NavMeshEvent();
+    private NavMeshEvent onLinkStart;
+    private NavMeshEvent onLinkEnd;
 
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        agent.updatePosition = false;
+        body = GetComponent<Rigidbody>();
+        colliderBox = GetComponent<Collider>();
+        colliderBox.isTrigger = true;
         healthController = GetComponent<HealthController>();
+        agent.autoTraverseOffMeshLink = false;
+        onLinkStart += AnimateJump;
+        onLinkEnd += AnimateStopCrouch;
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
@@ -30,6 +52,13 @@ public class AIManager : PlayerManager
         aiTargetCollider.transform.position = transform.position;
         StartCoroutine(LookForTargets());
         TrackedPlayers.ForEach(player => player.onDeath += RemovePlayer);
+    }
+
+    private void OnDestroy()
+    {
+        healthController.onDamageTaken -= OnDamageTaken;
+        healthController.onDeath -= OnDeath;
+        TrackedPlayers.ForEach(player => player.onDeath -= RemovePlayer);
     }
 
     public void SetIdentity(PlayerIdentity identity)
@@ -73,7 +102,22 @@ public class AIManager : PlayerManager
         {
             lastPlayerThatHitMe = info.sourcePlayer;
         }
+        if (info.damageType != DamageType.Explosion)
+            return;
+        StartCoroutine(WaitAndToggleAgent());
     }
+
+    public IEnumerator WaitAndToggleAgent()
+    {
+        agent.enabled = false;
+        body.isKinematic = false;
+        colliderBox.isTrigger = false;
+        yield return new WaitForSeconds(0.5f);
+        body.isKinematic = true;
+        agent.enabled = true;
+        colliderBox.isTrigger = true;
+    }
+
     void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
         var killer = info.sourcePlayer;
@@ -84,8 +128,9 @@ public class AIManager : PlayerManager
         onDeath?.Invoke(killer, this);
         aimAssistCollider.SetActive(false);
         aiTargetCollider.gameObject.SetActive(false);
-        TurnIntoRagdoll(info);
         agent.enabled = false;
+        body.isKinematic = false;
+        TurnIntoRagdoll(info);
         isDead = true;
     }
 
@@ -93,7 +138,9 @@ public class AIManager : PlayerManager
     {
         if (!ShootingTarget)
             return;
-        gunController.target = ShootingTarget.position;
+        gunController.target = ShootingTarget.position
+            + new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f))
+                * (transform.position - ShootingTarget.position).magnitude * 0.1f;
     }
     public void OnDrawGizmos()
     {
@@ -132,9 +179,7 @@ public class AIManager : PlayerManager
             closestPlayer = player.AiTarget.transform;
             closestDistance = hitDistance;
             DestinationTarget = closestPlayer;
-            // Close enough to shoot!
-            if ((player.transform.position - transform.position).magnitude < 15)
-                ShootingTarget = player.AiAimSpot;
+            ShootingTarget = player.AiAimSpot;
         }
 
         if (closestPlayer == null)
@@ -153,10 +198,43 @@ public class AIManager : PlayerManager
             DestinationTarget = player.AiTarget;
             ShootingTarget = player.AiAimSpot;
         }
+        agent.stoppingDistance = ShootingTarget ? shootingStoppingDistance : itemStoppingDistance;
         agent.SetDestination(DestinationTarget.position);
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(3f);
         StartCoroutine(LookForTargets());
+    }
+
+    private void AnimateJump()
+    {
+        animator.SetBool("Crouching", true);
+        animator.SetTrigger("Leap");
+        StartCoroutine(AnimateJumpCurve(0.6f));
+    }
+
+    private void AnimateStopCrouch()
+    {
+        animator.SetBool("Crouching", false);
+    }
+
+    IEnumerator AnimateJumpCurve(float duration)
+    {
+        if (!agent.enabled)
+            yield return null;
+        OffMeshLinkData data = agent.currentOffMeshLinkData;
+        Vector3 startPos = agent.transform.position;
+        Vector3 endPos = data.endPos + Vector3.up * agent.baseOffset;
+        transform.LookAt(new Vector3(endPos.x, transform.position.y, endPos.z), transform.up);
+        float normalizedTime = 0.0f;
+        while (normalizedTime < 1.0f)
+        {
+            float yOffset = jumpYoffset.Evaluate(normalizedTime);
+            agent.transform.position = Vector3.Lerp(startPos, endPos, normalizedTime) + yOffset * Vector3.up;
+            normalizedTime += Time.deltaTime / duration;
+            yield return null;
+        }
+        agent.CompleteOffMeshLink();
+        onLinkEnd?.Invoke();
     }
 
     void Update()
@@ -174,10 +252,25 @@ public class AIManager : PlayerManager
 #endif
         animator.SetFloat("Forward", Vector3.Dot(agent.velocity, transform.forward) / agent.speed);
         animator.SetFloat("Right", Vector3.Dot(agent.velocity, transform.right) / agent.speed);
+        if (agent.isOnOffMeshLink)
+            onLinkStart?.Invoke();
         if (!ShootingTarget)
             return;
         GunOrigin.LookAt(ShootingTarget.position, transform.up);
         Fire();
+    }
+
+    private void FixedUpdate()
+    {
+        if (isDead || !agent.enabled)
+            return;
+        var nextPosition = agent.nextPosition;
+        transform.position = Vector3.Lerp(transform.position, nextPosition, agent.speed * Time.fixedDeltaTime);
+
+        if (!updateRotation)
+            return;
+        var targetPosition = ShootingTarget ? ShootingTarget.position : nextPosition;
+        transform.LookAt(new Vector3(targetPosition.x, transform.position.y, targetPosition.z), transform.up);
     }
 
     private void Fire()

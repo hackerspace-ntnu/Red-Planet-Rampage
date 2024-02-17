@@ -24,7 +24,7 @@ public class TrainingModeAugment : MonoBehaviour, Interactable
     {
         var augmentModel = Instantiate(item.augment, modelHolder);
         augmentModel.transform.localScale = Vector3.one * 2;
-        augmentModel.transform.localPosition = Vector3.zero;
+        augmentModel.transform.localPosition = -Augment.Midpoint(augmentModel, item.augmentType).localPosition * 2;
 
         Augment.DisableInstance(augmentModel, item.augmentType);
     }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using TMPro;
 using SecretName;
 
@@ -11,14 +12,24 @@ public class ItemSelectMenu : MonoBehaviour
     private Canvas canvas;
 
     [SerializeField]
+    private GameObject handleModel;
+
+    [Header("Timer")]
+
+    [SerializeField]
     private Timer timer;
 
     [SerializeField]
     private TMP_Text timerText;
 
     [SerializeField]
+    private Image timerRadialProgress;
+
+    [SerializeField]
     private Transform cameraPosition;
     public Transform CameraPosition => cameraPosition;
+
+    [Header("Item slots")]
 
     [SerializeField]
     private ItemSelectSlot bodySlot;
@@ -65,6 +76,12 @@ public class ItemSelectMenu : MonoBehaviour
     private bool isReady = false;
     public bool IsReady => isReady;
 
+    private int handleTween;
+    [SerializeField]
+    private Vector3 handleStartRotation;
+    [SerializeField]
+    private Vector3 handleEndRotation;
+
     private void Start()
     {
         readyIndicator.gameObject.SetActive(false);
@@ -98,6 +115,8 @@ public class ItemSelectMenu : MonoBehaviour
         SetLoadout();
 
         bodySlot.Select();
+        var selectedItem = bodySlot.SelectedItem;
+        playerStatUI.SetDescription(selectedItem == null ? "" : selectedItem.displayDescription);
 
         yield return null;
         yield return null;
@@ -110,6 +129,9 @@ public class ItemSelectMenu : MonoBehaviour
         timer.StartTimer(20f);
         timer.OnTimerUpdate += OnTimerUpdate;
         timer.OnTimerRunCompleted += OnTimerRunCompleted;
+
+        timerRadialProgress.material = Instantiate(timerRadialProgress.material);
+        timerRadialProgress.material.SetFloat("_Arc2", 0);
     }
 
 
@@ -189,17 +211,23 @@ public class ItemSelectMenu : MonoBehaviour
         barrelSlot.Deselect();
         extensionSlot.Deselect();
         selectedSlot.Select();
+        var selectedItem = selectedSlot.SelectedItem;
+        playerStatUI.SetDescription(selectedItem == null ? "" : selectedItem.displayDescription);
     }
 
     private void MoveUpPerformed()
     {
         selectedSlot.Previous();
+        var selectedItem = selectedSlot.SelectedItem;
+        playerStatUI.SetDescription(selectedItem == null ? "" : selectedItem.displayDescription);
         SetLoadout();
     }
 
     private void MoveDownPerformed()
     {
         selectedSlot.Next();
+        var selectedItem = selectedSlot.SelectedItem;
+        playerStatUI.SetDescription(selectedItem == null ? "" : selectedItem.displayDescription);
         SetLoadout();
     }
 
@@ -226,10 +254,16 @@ public class ItemSelectMenu : MonoBehaviour
         {
             readyIndicator.gameObject.SetActive(true);
             LeanTween.scale(readyIndicator.gameObject, 1.4f * Vector3.one, .3f).setEasePunch();
+            if (LeanTween.isTweening(handleTween))
+                handleModel.LeanCancel(handleTween, true);
+            handleTween = handleModel.LeanRotateAroundLocal(Vector3.up, 140f, 0.5f).setEaseOutBounce().setOnComplete(() => handleModel.transform.localRotation = Quaternion.Euler(handleEndRotation)).id;
             OnReady?.Invoke(this);
         }
         else
         {
+            if (LeanTween.isTweening(handleTween))
+                handleModel.LeanCancel(handleTween, true);
+            handleTween = handleModel.LeanRotateAroundLocal(Vector3.up, -140f, 0.5f).setEaseOutBounce().setOnComplete(() => handleModel.transform.localRotation = Quaternion.Euler(handleStartRotation)).id;
             readyIndicator.gameObject.SetActive(false);
         }
     }
@@ -240,10 +274,11 @@ public class ItemSelectMenu : MonoBehaviour
         OnReady?.Invoke(this);
     }
 
-    // TODO Move timer up to manager
+    // TODO Move timer up to manager?
     private void OnTimerUpdate()
     {
         timerText.text = Mathf.Round(timer.WaitTime - timer.ElapsedTime).ToString();
+        timerRadialProgress.material.SetFloat("_Arc1", 360f - 360f * ((timer.WaitTime - timer.ElapsedTime) / timer.WaitTime));
     }
 }
 
