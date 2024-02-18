@@ -81,7 +81,9 @@ public class AuctionDriver : MonoBehaviour
         };
 
         playerFactory = GetComponent<PlayerFactory>();
-        playerFactory.InstantiatePlayersBidding(4 - PlayerInputManagerController.Singleton.playerInputs.Count);
+        var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
+            4 - PlayerInputManagerController.Singleton.playerInputs.Count : 0;
+        playerFactory.InstantiatePlayersBidding(aiPlayerCount);
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
 
         AnimateAuctionStart();

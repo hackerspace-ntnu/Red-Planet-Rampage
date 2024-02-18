@@ -27,9 +27,13 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private CreditsMenu creditsMenu;
     [SerializeField]
+    private GameObject mapSelectMenu;
+    [SerializeField]
     private PlayerSelectManager playerSelectManager;
     [SerializeField]
     private ToggleButton aIButton;
+    private Vector3 aiButtonOriginalPosition;
+    private int aiButtonTween;
     [SerializeField] 
     private Button startButton;
 
@@ -56,6 +60,7 @@ public class MainMenuController : MonoBehaviour
         }
 
         SelectControl(defaultButton);
+        aiButtonOriginalPosition = aIButton.transform.localPosition;
     }
 
     private void OnDestroy()
@@ -128,8 +133,12 @@ public class MainMenuController : MonoBehaviour
     {
         inputManager.PlayerCamera.enabled = false;
         playerInputs.Add(inputManager);
-        if (playerInputs.Count > 1)
-            startButton.enabled = true;
+
+        bool canPlay = playerInputs.Count > 1;
+        var colors = startButton.colors;
+        colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
+        startButton.colors = colors;
+
         foreach (TabGroup t in tabGroups)
         {
             t.SetPlayerInput(inputManager);
@@ -150,13 +159,33 @@ public class MainMenuController : MonoBehaviour
         SwitchToMenu(defaultMenu);
     }
 
+    public void StartGameButton(Selectable target)
+    {
+        bool canPlay = (playerInputManagerController.MatchHasAI || playerInputs.Count > 1);
+        if (canPlay)
+        {
+            SwitchToMenu(mapSelectMenu);
+            SelectControl(target);
+            return;
+        }
+        SelectControl(startButton);
+        if (LeanTween.isTweening(aiButtonTween))
+        {
+            LeanTween.cancel(aiButtonTween);
+            aIButton.transform.localPosition = aiButtonOriginalPosition;
+        }
+        aiButtonTween = aIButton.gameObject.LeanMoveLocal(aiButtonOriginalPosition * 1.1f, 0.3f).setEasePunch().id;
+    }
+
     public void ToggleAI()
     {
         aIButton.Toggle();
         SelectControl(aIButton.Button);
         playerInputManagerController.MatchHasAI = !playerInputManagerController.MatchHasAI;
         bool canPlay = (playerInputManagerController.MatchHasAI || playerInputs.Count > 1);
-        startButton.enabled = canPlay;
+        var colors = startButton.colors;
+        colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
+        startButton.colors = colors;
     }
 
     public void Quit()
