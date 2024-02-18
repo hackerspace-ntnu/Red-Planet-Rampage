@@ -47,7 +47,7 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
     {
         if (!(affectedLayers == (affectedLayers | (1 << collider.gameObject.layer))))
             return;
-        var stuck = Instantiate(stuckObject, state.position, state.rotation);
+        var stuck = Instantiate(stuckObject, collider.ClosestPoint(state.position), state.rotation);
         stuck.transform.ParentUnscaled(collider.transform);
         if (stuck.TryGetComponent<ContinuousDamage>(out var continuousDamage))
         {

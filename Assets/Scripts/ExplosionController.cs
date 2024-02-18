@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -43,28 +44,40 @@ public class ExplosionController : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, radius);
     }
 
-    public void Explode(PlayerManager sourcePlayer)
+    public List<(Collider collider, float damage)> Explode(PlayerManager sourcePlayer)
     {
         visualEffect.enabled = true;
         visualEffect.SendEvent(VisualEffectAsset.PlayEventID);
         soundEffect?.Play();
         var targets = Physics.OverlapSphere(transform.position, radius, hitBoxLayers);
+        var hits = new List<(Collider, float)>(targets.Length);
         foreach (var target in targets)
         {
-            DealDamage(target, sourcePlayer);
+            DealDamage(target, sourcePlayer, out var shouldBeReturned, out var scaledDamage);
+            if (shouldBeReturned)
+                hits.Add((target, scaledDamage));
         }
         Destroy(gameObject, 4);
+        return hits;
     }
 
-    private void DealDamage(Collider target, PlayerManager sourcePlayer)
+    private void DealDamage(Collider target, PlayerManager sourcePlayer, out bool shouldBeReturned, out float scaledDamage)
     {
+        scaledDamage = 0;
         if (!target.TryGetComponent<HitboxController>(out var hitbox))
+        {
+            shouldBeReturned = true;
             return;
+        }
+
         bool hasHealth = hitbox.health;
-        if (hasHealth && !hitHealthControllers.Contains(hitbox.health))
+        bool hasNotBeenRegisteredYet = !hitHealthControllers.Contains(hitbox.health);
+        shouldBeReturned = !hasHealth || hasNotBeenRegisteredYet;
+
+        if (hasHealth && hasNotBeenRegisteredYet)
         {
             hitHealthControllers.Add(hitbox.health);
-            var scaledDamage = damage * damageCurve.Evaluate(Vector3.Distance(target.transform.position, transform.position) / radius);
+            scaledDamage = damage * damageCurve.Evaluate(Vector3.Distance(target.transform.position, transform.position) / radius);
             hitbox.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage, target.transform.position, (target.transform.position - transform.position).normalized, DamageType.Explosion));
         }
 
