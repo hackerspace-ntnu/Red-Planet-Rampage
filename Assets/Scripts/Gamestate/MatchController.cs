@@ -93,6 +93,8 @@ public class MatchController : MonoBehaviour
     [SerializeField]
     private GameObject loadingScreen;
 
+    private int loadingDuration = 6;
+
     private void Awake()
     {
         #region Singleton boilerplate
@@ -167,16 +169,18 @@ public class MatchController : MonoBehaviour
             return;
         collectableChips = new List<CollectableChip>();
 
+        PlayerInputManagerController.Singleton.RemoveListeners();
+
+        StartCoroutine(ShowLoadingScreen());
+
         PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
         onBiddingStart?.Invoke();
         // TODO: Add Destroy on match win   
-        //playerInputManagerController.RemoveListeners();
-        StartCoroutine(ShowLoadingScreen());
     }   
     private IEnumerator ShowLoadingScreen(){
         loadingScreen.SetActive(true);
-        yield return new WaitForSeconds(6);
+        yield return new WaitForSeconds(loadingDuration);
         SceneManager.LoadSceneAsync("Bidding");
         PlayerInputManagerController.Singleton.playerInputManager.splitScreen = false;
 
