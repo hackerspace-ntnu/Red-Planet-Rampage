@@ -107,10 +107,7 @@ public class MainMenuController : MonoBehaviour
         currentMenu.SetActive(false);
         menu.SetActive(true);
         currentMenu = menu;
-        SelectControl(
-            menu.GetComponentsInChildren<Selectable>()
-            .Where((selectable) => selectable.GetComponent<Button>().enabled)
-            .FirstOrDefault());
+        SelectControl(menu.GetComponentInChildren<Selectable>());
     }
 
     /// <summary>
