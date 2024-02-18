@@ -24,6 +24,8 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private GalleryMenu galleryMenu;
     [SerializeField]
+    private CreditsMenu creditsMenu;
+    [SerializeField]
     private PlayerSelectManager playerSelectManager;
 
     [SerializeField]
@@ -125,6 +127,8 @@ public class MainMenuController : MonoBehaviour
         }
 
         galleryMenu.SetPlayerInput(inputManager);
+        creditsMenu.SetPlayerInput(inputManager);
+
         for (int i = 0; i < playerInputs.Count; i++)
         {
             PlayerIdentity playerIdentity = playerInputs[i].GetComponent<PlayerIdentity>();
