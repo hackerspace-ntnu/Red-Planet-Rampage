@@ -56,7 +56,10 @@ public abstract class Augment : MonoBehaviour
                 break;
             case AugmentType.Barrel:
                 instance.GetComponent<ProjectileController>().enabled = false;
-                instance.GetComponentsInChildren<VisualEffect>().Select(vfx => vfx.enabled = false);
+                foreach (var vfx in instance.GetComponentsInChildren<VisualEffect>())
+                {
+                    vfx.gameObject.SetActive(false);
+                }
                 break;
             case AugmentType.Extension:
                 instance.GetComponent<GunExtension>().enabled = false;

@@ -169,10 +169,8 @@ public class MatchController : MonoBehaviour
             return;
         collectableChips = new List<CollectableChip>();
 
-        PlayerInputManagerController.Singleton.RemoveListeners();
 
         StartCoroutine(ShowLoadingScreen());
-
         PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
         onBiddingStart?.Invoke();

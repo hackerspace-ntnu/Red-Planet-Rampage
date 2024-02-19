@@ -11,7 +11,7 @@ public class LoadingScreen : MonoBehaviour
     private Image radialTimer;
 
     [SerializeField]
-    private GameObject LoadingBar;
+    private GameObject loadingBar;
 
     [SerializeField]
     private TMP_Text tipsText;
@@ -22,7 +22,11 @@ public class LoadingScreen : MonoBehaviour
     private List<string> tips;
 
     private float rotateSpeed = 60;
+    
+    void Awake(){
+        PlayerInputManagerController.Singleton.RemoveListeners();
 
+    }
     void Start()
     {   
         tipsText.text = tips.RandomElement();
@@ -46,6 +50,6 @@ public class LoadingScreen : MonoBehaviour
     }
     void Update()
     {
-        LoadingBar.transform.Rotate(Vector3.forward, Time.deltaTime * rotateSpeed);
+        loadingBar.transform.Rotate(Vector3.forward, Time.deltaTime * rotateSpeed);
     }
 }
