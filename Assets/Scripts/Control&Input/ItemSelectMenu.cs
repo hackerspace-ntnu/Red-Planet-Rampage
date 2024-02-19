@@ -170,9 +170,6 @@ public class ItemSelectMenu : MonoBehaviour
         {
             MoveLeftPerformed();
             DelayIfGamepad();
-
-            gamepadMoveReady = !inputManager.IsMouseAndKeyboard;
-            StartCoroutine(GamepadMoveDelay());
         }
         else if (moveInput.x > 1 - errorMarginInput && gamepadMoveReady)
         {
