@@ -82,7 +82,7 @@ public class AuctionDriver : MonoBehaviour
 
         playerFactory = GetComponent<PlayerFactory>();
         var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
-            4 - PlayerInputManagerController.Singleton.playerInputs.Count : 0;
+            Mathf.Max(4 - PlayerInputManagerController.Singleton.playerInputs.Count, 0) : 0;
         playerFactory.InstantiatePlayersBidding(aiPlayerCount);
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
 

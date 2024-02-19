@@ -138,7 +138,7 @@ public class MatchController : MonoBehaviour
             collectableChips = FindObjectsOfType<CollectableChip>().ToList();
         // Setup of playerInputs
         var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
-            4 - PlayerInputManagerController.Singleton.playerInputs.Count : 0;
+            Mathf.Max(4 - PlayerInputManagerController.Singleton.playerInputs.Count, 0) : 0;
         playerFactory.InstantiatePlayersFPS(aiPlayerCount)
             .ForEach(player => players.Add(new Player(player.identity, player, startAmount)));
 
