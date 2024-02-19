@@ -17,7 +17,6 @@ public class LoadingScreen : MonoBehaviour
     private TMP_Text tipsText;
 
     private float incrementTimer = 360f;
-    private string currentTip;
 
     [SerializeField]
     private List<string> tips;
@@ -26,17 +25,16 @@ public class LoadingScreen : MonoBehaviour
 
     void Start()
     {   
-        currentTip = tips.RandomElement();
-        tipsText.text = currentTip;
-        
+        tipsText.text = tips.RandomElement();
         StartCoroutine(UpdateTimer());
-
     }
-    private IEnumerator UpdateTimer(){
 
+    private IEnumerator UpdateTimer()
+    {
         radialTimer.material = Instantiate(radialTimer.material);
 
-        for(int i = 0; i < 6;i++){
+        for(int i = 0; i < 6;i++)
+        {
             yield return new WaitForSeconds(1);
             incrementTimer -= 60f;
             radialTimer.material.SetFloat("_Arc2",incrementTimer);
@@ -46,7 +44,8 @@ public class LoadingScreen : MonoBehaviour
             }
         }
     }
-    void Update(){
+    void Update()
+    {
         LoadingBar.transform.Rotate(Vector3.forward, Time.deltaTime * rotateSpeed);
     }
 }
