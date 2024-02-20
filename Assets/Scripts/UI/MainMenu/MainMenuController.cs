@@ -68,6 +68,7 @@ public class MainMenuController : MonoBehaviour
 
         SelectControl(defaultButton);
         aiButtonOriginalPosition = aIButton.transform.localPosition;
+        PlayerInputManagerController.Singleton.MatchHasAI = false;
     }
 
     private void OnDestroy()
