@@ -24,7 +24,7 @@ public class ExplosionModifier : MonoBehaviour, ProjectileModifier
         projectile.OnColliderHit -= Explode;
     }
 
-    private void Explode(Collider other, ref ProjectileState state)
+    private void Explode(RaycastHit other, ref ProjectileState state)
     {
         var instance = Instantiate(explosion, state.position, Quaternion.identity);
         instance.Init();
