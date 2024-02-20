@@ -487,6 +487,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hud: {fileID: 7566135691517473172}
   healthBar: {fileID: 188052666812405710}
+  healthText: {fileID: 0}
+  healthMax: {r: 0, g: 0, b: 0, a: 0}
+  healthMin: {r: 0, g: 0, b: 0, a: 0}
   ammoHud: {fileID: 1524275023034483404}
   ammoBar: {fileID: 7291983410227568658}
   crosshair: {fileID: 1996473838909155284}
@@ -1410,7 +1413,7 @@ MonoBehaviour:
   interactMask:
     serializedVersion: 2
     m_Bits: 0
-  maxHitDistance: 100
+  maxHitDistance: 500
   targetStartOffset: 0.28
   overrideAimTarget: 0
   ammoMaskItem: {fileID: 11400000, guid: a99e4b806f963ac45a0635c34182107a, type: 2}
@@ -1461,6 +1464,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   itemStoppingDistance: 0.5
   shootingStoppingDistance: 5
+  updateRotation: 1
 --- !u!114 &4388086492469747923
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1475,7 +1479,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ignoreMask:
     serializedVersion: 2
-    m_Bits: 65335
+    m_Bits: 65655
   lookSpeed: 3
   LookSpeedZoom: 0.75
   groundDrag: 6
@@ -1499,6 +1503,10 @@ MonoBehaviour:
   state: 1
   animator: {fileID: 1738601778441408649}
   ZoomFov: 30
+  Target: {fileID: 0}
+  ignoreMask:
+    serializedVersion: 2
+    m_Bits: 65655
 --- !u!23 &2071132601125607186
 MeshRenderer:
   m_ObjectHideFlags: 0
