@@ -23,9 +23,9 @@ public class LoadingScreen : MonoBehaviour
 
     private float rotateSpeed = 60;
     
-    void Awake(){
+    void Awake()
+    {
         PlayerInputManagerController.Singleton.RemoveListeners();
-
     }
     void Start()
     {   
