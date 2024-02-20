@@ -36,7 +36,8 @@ public class MainMenuController : MonoBehaviour
     private int aiButtonTween;
     [SerializeField] 
     private Button startButton;
-
+    [SerializeField]
+    private GameObject innputManagerPrefab;
     [SerializeField]
     private string[] mapNames;
 
@@ -44,11 +45,17 @@ public class MainMenuController : MonoBehaviour
     private List<InputManager> playerInputs = new List<InputManager>();
     private List<GameObject> playerBackgrounds = new List<GameObject>();
 
+    private void Awake()
+    {
+        if (!FindAnyObjectByType<PlayerInputManagerController>())
+            Instantiate(innputManagerPrefab);
+    }
+
     void Start()
     {
-
         playerInputManagerController = PlayerInputManagerController.Singleton;
-        playerInputManagerController.playerInputManager.splitScreen = false;
+        playerInputManagerController.AddJoinListener();
+        playerInputManagerController.PlayerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
         if (playerInputManagerController.playerInputs.Count > 0)
         {
@@ -117,7 +124,7 @@ public class MainMenuController : MonoBehaviour
     /// <param name="sceneName"></param>
     public void ChangeScene(string name)
     {
-        playerInputManagerController.RemoveListeners();
+        playerInputManagerController.RemoveJoinListener();
         SceneManager.LoadSceneAsync(name);
     }
 

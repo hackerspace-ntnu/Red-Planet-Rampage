@@ -165,7 +165,7 @@ public class AuctionDriver : MonoBehaviour
         }
         */
         Camera.GetComponent<Camera>().enabled = false;
-        PlayerInputManagerController.Singleton.playerInputManager.splitScreen = true;
+        PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = true;
         playerFactory.InstantiatePlayerSelectItems();
         GetComponent<ItemSelectManager>().StartTrackingMenus();
     }
