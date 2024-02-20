@@ -1,6 +1,7 @@
 using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
@@ -30,7 +31,8 @@ public class AIManager : PlayerManager
     private float shootingStoppingDistance = 5f;
     [SerializeField]
     private bool updateRotation = true;
-
+    [SerializeField]
+    private Item[] disabledItems;
     private delegate void NavMeshEvent();
     private NavMeshEvent onLinkStart;
     private NavMeshEvent onLinkEnd;
@@ -88,7 +90,14 @@ public class AIManager : PlayerManager
     public override void SetGun(Transform offset)
     {
         overrideAimTarget = false;
-        var gun = GunFactory.InstantiateGunAI(identity.Body, identity.Barrel, identity?.Extension, this, offset);
+        bool hasDisabledBody = IsDisabledItem(identity.Body);
+        bool hasDisabledBarrel = IsDisabledItem(identity.Barrel);
+        bool hasDisabledExtension = IsDisabledItem(identity.Extension);
+        var gun = GunFactory.InstantiateGunAI(
+            hasDisabledBody ? identity.Bodies.Where(item => !IsDisabledItem(item)).RandomElement() : identity.Body,
+            hasDisabledBarrel ? identity.Barrels.Where(item => !IsDisabledItem(item)).RandomElement() : identity.Barrel,
+            hasDisabledExtension ? identity.Extensions.Where(item => !IsDisabledItem(item)).RandomElement() : identity?.Extension,
+            this, offset);
         gunController = gun.GetComponent<GunController>();
         gunController.onFireStart += UpdateAimTarget;
         gunController.onFire += UpdateAimTarget;
@@ -96,6 +105,11 @@ public class AIManager : PlayerManager
         if (gunController.RightHandTarget)
             playerIK.RightHandIKTarget = gunController.RightHandTarget;
         GetComponent<AmmoBoxCollector>().CheckForAmmoBoxBodyAgain();
+    }
+
+    private bool IsDisabledItem(Item item)
+    {
+        return disabledItems.Any(disabledItem => disabledItem == item);
     }
 
     private void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)

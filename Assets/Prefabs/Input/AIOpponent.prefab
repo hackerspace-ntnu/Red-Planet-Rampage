@@ -1465,6 +1465,10 @@ MonoBehaviour:
   itemStoppingDistance: 0.5
   shootingStoppingDistance: 5
   updateRotation: 1
+  disabledItems:
+  - {fileID: 11400000, guid: 77e9d94b7043eb348b2a0b25ae2cc56e, type: 2}
+  - {fileID: 11400000, guid: bdea3807a64796f4da3038c849234215, type: 2}
+  - {fileID: 11400000, guid: a99e4b806f963ac45a0635c34182107a, type: 2}
 --- !u!114 &4388086492469747923
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1504,9 +1508,6 @@ MonoBehaviour:
   animator: {fileID: 1738601778441408649}
   ZoomFov: 30
   Target: {fileID: 0}
-  ignoreMask:
-    serializedVersion: 2
-    m_Bits: 65655
 --- !u!23 &2071132601125607186
 MeshRenderer:
   m_ObjectHideFlags: 0
