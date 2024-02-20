@@ -10,6 +10,11 @@ public class ItemSelectManager : MonoBehaviour
     private List<ItemSelectMenu> itemSelectMenus;
 
     private Coroutine waitRoutine;
+    
+    [SerializeField]
+    private GameObject loadingScreen;
+
+    private int delayDuration = 2;
 
     public void StartTrackingMenus()
     {
@@ -24,7 +29,13 @@ public class ItemSelectManager : MonoBehaviour
 
     private void Finish()
     {
-        // TODO Fade to loading screen
+        StartCoroutine(LoadAndChangeScene());
+    }
+
+    private IEnumerator LoadAndChangeScene(){
+
+        loadingScreen.SetActive(true);
+        yield return new WaitForSeconds(delayDuration);
         AuctionDriver.Singleton.ChangeScene();
     }
 
