@@ -11,8 +11,8 @@ public class AIManager : PlayerManager
     public Transform DestinationTarget;
     public Transform ShootingTarget;
     public List<PlayerManager> TrackedPlayers;
-    private const float autoAwareRadius = 25f;
-    private const float ignoreAwareRadius = 100f;
+    private const float autoAwareRadius = 40f;
+    private const float ignoreAwareRadius = 1000f;
     [SerializeField]
     private Animator animator;
     private bool isDead = false;
@@ -21,6 +21,7 @@ public class AIManager : PlayerManager
     public BiddingAI biddingAI;
     private Rigidbody body;
     private Collider colliderBox;
+    private AIMovement aiMovement;
     [SerializeField]
     private AnimationCurve jumpYoffset;
     [SerializeField]
@@ -41,6 +42,7 @@ public class AIManager : PlayerManager
         body = GetComponent<Rigidbody>();
         colliderBox = GetComponent<Collider>();
         colliderBox.isTrigger = true;
+        aiMovement = GetComponent<AIMovement>();
         healthController = GetComponent<HealthController>();
         agent.autoTraverseOffMeshLink = false;
         onLinkStart += AnimateJump;
@@ -128,6 +130,7 @@ public class AIManager : PlayerManager
         onDeath?.Invoke(killer, this);
         aimAssistCollider.SetActive(false);
         aiTargetCollider.gameObject.SetActive(false);
+        aiMovement.enabled = false;
         agent.enabled = false;
         body.isKinematic = false;
         TurnIntoRagdoll(info);
@@ -185,6 +188,7 @@ public class AIManager : PlayerManager
         if (closestPlayer == null)
         {
             ShootingTarget = null;
+            aiMovement.enabled = false;
             if (DestinationTarget == null || !DestinationTarget || (!DestinationTarget.gameObject.GetComponent<PlayerManager>() && !DestinationTarget.gameObject.activeInHierarchy))
             {
                 var target = MatchController.Singleton.GetRandomActiveChip();
@@ -192,6 +196,17 @@ public class AIManager : PlayerManager
                     DestinationTarget = target;
             }
         }
+        else
+        {
+            var isStrafeDistance = closestDistance < 10;
+            aiMovement.enabled = isStrafeDistance;
+        }
+        if (aiMovement.Target != ShootingTarget)
+        {
+            aiMovement.enabled = false;
+        }
+        aiMovement.Target = ShootingTarget;
+
         if (!DestinationTarget)
         {
             var player = TrackedPlayers.RandomElement();
@@ -245,6 +260,11 @@ public class AIManager : PlayerManager
             Debug.DrawLine(transform.position, player.transform.position, Color.blue);
         }
 #endif
+        if (ShootingTarget)
+        {
+            GunOrigin.LookAt(ShootingTarget.position, transform.up);
+            Fire();
+        }
         if (!DestinationTarget || !agent.enabled)
             return;
 #if UNITY_EDITOR
@@ -254,10 +274,6 @@ public class AIManager : PlayerManager
         animator.SetFloat("Right", Vector3.Dot(agent.velocity, transform.right) / agent.speed);
         if (agent.isOnOffMeshLink)
             onLinkStart?.Invoke();
-        if (!ShootingTarget)
-            return;
-        GunOrigin.LookAt(ShootingTarget.position, transform.up);
-        Fire();
     }
 
     private void FixedUpdate()
