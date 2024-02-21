@@ -277,7 +277,7 @@ public class PlayerMovement : MonoBehaviour
     {
         // Cast a box to detect (partial) ground. See OnDrawGizmos for what I think is the extent of the box cast.
         // No, this does not work if the cast start at the bottom.
-        return !Physics.BoxCast(hitbox.bounds.center, 0.5f * Vector3.one, Vector3.down, Quaternion.identity, 0.5f + airThreshold, ignoreMask); ;
+        return !Physics.BoxCast(hitbox.bounds.center, new Vector3(.5f, .5f, .15f), Vector3.down, Quaternion.identity, 0.5f + airThreshold, ignoreMask); ;
     }
 
     protected Vector3 GroundNormal()
@@ -375,57 +375,54 @@ public class PlayerMovement : MonoBehaviour
 
     private void FindStep()
     {
-        Debug.DrawRay(bottomCaster.transform.position, body.velocity, Color.red);
         //Physics.Raycast(bottomCaster.transform.position, body.velocity, out hitBottom, 0.2f
+        Vector3 rayDirection = new Vector3(body.velocity.x, 0, body.velocity.z);
+        Quaternion rotation45 = Quaternion.Euler(0, 25, 0);
+        Quaternion rotationMinus45 = Quaternion.Euler(0, -25, 0);
+        Vector3 direction45 = rotation45 * rayDirection;
+        Vector3 directionMinus45 = rotationMinus45 * rayDirection;
 
         RaycastHit hitBottom;
         RaycastHit hitBottom45;
         RaycastHit hitBottomMinus45;
-        if (Physics.Raycast(bottomCaster.transform.position, new Vector3(body.velocity.x, 0, body.velocity.z), out hitBottom, 0.5f, ignoreMask))
+        if (Physics.Raycast(bottomCaster.transform.position, rayDirection, out hitBottom, 0.3f, ignoreMask))
         {
             RaycastHit hitTop;
-            if (!Physics.Raycast(topCaster.transform.position, new Vector3(body.velocity.x, 0, body.velocity.z), out hitTop, 1f, ignoreMask))
+            if (!Physics.Raycast(topCaster.transform.position, rayDirection, out hitTop, 1f, ignoreMask))
             {
-                
                 if (hitBottom.normal.y < 0.0001f && hitBottom.collider.name != "Terrain")
                 {
-                    
                     body.position += new Vector3(0f, 0.5f, 0f);
                 }
             }
         }
-        else if (Physics.Raycast(bottomCaster.transform.position, new Vector3(body.velocity.x + 1.5f, 0, body.velocity.z), out hitBottom45, 0.5f, ignoreMask))
+        else if (Physics.Raycast(bottomCaster.transform.position, direction45, out hitBottom45, 0.3f, ignoreMask))
         {
             RaycastHit hitTop45;
-            if (!Physics.Raycast(topCaster.transform.position, new Vector3(body.velocity.x + 1.5f, 0, body.velocity.z), out hitTop45, 1f, ignoreMask))
+            if (!Physics.Raycast(topCaster.transform.position, direction45, out hitTop45, 1f, ignoreMask))
             {
-
                 if (hitBottom45.normal.y < 0.0001f && hitBottom45.collider.name != "Terrain")
                 {
-
                     body.position += new Vector3(0f, 0.5f, 0f);
                 }
             }
         }
-        else if (Physics.Raycast(bottomCaster.transform.position, new Vector3(body.velocity.x - 1.5f, 0, body.velocity.z), out hitBottomMinus45, 0.5f, ignoreMask))
+        else if (Physics.Raycast(bottomCaster.transform.position, directionMinus45, out hitBottomMinus45, 0.3f, ignoreMask))
         {
             RaycastHit hitTopMinus45;
-            if (!Physics.Raycast(topCaster.transform.position, new Vector3(body.velocity.x - 1.5f, 0, body.velocity.z), out hitTopMinus45, 1f, ignoreMask))
+            if (!Physics.Raycast(topCaster.transform.position, directionMinus45, out hitTopMinus45, 1f, ignoreMask))
             {
-
                 if (hitBottomMinus45.normal.y < 0.0001f && hitBottomMinus45.collider.name != "Terrain")
                 {
-
                     body.position += new Vector3(0f, 0.5f, 0f);
                 }
             }
         }
-
     }
 
     void FixedUpdate()
     {
-        if (state == PlayerState.GROUNDED)
+        if (state == PlayerState.GROUNDED && body.velocity.magnitude > 0f)
         {
             FindStep();
         }
