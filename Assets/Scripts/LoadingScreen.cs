@@ -20,12 +20,7 @@ public class LoadingScreen : MonoBehaviour
     private TMP_Text tipsText;
 
     [SerializeField]
-    private TMP_Text gamepadInstructionsText; 
-
-    [SerializeField]
-    private TMP_Text keyboardInstructionsText; 
-
-    
+    private GameObject keybinds;
 
     private float incrementTimer = 360f;
 
@@ -35,7 +30,7 @@ public class LoadingScreen : MonoBehaviour
     private float rotateSpeed = 60;
 
     private static int loadingCounter = 0;
-    
+
     void Awake()
     {
         PlayerInputManagerController.Singleton.RemoveListeners();
@@ -69,16 +64,14 @@ public class LoadingScreen : MonoBehaviour
             }
         }
     }
+
     private void showInstructions(){
         tipsText.text = "";
         staticText.SetActive(false);
 
-        if(loadingCounter == 1){
-
-            gamepadInstructionsText.text="Gamepad instructions";
-            keyboardInstructionsText.text="Keyboard instructions";
-            
-        }else{
+        if (loadingCounter == 1) {
+            keybinds.SetActive(true);
+        } else {
 
             tipsText.text="Bidding instructions";
         }
