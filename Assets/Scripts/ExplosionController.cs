@@ -44,16 +44,16 @@ public class ExplosionController : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, radius);
     }
 
-    public List<(Collider collider, float damage)> Explode(PlayerManager sourcePlayer)
+    public List<(RaycastHit hit, float damage)> Explode(PlayerManager sourcePlayer)
     {
         visualEffect.enabled = true;
         visualEffect.SendEvent(VisualEffectAsset.PlayEventID);
         soundEffect?.Play();
-        var targets = Physics.OverlapSphere(transform.position, radius, hitBoxLayers);
-        var hits = new List<(Collider, float)>(targets.Length);
+        var targets = Physics.SphereCastAll(transform.position, radius, Vector3.up, 0.01f, hitBoxLayers);
+        var hits = new List<(RaycastHit, float)>(targets.Length);
         foreach (var target in targets)
         {
-            DealDamage(target, sourcePlayer, out var shouldBeReturned, out var scaledDamage);
+            DealDamage(target.collider, sourcePlayer, out var shouldBeReturned, out var scaledDamage);
             if (shouldBeReturned)
                 hits.Add((target, scaledDamage));
         }

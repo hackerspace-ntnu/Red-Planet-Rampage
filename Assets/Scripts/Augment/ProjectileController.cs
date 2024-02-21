@@ -122,7 +122,7 @@ public abstract class ProjectileController : MonoBehaviour
     public HitboxInteraction OnHitboxCollision;
 
     // Used whenever a projectile hits any collider, though 
-    public delegate void CollisionEvent(Collider other, ref ProjectileState state);
+    public delegate void CollisionEvent(RaycastHit other, ref ProjectileState state);
     public CollisionEvent OnColliderHit;
     public CollisionEvent OnRicochet;
 

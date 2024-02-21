@@ -52,14 +52,14 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
         }
     }
 
-    private void OnHit(Collider target, ref ProjectileState state)
+    private void OnHit(RaycastHit target, ref ProjectileState state)
     {
         // Soda cans are tiny and flail around, making them unsuitable for placing bullet holes on
         // TODO Add some way of determining which *other* objects to avoid placing decals on
-        if (target.TryGetComponent<SodaCan>(out var _))
+        if (target.collider.TryGetComponent<SodaCan>(out var _))
             return;
         // Also avoid placing decals on players, as that leads to the heebie-jeebies
-        if (target.TryGetComponent<HitboxController>(out var hitbox))
+        if (target.collider.TryGetComponent<HitboxController>(out var hitbox))
             if (hitbox.health && hitbox.health.TryGetComponent<PlayerManager>(out var _))
                 return;
 
@@ -67,10 +67,9 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
 
         // Place the decal some distance away from the target so that it is more likely to be projected onto a surface
         var depthOffset = decal.size.z * depthOffsetFraction;
-        spawnedDecal.transform.position = target.ClosestPoint(state.position) - state.direction * depthOffset;
-
-        spawnedDecal.transform.rotation = DetermineRotation(target, state);
-        spawnedDecal.transform.parent = target.transform;
+        spawnedDecal.transform.position = target.collider.ClosestPoint(state.position) - state.direction * depthOffset;
+        spawnedDecal.transform.rotation = DetermineRotation(target.collider, state);
+        spawnedDecal.transform.parent = target.collider.transform;
 
         // Rotate it randomly for basic variation
         spawnedDecal.transform.Rotate(Vector3.forward, Random.Range(-angleVariation, angleVariation));
