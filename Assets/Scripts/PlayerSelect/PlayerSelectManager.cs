@@ -15,6 +15,8 @@ public class PlayerSelectManager : MonoBehaviour
     private Camera playerSelectCam;
     [SerializeField]
     private List<TMP_Text> nameTags;
+    [SerializeField]
+    private List<TMP_Text> joinText;
 
     [SerializeField]
     private float minimumTime = 20f;
@@ -22,16 +24,18 @@ public class PlayerSelectManager : MonoBehaviour
     private float maximumTime = 30f;
 
     private PlayerInputManagerController playerInputManagerController;
-    private List<TMP_Text> playerNames;
-    private List<Animator> playerAnimators;
-    private List<string> animatorParameters;
+    private List<TMP_Text> playerNames = new List<TMP_Text>();
+    private List<Animator> playerAnimators = new List<Animator>();
+    private List<string> animatorParameters = new List<string>();
     private int cardPeekCounter = 0;
 
-    public void Awake()
+    private void Awake()
     {
-        playerNames = new List<TMP_Text>();
-        playerAnimators = new List<Animator>();
-        animatorParameters = new List<string>();
+        for (int i = 0; i < playerModels.Count; i++)
+        {
+            Vector3 playerPosition = new Vector3(playerModels[i].transform.position.x, 2, playerModels[i].transform.position.z);
+            joinText[i].transform.position = playerPosition;
+        }
     }
 
     private void Start()
@@ -60,6 +64,7 @@ public class PlayerSelectManager : MonoBehaviour
         playerModels[playerID].SetActive(true); // Show corresponding player model
         playerModels[playerID].transform.LookAt(new Vector3(playerSelectCam.transform.position.x, playerModels[playerID].transform.position.y, playerSelectCam.transform.position.z)); // Orient player model to look at camera
         SetPlayerNameTag(playerModels[playerID], playerName, playerID); // Create and display player nametag
+        joinText[playerID].enabled = false;
     }
 
     /// <summary>
@@ -79,7 +84,7 @@ public class PlayerSelectManager : MonoBehaviour
             Vector3 playerPosition = new Vector3(player.transform.position.x, 2, player.transform.position.z);
 
             TMP_Text name = nameTags[playerID];
-            name.GetComponent<Transform>().position = playerPosition; // Sets the nametag position over the head of the player model
+            name.transform.position = playerPosition; // Sets the nametag position over the head of the player model
             name.text = playerName; // Sets the text of the nametag
             playerNames.Add(name); // Adds TMP_text object to list for monitoring
         }
