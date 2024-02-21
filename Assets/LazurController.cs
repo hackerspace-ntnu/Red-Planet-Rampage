@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.VFX;
@@ -31,7 +29,7 @@ public class LazurController : ProjectileController
 
     void Start()
     {
-        Vfx.SetGraphicsBuffer("StartEndPositions", encoder.StartEndPositionsBuffer);   
+        Vfx.SetGraphicsBuffer("StartEndPositions", encoder.StartEndPositionsBuffer);
     }
 
     public void FireLazur()
@@ -41,7 +39,7 @@ public class LazurController : ProjectileController
         projectile.damage = stats.ProjectileDamage;
         projectile.position = projectileOutput.position;
         projectile.oldPosition = projectileOutput.position;
-        projectile.direction =  projectileOutput.forward;
+        projectile.direction = projectileRotation * projectileOutput.forward;
         projectile.maxDistance = this.MaxDistance;
         projectile.initializationTime = Time.fixedTime;
         projectile.additionalProperties.Clear();
@@ -51,38 +49,40 @@ public class LazurController : ProjectileController
 
         int currentLasers = 0;
         Collider lastCollider = null;
-        while(projectile.active)
+        while (projectile.active)
         {
             projectile.oldPosition = projectile.position;
 
-            RaycastHit[] rayCasts = Physics.RaycastAll(projectile.position, projectile.direction, MaxDistance-projectile.distanceTraveled, collisionLayers);
+            RaycastHit[] rayCasts = Physics.RaycastAll(projectile.position, projectile.direction, MaxDistance - projectile.distanceTraveled, collisionLayers);
             rayCasts = rayCasts.OrderBy(x => x.distance).Where(p => p.collider != lastCollider).ToArray();
 
 
             if (rayCasts.Length > 0)
             {
-            
+
                 Collider collider = rayCasts[0].collider;
                 lastCollider = collider;
                 HitboxController hitbox = collider.GetComponent<HitboxController>();
-                
+
                 projectile.position = rayCasts[0].point;
+                OnRicochet?.Invoke(rayCasts[0], ref projectile);
                 if (hitbox != null)
                     OnHitboxCollision?.Invoke(hitbox, ref projectile);
                 OnColliderHit?.Invoke(rayCasts[0], ref projectile);
 
                 projectile.distanceTraveled += rayCasts[0].distance;
-                
+
             }
             else
             {
                 projectile.position = projectile.position + projectile.direction.normalized * (MaxDistance - projectile.distanceTraveled);
                 projectile.active = false;
             }
+
             encoder.AddLine(projectile.oldPosition, projectile.position);
             currentLasers++;
 
-            if(currentLasers >= maxCollisions)
+            if (currentLasers >= maxCollisions)
             {
                 projectile.active = false;
             }

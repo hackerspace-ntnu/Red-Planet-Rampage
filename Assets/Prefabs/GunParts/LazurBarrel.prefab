@@ -514,8 +514,10 @@ GameObject:
   - component: {fileID: 8865490531545464824}
   - component: {fileID: 4273715955371138616}
   - component: {fileID: 4536155953706137537}
+  - component: {fileID: 859563612832636832}
+  - component: {fileID: 3946977540612511835}
   m_Layer: 0
-  m_Name: Lazur
+  m_Name: LazurBarrel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -562,6 +564,10 @@ MonoBehaviour:
     addition: 4
     multiplier: 0
     exponential: 1
+  - name: Ammo
+    addition: 0
+    multiplier: 0
+    exponential: 0.75
   outputs:
   - {fileID: 2021858193588301184}
   midpoint: {fileID: 4423458652456300157}
@@ -628,6 +634,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MaxLines: 10
+--- !u!114 &859563612832636832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1569365569997936042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49ba4bdeb4a0c8548b6b50d2d03dc38a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pushPower: 20
+  baseFireRateAdder: 2
+--- !u!114 &3946977540612511835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1569365569997936042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18b57f7d0109d614c8ff956eff6a9841, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 1
+  decal: {fileID: 5462112114334002006, guid: 65b7186194b414d4bb212807630f62c9, type: 3}
+  depthOffsetFraction: 0.258
+  stickToNormalFraction: 0.581
+  angleVariation: 180
 --- !u!1 &1667226434269812885
 GameObject:
   m_ObjectHideFlags: 0
