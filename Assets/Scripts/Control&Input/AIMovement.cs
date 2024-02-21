@@ -29,9 +29,7 @@ public class AIMovement : PlayerMovement
 
     private void FixedUpdate()
     {
-        if (!Target)
-            return;
-        if (Vector3.Distance(Target.position, transform.position) > 10)
+        if (!StateIsAir && (!Target || Vector3.Distance(Target.position, transform.position) > 35))
         {
             this.enabled = false;
             return;

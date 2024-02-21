@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,7 +13,7 @@ public class AIManager : PlayerManager
     public Transform DestinationTarget;
     public Transform ShootingTarget;
     public List<PlayerManager> TrackedPlayers;
-    private const float autoAwareRadius = 40f;
+    private const float autoAwareRadius = 25f;
     private const float ignoreAwareRadius = 1000f;
     [SerializeField]
     private Animator animator;
@@ -169,7 +170,14 @@ public class AIManager : PlayerManager
     {
         if (isDead)
             yield break;
+        if (!aiMovement.enabled)
+            FindPlayers();
+        yield return new WaitForSeconds(3f);
+        StartCoroutine(LookForTargets());
+    }
 
+    private void FindPlayers()
+    {
         Transform closestPlayer = null;
         float closestDistance = ignoreAwareRadius;
         foreach (var player in TrackedPlayers)
@@ -202,7 +210,6 @@ public class AIManager : PlayerManager
         if (closestPlayer == null)
         {
             ShootingTarget = null;
-            aiMovement.enabled = false;
             if (DestinationTarget == null || !DestinationTarget || (!DestinationTarget.gameObject.GetComponent<PlayerManager>() && !DestinationTarget.gameObject.activeInHierarchy))
             {
                 var target = MatchController.Singleton.GetRandomActiveChip();
@@ -212,14 +219,10 @@ public class AIManager : PlayerManager
         }
         else
         {
-            var isStrafeDistance = closestDistance < 10;
+            aiMovement.Target = ShootingTarget;
+            var isStrafeDistance = closestDistance < 10f;
             aiMovement.enabled = isStrafeDistance;
         }
-        if (aiMovement.Target != ShootingTarget)
-        {
-            aiMovement.enabled = false;
-        }
-        aiMovement.Target = ShootingTarget;
 
         if (!DestinationTarget)
         {
@@ -229,10 +232,8 @@ public class AIManager : PlayerManager
         }
         agent.stoppingDistance = ShootingTarget ? shootingStoppingDistance : itemStoppingDistance;
         agent.SetDestination(DestinationTarget.position);
-
-        yield return new WaitForSeconds(3f);
-        StartCoroutine(LookForTargets());
     }
+ 
 
     private void AnimateJump()
     {
