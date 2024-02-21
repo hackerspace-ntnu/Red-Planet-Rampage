@@ -5,8 +5,7 @@ using UnityEngine;
 using UnityEngine.VFX;
 public class LazurController : ProjectileController
 {
-    [SerializeField]
-    private VisualEffect Vfx;
+    public VisualEffect Vfx;
 
     [SerializeField]
     private LessJallaVFXPositionEncoder encoder;
@@ -70,7 +69,6 @@ public class LazurController : ProjectileController
                 projectile.position = rayCasts[0].point;
                 if (hitbox != null)
                     OnHitboxCollision?.Invoke(hitbox, ref projectile);
-                print(rayCasts[0].collider.gameObject.name);
                 OnColliderHit?.Invoke(rayCasts[0], ref projectile);
 
                 projectile.distanceTraveled += rayCasts[0].distance;

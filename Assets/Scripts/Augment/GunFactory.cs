@@ -53,6 +53,9 @@ public class GunFactory : MonoBehaviour
         if (displayGun.GunController.projectile.GetType() == typeof(MeshProjectileController))
             ((MeshProjectileController)gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
 
+        if (displayGun.GunController.projectile.GetType() == typeof(LazurController))
+            ((LazurController)gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
+
         return gun;
     }
 

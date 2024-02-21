@@ -183,8 +183,7 @@ public class MeshProjectileController : ProjectileController
         if (shouldRicochet && state.distanceTraveled < maxDistanceBeforeStuck)
         {
             OnRicochet?.Invoke(collisions[0], ref state);
-            // Physics.Raycast(state.oldPosition, state.direction, out RaycastHit hitInfo);
-            state.position = state.oldPosition;//collisions[0].point;
+            state.position = state.oldPosition;
             state.direction = Vector3.Reflect(state.direction, collisions[0].normal);
         }
         else
