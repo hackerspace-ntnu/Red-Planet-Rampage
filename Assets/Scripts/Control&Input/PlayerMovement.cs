@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using Unity.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -122,11 +124,21 @@ public class PlayerMovement : MonoBehaviour
     private int gunCrouchCanceledTween;
     private int cameraCrouchCanceledTween;
 
+    [Header("Step climb")]
+    [SerializeField]
+    private GameObject bottomCaster;
+    [SerializeField]
+    private GameObject topCaster;
+    [SerializeField] 
+    private float stepHeight = 0.5f;
+
+
     void Start()
     {
         body = GetComponent<Rigidbody>();
         hitbox = GetComponent<BoxCollider>();
         strafeForce = strafeForceGrounded;
+        topCaster.transform.localPosition = new Vector3 (0f, stepHeight, 0f);
     }
 
     /// <summary>
@@ -351,8 +363,73 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.DrawWireCube(center, extents);
     }
 
+    /* 
+    Detect collisions x
+    Find if collision is ground
+    Do not try to step up if player is not grounded or not moving
+    Find contactpoint of other collisions
+    check normals to find height of step
+    if within range, check if there is a surface at the top
+    if yes, teleport to top
+    */
+
+    private void FindStep()
+    {
+        Debug.DrawRay(bottomCaster.transform.position, body.velocity, Color.red);
+        //Physics.Raycast(bottomCaster.transform.position, body.velocity, out hitBottom, 0.2f
+
+        RaycastHit hitBottom;
+        RaycastHit hitBottom45;
+        RaycastHit hitBottomMinus45;
+        if (Physics.Raycast(bottomCaster.transform.position, new Vector3(body.velocity.x, 0, body.velocity.z), out hitBottom, 0.5f, ignoreMask))
+        {
+            RaycastHit hitTop;
+            if (!Physics.Raycast(topCaster.transform.position, new Vector3(body.velocity.x, 0, body.velocity.z), out hitTop, 1f, ignoreMask))
+            {
+                
+                if (hitBottom.normal.y < 0.0001f && hitBottom.collider.name != "Terrain")
+                {
+                    
+                    body.position += new Vector3(0f, 0.5f, 0f);
+                }
+            }
+        }
+        else if (Physics.Raycast(bottomCaster.transform.position, new Vector3(body.velocity.x + 1.5f, 0, body.velocity.z), out hitBottom45, 0.5f, ignoreMask))
+        {
+            RaycastHit hitTop45;
+            if (!Physics.Raycast(topCaster.transform.position, new Vector3(body.velocity.x + 1.5f, 0, body.velocity.z), out hitTop45, 1f, ignoreMask))
+            {
+
+                if (hitBottom45.normal.y < 0.0001f && hitBottom45.collider.name != "Terrain")
+                {
+
+                    body.position += new Vector3(0f, 0.5f, 0f);
+                }
+            }
+        }
+        else if (Physics.Raycast(bottomCaster.transform.position, new Vector3(body.velocity.x - 1.5f, 0, body.velocity.z), out hitBottomMinus45, 0.5f, ignoreMask))
+        {
+            RaycastHit hitTopMinus45;
+            if (!Physics.Raycast(topCaster.transform.position, new Vector3(body.velocity.x - 1.5f, 0, body.velocity.z), out hitTopMinus45, 1f, ignoreMask))
+            {
+
+                if (hitBottomMinus45.normal.y < 0.0001f && hitBottomMinus45.collider.name != "Terrain")
+                {
+
+                    body.position += new Vector3(0f, 0.5f, 0f);
+                }
+            }
+        }
+
+    }
+
     void FixedUpdate()
     {
+        if (state == PlayerState.GROUNDED)
+        {
+            FindStep();
+        }
+
         var positionInput = new Vector3(inputManager.moveInput.x, 0, inputManager.moveInput.y);
         UpdatePosition(positionInput);
         // Limit velocity when not grounded
