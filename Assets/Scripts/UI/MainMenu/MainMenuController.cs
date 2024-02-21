@@ -45,6 +45,11 @@ public class MainMenuController : MonoBehaviour
     private List<InputManager> playerInputs = new List<InputManager>();
     private List<GameObject> playerBackgrounds = new List<GameObject>();
 
+    [SerializeField]
+    private GameObject loadingScreen;
+    
+    private int loadingDuration = 6;
+
     private void Awake()
     {
         if (!FindAnyObjectByType<PlayerInputManagerController>())
@@ -119,13 +124,18 @@ public class MainMenuController : MonoBehaviour
     }
 
     /// <summary>
-    /// This function calls loadscene asynchronously, so it can later be expanded to show a loading screen when it's called.
     /// Function to be called as an onclick event from a button
     /// </summary>
     /// <param name="sceneName"></param>
     public void ChangeScene(string name)
     {
         playerInputManagerController.RemoveJoinListener();
+        StartCoroutine(LoadAndChangeScene(name));
+    }
+     private IEnumerator LoadAndChangeScene(string name){
+        mapSelectMenu.SetActive(false);
+        loadingScreen.SetActive(true);
+        yield return new WaitForSeconds(loadingDuration);
         SceneManager.LoadSceneAsync(name);
     }
 
