@@ -1,9 +1,11 @@
+using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -40,6 +42,11 @@ public class MainMenuController : MonoBehaviour
     private GameObject innputManagerPrefab;
     [SerializeField]
     private string[] mapNames;
+    private AudioSource audioSource;
+    [SerializeField]
+    private AudioClip[] uiSelectSounds;
+    [SerializeField]
+    private AudioGroup uiChooseSounds;
 
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
@@ -53,6 +60,7 @@ public class MainMenuController : MonoBehaviour
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         playerInputManagerController = PlayerInputManagerController.Singleton;
         playerInputManagerController.AddJoinListener();
         playerInputManagerController.PlayerInputManager.splitScreen = false;
@@ -143,6 +151,8 @@ public class MainMenuController : MonoBehaviour
         var colors = startButton.colors;
         colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
         startButton.colors = colors;
+        inputManager.onMovePerformed += PlayUISelectAudio;
+        inputManager.onSelect += PlayChooseAudio;
 
         foreach (TabGroup t in tabGroups)
         {
@@ -157,6 +167,17 @@ public class MainMenuController : MonoBehaviour
             PlayerIdentity playerIdentity = playerInputs[i].GetComponent<PlayerIdentity>();
             playerSelectManager.SetupPlayerSelectModels(playerIdentity.playerName, playerIdentity.color, i);
         }
+    }
+
+    private void PlayUISelectAudio(InputAction.CallbackContext ctx)
+    {
+        audioSource.clip = uiSelectSounds.RandomElement();
+        audioSource.Play();
+    }
+
+    private void PlayChooseAudio(InputAction.CallbackContext ctx)
+    {
+        uiChooseSounds.Play(audioSource);
     }
 
     public void ReturnToMainMenu()

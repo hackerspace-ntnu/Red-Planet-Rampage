@@ -1,3 +1,4 @@
+using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,4 +21,6 @@ public class FiringSound : MonoBehaviour
     {
         sound.Play(audioSource);
     }
+
+
 }
