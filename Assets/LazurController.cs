@@ -81,7 +81,6 @@ public class LazurController : ProjectileController
                 projectile.position = projectile.position + projectile.direction.normalized * (MaxDistance - projectile.distanceTraveled);
                 projectile.active = false;
             }
-            print("From: " + projectile.oldPosition.ToString() + ", to:" + projectile.position.ToString());
             encoder.AddLine(projectile.oldPosition, projectile.position);
             currentLasers++;
 
@@ -90,7 +89,6 @@ public class LazurController : ProjectileController
                 projectile.active = false;
             }
         }
-        print("Laser: " + currentLasers.ToString());
         encoder.PopulateBuffer();
         Vfx.SetInt("SpawnCount", currentLasers);
         Vfx.SendEvent("OnPlay");
