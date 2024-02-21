@@ -90,6 +90,9 @@ public class MatchController : MonoBehaviour
 
     public int RoundCount { get => rounds.Count(); }
 
+    private bool isAuction = false;
+    public bool IsAuction => isAuction;
+
     [SerializeField]
     private GameObject loadingScreen;
 
@@ -158,6 +161,7 @@ public class MatchController : MonoBehaviour
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
         onRoundStart?.Invoke();
+        isAuction = false;
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
         roundTimer.StartTimer(roundLength);
         roundTimer.OnTimerUpdate += AdjustMusic;
@@ -171,19 +175,19 @@ public class MatchController : MonoBehaviour
             return;
         collectableChips = new List<CollectableChip>();
 
+        StartCoroutine(ShowLoadingScreenBeforeBidding());
+        // TODO: Add Destroy on match win   
+    }   
+    private IEnumerator ShowLoadingScreenBeforeBidding(){
+        loadingScreen.SetActive(true);
+        yield return new WaitForSeconds(loadingDuration);
 
-        StartCoroutine(ShowLoadingScreen());
         PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
         onBiddingStart?.Invoke();
-        // TODO: Add Destroy on match win   
-    }   
-    private IEnumerator ShowLoadingScreen(){
-        loadingScreen.SetActive(true);
-        yield return new WaitForSeconds(loadingDuration);
         SceneManager.LoadSceneAsync("Bidding");
         PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = false;
-
+        isAuction = true;
     }
     public void EndActiveRound()
     {

@@ -26,7 +26,7 @@ public class PlatformMovement : MonoBehaviour
 
         travelDistance = Vector3.Distance(routepoints[nextRoutepointIndex + 1].transform.position, transform.position);
 
-        rotor.LeanRotateAroundLocal(Vector3.forward, 360, 1).setLoopClamp();
+        rotor?.LeanRotateAroundLocal(Vector3.forward, 360, 1).setLoopClamp();
 
         if (routepoints.Count <= 0)
         {
