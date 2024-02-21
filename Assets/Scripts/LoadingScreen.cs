@@ -14,7 +14,18 @@ public class LoadingScreen : MonoBehaviour
     private GameObject loadingBar;
 
     [SerializeField]
+    private GameObject staticText;
+
+    [SerializeField]
     private TMP_Text tipsText;
+
+    [SerializeField]
+    private TMP_Text gamepadInstructionsText; 
+
+    [SerializeField]
+    private TMP_Text keyboardInstructionsText; 
+
+    
 
     private float incrementTimer = 360f;
 
@@ -22,14 +33,24 @@ public class LoadingScreen : MonoBehaviour
     private List<string> tips;
 
     private float rotateSpeed = 60;
+
+    private static int loadingCounter = 0;
     
     void Awake()
     {
         PlayerInputManagerController.Singleton.RemoveListeners();
+        loadingCounter += 1;
+        Debug.Log(loadingCounter);
     }
     void Start()
     {   
         tipsText.text = tips.RandomElement();
+
+        if(loadingCounter <= 2){
+
+            showInstructions();
+        }
+
         StartCoroutine(UpdateTimer());
     }
 
@@ -48,6 +69,21 @@ public class LoadingScreen : MonoBehaviour
             }
         }
     }
+    private void showInstructions(){
+        tipsText.text = "";
+        staticText.SetActive(false);
+
+        if(loadingCounter == 1){
+
+            gamepadInstructionsText.text="Gamepad instructions";
+            keyboardInstructionsText.text="Keyboard instructions";
+            
+        }else{
+
+            tipsText.text="Bidding instructions";
+        }
+    }
+    
     void Update()
     {
         loadingBar.transform.Rotate(Vector3.forward, Time.deltaTime * rotateSpeed);
