@@ -212,9 +212,9 @@ public class PlayerHUDController : MonoBehaviour
         ammoCapacityMaterial.SetFloat("_Arc2", (1 - ammoPercent) * availableDegrees);
     }
 
-    public void UpdateHealthBar(float currentHealth, float maxHealth)
+    private void UpdateHealthBar(float currentHealth, float maxHealth)
     {
-        healthText.text = $"{Mathf.Min(100f, Mathf.RoundToInt(currentHealth))}%";
+        healthText.text = $"{Mathf.Clamp(Mathf.RoundToInt(currentHealth), 0, 100)}%";
         if (LeanTween.isTweening(healthTextTween))
         {
             LeanTween.cancel(healthTextTween);
