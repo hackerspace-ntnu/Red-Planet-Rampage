@@ -19,11 +19,16 @@ public class LazurController : ProjectileController
     [SerializeField]
     private AugmentAnimator animator;
 
+    private AudioSource audioSource;
+    [SerializeField]
+    private AudioClip chargeUpAudio;
+
     protected override void Awake()
     {
         base.Awake();
         if (!gunController || !gunController.Player)
             return;
+        audioSource = GetComponent<AudioSource>();
         animator.OnShotFiredAnimation += FireLazur;
     }
 
@@ -104,5 +109,7 @@ public class LazurController : ProjectileController
     public override void InitializeProjectile(GunStats stats)
     {
         animator.OnFire(stats);
+        audioSource.clip = chargeUpAudio;
+        audioSource.Play();
     }
 }
