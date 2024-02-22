@@ -132,8 +132,12 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.RemoveJoinListener();
         StartCoroutine(LoadAndChangeScene(name));
     }
-     private IEnumerator LoadAndChangeScene(string name){
+
+    private IEnumerator LoadAndChangeScene(string name){
+        // Disable menus we may enter a new scene from
+        defaultMenu.SetActive(false);
         mapSelectMenu.SetActive(false);
+        // Show loading screen and switch scenes eventually
         loadingScreen.SetActive(true);
         yield return new WaitForSeconds(loadingDuration);
         SceneManager.LoadSceneAsync(name);
