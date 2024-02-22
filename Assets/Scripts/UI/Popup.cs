@@ -11,12 +11,15 @@ public class Popup : MonoBehaviour
 
     [SerializeField] private float maxTimeout = 4;
 
+    [SerializeField] private AudioGroup audioGroup;
+
     private Timer timer;
 
     private void Start()
     {
         PickRandomImage();
         StartTimer();
+        audioGroup.Play(GetComponent<AudioSource>());
     }
 
     private void PickRandomImage()

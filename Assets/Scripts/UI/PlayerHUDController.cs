@@ -220,7 +220,7 @@ public class PlayerHUDController : MonoBehaviour
             LeanTween.cancel(healthTextTween);
             healthText.transform.localPosition = healthTextPosition;
         }
-            
+
         healthTextTween = healthText.gameObject.LeanMoveLocal(healthTextPosition * 2f, 0.5f).setEasePunch().id;
         float width = (Mathf.Max(currentHealth, 0) / maxHealth) * healthBarScaleX;
         if (width > 0)
