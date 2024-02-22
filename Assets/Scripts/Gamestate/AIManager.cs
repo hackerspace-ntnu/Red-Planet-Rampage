@@ -40,6 +40,7 @@ public class AIManager : PlayerManager
 
     private void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         agent = GetComponent<NavMeshAgent>();
         agent.updatePosition = false;
         body = GetComponent<Rigidbody>();
@@ -119,6 +120,7 @@ public class AIManager : PlayerManager
         {
             lastPlayerThatHitMe = info.sourcePlayer;
         }
+        PlayOnHit();
         if (info.damageType != DamageType.Explosion)
             return;
         StartCoroutine(WaitAndToggleAgent());
