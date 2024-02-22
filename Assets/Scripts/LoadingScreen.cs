@@ -21,13 +21,20 @@ public class LoadingScreen : MonoBehaviour
 
     [SerializeField] private List<string> tips;
 
+    [SerializeField] private RawImage background;
+
     private float incrementTimer = 360f;
     private float rotateSpeed = 60;
 
     private static int loadingCounter = 0;
 
+    private Vector2 backgroundVelocity;
+
     private void Awake()
     {
+        backgroundVelocity = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized * Random.Range(.5f, 1.5f);
+        if (backgroundVelocity.magnitude < .1) backgroundVelocity = new Vector2(.5f, .8f);
+
         PlayerInputManagerController.Singleton.RemoveListeners();
         loadingCounter += 1;
     }
@@ -81,5 +88,8 @@ public class LoadingScreen : MonoBehaviour
     private void Update()
     {
         loadingBar.transform.Rotate(Vector3.forward, Time.deltaTime * rotateSpeed);
+
+        var uv = background.uvRect;
+        background.uvRect = new Rect(uv.x + backgroundVelocity.x * Time.deltaTime, uv.y + backgroundVelocity.y * Time.deltaTime, uv.width, uv.height);
     }
 }
