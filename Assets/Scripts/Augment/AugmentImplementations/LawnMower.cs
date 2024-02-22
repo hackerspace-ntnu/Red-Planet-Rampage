@@ -43,6 +43,10 @@ public class LawnMower : GunBody
 
     private bool success = false;
 
+    private AudioSource audioSource;
+    [SerializeField]
+    private AudioGroup plopSounds;
+
     public override void Start()
     {
         meshRenderer.materials[mowerScreenMaterialIndex] = Instantiate(meshRenderer.materials[mowerScreenMaterialIndex]);
@@ -61,7 +65,7 @@ public class LawnMower : GunBody
 
         if (!gunController.Player)
             return;
-
+        audioSource = GetComponent<AudioSource>();
         playerHandLeft.gameObject.SetActive(true);
         playerHandLeft.SetPlayer(gunController.Player);
         playerHandRight.gameObject.SetActive(true);
@@ -92,6 +96,8 @@ public class LawnMower : GunBody
     {
         LeanTween.cancel(gameObject);
         animator.SetTrigger("PistonPump");
+        if (gunController)
+            plopSounds.Play(audioSource);
         handAnimator.SetTrigger("Pull");
         exhaustParticles.Play();
         var currentDegrees = mowerScreen.GetFloat("_ArrowDegrees");

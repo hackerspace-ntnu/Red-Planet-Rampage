@@ -18,6 +18,9 @@ public class BiddingPlatform : MonoBehaviour
     public PlayerIdentity LeadingBidder => leadingBidder;
 
     [SerializeField]
+    private AudioSource audioSource;
+
+    [SerializeField]
     private TMP_Text itemNameText;
 
     [SerializeField]
@@ -136,6 +139,8 @@ public class BiddingPlatform : MonoBehaviour
             if (leadingBidder)
             {
                 leadingBidder.UpdateChip(chips);
+                if (playerIdentity != leadingBidder)
+                    audioSource.Play();
             }
             chips++;
             playerIdentity.UpdateChip(-chips);
