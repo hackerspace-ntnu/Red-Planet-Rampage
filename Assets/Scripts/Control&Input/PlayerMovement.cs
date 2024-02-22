@@ -131,6 +131,8 @@ public class PlayerMovement : MonoBehaviour
     private GameObject topCaster;
     [SerializeField] 
     private float stepHeight = 0.5f;
+    [SerializeField]
+    private Transform playerRoot;
 
 
     void Start()
@@ -277,7 +279,7 @@ public class PlayerMovement : MonoBehaviour
     {
         // Cast a box to detect (partial) ground. See OnDrawGizmos for what I think is the extent of the box cast.
         // No, this does not work if the cast start at the bottom.
-        return !Physics.BoxCast(hitbox.bounds.center, new Vector3(.5f, .5f, .15f), Vector3.down, Quaternion.identity, 0.5f + airThreshold, ignoreMask); ;
+        return !Physics.BoxCast(hitbox.bounds.center, new Vector3(.5f, .5f, .2f), Vector3.down, Quaternion.identity, 0.5f + airThreshold, ignoreMask); ;
     }
 
     protected Vector3 GroundNormal()
@@ -363,58 +365,40 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.DrawWireCube(center, extents);
     }
 
-    /* 
-    Detect collisions x
-    Find if collision is ground
-    Do not try to step up if player is not grounded or not moving
-    Find contactpoint of other collisions
-    check normals to find height of step
-    if within range, check if there is a surface at the top
-    if yes, teleport to top
-    */
+    /// <summary>
+    /// More accurate ground detection to use in stepping up edges. Uses raycast to check for ground directly beneath the player.
+    /// </summary>
+    /// <returns>true if player is touching the ground, false if not touching ground </returns>
+    private bool FindSteppingGround()
+    {
+        RaycastHit hitGround;
+        if (Physics.Raycast(playerRoot.position, Vector3.down, out hitGround, 0.01f))
+        {
+            if(hitGround.normal.y > 0.0001f && state == PlayerState.GROUNDED)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
+    /// <summary>
+    /// Check for an edge to step up using a short raycast, then check if there's unobstructed space on top of the edge using a longer raycast. 
+    /// If that is the case, teleport the player on top of the edge.
+    /// </summary>
     private void FindStep()
     {
-        //Physics.Raycast(bottomCaster.transform.position, body.velocity, out hitBottom, 0.2f
         Vector3 rayDirection = new Vector3(body.velocity.x, 0, body.velocity.z);
-        Quaternion rotation45 = Quaternion.Euler(0, 25, 0);
-        Quaternion rotationMinus45 = Quaternion.Euler(0, -25, 0);
-        Vector3 direction45 = rotation45 * rayDirection;
-        Vector3 directionMinus45 = rotationMinus45 * rayDirection;
 
         RaycastHit hitBottom;
-        RaycastHit hitBottom45;
-        RaycastHit hitBottomMinus45;
-        if (Physics.Raycast(bottomCaster.transform.position, rayDirection, out hitBottom, 0.3f, ignoreMask))
+        if (Physics.Raycast(bottomCaster.transform.position, rayDirection, out hitBottom, 0.5f, ignoreMask))
         {
             RaycastHit hitTop;
             if (!Physics.Raycast(topCaster.transform.position, rayDirection, out hitTop, 1f, ignoreMask))
             {
                 if (hitBottom.normal.y < 0.0001f && hitBottom.collider.name != "Terrain")
                 {
-                    body.position += new Vector3(0f, 0.5f, 0f);
-                }
-            }
-        }
-        else if (Physics.Raycast(bottomCaster.transform.position, direction45, out hitBottom45, 0.3f, ignoreMask))
-        {
-            RaycastHit hitTop45;
-            if (!Physics.Raycast(topCaster.transform.position, direction45, out hitTop45, 1f, ignoreMask))
-            {
-                if (hitBottom45.normal.y < 0.0001f && hitBottom45.collider.name != "Terrain")
-                {
-                    body.position += new Vector3(0f, 0.5f, 0f);
-                }
-            }
-        }
-        else if (Physics.Raycast(bottomCaster.transform.position, directionMinus45, out hitBottomMinus45, 0.3f, ignoreMask))
-        {
-            RaycastHit hitTopMinus45;
-            if (!Physics.Raycast(topCaster.transform.position, directionMinus45, out hitTopMinus45, 1f, ignoreMask))
-            {
-                if (hitBottomMinus45.normal.y < 0.0001f && hitBottomMinus45.collider.name != "Terrain")
-                {
-                    body.position += new Vector3(0f, 0.5f, 0f);
+                    body.position += new Vector3(0f, 0.5f, 0f) + body.velocity.normalized * 0.5f;
                 }
             }
         }
@@ -422,7 +406,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (state == PlayerState.GROUNDED && body.velocity.magnitude > 0f)
+        if (FindSteppingGround() && body.velocity.magnitude > 0.08f)
         {
             FindStep();
         }
