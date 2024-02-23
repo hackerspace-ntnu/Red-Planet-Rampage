@@ -40,6 +40,9 @@ public class AuctionDriver : MonoBehaviour
 
     [SerializeField]
     private Animator cameraAnimator;
+    [SerializeField]
+    private Vector3 cameraStandbyPosition;
+    private int screenShakeTween;
     public GameObject Camera => cameraAnimator.gameObject;
 
     public static AuctionDriver Singleton;
@@ -114,6 +117,18 @@ public class AuctionDriver : MonoBehaviour
     {
         yield return new WaitForSeconds(biddingBeginDelay);
         cameraAnimator.SetTrigger("start");
+    }
+
+    public void ScreenShake()
+    {
+        cameraAnimator.enabled = false;
+        Debug.Log("Trying to shake!!");
+        if (LeanTween.isTweening(screenShakeTween))
+        {
+            LeanTween.cancel(screenShakeTween);
+            cameraAnimator.transform.localPosition = cameraStandbyPosition;
+        }
+        screenShakeTween = cameraAnimator.gameObject.LeanMoveLocal(cameraStandbyPosition * 1.01f, 0.2f).setEaseShake().id;
     }
 
     private IEnumerator PopulatePlatforms()

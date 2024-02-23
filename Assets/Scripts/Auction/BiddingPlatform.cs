@@ -140,7 +140,11 @@ public class BiddingPlatform : MonoBehaviour
             {
                 leadingBidder.UpdateChip(chips);
                 if (playerIdentity != leadingBidder)
+                {
                     audioSource.Play();
+                    AuctionDriver.Singleton.ScreenShake();
+                }
+                    
             }
             chips++;
             playerIdentity.UpdateChip(-chips);
