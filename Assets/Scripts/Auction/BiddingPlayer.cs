@@ -81,14 +81,23 @@ public class BiddingPlayer : MonoBehaviour
     {
         if (LeanTween.isTweening(signMesh.gameObject))
             return;
-        sign.LookAt(new Vector3(sign.position.x, Camera.main.transform.position.y, sign.position.z));
+        var yAbove = Camera.main ? Camera.main.transform.position.y : sign.position.y + 100;
+        sign.LookAt(new Vector3(sign.position.x, yAbove, sign.position.z));
     }
 
     private void OnDestroy()
     {
-        playerManager.inputManager.onFirePerformed -= AnimateBid;
-        playerManager.inputManager.onSelect -= AnimateBid;
-        playerManager.identity.onChipChange -= AnimateChipStatus;
+        if (!playerManager)
+            return;
+        if (playerManager.inputManager)
+        {
+            playerManager.inputManager.onFirePerformed -= AnimateBid;
+            playerManager.inputManager.onSelect -= AnimateBid;
+        }
+        if (playerManager.identity)
+        {
+            playerManager.identity.onChipChange -= AnimateChipStatus;
+        }
         playerManager.onSelectedBiddingPlatformChange -= AnimateChipStatus;
     }
 }
