@@ -39,6 +39,7 @@ Transform:
   - {fileID: 6507685450046118291}
   - {fileID: 254547644754247345}
   - {fileID: 3570743071879246586}
+  - {fileID: 4668425952303134772}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -80,6 +81,10 @@ MonoBehaviour:
   state: 1
   animator: {fileID: 289053663840324231}
   ZoomFov: 30
+  bottomCaster: {fileID: 943828384506437906}
+  topCaster: {fileID: 943828384506437906}
+  stepHeight: 0.5
+  playerRoot: {fileID: 5539336408495370967}
 --- !u!23 &71015680234268065
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -569,6 +574,37 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &943828384506437906
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4668425952303134772}
+  m_Layer: 0
+  m_Name: SteppingPlaceholder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4668425952303134772
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 943828384506437906}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 71015680234268071}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1029316632486890240
 GameObject:
   m_ObjectHideFlags: 0
@@ -1045,6 +1081,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hud: {fileID: 0}
   healthBar: {fileID: 8281853296856510176}
+  healthText: {fileID: 0}
+  healthMax: {r: 0, g: 0, b: 0, a: 0}
+  healthMin: {r: 0, g: 0, b: 0, a: 0}
   ammoHud: {fileID: 6629533919243205533}
   ammoBar: {fileID: 4001729099187883475}
   crosshair: {fileID: 0}
@@ -2271,5 +2310,10 @@ CapsuleCollider:
 --- !u!1 &5330336945653279977 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7230968032871701784, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
+  m_PrefabInstance: {fileID: 3287810421515891185}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &5539336408495370967 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7025346269212640038, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
   m_PrefabInstance: {fileID: 3287810421515891185}
   m_PrefabAsset: {fileID: 0}

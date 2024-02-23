@@ -4,6 +4,7 @@ using Unity.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 enum PlayerState
 {
@@ -389,23 +390,36 @@ public class PlayerMovement : MonoBehaviour
     private void FindStep()
     {
         Vector3 rayDirection = new Vector3(body.velocity.x, 0, body.velocity.z);
-
-        RaycastHit hitBottom;
-        if (Physics.Raycast(bottomCaster.transform.position, rayDirection, out hitBottom, 0.5f, ignoreMask))
+        if (Physics.Raycast(bottomCaster.transform.position, rayDirection, out var hitBottom, 0.5f, ignoreMask))
         {
-            RaycastHit hitTop;
-            if (!Physics.Raycast(topCaster.transform.position, rayDirection, out hitTop, 1f, ignoreMask))
-            {
-                if (hitBottom.normal.y < 0.0001f && hitBottom.collider.name != "Terrain")
-                {
-                    body.position += new Vector3(0f, 0.5f, 0f) + body.velocity.normalized * 0.5f;
-                }
-            }
+            OnStepDetected(hitBottom, rayDirection);
+            return;
+        }
+        if(Physics.Raycast(bottomCaster.transform.position + rayDirection.normalized * 0.5f, Vector3.up, out var hitBottomSurface, stepHeight, ignoreMask))
+        {
+            OnStepDetected(hitBottomSurface, rayDirection);
         }
     }
 
+    public void OnStepDetected(RaycastHit raycastHit, Vector3 rayDirection)
+    {
+        Debug.Log(raycastHit.collider.name);
+        if (!Physics.Raycast(topCaster.transform.position, rayDirection, 1f, ignoreMask))
+        {
+            if (raycastHit.normal.y < 0.0001f && raycastHit.collider.name != "Terrain")
+            {
+                Physics.Raycast(topCaster.transform.position + rayDirection.normalized * 0.5f, Vector3.down, out var hitTopSurface, stepHeight, ignoreMask);
+                body.position += new Vector3(0f, stepHeight - hitTopSurface.distance + 0.01f, 0f) + body.velocity.normalized * 0.4f;
+            }
+        }
+    }
     void FixedUpdate()
     {
+        Debug.DrawRay(bottomCaster.transform.position+ new Vector3(body.velocity.x, 0, body.velocity.z).normalized, Vector3.up * stepHeight, Color.cyan);
+        Debug.DrawRay(bottomCaster.transform.position, new Vector3(body.velocity.x, 0, body.velocity.z).normalized * 0.5f, Color.red);
+        Debug.DrawRay(topCaster.transform.position, new Vector3(body.velocity.x, 0, body.velocity.z).normalized * 1f, Color.red);
+        Debug.DrawRay(topCaster.transform.position + new Vector3(body.velocity.x, 0, body.velocity.z).normalized * 0.5f, Vector3.down * stepHeight, Color.red);
+        Debug.DrawRay(topCaster.transform.position + new Vector3(body.velocity.x, 0, body.velocity.z).normalized, Vector3.down * stepHeight, Color.black);
         if (FindSteppingGround() && body.velocity.magnitude > 0.08f)
         {
             FindStep();
