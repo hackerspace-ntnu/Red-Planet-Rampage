@@ -1,7 +1,10 @@
+using System;
 using System.Collections;
 using Unity.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 enum PlayerState
 {
@@ -122,11 +125,25 @@ public class PlayerMovement : MonoBehaviour
     private int gunCrouchCanceledTween;
     private int cameraCrouchCanceledTween;
 
+    [Header("Step climb")]
+    [SerializeField]
+    private GameObject bottomCaster;
+    [SerializeField]
+    private GameObject topCaster;
+    [SerializeField] 
+    private float stepHeight = 0.5f;
+    [SerializeField]
+    private Transform playerRoot;
+    [SerializeField]
+    protected LayerMask steppingIgnoreMask;
+
+
     void Start()
     {
         body = GetComponent<Rigidbody>();
         hitbox = GetComponent<BoxCollider>();
         strafeForce = strafeForceGrounded;
+        topCaster.transform.localPosition = new Vector3 (0f, stepHeight, 0f);
     }
 
     /// <summary>
@@ -265,7 +282,7 @@ public class PlayerMovement : MonoBehaviour
     {
         // Cast a box to detect (partial) ground. See OnDrawGizmos for what I think is the extent of the box cast.
         // No, this does not work if the cast start at the bottom.
-        return !Physics.BoxCast(hitbox.bounds.center, 0.5f * Vector3.one, Vector3.down, Quaternion.identity, 0.5f + airThreshold, ignoreMask); ;
+        return !Physics.BoxCast(hitbox.bounds.center, new Vector3(.5f, .5f, .2f), Vector3.down, Quaternion.identity, 0.5f + airThreshold, ignoreMask); ;
     }
 
     protected Vector3 GroundNormal()
@@ -351,8 +368,63 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.DrawWireCube(center, extents);
     }
 
+    /// <summary>
+    /// More accurate ground detection for use in stepping up edges. Uses raycast to check for ground directly beneath the player.
+    /// </summary>
+    /// <returns>true if player is touching the ground, false if not touching ground </returns>
+    private bool FindSteppingGround()
+    {
+        RaycastHit hitGround;
+        if (Physics.Raycast(playerRoot.position, Vector3.down, out hitGround, 0.01f))
+        {
+            if(hitGround.normal.y > 0.0001f && state == PlayerState.GROUNDED)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Check for an edge to step up using a short raycast, also checks for a ledge if the short raycast doesn't hit anything.
+    /// </summary>
+    private void FindStep()
+    {
+        Vector3 rayDirection = new Vector3(body.velocity.x, 0, body.velocity.z);
+        if (Physics.Raycast(bottomCaster.transform.position, rayDirection, out var hitBottom, 0.5f, steppingIgnoreMask))
+        {
+            OnStepDetected(hitBottom, rayDirection);
+            return;
+        }
+        if(Physics.Raycast(bottomCaster.transform.position + rayDirection.normalized * 0.5f, Vector3.up, out var hitBottomSurface, stepHeight, steppingIgnoreMask))
+        {
+            OnStepDetected(hitBottomSurface, rayDirection);
+        }
+    }
+
+    /// <summary>
+    /// Called when a edge or ledge is detected, checks for free area on top of edge and moves the player ontop if there is space.
+    /// </summary>
+    /// <param name="raycastHit"></param>
+    /// <param name="rayDirection"></param>
+    public void OnStepDetected(RaycastHit raycastHit, Vector3 rayDirection)
+    {
+        if (!Physics.Raycast(topCaster.transform.position, rayDirection, 1f, steppingIgnoreMask))
+        {
+            if (raycastHit.normal.y < 0.0001f && raycastHit.collider.name != "Terrain")
+            {
+                Physics.Raycast(topCaster.transform.position + rayDirection.normalized * 0.5f, Vector3.down, out var hitTopSurface, stepHeight, steppingIgnoreMask);
+                body.position += new Vector3(0f, stepHeight - hitTopSurface.distance + 0.05f, 0f) + body.velocity.normalized * 0.4f;
+            }
+        }
+    }
     void FixedUpdate()
     {
+        if (FindSteppingGround() && body.velocity.magnitude > 0.08f)
+        {
+            FindStep();
+        }
+
         var positionInput = new Vector3(inputManager.moveInput.x, 0, inputManager.moveInput.y);
         UpdatePosition(positionInput);
         // Limit velocity when not grounded
