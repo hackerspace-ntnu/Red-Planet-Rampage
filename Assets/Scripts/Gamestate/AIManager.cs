@@ -215,7 +215,7 @@ public class AIManager : PlayerManager
             if (DestinationTarget == null || !DestinationTarget || (!DestinationTarget.gameObject.GetComponent<PlayerManager>() && !DestinationTarget.gameObject.activeInHierarchy))
             {
                 var target = MatchController.Singleton.GetRandomActiveChip();
-                if (target != null)
+                if (target != null && MatchController.Singleton.HumanPlayers.Any(player => player.playerManager.IsAlive))
                     DestinationTarget = target;
             }
         }
