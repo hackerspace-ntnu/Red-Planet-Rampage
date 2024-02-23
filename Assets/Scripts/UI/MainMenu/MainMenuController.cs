@@ -82,7 +82,6 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.AddJoinListener();
         playerInputManagerController.PlayerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
-        playerInputManagerController.onPlayerInputJoined += ShowSkipText;
         if (playerInputManagerController.playerInputs.Count > 0)
         {
             // Already played, just show the menu.
@@ -95,6 +94,7 @@ public class MainMenuController : MonoBehaviour
         {
             // First time in menu, play intro video.
             DontDestroyOnLoad(EventSystem.current);
+            playerInputManagerController.onPlayerInputJoined += ShowSkipText;
             defaultMenu.SetActive(false);
             introRoutine = StartCoroutine(WaitForIntroVideoToEnd());
         }
