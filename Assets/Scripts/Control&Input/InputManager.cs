@@ -18,6 +18,7 @@ public class InputManager : MonoBehaviour
     public InputEvent onCancel;
     public InputEvent onLeftTab;
     public InputEvent onRightTab;
+    public InputEvent onAnyKey;
     // FPS-related
     public InputEvent onInteract;
     public InputEvent onFirePerformed;
@@ -75,6 +76,7 @@ public class InputManager : MonoBehaviour
         onLookPerformed += LookInputPerformed;
         onLookCanceled += LookInputCanceled;
         // Subscribe delegates to inputs
+        playerInput.actions["Join"].performed += AnyKey;
         playerInput.actions["Select"].performed += Select;
         playerInput.actions["Cancel"].performed += Cancel;
         playerInput.actions["Move"].performed += Move;
@@ -177,6 +179,11 @@ public class InputManager : MonoBehaviour
     }
 
     #region OnEvent Functions
+    private void AnyKey(InputAction.CallbackContext ctx)
+    {
+        onAnyKey?.Invoke(ctx);
+    }
+
     private void Select(InputAction.CallbackContext ctx)
     {
         onSelect?.Invoke(ctx);

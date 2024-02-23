@@ -60,7 +60,7 @@ public class MusicTrackManager : MonoBehaviour
 
     private readonly float LOGARITHMIC_MUTE = -90f;
 
-    void Awake()
+    private void Awake()
     {
         #region Singleton boilerplate
 
@@ -79,9 +79,9 @@ public class MusicTrackManager : MonoBehaviour
 
         #endregion Singleton boilerplate
 
+        // Set temporary state while intro scene is playing
         track = menuTheme;
         trackStartTime = AudioSettings.dspTime;
-        AssignPlayedLayers(menuTheme);
 
         DontDestroyOnLoad(gameObject);
     }
