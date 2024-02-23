@@ -159,7 +159,7 @@ public class MatchController : MonoBehaviour
                 ai.TrackedPlayers = players.Select(player => player.playerManager)
                     .Where(player => player != ai).ToList());
 
-        MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
         onRoundStart?.Invoke();
         isAuction = false;
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
@@ -183,7 +183,7 @@ public class MatchController : MonoBehaviour
         yield return new WaitForSeconds(loadingDuration);
 
         PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
-        MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Bidding);
         onBiddingStart?.Invoke();
         SceneManager.LoadSceneAsync("Bidding");
         PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = false;
@@ -312,7 +312,7 @@ public class MatchController : MonoBehaviour
             .Where(identity => identity.IsAI)
             .ToList().ForEach(aiIdentity => Destroy(aiIdentity));
 
-        MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         rounds = new List<Round>();
         PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         SceneManager.LoadSceneAsync("Menu");
