@@ -27,6 +27,8 @@ public class MainMenuController : MonoBehaviour
     private GameObject introVideoFirstFrame;
     [SerializeField]
     private TMP_Text skipIntroText;
+    [SerializeField]
+    private MainMenuSunMovement sun;
 
     [SerializeField]
     private List<TabGroup> tabGroups;
@@ -154,6 +156,8 @@ public class MainMenuController : MonoBehaviour
 
     private void EndIntro()
     {
+        sun.Restart();
+        playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
         skipIntroText.gameObject.SetActive(false);
         introVideo.gameObject.SetActive(false);
         defaultMenu.SetActive(true);
