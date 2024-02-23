@@ -10,6 +10,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
+[RequireComponent(typeof(AudioSource))]
 public class MainMenuController : MonoBehaviour
 {
     [ReadOnly, SerializeField]
@@ -117,6 +118,7 @@ public class MainMenuController : MonoBehaviour
         {
             yield return null;
         }
+        Debug.Log("Waitin");
         EndIntro();
     }
 
