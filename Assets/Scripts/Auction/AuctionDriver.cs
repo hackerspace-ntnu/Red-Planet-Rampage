@@ -40,7 +40,12 @@ public class AuctionDriver : MonoBehaviour
 
     [SerializeField]
     private Animator cameraAnimator;
+    [SerializeField]
+    private Vector3 cameraStandbyPosition;
+    private int screenShakeTween;
     public GameObject Camera => cameraAnimator.gameObject;
+    [SerializeField]
+    private Camera extraCamera;
 
     public static AuctionDriver Singleton;
 
@@ -116,6 +121,17 @@ public class AuctionDriver : MonoBehaviour
         cameraAnimator.SetTrigger("start");
     }
 
+    public void ScreenShake()
+    {
+        cameraAnimator.enabled = false;
+        if (LeanTween.isTweening(screenShakeTween))
+        {
+            LeanTween.cancel(screenShakeTween);
+            cameraAnimator.transform.localPosition = cameraStandbyPosition;
+        }
+        screenShakeTween = cameraAnimator.gameObject.LeanMoveLocal(cameraStandbyPosition * 1.01f, 0.2f).setEaseShake().id;
+    }
+
     private IEnumerator PopulatePlatforms()
     {
         yield return new WaitForSeconds(biddingBeginDelay);
@@ -153,21 +169,12 @@ public class AuctionDriver : MonoBehaviour
     private void EndAuction(BiddingPlatform biddingPlatform)
     {
         lastExtendedAuction.onBiddingEnd = null;
-
-        // TODO: Reuse and upgrade for new gun construction in the future
-        //LeanTween.alpha(gunConstructionPanels[0].parent.GetComponent<RectTransform>(), 1f, 1f).setEase(LeanTweenType.linear);
-        //MusicTrackManager.Singleton.SwitchTo(MusicType.CONSTRUCTION_FANFARE);
-
-        /*
-        for (int i = 0; i < playersInAuction.Count; i++)
-        {
-            StartCoroutine(AnimateGunConstruction(playersInAuction.ElementAt(playersInAuction.Count-i-1), gunConstructionPanels[i]));
-        }
-        */
         Camera.GetComponent<Camera>().enabled = false;
+        extraCamera.enabled = true;
         PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = true;
         playerFactory.InstantiatePlayerSelectItems();
         GetComponent<ItemSelectManager>().StartTrackingMenus();
+
     }
 
     public void ChangeScene()
