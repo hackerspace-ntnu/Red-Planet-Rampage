@@ -47,7 +47,7 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] 
     private Button startButton;
     [SerializeField]
-    private GameObject innputManagerPrefab;
+    private GameObject inputManagerPrefab;
     [SerializeField]
     private string[] mapNames;
     private AudioSource audioSource;
@@ -70,7 +70,7 @@ public class MainMenuController : MonoBehaviour
     private void Awake()
     {
         if (!FindAnyObjectByType<PlayerInputManagerController>())
-            Instantiate(innputManagerPrefab);
+            Instantiate(inputManagerPrefab);
         introVideo.Prepare();
     }
 
