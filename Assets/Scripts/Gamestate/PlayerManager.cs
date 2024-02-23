@@ -19,6 +19,9 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private LayerMask interactMask;
 
+    private bool isAlive = true;
+    public bool IsAlive => isAlive;
+
     [Header("Shooting")]
 
     [SerializeField]
@@ -152,6 +155,7 @@ public class PlayerManager : MonoBehaviour
             killer = lastPlayerThatHitMe;
         }
         onDeath?.Invoke(killer, this);
+        isAlive = false;
         aimAssistCollider.SetActive(false);
         TurnIntoRagdoll(info);
         aiTargetCollider.gameObject.SetActive(false);

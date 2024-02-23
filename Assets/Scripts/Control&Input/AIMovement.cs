@@ -27,7 +27,7 @@ public class AIMovement : PlayerMovement
         }
     }
 
-    private void FixedUpdate()
+    protected override void FixedUpdate()
     {
         if (!StateIsAir && (!Target || Vector3.Distance(Target.position, transform.position) > 35))
         {
