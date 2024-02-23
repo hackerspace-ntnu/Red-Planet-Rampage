@@ -133,7 +133,8 @@ public class GunController : MonoBehaviour
 
     private void CancelZoom()
     {
-        gameObject.LeanMoveLocalX(localGunXOffset, 0.2f).setEaseInOutCubic();
+        if (gameObject)
+            gameObject.LeanMoveLocalX(localGunXOffset, 0.2f).setEaseInOutCubic();
     }
 
     private void FireGun()

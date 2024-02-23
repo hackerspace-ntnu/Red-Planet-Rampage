@@ -172,7 +172,7 @@ public class AIManager : PlayerManager
     {
         if (isDead)
             yield break;
-        if (!aiMovement.enabled)
+        if (!aiMovement || !aiMovement.enabled)
             FindPlayers();
         yield return new WaitForSeconds(3f);
         StartCoroutine(LookForTargets());

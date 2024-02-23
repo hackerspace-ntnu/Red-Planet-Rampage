@@ -70,8 +70,11 @@ public class SolarBody : GunBody
         if (solarPanelMaterial.GetFloat("_On") == 0)
         {
             LeanTween.value(gameObject, SetEmissionStrength, 0, 1, chargeUpSeconds);
-            audioSource.clip = chargeUp;
-            audioSource.Play();
+            if (audioSource)
+            {
+                audioSource.clip = chargeUp;
+                audioSource.Play();
+            }
         }
         solarPanelMaterial.SetFloat("_On", 1);
         gunController.Reload(reloadEfficiencyPercentagen);
@@ -101,7 +104,7 @@ public class SolarBody : GunBody
         }
         else
         {
-            if (solarPanelMaterial.GetFloat("_On") == 1)
+            if (audioSource && solarPanelMaterial.GetFloat("_On") == 1)
             {
                 audioSource.clip = chargeDown;
                 audioSource.Play();
