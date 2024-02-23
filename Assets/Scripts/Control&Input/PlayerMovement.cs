@@ -407,7 +407,7 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     /// <param name="raycastHit"></param>
     /// <param name="rayDirection"></param>
-    public void OnStepDetected(RaycastHit raycastHit, Vector3 rayDirection)
+    private void OnStepDetected(RaycastHit raycastHit, Vector3 rayDirection)
     {
         if (!Physics.Raycast(topCaster.transform.position, rayDirection, 1f, steppingIgnoreMask))
         {
@@ -418,7 +418,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
     }
-    void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
         if (FindSteppingGround() && body.velocity.magnitude > 0.08f)
         {
