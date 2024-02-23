@@ -134,6 +134,8 @@ public class PlayerMovement : MonoBehaviour
     private float stepHeight = 0.5f;
     [SerializeField]
     private Transform playerRoot;
+    [SerializeField]
+    protected LayerMask steppingIgnoreMask;
 
 
     void Start()
@@ -390,12 +392,12 @@ public class PlayerMovement : MonoBehaviour
     private void FindStep()
     {
         Vector3 rayDirection = new Vector3(body.velocity.x, 0, body.velocity.z);
-        if (Physics.Raycast(bottomCaster.transform.position, rayDirection, out var hitBottom, 0.5f, ignoreMask))
+        if (Physics.Raycast(bottomCaster.transform.position, rayDirection, out var hitBottom, 0.5f, steppingIgnoreMask))
         {
             OnStepDetected(hitBottom, rayDirection);
             return;
         }
-        if(Physics.Raycast(bottomCaster.transform.position + rayDirection.normalized * 0.5f, Vector3.up, out var hitBottomSurface, stepHeight, ignoreMask))
+        if(Physics.Raycast(bottomCaster.transform.position + rayDirection.normalized * 0.5f, Vector3.up, out var hitBottomSurface, stepHeight, steppingIgnoreMask))
         {
             OnStepDetected(hitBottomSurface, rayDirection);
         }
@@ -404,12 +406,12 @@ public class PlayerMovement : MonoBehaviour
     public void OnStepDetected(RaycastHit raycastHit, Vector3 rayDirection)
     {
         Debug.Log(raycastHit.collider.name);
-        if (!Physics.Raycast(topCaster.transform.position, rayDirection, 1f, ignoreMask))
+        if (!Physics.Raycast(topCaster.transform.position, rayDirection, 1f, steppingIgnoreMask))
         {
             if (raycastHit.normal.y < 0.0001f && raycastHit.collider.name != "Terrain")
             {
-                Physics.Raycast(topCaster.transform.position + rayDirection.normalized * 0.5f, Vector3.down, out var hitTopSurface, stepHeight, ignoreMask);
-                body.position += new Vector3(0f, stepHeight - hitTopSurface.distance + 0.01f, 0f) + body.velocity.normalized * 0.4f;
+                Physics.Raycast(topCaster.transform.position + rayDirection.normalized * 0.5f, Vector3.down, out var hitTopSurface, stepHeight, steppingIgnoreMask);
+                body.position += new Vector3(0f, stepHeight - hitTopSurface.distance + 0.05f, 0f) + body.velocity.normalized * 0.4f;
             }
         }
     }
