@@ -22,6 +22,8 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private VideoPlayer introVideo;
     [SerializeField]
+    private GameObject introVideoFirstFrame;
+    [SerializeField]
     private TMP_Text skipIntroText;
 
     [SerializeField]
@@ -90,14 +92,22 @@ public class MainMenuController : MonoBehaviour
             SelectControl(defaultButton);
             introVideo.Stop();
             introVideo.gameObject.SetActive(false);
+            introVideoFirstFrame.SetActive(false);
         }
         else
         {
             // First time in menu, play intro video.
+            introVideo.started += StopFirstFrame;
             DontDestroyOnLoad(EventSystem.current);
             defaultMenu.SetActive(false);
             introRoutine = StartCoroutine(WaitForIntroVideoToEnd());
         }
+    }
+
+    private void StopFirstFrame(VideoPlayer source)
+    {
+        introVideoFirstFrame.SetActive(false);
+        introVideo.started -= StopFirstFrame;
     }
 
     private IEnumerator WaitForIntroVideoToEnd()
@@ -120,6 +130,7 @@ public class MainMenuController : MonoBehaviour
     private void SkipIntro(InputAction.CallbackContext ctx)
     {
         playerInputs[0].onAnyKey -= SkipIntro;
+        introVideo.started -= StopFirstFrame;
         if (!introVideo.isPlaying)
             return;
         SkipIntro();
@@ -161,7 +172,7 @@ public class MainMenuController : MonoBehaviour
     private IEnumerator WaitSelect(Selectable target)
     {
         yield return null;
-        target.Select();
+        target?.Select();
     }
 
     /// <summary>
