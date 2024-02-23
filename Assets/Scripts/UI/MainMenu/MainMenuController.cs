@@ -119,7 +119,7 @@ public class MainMenuController : MonoBehaviour
             yield return null;
         }
         yield return new WaitForSecondsRealtime((float)introVideo.length - introVideoTransitionTime);
-        MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Menu, FadeMode.FadeIn);
         while (introVideo.isPlaying)
         {
             yield return null;
@@ -149,7 +149,7 @@ public class MainMenuController : MonoBehaviour
         StopCoroutine(introRoutine);
         EndIntro();
         if (!MusicTrackManager.Singleton.IsPlaying)
-            MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
+            MusicTrackManager.Singleton.SwitchTo(MusicType.Menu, FadeMode.None);
     }
 
     private void EndIntro()

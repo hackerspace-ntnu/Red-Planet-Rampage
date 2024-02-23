@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MainMenuSunMovement : MonoBehaviour
@@ -19,6 +17,5 @@ public class MainMenuSunMovement : MonoBehaviour
     {
         RenderSettings.skybox.SetVector("_SunDirection", transform.forward);
         RenderSettings.skybox.SetFloat("_MaxGradientTreshold", Mathf.Min( 0.25f, Vector3.Dot(transform.forward, -Vector3.up)));
-
     }
 }
