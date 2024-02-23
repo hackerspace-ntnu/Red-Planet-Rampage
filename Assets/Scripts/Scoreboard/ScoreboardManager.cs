@@ -164,30 +164,33 @@ public class ScoreboardManager : MonoBehaviour
             Player player = players[i];
             Scoreboard scoreboard = scoreboards[i];
 
-            scoreboard.AddPosterCrime("Savings", player.playerIdentity.chips);
+            var baseReward = matchController.RewardBase;
+            var killsReward = matchController.RewardKill * lastRound.KillCount(player.playerManager);
+            var winReward = lastRound.IsWinner(player.playerIdentity) ? matchController.RewardWin : 0;
+
+            var total = player.playerIdentity.chips;
+            var gain = baseReward + killsReward + winReward;
+            var savings = total - gain;
+
+            scoreboard.AddPosterCrime("Savings", savings);
 
             // Participation award
-            scoreboard.AddPosterCrime("Base", matchController.RewardBase);
+            scoreboard.AddPosterCrime("Base", baseReward);
 
             // Kill Award (shows 0 if none)
-            scoreboard.AddPosterCrime("Kills", matchController.RewardKill * lastRound.KillCount(player.playerManager));
+            scoreboard.AddPosterCrime("Kills", killsReward);
 
             // Round winner award
-            if (lastRound.IsWinner(player.playerIdentity))
+            if (winReward > 0)
             {
-                scoreboard.AddPosterCrime("Victor", matchController.RewardWin);
+                scoreboard.AddPosterCrime("Victor", winReward);
             }
             else
             {
                 scoreboard.AddBlankPoster();
             }
 
-            // New total
-            int roundSpoils = matchController.RewardBase
-                + matchController.RewardKill * lastRound.KillCount(player.playerManager)
-                + (lastRound.IsWinner(player.playerIdentity) ? matchController.RewardWin : 0);
-
-            scoreboard.AddPosterCrime("Total", roundSpoils + player.playerIdentity.chips);
+            scoreboard.AddPosterCrime("Total", total);
         }
 
         StartCoroutine(ShowMatchResults());
