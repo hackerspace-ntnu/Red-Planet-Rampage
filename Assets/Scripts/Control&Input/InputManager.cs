@@ -107,6 +107,8 @@ public class InputManager : MonoBehaviour
     {
         RemoveAllListeners();
         RemoveExtraListeners();
+        moveInput = Vector2.zero;
+        lookInput = Vector2.zero;
     }
 
     /// <summary>
