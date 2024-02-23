@@ -369,7 +369,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// More accurate ground detection to use in stepping up edges. Uses raycast to check for ground directly beneath the player.
+    /// More accurate ground detection for use in stepping up edges. Uses raycast to check for ground directly beneath the player.
     /// </summary>
     /// <returns>true if player is touching the ground, false if not touching ground </returns>
     private bool FindSteppingGround()
@@ -386,8 +386,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// Check for an edge to step up using a short raycast, then check if there's unobstructed space on top of the edge using a longer raycast. 
-    /// If that is the case, teleport the player on top of the edge.
+    /// Check for an edge to step up using a short raycast, also checks for a ledge if the short raycast doesn't hit anything.
     /// </summary>
     private void FindStep()
     {
@@ -403,9 +402,13 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Called when a edge or ledge is detected, checks for free area on top of edge and moves the player ontop if there is space.
+    /// </summary>
+    /// <param name="raycastHit"></param>
+    /// <param name="rayDirection"></param>
     public void OnStepDetected(RaycastHit raycastHit, Vector3 rayDirection)
     {
-        Debug.Log(raycastHit.collider.name);
         if (!Physics.Raycast(topCaster.transform.position, rayDirection, 1f, steppingIgnoreMask))
         {
             if (raycastHit.normal.y < 0.0001f && raycastHit.collider.name != "Terrain")
@@ -417,11 +420,6 @@ public class PlayerMovement : MonoBehaviour
     }
     void FixedUpdate()
     {
-        Debug.DrawRay(bottomCaster.transform.position+ new Vector3(body.velocity.x, 0, body.velocity.z).normalized, Vector3.up * stepHeight, Color.cyan);
-        Debug.DrawRay(bottomCaster.transform.position, new Vector3(body.velocity.x, 0, body.velocity.z).normalized * 0.5f, Color.red);
-        Debug.DrawRay(topCaster.transform.position, new Vector3(body.velocity.x, 0, body.velocity.z).normalized * 1f, Color.red);
-        Debug.DrawRay(topCaster.transform.position + new Vector3(body.velocity.x, 0, body.velocity.z).normalized * 0.5f, Vector3.down * stepHeight, Color.red);
-        Debug.DrawRay(topCaster.transform.position + new Vector3(body.velocity.x, 0, body.velocity.z).normalized, Vector3.down * stepHeight, Color.black);
         if (FindSteppingGround() && body.velocity.magnitude > 0.08f)
         {
             FindStep();
