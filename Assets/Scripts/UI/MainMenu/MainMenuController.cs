@@ -22,6 +22,8 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private VideoPlayer introVideo;
     [SerializeField]
+    private float introVideoTransitionTime = 4;
+    [SerializeField]
     private GameObject introVideoFirstFrame;
     [SerializeField]
     private TMP_Text skipIntroText;
@@ -112,7 +114,12 @@ public class MainMenuController : MonoBehaviour
 
     private IEnumerator WaitForIntroVideoToEnd()
     {
-        yield return new WaitForSecondsRealtime((float)introVideo.length);
+        while (!introVideo.isPlaying)
+        {
+            yield return null;
+        }
+        yield return new WaitForSecondsRealtime((float)introVideo.length - introVideoTransitionTime);
+        MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
         while (introVideo.isPlaying)
         {
             yield return null;
@@ -141,6 +148,8 @@ public class MainMenuController : MonoBehaviour
         introVideo.Stop();
         StopCoroutine(introRoutine);
         EndIntro();
+        if (!MusicTrackManager.Singleton.IsPlaying)
+            MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
     }
 
     private void EndIntro()
@@ -149,7 +158,6 @@ public class MainMenuController : MonoBehaviour
         introVideo.gameObject.SetActive(false);
         defaultMenu.SetActive(true);
         SelectControl(defaultButton);
-        MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
     }
 
     private void OnDestroy()

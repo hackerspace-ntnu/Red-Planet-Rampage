@@ -53,6 +53,9 @@ public class MusicTrackManager : MonoBehaviour
     private bool isFadingOutPreviousTrack = false;
     public bool IsfadingOutPreviousTrack => isFadingOutPreviousTrack;
 
+    private bool isPlaying = false;
+    public bool IsPlaying => isPlaying;
+
     private bool shouldSwap = false;
     private double nextSwapTime;
 
@@ -82,6 +85,7 @@ public class MusicTrackManager : MonoBehaviour
         // Set temporary state while intro scene is playing
         track = menuTheme;
         trackStartTime = AudioSettings.dspTime;
+        isPlaying = false;
 
         DontDestroyOnLoad(gameObject);
     }
@@ -187,6 +191,7 @@ public class MusicTrackManager : MonoBehaviour
 
     public void SwitchTo(MusicType type)
     {
+        isPlaying = true;
         track = GetTrack(type);
         StartCoroutine(FadeOutThenSwitchTo(track));
         if (trackSwitchingRoutine != null) StopCoroutine(trackSwitchingRoutine);
