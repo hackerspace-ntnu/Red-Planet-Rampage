@@ -1,13 +1,14 @@
 using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using TMPro;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.Video;
 
 public class MainMenuController : MonoBehaviour
 {
@@ -17,6 +18,11 @@ public class MainMenuController : MonoBehaviour
     private RectTransform characterView;
     [SerializeField]
     private GameObject playerBackgroundPanel;
+
+    [SerializeField]
+    private VideoPlayer introVideo;
+    [SerializeField]
+    private TMP_Text skipIntroText;
 
     [SerializeField]
     private List<TabGroup> tabGroups;
@@ -57,36 +63,88 @@ public class MainMenuController : MonoBehaviour
     
     private int loadingDuration = 6;
 
+    private Coroutine introRoutine;
+
     private void Awake()
     {
         if (!FindAnyObjectByType<PlayerInputManagerController>())
             Instantiate(innputManagerPrefab);
+        introVideo.Prepare();
     }
 
-    void Start()
+    private void Start()
     {
+        aiButtonOriginalPosition = aIButton.transform.localPosition;
+        PlayerInputManagerController.Singleton.MatchHasAI = false;
         audioSource = GetComponent<AudioSource>();
+
         playerInputManagerController = PlayerInputManagerController.Singleton;
         playerInputManagerController.AddJoinListener();
         playerInputManagerController.PlayerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
+        playerInputManagerController.onPlayerInputJoined += ShowSkipText;
         if (playerInputManagerController.playerInputs.Count > 0)
         {
+            // Already played, just show the menu.
             TransferExistingInputs();
+            SelectControl(defaultButton);
+            introVideo.Stop();
+            introVideo.gameObject.SetActive(false);
         }
         else
         {
+            // First time in menu, play intro video.
             DontDestroyOnLoad(EventSystem.current);
+            defaultMenu.SetActive(false);
+            introRoutine = StartCoroutine(WaitForIntroVideoToEnd());
         }
+    }
 
+    private IEnumerator WaitForIntroVideoToEnd()
+    {
+        yield return new WaitForSecondsRealtime((float)introVideo.length);
+        while (introVideo.isPlaying)
+        {
+            yield return null;
+        }
+        EndIntro();
+    }
+
+    private void ShowSkipText(InputManager inputManager)
+    {
+        skipIntroText.gameObject.SetActive(true);
+        playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
+        inputManager.onAnyKey += SkipIntro;
+    }
+
+    private void SkipIntro(InputAction.CallbackContext ctx)
+    {
+        playerInputs[0].onAnyKey -= SkipIntro;
+        if (!introVideo.isPlaying)
+            return;
+        SkipIntro();
+    }
+
+    private void SkipIntro()
+    {
+        introVideo.Stop();
+        StopCoroutine(introRoutine);
+        EndIntro();
+    }
+
+    private void EndIntro()
+    {
+        skipIntroText.gameObject.SetActive(false);
+        introVideo.gameObject.SetActive(false);
+        defaultMenu.SetActive(true);
         SelectControl(defaultButton);
-        aiButtonOriginalPosition = aIButton.transform.localPosition;
-        PlayerInputManagerController.Singleton.MatchHasAI = false;
+        MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
     }
 
     private void OnDestroy()
     {
         playerInputManagerController.onPlayerInputJoined -= AddPlayer;
+        playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
     }
 
     /// <summary>
