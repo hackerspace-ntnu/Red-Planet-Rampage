@@ -1,7 +1,9 @@
 using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,7 +14,7 @@ public class AIManager : PlayerManager
     public Transform ShootingTarget;
     public List<PlayerManager> TrackedPlayers;
     private const float autoAwareRadius = 25f;
-    private const float ignoreAwareRadius = 100f;
+    private const float ignoreAwareRadius = 1000f;
     [SerializeField]
     private Animator animator;
     private bool isDead = false;
@@ -21,6 +23,7 @@ public class AIManager : PlayerManager
     public BiddingAI biddingAI;
     private Rigidbody body;
     private Collider colliderBox;
+    private AIMovement aiMovement;
     [SerializeField]
     private AnimationCurve jumpYoffset;
     [SerializeField]
@@ -29,18 +32,21 @@ public class AIManager : PlayerManager
     private float shootingStoppingDistance = 5f;
     [SerializeField]
     private bool updateRotation = true;
-
+    [SerializeField]
+    private Item[] disabledItems;
     private delegate void NavMeshEvent();
     private NavMeshEvent onLinkStart;
     private NavMeshEvent onLinkEnd;
 
     private void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         agent = GetComponent<NavMeshAgent>();
         agent.updatePosition = false;
         body = GetComponent<Rigidbody>();
         colliderBox = GetComponent<Collider>();
         colliderBox.isTrigger = true;
+        aiMovement = GetComponent<AIMovement>();
         healthController = GetComponent<HealthController>();
         agent.autoTraverseOffMeshLink = false;
         onLinkStart += AnimateJump;
@@ -86,7 +92,14 @@ public class AIManager : PlayerManager
     public override void SetGun(Transform offset)
     {
         overrideAimTarget = false;
-        var gun = GunFactory.InstantiateGunAI(identity.Body, identity.Barrel, identity?.Extension, this, offset);
+        bool hasDisabledBody = IsDisabledItem(identity.Body);
+        bool hasDisabledBarrel = IsDisabledItem(identity.Barrel);
+        bool hasDisabledExtension = IsDisabledItem(identity.Extension);
+        var gun = GunFactory.InstantiateGunAI(
+            hasDisabledBody ? identity.Bodies.Where(item => !IsDisabledItem(item)).RandomElement() : identity.Body,
+            hasDisabledBarrel ? identity.Barrels.Where(item => !IsDisabledItem(item)).RandomElement() : identity.Barrel,
+            hasDisabledExtension ? identity.Extensions.Where(item => !IsDisabledItem(item)).RandomElement() : identity?.Extension,
+            this, offset);
         gunController = gun.GetComponent<GunController>();
         gunController.onFireStart += UpdateAimTarget;
         gunController.onFire += UpdateAimTarget;
@@ -96,12 +109,18 @@ public class AIManager : PlayerManager
         GetComponent<AmmoBoxCollector>().CheckForAmmoBoxBodyAgain();
     }
 
+    private bool IsDisabledItem(Item item)
+    {
+        return disabledItems.Any(disabledItem => disabledItem == item);
+    }
+
     private void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
         if (info.sourcePlayer != this)
         {
             lastPlayerThatHitMe = info.sourcePlayer;
         }
+        PlayOnHit();
         if (info.damageType != DamageType.Explosion)
             return;
         StartCoroutine(WaitAndToggleAgent());
@@ -128,6 +147,7 @@ public class AIManager : PlayerManager
         onDeath?.Invoke(killer, this);
         aimAssistCollider.SetActive(false);
         aiTargetCollider.gameObject.SetActive(false);
+        aiMovement.enabled = false;
         agent.enabled = false;
         body.isKinematic = false;
         TurnIntoRagdoll(info);
@@ -152,7 +172,14 @@ public class AIManager : PlayerManager
     {
         if (isDead)
             yield break;
+        if (!aiMovement || !aiMovement.enabled)
+            FindPlayers();
+        yield return new WaitForSeconds(3f);
+        StartCoroutine(LookForTargets());
+    }
 
+    private void FindPlayers()
+    {
         Transform closestPlayer = null;
         float closestDistance = ignoreAwareRadius;
         foreach (var player in TrackedPlayers)
@@ -192,6 +219,13 @@ public class AIManager : PlayerManager
                     DestinationTarget = target;
             }
         }
+        else
+        {
+            aiMovement.Target = ShootingTarget;
+            var isStrafeDistance = closestDistance < 10f;
+            aiMovement.enabled = isStrafeDistance;
+        }
+
         if (!DestinationTarget)
         {
             var player = TrackedPlayers.RandomElement();
@@ -200,10 +234,8 @@ public class AIManager : PlayerManager
         }
         agent.stoppingDistance = ShootingTarget ? shootingStoppingDistance : itemStoppingDistance;
         agent.SetDestination(DestinationTarget.position);
-
-        yield return new WaitForSeconds(3f);
-        StartCoroutine(LookForTargets());
     }
+ 
 
     private void AnimateJump()
     {
@@ -245,6 +277,11 @@ public class AIManager : PlayerManager
             Debug.DrawLine(transform.position, player.transform.position, Color.blue);
         }
 #endif
+        if (ShootingTarget)
+        {
+            GunOrigin.LookAt(ShootingTarget.position, transform.up);
+            Fire();
+        }
         if (!DestinationTarget || !agent.enabled)
             return;
 #if UNITY_EDITOR
@@ -254,10 +291,6 @@ public class AIManager : PlayerManager
         animator.SetFloat("Right", Vector3.Dot(agent.velocity, transform.right) / agent.speed);
         if (agent.isOnOffMeshLink)
             onLinkStart?.Invoke();
-        if (!ShootingTarget)
-            return;
-        GunOrigin.LookAt(ShootingTarget.position, transform.up);
-        Fire();
     }
 
     private void FixedUpdate()

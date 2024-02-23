@@ -371,11 +371,11 @@ public class PlayerMovement : MonoBehaviour
             body.AddForce(-(isDashing ? dashDamping : extraDamping) * body.mass * new Vector3(body.velocity.x, 0, body.velocity.z), ForceMode.Force);
     }
 
-    void Update()
+    private void Update()
     {
         UpdateRotation();
         UpdateAnimatorParameters();
-        onMove(body);
+        onMove?.Invoke(body);
     }
 
     private void OnDestroy()

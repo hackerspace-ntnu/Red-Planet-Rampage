@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -9,9 +10,11 @@ public class ExplosionModifier : MonoBehaviour, ProjectileModifier
     private ExplosionController explosion;
 
     private PlayerManager player;
+    private ProjectileController projectile;
 
     public void Attach(ProjectileController projectile)
     {
+        this.projectile = projectile;
         projectile.OnColliderHit += Explode;
         player = projectile.player;
     }
@@ -21,12 +24,22 @@ public class ExplosionModifier : MonoBehaviour, ProjectileModifier
         projectile.OnColliderHit -= Explode;
     }
 
-    private void Explode(Collider other, ref ProjectileState state)
+    private void Explode(RaycastHit other, ref ProjectileState state)
     {
-        // TODO Trigger on-hit on all hitboxes hit by the explosion
         var instance = Instantiate(explosion, state.position, Quaternion.identity);
         instance.Init();
-        instance.Explode(player);
+        var targets = instance.Explode(player);
+
+        // Trigger on hit, excluding this effect and using the scaled damage from the explosion
+        var originalDamage = state.damage;
+        projectile.OnColliderHit -= Explode;
+        foreach (var (target, damage) in targets)
+        {
+            state.damage = damage;
+            projectile.OnColliderHit?.Invoke(target, ref state);
+        }
+        projectile.OnColliderHit += Explode;
+        state.damage = originalDamage;
     }
 }
 

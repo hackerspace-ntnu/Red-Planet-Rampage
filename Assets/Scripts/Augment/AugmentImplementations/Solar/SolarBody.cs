@@ -33,6 +33,12 @@ public class SolarBody : GunBody
 
     private const int solarPanelMaterialIndex = 3;
 
+    private AudioSource audioSource;
+    [SerializeField]
+    private AudioClip chargeUp;
+    [SerializeField]
+    private AudioClip chargeDown;
+
     public override void Start()
     {
         meshRenderer.materials[solarPanelMaterialIndex] = Instantiate(meshRenderer.materials[solarPanelMaterialIndex]);
@@ -53,6 +59,7 @@ public class SolarBody : GunBody
         playerHandRight.gameObject.SetActive(true);
         playerHandLeft.SetPlayer(gunController.Player);
         playerHandLeft.gameObject.SetActive(true);
+        audioSource = GetComponent<AudioSource>();
     }
 
 
@@ -63,6 +70,11 @@ public class SolarBody : GunBody
         if (solarPanelMaterial.GetFloat("_On") == 0)
         {
             LeanTween.value(gameObject, SetEmissionStrength, 0, 1, chargeUpSeconds);
+            if (audioSource)
+            {
+                audioSource.clip = chargeUp;
+                audioSource.Play();
+            }
         }
         solarPanelMaterial.SetFloat("_On", 1);
         gunController.Reload(reloadEfficiencyPercentagen);
@@ -92,6 +104,11 @@ public class SolarBody : GunBody
         }
         else
         {
+            if (audioSource && solarPanelMaterial.GetFloat("_On") == 1)
+            {
+                audioSource.clip = chargeDown;
+                audioSource.Play();
+            }
             SetEmissionStrength(0);
             solarPanelMaterial.SetFloat("_On", 0);
         }

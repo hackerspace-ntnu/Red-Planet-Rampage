@@ -10,12 +10,20 @@ public class Revolver : GunBody
     private PlayerHand playerHandLeft;
     [SerializeField]
     private PlayerHand playerHandRight;
+    private AudioSource audioSource;
+    [SerializeField]
+    private AudioClip bonkWeak;
+    [SerializeField]
+    private AudioClip bonkStrong;
+    [SerializeField]
+    private AudioClip bulletDrop;
 
     private GunBarrel barrel;
     private GunExtension extension;
 
     public override void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
@@ -52,6 +60,28 @@ public class Revolver : GunBody
     public void TriggerSteam()
     {
         steamParticles.Play();
+    }
+
+    public void PlayWeakBonk()
+    {
+        if (!gunController)
+            return;
+        audioSource.clip = bonkWeak;
+        audioSource.Play();
+    }
+    public void PlayStrongBonk()
+    {
+        if (!gunController)
+            return;
+        audioSource.clip = bonkStrong;
+        audioSource.Play();
+    }
+    public void PlayBulletDrop()
+    {
+        if (!gunController)
+            return;
+        audioSource.clip = bulletDrop;
+        audioSource.Play();
     }
 
     public void ToggleArm()

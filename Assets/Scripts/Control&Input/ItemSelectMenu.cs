@@ -51,6 +51,14 @@ public class ItemSelectMenu : MonoBehaviour
 
     private InputManager inputManager;
 
+    private AudioSource audioSource;
+    [SerializeField]
+    private AudioClip switchAudio;
+    [SerializeField]
+    private AudioClip scrollAudio;
+    [SerializeField]
+    private AudioClip readyAudio;
+
     private Vector2 moveInput;
 
     private const float errorMarginInput = 0.1f;
@@ -86,6 +94,7 @@ public class ItemSelectMenu : MonoBehaviour
     private void Start()
     {
         readyIndicator.gameObject.SetActive(false);
+        audioSource = GetComponent<AudioSource>();
     }
 
     public IEnumerator SpawnItems(InputManager inputManager)
@@ -170,9 +179,6 @@ public class ItemSelectMenu : MonoBehaviour
         {
             MoveLeftPerformed();
             DelayIfGamepad();
-
-            gamepadMoveReady = !inputManager.IsMouseAndKeyboard;
-            StartCoroutine(GamepadMoveDelay());
         }
         else if (moveInput.x > 1 - errorMarginInput && gamepadMoveReady)
         {
@@ -214,6 +220,8 @@ public class ItemSelectMenu : MonoBehaviour
 
     private void ChangeSelectedSlot()
     {
+        audioSource.clip = switchAudio;
+        audioSource.Play();
         bodySlot.Deselect();
         barrelSlot.Deselect();
         extensionSlot.Deselect();
@@ -224,6 +232,8 @@ public class ItemSelectMenu : MonoBehaviour
 
     private void MoveUpPerformed()
     {
+        audioSource.clip = scrollAudio;
+        audioSource.Play(); 
         selectedSlot.Previous();
         var selectedItem = selectedSlot.SelectedItem;
         playerStatUI.SetDescription(selectedItem == null ? "" : selectedItem.displayDescription);
@@ -232,6 +242,8 @@ public class ItemSelectMenu : MonoBehaviour
 
     private void MoveDownPerformed()
     {
+        audioSource.clip = scrollAudio;
+        audioSource.Play();
         selectedSlot.Next();
         var selectedItem = selectedSlot.SelectedItem;
         playerStatUI.SetDescription(selectedItem == null ? "" : selectedItem.displayDescription);
@@ -259,6 +271,8 @@ public class ItemSelectMenu : MonoBehaviour
 
         if (isReady)
         {
+            audioSource.clip = readyAudio;
+            audioSource.Play();
             readyIndicator.gameObject.SetActive(true);
             LeanTween.scale(readyIndicator.gameObject, 1.4f * Vector3.one, .3f).setEasePunch();
             if (LeanTween.isTweening(handleTween))

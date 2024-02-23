@@ -1,10 +1,14 @@
+using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.Video;
 
 public class MainMenuController : MonoBehaviour
 {
@@ -14,6 +18,13 @@ public class MainMenuController : MonoBehaviour
     private RectTransform characterView;
     [SerializeField]
     private GameObject playerBackgroundPanel;
+
+    [SerializeField]
+    private VideoPlayer introVideo;
+    [SerializeField]
+    private GameObject introVideoFirstFrame;
+    [SerializeField]
+    private TMP_Text skipIntroText;
 
     [SerializeField]
     private List<TabGroup> tabGroups;
@@ -26,36 +37,125 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private CreditsMenu creditsMenu;
     [SerializeField]
+    private GameObject mapSelectMenu;
+    [SerializeField]
     private PlayerSelectManager playerSelectManager;
-
+    [SerializeField]
+    private ToggleButton aIButton;
+    private Vector3 aiButtonOriginalPosition;
+    private int aiButtonTween;
+    [SerializeField] 
+    private Button startButton;
+    [SerializeField]
+    private GameObject innputManagerPrefab;
     [SerializeField]
     private string[] mapNames;
+    private AudioSource audioSource;
+    [SerializeField]
+    private AudioClip[] uiSelectSounds;
+    [SerializeField]
+    private AudioGroup uiChooseSounds;
 
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
     private List<GameObject> playerBackgrounds = new List<GameObject>();
 
-    void Start()
+    [SerializeField]
+    private GameObject loadingScreen;
+    
+    private int loadingDuration = 6;
+
+    private Coroutine introRoutine;
+
+    private void Awake()
     {
+        if (!FindAnyObjectByType<PlayerInputManagerController>())
+            Instantiate(innputManagerPrefab);
+        introVideo.Prepare();
+    }
+
+    private void Start()
+    {
+        aiButtonOriginalPosition = aIButton.transform.localPosition;
+        PlayerInputManagerController.Singleton.MatchHasAI = false;
+        audioSource = GetComponent<AudioSource>();
 
         playerInputManagerController = PlayerInputManagerController.Singleton;
-        playerInputManagerController.playerInputManager.splitScreen = false;
+        playerInputManagerController.AddJoinListener();
+        playerInputManagerController.PlayerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
+        playerInputManagerController.onPlayerInputJoined += ShowSkipText;
         if (playerInputManagerController.playerInputs.Count > 0)
         {
+            // Already played, just show the menu.
             TransferExistingInputs();
+            SelectControl(defaultButton);
+            introVideo.Stop();
+            introVideo.gameObject.SetActive(false);
+            introVideoFirstFrame.SetActive(false);
         }
         else
         {
+            // First time in menu, play intro video.
+            introVideo.started += StopFirstFrame;
             DontDestroyOnLoad(EventSystem.current);
+            defaultMenu.SetActive(false);
+            introRoutine = StartCoroutine(WaitForIntroVideoToEnd());
         }
+    }
 
+    private void StopFirstFrame(VideoPlayer source)
+    {
+        introVideoFirstFrame.SetActive(false);
+        introVideo.started -= StopFirstFrame;
+    }
+
+    private IEnumerator WaitForIntroVideoToEnd()
+    {
+        yield return new WaitForSecondsRealtime((float)introVideo.length);
+        while (introVideo.isPlaying)
+        {
+            yield return null;
+        }
+        EndIntro();
+    }
+
+    private void ShowSkipText(InputManager inputManager)
+    {
+        skipIntroText.gameObject.SetActive(true);
+        playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
+        inputManager.onAnyKey += SkipIntro;
+    }
+
+    private void SkipIntro(InputAction.CallbackContext ctx)
+    {
+        playerInputs[0].onAnyKey -= SkipIntro;
+        introVideo.started -= StopFirstFrame;
+        if (!introVideo.isPlaying)
+            return;
+        SkipIntro();
+    }
+
+    private void SkipIntro()
+    {
+        introVideo.Stop();
+        StopCoroutine(introRoutine);
+        EndIntro();
+    }
+
+    private void EndIntro()
+    {
+        skipIntroText.gameObject.SetActive(false);
+        introVideo.gameObject.SetActive(false);
+        defaultMenu.SetActive(true);
         SelectControl(defaultButton);
+        MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
     }
 
     private void OnDestroy()
     {
         playerInputManagerController.onPlayerInputJoined -= AddPlayer;
+        playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
     }
 
     /// <summary>
@@ -72,7 +172,7 @@ public class MainMenuController : MonoBehaviour
     private IEnumerator WaitSelect(Selectable target)
     {
         yield return null;
-        target.Select();
+        target?.Select();
     }
 
     /// <summary>
@@ -101,13 +201,22 @@ public class MainMenuController : MonoBehaviour
     }
 
     /// <summary>
-    /// This function calls loadscene asynchronously, so it can later be expanded to show a loading screen when it's called.
     /// Function to be called as an onclick event from a button
     /// </summary>
     /// <param name="sceneName"></param>
     public void ChangeScene(string name)
     {
-        playerInputManagerController.RemoveListeners();
+        playerInputManagerController.RemoveJoinListener();
+        StartCoroutine(LoadAndChangeScene(name));
+    }
+
+    private IEnumerator LoadAndChangeScene(string name){
+        // Disable menus we may enter a new scene from
+        defaultMenu.SetActive(false);
+        mapSelectMenu.SetActive(false);
+        // Show loading screen and switch scenes eventually
+        loadingScreen.SetActive(true);
+        yield return new WaitForSeconds(loadingDuration);
         SceneManager.LoadSceneAsync(name);
     }
 
@@ -120,6 +229,13 @@ public class MainMenuController : MonoBehaviour
     {
         inputManager.PlayerCamera.enabled = false;
         playerInputs.Add(inputManager);
+
+        bool canPlay = playerInputs.Count > 1;
+        var colors = startButton.colors;
+        colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
+        startButton.colors = colors;
+        inputManager.onMovePerformed += PlayUISelectAudio;
+        inputManager.onSelect += PlayChooseAudio;
 
         foreach (TabGroup t in tabGroups)
         {
@@ -136,9 +252,49 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
+    private void PlayUISelectAudio(InputAction.CallbackContext ctx)
+    {
+        audioSource.clip = uiSelectSounds.RandomElement();
+        audioSource.Play();
+    }
+
+    private void PlayChooseAudio(InputAction.CallbackContext ctx)
+    {
+        uiChooseSounds.Play(audioSource);
+    }
+
     public void ReturnToMainMenu()
     {
         SwitchToMenu(defaultMenu);
+    }
+
+    public void StartGameButton(Selectable target)
+    {
+        bool canPlay = (playerInputManagerController.MatchHasAI || playerInputs.Count > 1);
+        if (canPlay)
+        {
+            SwitchToMenu(mapSelectMenu);
+            SelectControl(target);
+            return;
+        }
+        SelectControl(startButton);
+        if (LeanTween.isTweening(aiButtonTween))
+        {
+            LeanTween.cancel(aiButtonTween);
+            aIButton.transform.localPosition = aiButtonOriginalPosition;
+        }
+        aiButtonTween = aIButton.gameObject.LeanMoveLocal(aiButtonOriginalPosition * 1.05f, 0.3f).setEasePunch().id;
+    }
+
+    public void ToggleAI()
+    {
+        aIButton.Toggle();
+        SelectControl(aIButton.Button);
+        playerInputManagerController.MatchHasAI = !playerInputManagerController.MatchHasAI;
+        bool canPlay = (playerInputManagerController.MatchHasAI || playerInputs.Count > 1);
+        var colors = startButton.colors;
+        colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
+        startButton.colors = colors;
     }
 
     public void Quit()

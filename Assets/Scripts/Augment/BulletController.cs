@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.VFX;
 using Random = UnityEngine.Random;
@@ -12,7 +13,10 @@ public class BulletController : ProjectileController
     private int collisionSamplesPerUnit = 3;
 
     private int collisionSamples;
-
+    
+    [SerializeField]
+    private int collisionsBeforeInactive = 1;
+    
     private const int vfxPositionsPerSample = 3;
 
     private const float baseSpeed = 50f;
@@ -89,6 +93,8 @@ public class BulletController : ProjectileController
             projectile.speed = baseSpeed * stats.ProjectileSpeedFactor;
 
             int sampleNum = 0;
+            int totalCollisions = 0;
+            Collider lastCollider = null;
 
             while (sampleNum < collisionSamples && projectile.active)
             {
@@ -103,29 +109,32 @@ public class BulletController : ProjectileController
                     UpdateProjectileMovement?.Invoke(maxDistance / (collisionSamples * vfxPositionsPerSample), ref projectile);
                 }
 
-                RaycastHit[] collisions = ProjectileMotions.GetPathCollisions(projectile, collisionLayers);
-
-                if (collisions.Length > 0)
+                RaycastHit[] collisions = ProjectileMotions.GetPathCollisions(projectile, collisionLayers).Where(p => p.collider != lastCollider).ToArray();
+                sampleNum += 1;
+                for (int i = 0; i < collisions.Length && projectile.active; i++) 
                 {
-                    sampleNum += 1;
-                    var collider = collisions[0].collider;
+                    totalCollisions += 1;
+                    var collider = collisions[i].collider;
                     HitboxController hitbox = collider.GetComponent<HitboxController>();
                     if (hitbox != null)
                         if (hitbox.health.Player == player && projectile.distanceTraveled < player.GunController.OutputTransitionDistance)
                             continue;
 
-                    projectile.position = collisions[0].point;
+                    projectile.position = collisions[i].point;
                     if (hitbox != null)
                         OnHitboxCollision?.Invoke(hitbox, ref projectile);
-                    OnColliderHit?.Invoke(collider, ref projectile);
-                    projectile.active = false;
-                    if (sampleNum < collisionSamples)
-                        TrySetTextureValue(sampleNum * vfxPositionsPerSample + k * vfxPositionsPerSample * collisionSamples, projectile.position);
+
+                    OnColliderHit?.Invoke(collisions[i], ref projectile);
+                    
+                    if(totalCollisions == this.collisionsBeforeInactive)
+                        projectile.active = false;
+
+                        if (sampleNum < collisionSamples)
+                            TrySetTextureValue(sampleNum * vfxPositionsPerSample + k * vfxPositionsPerSample * collisionSamples, projectile.position);
                 }
-                else
-                {
-                    sampleNum += 1;
-                }
+                if(collisions.Length > 0)
+                    lastCollider = collisions[collisions.Length - 1].collider;
+
             }
 
             for (int i = sampleNum * vfxPositionsPerSample + 1; i < collisionSamples * vfxPositionsPerSample; i++)

@@ -8,7 +8,7 @@ public class PlayerInputManagerController : MonoBehaviour
 
     public List<InputManager> playerInputs = new List<InputManager>();
 
-    public PlayerInputManager playerInputManager;
+    public PlayerInputManager PlayerInputManager;
 
     [SerializeField]
     private Color[] playerColors;
@@ -19,6 +19,8 @@ public class PlayerInputManagerController : MonoBehaviour
     public delegate void JoinEvent(InputManager inputManager);
 
     public JoinEvent onPlayerInputJoined;
+
+    public bool MatchHasAI = false;
 
     void Awake()
     {
@@ -38,14 +40,24 @@ public class PlayerInputManagerController : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
-        playerInputManager = PlayerInputManager.instance;
-        playerInputManager.onPlayerJoined += OnPlayerJoined;
+        this.PlayerInputManager = PlayerInputManager.instance;
         DontDestroyOnLoad(gameObject);
+    }
+
+    public void RemoveJoinListener()
+    {
+        this.PlayerInputManager.onPlayerJoined -= OnPlayerJoined;
+    }
+
+    public void AddJoinListener()
+    {
+        this.PlayerInputManager.EnableJoining();
+        this.PlayerInputManager.onPlayerJoined += OnPlayerJoined;
     }
 
     public void RemoveListeners()
     {
-        playerInputManager.onPlayerJoined -= OnPlayerJoined;
+        playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
     }
 
     private void OnPlayerJoined(PlayerInput playerInput)

@@ -43,7 +43,8 @@ public class AudioGroup : ScriptableObject
 
     private void OnDisable()
     {
-        DestroyImmediate(previewSource.gameObject);
+        if (previewSource)
+            DestroyImmediate(previewSource.gameObject);
     }
 
     [ContextMenu("Play Random")]

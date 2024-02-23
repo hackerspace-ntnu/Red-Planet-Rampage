@@ -81,7 +81,9 @@ public class AuctionDriver : MonoBehaviour
         };
 
         playerFactory = GetComponent<PlayerFactory>();
-        playerFactory.InstantiatePlayersBidding(4 - PlayerInputManagerController.Singleton.playerInputs.Count);
+        var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
+            Mathf.Max(4 - PlayerInputManagerController.Singleton.playerInputs.Count, 0) : 0;
+        playerFactory.InstantiatePlayersBidding(aiPlayerCount);
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
 
         AnimateAuctionStart();
@@ -163,7 +165,7 @@ public class AuctionDriver : MonoBehaviour
         }
         */
         Camera.GetComponent<Camera>().enabled = false;
-        PlayerInputManagerController.Singleton.playerInputManager.splitScreen = true;
+        PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = true;
         playerFactory.InstantiatePlayerSelectItems();
         GetComponent<ItemSelectManager>().StartTrackingMenus();
     }

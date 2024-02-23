@@ -7,12 +7,11 @@ public class GiantFanController : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.TryGetComponent<Rigidbody>(out Rigidbody rigidbodyPlayer))
+        if (other.gameObject.TryGetComponent<Rigidbody>(out var rigidbodyPlayer))
         {
-            if (rigidbodyPlayer.isKinematic)
-                StartCoroutine(rigidbodyPlayer.GetComponent<AIManager>().WaitAndToggleAgent());
+            if (rigidbodyPlayer.TryGetComponent<AIManager>(out var aiManager))
+                StartCoroutine(aiManager.WaitAndToggleAgent());
             rigidbodyPlayer.AddForce(Vector3.up * airForce, ForceMode.Acceleration);
         }
-
     }
 }

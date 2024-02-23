@@ -11,7 +11,15 @@ public class PlayerHUDController : MonoBehaviour
     [Header("Health and ammo")]
 
     [SerializeField]
-    private RectTransform healthBar;
+    private SpriteRenderer healthBar;
+    [SerializeField]
+    private TMP_Text healthText;
+    [SerializeField]
+    private Color healthMax;
+    [SerializeField]
+    private Color healthMin;
+    private Vector3 healthTextPosition;
+    private int healthTextTween;
 
     [SerializeField]
     private RectTransform ammoHud;
@@ -105,7 +113,9 @@ public class PlayerHUDController : MonoBehaviour
         ammoBar.material = ammoCapacityMaterial;
         ammoCapacityMaterial.SetFloat("_Arc2", 0);
 
-        healthBarScaleX = healthBar.localScale.x;
+        healthBarScaleX = healthBar.transform.localScale.x;
+        healthBar.color = healthMax;
+        healthTextPosition = healthText.transform.localPosition;
         defaultCrosshairScale = crosshair.localScale;
 
         originalChipY = chipBox.anchoredPosition.y;
@@ -202,18 +212,27 @@ public class PlayerHUDController : MonoBehaviour
         ammoCapacityMaterial.SetFloat("_Arc2", (1 - ammoPercent) * availableDegrees);
     }
 
-    public void UpdateHealthBar(float currentHealth, float maxHealth)
+    private void UpdateHealthBar(float currentHealth, float maxHealth)
     {
+        healthText.text = $"{Mathf.Clamp(Mathf.RoundToInt(currentHealth), 0, 100)}%";
+        if (LeanTween.isTweening(healthTextTween))
+        {
+            LeanTween.cancel(healthTextTween);
+            healthText.transform.localPosition = healthTextPosition;
+        }
+            
+        healthTextTween = healthText.gameObject.LeanMoveLocal(healthTextPosition * 2f, 0.5f).setEasePunch().id;
         float width = (Mathf.Max(currentHealth, 0) / maxHealth) * healthBarScaleX;
         if (width > 0)
             width = Mathf.Max(width, 0.001f);
 
-        LeanTween.value(healthBar.gameObject, SetHealthBar, healthBar.localScale.x, width, tweenDuration);
+        LeanTween.value(healthBar.gameObject, SetHealthBar, healthBar.transform.localScale.x, width, tweenDuration);
+        healthBar.color = Color.Lerp(healthMin, healthMax, (Mathf.Max(currentHealth, 0) / maxHealth));
     }
 
     private void SetHealthBar(float width)
     {
-        healthBar.localScale = new Vector3(width, healthBar.localScale.y, healthBar.localScale.z);
+        healthBar.transform.localScale = new Vector3(width, healthBar.transform.localScale.y, healthBar.transform.localScale.z);
     }
 
     public void TweenScope(float alpha, float seconds)

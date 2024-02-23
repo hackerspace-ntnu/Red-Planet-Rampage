@@ -11,6 +11,9 @@ public class PopupSpammer : MonoBehaviour
     [SerializeField] private float minSpamDelay = .05f;
     [SerializeField] private float maxSpamDelay = .2f;
 
+    [SerializeField]
+    private AudioSource audioSource;
+
     private int spamRemaining = 0;
 
     private Coroutine spamRoutine = null;
@@ -32,6 +35,7 @@ public class PopupSpammer : MonoBehaviour
         while (spamRemaining > 0)
         {
             OpenPopup();
+            audioSource.Play();
             spamRemaining--;
             yield return new WaitForSeconds(Random.Range(minSpamDelay, maxSpamDelay));
         }

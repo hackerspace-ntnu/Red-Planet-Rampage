@@ -43,12 +43,12 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
         projectile.OnColliderHit -= StickToTarget;
     }
 
-    public void StickToTarget(Collider collider, ref ProjectileState state)
+    public void StickToTarget(RaycastHit hit, ref ProjectileState state)
     {
-        if (!(affectedLayers == (affectedLayers | (1 << collider.gameObject.layer))))
+        if (!(affectedLayers == (affectedLayers | (1 << hit.collider.gameObject.layer))))
             return;
-        var stuck = Instantiate(stuckObject, state.position, state.rotation);
-        stuck.transform.ParentUnscaled(collider.transform);
+        var stuck = Instantiate(stuckObject, hit.collider.ClosestPoint(state.position), state.rotation);
+        stuck.transform.ParentUnscaled(hit.collider.transform);
         if (stuck.TryGetComponent<ContinuousDamage>(out var continuousDamage))
         {
             continuousDamage.source = source;

@@ -98,9 +98,11 @@ public class MeshProjectileController : ProjectileController
 
         loadedProjectile.active = true;
         loadedProjectile.speed = baseSpeed;
+
         OnProjectileInit?.Invoke(ref loadedProjectile, stats);
         for (int i = 0; i < maxProjectiles; i++)
         {
+
             if (projectiles[currentStateIndex] == null || !projectiles[currentStateIndex].active)
             {
                 loadedProjectile.initializationTime = Time.fixedTime;
@@ -108,6 +110,7 @@ public class MeshProjectileController : ProjectileController
                 loadedProjectile.direction = projectileRotation * projectileOutput.forward;
                 loadedProjectile.rotation = projectileRotation * projectileOutput.rotation;
                 loadedProjectile.size = size;
+                loadedProjectile.additionalProperties["lastCollider"] = null;
 
                 projectiles[currentStateIndex] = loadedProjectile;
                 // Sets initial position of the projectile
@@ -151,20 +154,21 @@ public class MeshProjectileController : ProjectileController
         state.oldPosition = state.position;
         UpdateProjectileMovement?.Invoke(state.speed * state.speedFactor * Time.fixedDeltaTime, ref state);
         OnProjectileTravel?.Invoke(ref state);
-
+        Collider lastCollider = (Collider)state.additionalProperties["lastCollider"];
 
         if (state.distanceTraveled > state.maxDistance)
         {
             state.active = false;
         }
 
-        var collisions = ProjectileMotions.GetPathCollisions(state, collisionLayers).Select(x => x.collider).ToArray();
+        var collisions = ProjectileMotions.GetPathCollisions(state, collisionLayers).Where(p => p.collider != lastCollider).ToArray();
+
+        state.additionalProperties["lastCollider"] = collisions.Length > 0 ? collisions[0].collider : null;
 
         if (collisions.Length <= 0) return;
 
 
-
-        if (collisions[0].TryGetComponent<HitboxController>(out HitboxController hitbox))
+        if (collisions[0].collider.TryGetComponent<HitboxController>(out HitboxController hitbox))
         {
             var hasHitYourselfTooEarly = hitbox.health.Player == player && state.distanceTraveled < player.GunController.OutputTransitionDistance;
             if (hasHitYourselfTooEarly)
@@ -179,8 +183,8 @@ public class MeshProjectileController : ProjectileController
         if (shouldRicochet && state.distanceTraveled < maxDistanceBeforeStuck)
         {
             OnRicochet?.Invoke(collisions[0], ref state);
-            Physics.Raycast(state.oldPosition, state.direction, out RaycastHit hitInfo);
-            state.direction = Vector3.Reflect(state.direction, hitInfo.normal);
+            state.position = state.oldPosition;
+            state.direction = Vector3.Reflect(state.direction, collisions[0].normal);
         }
         else
         {

@@ -90,6 +90,14 @@ public class MatchController : MonoBehaviour
 
     public int RoundCount { get => rounds.Count(); }
 
+    private bool isAuction = false;
+    public bool IsAuction => isAuction;
+
+    [SerializeField]
+    private GameObject loadingScreen;
+
+    private int loadingDuration = 6;
+
     private void Awake()
     {
         #region Singleton boilerplate
@@ -137,7 +145,9 @@ public class MatchController : MonoBehaviour
         if (collectableChips.Count == 0)
             collectableChips = FindObjectsOfType<CollectableChip>().ToList();
         // Setup of playerInputs
-        playerFactory.InstantiatePlayersFPS(4 - PlayerInputManagerController.Singleton.playerInputs.Count)
+        var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
+            Mathf.Max(4 - PlayerInputManagerController.Singleton.playerInputs.Count, 0) : 0;
+        playerFactory.InstantiatePlayersFPS(aiPlayerCount)
             .ForEach(player => players.Add(new Player(player.identity, player, startAmount)));
 
         var aiPLayers = players.Where(player => player.playerManager is AIManager)
@@ -151,6 +161,7 @@ public class MatchController : MonoBehaviour
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
         onRoundStart?.Invoke();
+        isAuction = false;
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
         roundTimer.StartTimer(roundLength);
         roundTimer.OnTimerUpdate += AdjustMusic;
@@ -164,14 +175,20 @@ public class MatchController : MonoBehaviour
             return;
         collectableChips = new List<CollectableChip>();
 
+        StartCoroutine(ShowLoadingScreenBeforeBidding());
+        // TODO: Add Destroy on match win   
+    }   
+    private IEnumerator ShowLoadingScreenBeforeBidding(){
+        loadingScreen.SetActive(true);
+        yield return new WaitForSeconds(loadingDuration);
+
         PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
         onBiddingStart?.Invoke();
-        // TODO: Add Destroy on match win
         SceneManager.LoadSceneAsync("Bidding");
-        PlayerInputManagerController.Singleton.playerInputManager.splitScreen = false;
+        PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = false;
+        isAuction = true;
     }
-
     public void EndActiveRound()
     {
         onOutcomeDecided?.Invoke();
@@ -194,6 +211,7 @@ public class MatchController : MonoBehaviour
     public IEnumerator WaitAndStartNextBidding()
     {
         yield return new WaitForSeconds(roundEndDelay);
+
         StartNextBidding();
     }
 

@@ -43,8 +43,8 @@ public class PlayerFactory : MonoBehaviour
         playerInputManagerController = PlayerInputManagerController.Singleton;
 
         // Enable splitscreen
-        playerInputManagerController.playerInputManager.DisableJoining();
-        playerInputManagerController.playerInputManager.splitScreen = true;
+        playerInputManagerController.PlayerInputManager.DisableJoining();
+        playerInputManagerController.PlayerInputManager.splitScreen = true;
 
         existingAiIdentities = FindObjectsOfType<PlayerIdentity>()
             .Where(identity => identity.IsAI).ToList();
