@@ -3,6 +3,7 @@ using UnityEngine;
 using TMPro;
 using TransformExtensions;
 using System.Collections;
+using System.Linq;
 using OperatorExtensions;
 
 public class ItemSelectSlot : MonoBehaviour
@@ -72,10 +73,15 @@ public class ItemSelectSlot : MonoBehaviour
                 continue;
             }
 
+            var scale = itemModelScale;
+            // Items are tiiiny when we are at 3-4 splitscreens, so scale them up.
+            if (MatchController.Singleton.HumanPlayers.Count() > 2)
+                scale *= 3;
+
             // Item is an augment
             var rotation = Quaternion.Euler(new Vector3(0, 90, -20));
             var instance = Instantiate(items[i].augment, Vector3.zero, rotation, itemHolder);
-            instance.transform.ScaleAndParent(itemModelScale, itemHolder);
+            instance.transform.ScaleAndParent(scale, itemHolder);
             Transform itemCenter;
             if (items[i].augmentType == AugmentType.Body)
             {
@@ -86,10 +92,10 @@ public class ItemSelectSlot : MonoBehaviour
                 itemCenter = instance.GetComponent<Augment>().midpoint;
             }
             var offset = instance.transform.position - itemCenter.transform.position;
-            instance.transform.localPosition = itemSlots[i].transform.position + offset / itemModelScale;
+            instance.transform.localPosition = itemSlots[i].transform.position + offset / scale;
 
             Augment.DisableInstance(instance, type);
-            augmentModels.Add((instance, itemSlots[i].transform.position, offset / itemModelScale));
+            augmentModels.Add((instance, itemSlots[i].transform.position, offset / scale));
         }
 
         selectedIndex = items.IndexOf(initialItem);
