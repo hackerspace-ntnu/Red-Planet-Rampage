@@ -107,7 +107,7 @@ public class PlayerManager : MonoBehaviour
 
     [Header("Hit sounds")]
 
-    private AudioSource audioSource;
+    protected AudioSource audioSource;
 
     [SerializeField]
     private AudioGroup hitSounds;
@@ -399,7 +399,7 @@ public class PlayerManager : MonoBehaviour
         return "Player " + inputManager.playerInput.playerIndex;
     }
 
-    private void PlayOnHit()
+    protected void PlayOnHit()
     {
         if (Random.Range(0, 10000) > 5)
         {

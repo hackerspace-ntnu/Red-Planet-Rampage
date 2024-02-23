@@ -9,6 +9,7 @@ public struct Precision
     public string text;
     public Color color;
     public float awardFactor;
+    public AudioClip audio;
 }
 public enum ArrowDirection
 {
@@ -58,6 +59,7 @@ public class DDRBody : GunBody
     private float secondsPerUnitHeight;
     private float musicPace;
 
+    private AudioSource audioSource;
 
     public override void Start()
     {
@@ -102,6 +104,8 @@ public class DDRBody : GunBody
             playerHandLeft.gameObject.SetActive(true);
             playerHandRight.SetPlayer(gunController.Player);
             playerHandRight.gameObject.SetActive(true);
+
+            audioSource = GetComponent<AudioSource>();
         }
 
     }
@@ -136,6 +140,12 @@ public class DDRBody : GunBody
 
         gunController.Reload(reloadEfficiencyPercentage * precision.Value.awardFactor);
         animator.OnReload(gunController.stats);
+
+        if (precision.Value.audio)
+        {
+            audioSource.clip = precision.Value.audio;
+            audioSource.Play();
+        }
     }
 
     private void Fire(InputAction.CallbackContext ctx)

@@ -21,6 +21,10 @@ public class Auctioneer : MonoBehaviour
     private AudioClip[] missingChips;
     [SerializeField]
     private AudioClip[] sold;
+    [SerializeField]
+    private AudioClip hammer;
+    [SerializeField]
+    private AudioClip kaching;
 
     private void Start()
     {
@@ -45,6 +49,8 @@ public class Auctioneer : MonoBehaviour
             default:
                 throw new ArgumentException("No auctioneer animation for given platform index");
         }
+        audioSourceSoundEffects.clip = hammer;
+        audioSourceSoundEffects.PlayDelayed(0.4f);
         audioSource.clip = bid.RandomElement();
         audioSource.Play();
         StartCoroutine(TryQueueVoice(audioSource.clip.length, haste));
@@ -67,6 +73,7 @@ public class Auctioneer : MonoBehaviour
         audioSource.Stop();
         audioSource.clip = sold.RandomElement();
         audioSource.Play();
+        audioSourceSoundEffects.clip = kaching;
         audioSourceSoundEffects.PlayDelayed(0.4f);
     }
 

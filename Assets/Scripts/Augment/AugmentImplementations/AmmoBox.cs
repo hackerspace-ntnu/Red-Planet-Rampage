@@ -1,3 +1,4 @@
+using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,11 @@ public class AmmoBox : MonoBehaviour
     [SerializeField] private GameObject boxModel;
     [SerializeField] private VisualEffect effect;
     [SerializeField] private bool shouldAlwaysSpawn = false;
+
+    [SerializeField]
+    private AudioSource audioSource;
+    [SerializeField]
+    private AudioClip[] pickupSounds;
 
     private Collider collider;
     private MeshRenderer renderer;
@@ -81,6 +87,8 @@ public class AmmoBox : MonoBehaviour
             return;
 
         collector.Reload();
+        audioSource.clip = pickupSounds.RandomElement();
+        audioSource.Play();
 
         collider.enabled = false;
         renderer.enabled = false;
