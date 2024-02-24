@@ -215,8 +215,7 @@ public class AIManager : PlayerManager
             if (DestinationTarget == null || !DestinationTarget || (!DestinationTarget.gameObject.GetComponent<PlayerManager>() && !DestinationTarget.gameObject.activeInHierarchy))
             {
                 var target = MatchController.Singleton.GetRandomActiveChip();
-                if (target != null && MatchController.Singleton.HumanPlayers.Any(player => player.playerManager.IsAlive))
-                    DestinationTarget = target;
+                DestinationTarget = target;
             }
         }
         else
@@ -233,7 +232,15 @@ public class AIManager : PlayerManager
             ShootingTarget = player.AiAimSpot;
         }
         agent.stoppingDistance = ShootingTarget ? shootingStoppingDistance : itemStoppingDistance;
-        agent.SetDestination(DestinationTarget.position);
+        try
+        {
+            agent.SetDestination(DestinationTarget.position);
+        }
+        catch
+        {
+            aiMovement.enabled = true;
+        }
+        
     }
  
 
