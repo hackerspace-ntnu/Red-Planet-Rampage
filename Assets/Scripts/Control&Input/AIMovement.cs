@@ -11,6 +11,13 @@ public class AIMovement : PlayerMovement
     private NavMeshAgent agent;
     private float timeSinceJump = 0f;
 
+    protected override void Start()
+    {
+        body = GetComponent<Rigidbody>();
+        hitbox = GetComponent<BoxCollider>();
+        strafeForce = strafeForceGrounded;
+    }
+
     private void Update()
     {
         UpdateAnimatorParameters();

@@ -138,7 +138,7 @@ public class PlayerMovement : MonoBehaviour
     protected LayerMask steppingIgnoreMask;
 
 
-    void Start()
+    protected virtual void Start()
     {
         body = GetComponent<Rigidbody>();
         hitbox = GetComponent<BoxCollider>();
