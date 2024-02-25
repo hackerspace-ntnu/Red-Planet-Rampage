@@ -31,6 +31,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     public float LookSpeedZoom = 0.75f;
 
+    [SerializeField]
+    [Tooltip("Reduction in look speed for mice when zoomed")]
+    private float mouseZoomSpeedFactor = 0.1f;
+
     [Header("Drag")]
     [SerializeField]
     protected float groundDrag = 6f;
@@ -339,8 +343,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateRotation()
     {
-        var lookSpeedFactor = inputManager.ZoomActive ? LookSpeedZoom : lookSpeed;
-        var lookInput = inputManager.IsMouseAndKeyboard ? inputManager.lookInput : inputManager.lookInput * Time.deltaTime;
+        var lookSpeedFactor = inputManager.ZoomActive
+            ? inputManager.IsMouseAndKeyboard ? LookSpeedZoom * mouseZoomSpeedFactor : LookSpeedZoom
+            : lookSpeed;
+        var lookInput = inputManager.IsMouseAndKeyboard
+            ? inputManager.lookInput
+            : inputManager.lookInput * Time.deltaTime;
         aimAngle += lookInput * lookSpeedFactor;
         // Constrain aiming angle vertically and wrap horizontally.
         // + and - Mathf.Deg2Rad is offsetting with 1 degree in radians,
