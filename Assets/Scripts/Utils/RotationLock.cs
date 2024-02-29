@@ -4,14 +4,16 @@ using UnityEngine;
 
 public class RotationLock : MonoBehaviour
 {
-    private Quaternion initialRotation;
+    [SerializeField]
+    private Vector3 initialRotation;
+    private Quaternion rotation;
     void Start()
     {
-        initialRotation = transform.rotation;
+        rotation = Quaternion.Euler(initialRotation);
     }
 
     void Update()
     {
-        transform.rotation = initialRotation;
+        transform.rotation = rotation;
     }
 }

@@ -43,7 +43,9 @@ public class GunFactory : MonoBehaviour
         SetGunLayer(displayGun, cullingLayerDisplay);
 
         // Turn off shadow casting for first person gun
-        gun.GetComponentsInChildren<MeshRenderer>().ToList()
+        gun.GetComponentsInChildren<MeshRenderer>(includeInactive: true).ToList()
+            .ForEach(mesh => mesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off);
+        gun.GetComponentsInChildren<SkinnedMeshRenderer>(includeInactive: true).ToList()
             .ForEach(mesh => mesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off);
 
         firstPersonGunController.RightHandTarget = displayGun.GunController.RightHandTarget;
