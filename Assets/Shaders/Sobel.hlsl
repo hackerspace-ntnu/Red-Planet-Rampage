@@ -85,5 +85,17 @@ void ViewDirectionFromScreenUV_float(float2 In, out float3 Out) {
     // Convert the uvs into view space by "undoing" projection
     Out = -normalize(float3((In * 2 - 1) / p11_22, -1));
 }
+static float2 CornerDirs[4] =
+{
+    float2(-1, 1), float2(1, 1), float2(-1, -1), float2(1, -1),
+};
+
+void GetCornerUVs_float(float2 UV, float Thickness, out float2 UpLeft, out float2 UpRight, out float2 DownLeft, out float2 DownRight)
+{
+    UpLeft = UV + Thickness * CornerDirs[0];
+    UpRight = UV + Thickness * CornerDirs[1];
+    DownLeft = UV + Thickness * CornerDirs[2];
+    DownRight = UV + Thickness * CornerDirs[3];
+}
 
 #endif
