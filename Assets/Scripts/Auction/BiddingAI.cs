@@ -14,7 +14,11 @@ public class BiddingAI : BiddingPlayer
     private Dictionary<BiddingPlatform, int> priorities = new Dictionary<BiddingPlatform, int>();
     [SerializeField]
     private BiddingPlatform currentDestination;
+    [SerializeField]
+    private Vector3 platformDestinationOffset = Vector3.back * 2;
+
     private bool shouldEvaluate = true;
+
     void Start()
     {
         GetComponent<PlayerIK>().RightHandIKTarget = signTarget;
@@ -55,7 +59,7 @@ public class BiddingAI : BiddingPlayer
             .Select(x => x.Key).First();
 
         if (currentDestination)
-            agent.SetDestination(currentDestination.transform.position);
+            agent.SetDestination(currentDestination.transform.position + platformDestinationOffset);
 
         if (currentDestination == playerManager.SelectedBiddingPlatform)
             OnBiddingPlatformChange(currentDestination);
@@ -80,7 +84,8 @@ public class BiddingAI : BiddingPlayer
                 break;
         }
         priorities.Add(platform, priority);
-        agent.SetDestination(platform.transform.position);
+        // Move towards a position that does not obscure the cost text (!)
+        agent.SetDestination(platform.transform.position + platformDestinationOffset);
 
         if (!shouldEvaluate)
             return;
