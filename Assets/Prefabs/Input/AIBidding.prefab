@@ -60,6 +60,7 @@ MonoBehaviour:
     m_Bits: 65335
   lookSpeed: 3
   LookSpeedZoom: 0.75
+  mouseZoomSpeedFactor: 0.1
   groundDrag: 2
   airDrag: 1
   maxVelocityBeforeExtraDamping: 20
@@ -81,6 +82,13 @@ MonoBehaviour:
   state: 1
   animator: {fileID: 289053663840324231}
   ZoomFov: 30
+  bottomCaster: {fileID: 0}
+  topCaster: {fileID: 0}
+  stepHeight: 0.5
+  playerRoot: {fileID: 0}
+  steppingIgnoreMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!23 &71015680234268065
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -196,6 +204,7 @@ MonoBehaviour:
   inputManager: {fileID: 0}
   identity: {fileID: 0}
   hudController: {fileID: 0}
+  playerShadow: {fileID: 0}
   aiTarget: {fileID: 8325754837701600379, guid: c133d38b202cbc94dbc1e02d7ee2e7ba, type: 3}
   AiAimSpot: {fileID: 0}
   meshBase: {fileID: 631494708426531851}
@@ -220,6 +229,7 @@ MonoBehaviour:
   itemStoppingDistance: 0.5
   shootingStoppingDistance: 5
   updateRotation: 0
+  disabledItems: []
 --- !u!114 &6717855691676836013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1085,6 +1095,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hud: {fileID: 0}
   healthBar: {fileID: 8281853296856510176}
+  healthText: {fileID: 0}
+  healthMax: {r: 0, g: 0, b: 0, a: 0}
+  healthMin: {r: 0, g: 0, b: 0, a: 0}
   ammoHud: {fileID: 6629533919243205533}
   ammoBar: {fileID: 4001729099187883475}
   crosshair: {fileID: 0}
@@ -2201,6 +2214,7 @@ MonoBehaviour:
   agent: {fileID: 181978900810785054}
   animator: {fileID: 289053663840324231}
   currentDestination: {fileID: 0}
+  platformDestinationOffset: {x: 0, y: 0, z: -2}
 --- !u!136 &2815208169435112715 stripped
 CapsuleCollider:
   m_CorrespondingSourceObject: {fileID: 770404444716995834, guid: 27ac4408b426ae745a1792dde18c79ba, type: 3}
