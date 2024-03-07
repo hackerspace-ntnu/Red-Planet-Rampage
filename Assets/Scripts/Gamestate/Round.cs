@@ -119,7 +119,7 @@ public class Round
     {
         if (livingPlayers.Count < 2)
         {
-            winner = lastKiller?.identity;
+            winner = livingPlayers.FirstOrDefault()?.identity;
             MatchController.Singleton.EndActiveRound();
         }
     }
