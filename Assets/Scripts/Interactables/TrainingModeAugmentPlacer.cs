@@ -1,8 +1,6 @@
 using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem.Utilities;
 
 public class TrainingModeAugmentPlacer : MonoBehaviour
 {
@@ -16,6 +14,13 @@ public class TrainingModeAugmentPlacer : MonoBehaviour
     private TrainingModeAugment pedestal;
 
     private void Start()
+    {
+#if UNITY_EDITOR 
+        SpawnAugments();
+#endif
+    }
+
+    private void SpawnAugments()
     {
         var bodies = new List<Item>();
         bodies.Add(StaticInfo.Singleton.StartingBody);

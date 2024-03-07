@@ -1,6 +1,8 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerMovement))]
@@ -18,6 +20,9 @@ public class PlayerManager : MonoBehaviour
 
     [SerializeField]
     private LayerMask interactMask;
+
+    private bool isAlive = true;
+    public bool IsAlive => isAlive;
 
     [Header("Shooting")]
 
@@ -60,6 +65,9 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private PlayerHUDController hudController;
     public PlayerHUDController HUDController => hudController;
+
+    [SerializeField]
+    private DecalProjector playerShadow;
 
     [SerializeField]
     protected GameObject aiTarget;
@@ -152,10 +160,12 @@ public class PlayerManager : MonoBehaviour
             killer = lastPlayerThatHitMe;
         }
         onDeath?.Invoke(killer, this);
+        isAlive = false;
         aimAssistCollider.SetActive(false);
         TurnIntoRagdoll(info);
         aiTargetCollider.gameObject.SetActive(false);
         hudController.DisplayDeathScreen(killer.identity);
+        playerShadow.gameObject.SetActive(false);
     }
 
     protected void TurnIntoRagdoll(DamageInfo info)

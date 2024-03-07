@@ -21,6 +21,8 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
     [Range(0f, 1f)][SerializeField] private float stickToNormalFraction = 0;
 
     [Range(0f, 180f)][SerializeField] private float angleVariation = 180f;
+    
+    private const int allGunsAndPlayersMask = (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
     private void Awake()
     {
@@ -59,6 +61,8 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
         if (target.collider.TryGetComponent<SodaCan>(out var _))
             return;
         // Also avoid placing decals on players, as that leads to the heebie-jeebies
+        if ((target.collider.gameObject.layer & allGunsAndPlayersMask) > 0)
+            return;
         if (target.collider.TryGetComponent<HitboxController>(out var hitbox))
             if (hitbox.health && hitbox.health.TryGetComponent<PlayerManager>(out var _))
                 return;

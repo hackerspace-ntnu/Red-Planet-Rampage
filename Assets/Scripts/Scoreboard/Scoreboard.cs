@@ -50,7 +50,7 @@ public class Scoreboard : MonoBehaviour
     public int CurrentStep { get => currentStep; }
 
     private List<(string, string)> crimeData = new();
-    private List<(TMP_Text, TMP_Text)> crimeTextComponents = new();
+    private List<(TMP_Text label, TMP_Text amount, Renderer chip)> crimeTextComponents = new();
 
     void Start()
     {
@@ -72,19 +72,22 @@ public class Scoreboard : MonoBehaviour
 
     public void AddPosterCrime(string crimeLabel, int Value)
     {
-        GameObject crime = Instantiate(crimeTextPrefab, crimeContent);
-        TMP_Text[] texts = crime.GetComponentsInChildren<TMP_Text>();
+        var crime = Instantiate(crimeTextPrefab, crimeContent);
+        var texts = crime.GetComponentsInChildren<TMP_Text>();
+        var chip = crime.GetComponentInChildren<Renderer>();
+        chip.enabled = false;
 
-        crimeTextComponents.Add((texts[0], texts[1]));
+        crimeTextComponents.Add((texts[0], texts[1], chip));
         crimeData.Add((crimeLabel, Value.ToString()));
     }
 
     public void AddBlankPoster()
     {
-        GameObject crime = Instantiate(crimeTextPrefab, crimeContent);
-        TMP_Text[] texts = crime.GetComponentsInChildren<TMP_Text>();
+        var crime = Instantiate(crimeTextPrefab, crimeContent);
+        var texts = crime.GetComponentsInChildren<TMP_Text>();
+        crime.GetComponentInChildren<Renderer>().enabled = false;
 
-        crimeTextComponents.Add((texts[0], texts[1]));
+        crimeTextComponents.Add((texts[0], texts[1], null));
         crimeData.Add(("", ""));
     }
 
@@ -98,8 +101,10 @@ public class Scoreboard : MonoBehaviour
     {
         if (index <= crimeData.Count - 1)
         {
-            crimeTextComponents[index].Item1.text = crimeData[index].Item1;
-            crimeTextComponents[index].Item2.text = crimeData[index].Item2;
+            var crime = crimeTextComponents[index];
+            crime.label.text = crimeData[index].Item1;
+            crime.amount.text = crimeData[index].Item2;
+            if (crime.chip) crime.chip.enabled = true;
         }
     }
     

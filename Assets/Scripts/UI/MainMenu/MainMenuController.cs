@@ -23,9 +23,13 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private VideoPlayer introVideo;
     [SerializeField]
+    private float introVideoTransitionTime = 4;
+    [SerializeField]
     private GameObject introVideoFirstFrame;
     [SerializeField]
     private TMP_Text skipIntroText;
+    [SerializeField]
+    private MainMenuSunMovement sun;
 
     [SerializeField]
     private List<TabGroup> tabGroups;
@@ -85,7 +89,6 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.AddJoinListener();
         playerInputManagerController.PlayerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
-        playerInputManagerController.onPlayerInputJoined += ShowSkipText;
         if (playerInputManagerController.playerInputs.Count > 0)
         {
             // Already played, just show the menu.
@@ -94,12 +97,15 @@ public class MainMenuController : MonoBehaviour
             introVideo.Stop();
             introVideo.gameObject.SetActive(false);
             introVideoFirstFrame.SetActive(false);
+            // Reset loading screen
+            LoadingScreen.ResetCounter();
         }
         else
         {
             // First time in menu, play intro video.
             introVideo.started += StopFirstFrame;
             DontDestroyOnLoad(EventSystem.current);
+            playerInputManagerController.onPlayerInputJoined += ShowSkipText;
             defaultMenu.SetActive(false);
             introRoutine = StartCoroutine(WaitForIntroVideoToEnd());
         }
@@ -113,7 +119,12 @@ public class MainMenuController : MonoBehaviour
 
     private IEnumerator WaitForIntroVideoToEnd()
     {
-        yield return new WaitForSecondsRealtime((float)introVideo.length);
+        while (!introVideo.isPlaying)
+        {
+            yield return null;
+        }
+        yield return new WaitForSecondsRealtime((float)introVideo.length - introVideoTransitionTime);
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Menu, FadeMode.FadeIn);
         while (introVideo.isPlaying)
         {
             yield return null;
@@ -143,15 +154,18 @@ public class MainMenuController : MonoBehaviour
         introVideo.Stop();
         StopCoroutine(introRoutine);
         EndIntro();
+        if (!MusicTrackManager.Singleton.IsPlaying)
+            MusicTrackManager.Singleton.SwitchTo(MusicType.Menu, FadeMode.None);
     }
 
     private void EndIntro()
     {
+        sun.Restart();
+        playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
         skipIntroText.gameObject.SetActive(false);
         introVideo.gameObject.SetActive(false);
         defaultMenu.SetActive(true);
         SelectControl(defaultButton);
-        MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
     }
 
     private void OnDestroy()

@@ -107,6 +107,8 @@ public class InputManager : MonoBehaviour
     {
         RemoveAllListeners();
         RemoveExtraListeners();
+        moveInput = Vector2.zero;
+        lookInput = Vector2.zero;
     }
 
     /// <summary>
@@ -231,16 +233,16 @@ public class InputManager : MonoBehaviour
     {
         if (isMouseAndKeyboard)
         {
-            if (ctx.performed) { onZoomPerformed.Invoke(ctx); return; }
-            onZoomCanceled.Invoke(ctx);
+            if (ctx.performed) { onZoomPerformed?.Invoke(ctx); return; }
+            onZoomCanceled?.Invoke(ctx);
             return;
         }
 
         if (ctx.performed)
         {
             ZoomActive = !ZoomActive;
-            if (!ZoomActive) { onZoomCanceled.Invoke(ctx); return; }
-            onZoomPerformed.Invoke(ctx);
+            if (!ZoomActive) { onZoomCanceled?.Invoke(ctx); return; }
+            onZoomPerformed?.Invoke(ctx);
         }
     }
 
