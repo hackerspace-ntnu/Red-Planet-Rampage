@@ -29,6 +29,9 @@
         },
         {
             "m_Id": "ad925c4beb8b4eb9af578c6fb4843231"
+        },
+        {
+            "m_Id": "c7949af5633f409ba67b40f8e71ef7ee"
         }
     ],
     "m_Keywords": [
@@ -102,6 +105,9 @@
         },
         {
             "m_Id": "8c2d941072454471be77c21b35aaaac6"
+        },
+        {
+            "m_Id": "37494260d2594f3b9c1ee1a22d666ebe"
         }
     ],
     "m_GroupDatas": [],
@@ -119,6 +125,20 @@
                     "m_Id": "3788a6337d844cf2afdb4f02176d13b1"
                 },
                 "m_SlotId": 1689957513
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "37494260d2594f3b9c1ee1a22d666ebe"
+                },
+                "m_SlotId": 0
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "3788a6337d844cf2afdb4f02176d13b1"
+                },
+                "m_SlotId": -397886200
             }
         },
         {
@@ -486,6 +506,42 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.PropertyNode",
+    "m_ObjectId": "37494260d2594f3b9c1ee1a22d666ebe",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "Property",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": 11.19999885559082,
+            "y": -141.60000610351563,
+            "width": 163.1999969482422,
+            "height": 33.59999084472656
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "81f6af38a2114bb7ad548770a7013a6f"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_Property": {
+        "m_Id": "c7949af5633f409ba67b40f8e71ef7ee"
+    }
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector2MaterialSlot",
     "m_ObjectId": "37679b03946e416aacbbde2ba429c7cf",
     "m_Id": -211477938,
@@ -537,6 +593,9 @@
             "m_Id": "f9d792bab2ee4c068e113f26599ffe95"
         },
         {
+            "m_Id": "f83e1d2b54ef4677a7bbf76f3bb2284b"
+        },
+        {
             "m_Id": "3945d7ae4bd04df5a65e5726e8000f7c"
         },
         {
@@ -573,7 +632,9 @@
         "05417ffd-3333-418d-8112-367ec1544c17",
         "dfd4614c-8676-4727-98b1-33cbc41c2584",
         "f4c3eb80-2c7c-4e08-a14a-1f038aaec35f",
-        "81edd143-4e15-4e44-a0db-f3a20f31d05d"
+        "81edd143-4e15-4e44-a0db-f3a20f31d05d",
+        "561acda8-badb-43c9-b637-89fc33f121bc",
+        "b94d9b26-6a00-4d2a-bf4c-759391005a8f"
     ],
     "m_PropertyIds": [
         1453157262,
@@ -584,7 +645,9 @@
         766904974,
         -672839066,
         -434691113,
-        814380537
+        814380537,
+        1434169846,
+        -397886200
     ],
     "m_Dropdowns": [],
     "m_DropdownSelectedEntries": []
@@ -980,6 +1043,20 @@
     },
     "m_Labels": [],
     "m_Space": 0
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.BooleanMaterialSlot",
+    "m_ObjectId": "81f6af38a2114bb7ad548770a7013a6f",
+    "m_Id": 0,
+    "m_DisplayName": "Shadow Texture",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 3,
+    "m_Value": false,
+    "m_DefaultValue": false
 }
 
 {
@@ -1421,6 +1498,29 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.BooleanShaderProperty",
+    "m_ObjectId": "c7949af5633f409ba67b40f8e71ef7ee",
+    "m_Guid": {
+        "m_GuidSerialized": "64ffd46f-9b16-4bdf-9155-a15d708494be"
+    },
+    "m_Name": "Shadow Texture",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "Shadow Texture",
+    "m_DefaultReferenceName": "_Shadow_Texture",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": true
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.BooleanMaterialSlot",
     "m_ObjectId": "cd51a471b0ae40fe9f430258c281a8d7",
     "m_Id": 0,
@@ -1620,6 +1720,9 @@
         },
         {
             "m_Id": "dcec1feb0c634a45b4089aeefb8925a9"
+        },
+        {
+            "m_Id": "c7949af5633f409ba67b40f8e71ef7ee"
         }
     ]
 }
@@ -1658,6 +1761,20 @@
     "m_Property": {
         "m_Id": "46e5bfa302ae413c92640d4fc2a48881"
     }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.BooleanMaterialSlot",
+    "m_ObjectId": "f83e1d2b54ef4677a7bbf76f3bb2284b",
+    "m_Id": -397886200,
+    "m_DisplayName": "Shadow Texture",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "_Shadow_Texture",
+    "m_StageCapability": 2,
+    "m_Value": true,
+    "m_DefaultValue": false
 }
 
 {
