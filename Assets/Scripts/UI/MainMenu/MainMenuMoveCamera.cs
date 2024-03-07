@@ -18,7 +18,7 @@ public class MainMenuMoveCamera : MonoBehaviour
     public void MoveToOptions()
     {
         LeanTween.sequence()
-            .append(LeanTween.rotateX(mainMenuCamera.gameObject, -90, cameraSpeed).setEaseInOutQuart());
+            .append(LeanTween.rotateY(mainMenuCamera.gameObject, 10, cameraSpeed).setEaseInOutQuart());
     }
 
     public void MoveToDefault()
