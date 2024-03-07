@@ -62,6 +62,11 @@ public class LoadingScreen : MonoBehaviour
         }
     }
 
+    public static void ResetCounter()
+    {
+        loadingCounter = 0;
+    }
+
     private void ShowContent()
     {
         tipsText.text = "";

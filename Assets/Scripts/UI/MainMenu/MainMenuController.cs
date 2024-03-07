@@ -96,6 +96,8 @@ public class MainMenuController : MonoBehaviour
             introVideo.Stop();
             introVideo.gameObject.SetActive(false);
             introVideoFirstFrame.SetActive(false);
+            // Reset loading screen
+            LoadingScreen.ResetCounter();
         }
         else
         {
