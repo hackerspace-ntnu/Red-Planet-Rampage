@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using UnityEngine.EventSystems;
 
 /// <summary>
@@ -10,12 +9,14 @@ using UnityEngine.EventSystems;
 public class DropdownController : MonoBehaviour, ISelectHandler
 {
     private ScrollRect scrollRect;
+    //private TMPro.TMP_ScrollbarEventHandler eventHandler;
     private float scrollPosition;
 
     void Start()
     {
         scrollRect = GetComponentInParent<ScrollRect>(true);
-
+        
+        
         int childCount = scrollRect.content.childCount - 1;
         int childIndex = transform.GetSiblingIndex();
 
@@ -27,7 +28,10 @@ public class DropdownController : MonoBehaviour, ISelectHandler
 
     public void OnSelect(BaseEventData eventData)
     {
+        //GetComponentInParent<MainMenuController>().SelectControl(GetComponentInChildren<Selectable>());
+
         if(scrollRect)
             scrollRect.verticalScrollbar.value = scrollPosition;
+    
     }
 }
