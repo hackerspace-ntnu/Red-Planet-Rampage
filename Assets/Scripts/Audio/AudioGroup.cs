@@ -15,6 +15,9 @@ public class AudioGroup : ScriptableObject
     [SerializeField]
     private IntRange semitoneRange;
 
+    [SerializeField]
+    private bool continuousPitchBend;
+
 #if UNITY_EDITOR
     [MinMax(0, 1), ContextMenuItem("Preview/Low Volume", "PreviewLowVolume"), ContextMenuItem("Preview/High Volume", "PreviewHighVolume")]
 #endif
@@ -27,7 +30,8 @@ public class AudioGroup : ScriptableObject
     }
     public void Play(AudioSource source)
     {
-        source.pitch = Mathf.Pow(SEMITONE_PITCH_CONVERSION_UNIT, Random.Range(semitoneRange.Min, semitoneRange.Max));
+        float pitch = continuousPitchBend ? Random.Range((float)semitoneRange.Min, (float)semitoneRange.Max) : Random.Range(semitoneRange.Min, semitoneRange.Max);
+        source.pitch = Mathf.Pow(SEMITONE_PITCH_CONVERSION_UNIT, pitch);
         source.volume = Random.Range(volumeRange.Min, volumeRange.Max);
         source.PlayOneShot(sounds.RandomElement());
     }
