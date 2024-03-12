@@ -38,6 +38,13 @@ public class AudioGroup : ScriptableObject
         source.PlayOneShot(sounds.RandomElement());
     }
 
+    public void PlayDelayed(AudioSource source, float delay)
+    {
+        Modulate(source);
+        source.clip = sounds.RandomElement();
+        source.PlayDelayed(delay);
+    }
+
     #region PREVIEW_IN_EDITOR_FUNCTIONALITY
 #if UNITY_EDITOR
     private AudioSource previewSource;
