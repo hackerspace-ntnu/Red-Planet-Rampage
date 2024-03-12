@@ -294,7 +294,7 @@ public class PlayerManager : MonoBehaviour
     private void UpdateHudFire(GunStats stats)
     {
         // stats variables must be dereferenced
-        float ammo = stats.Ammo;
+        float ammo = stats.Ammo < 1 ? 0 : stats.Ammo;
         float magazine = stats.MagazineSize;
         hudController.UpdateOnFire(ammo / magazine);
     }
