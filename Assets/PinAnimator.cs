@@ -15,9 +15,9 @@ public class PinAnimator : AugmentAnimator
     private AnimationCurve easeCurve;
 
     [SerializeField]
-    private AudioSource audioSource;
+    private AudioGroup gunCocking;
     [SerializeField]
-    private AudioClip[] gunCocking;
+    private AudioSource audioSource;
 
     [SerializeField]
     private bool playAudio;
@@ -41,9 +41,8 @@ public class PinAnimator : AugmentAnimator
         OnAnimationEnd?.Invoke();
     }
 
-    public void PlayCockingSound()
+    private void PlayCockingSound()
     {
-        audioSource.clip = gunCocking.RandomElement();
-        audioSource.PlayDelayed(delay);
+        gunCocking.PlayDelayed(audioSource, delay);
     }
 }
