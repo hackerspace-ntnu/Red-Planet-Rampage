@@ -1,4 +1,3 @@
-using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,17 +12,17 @@ public class AmmoBox : MonoBehaviour
     [SerializeField] private bool shouldAlwaysSpawn = false;
 
     [SerializeField]
+    private AudioGroup soundEffect;
     private AudioSource audioSource;
-    [SerializeField]
-    private AudioClip[] pickupSounds;
 
     private Collider collider;
     private MeshRenderer renderer;
 
-    private static List<AmmoBox> ammoBoxes = new List<AmmoBox>();
+    private static readonly List<AmmoBox> ammoBoxes = new();
 
     private void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         collider = GetComponent<Collider>();
         renderer = boxModel.GetComponent<MeshRenderer>();
         if (!shouldAlwaysSpawn)
@@ -49,7 +48,7 @@ public class AmmoBox : MonoBehaviour
 
     public static AmmoBox GetClosestAmmoBox(Vector3 from)
     {
-        if (ammoBoxes.Count() == 0)
+        if (ammoBoxes.Count == 0)
             return null;
         return ammoBoxes.Aggregate(
             (ammoBox, next) =>
@@ -87,8 +86,7 @@ public class AmmoBox : MonoBehaviour
             return;
 
         collector.Reload();
-        audioSource.clip = pickupSounds.RandomElement();
-        audioSource.Play();
+        soundEffect.Play(audioSource);
 
         collider.enabled = false;
         renderer.enabled = false;
