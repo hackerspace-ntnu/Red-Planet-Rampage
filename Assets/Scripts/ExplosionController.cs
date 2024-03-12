@@ -19,8 +19,10 @@ public class ExplosionController : MonoBehaviour
 
     [SerializeField] private LayerMask hitBoxLayers;
 
+    [SerializeField] private AudioGroup soundEffect;
+
     private VisualEffect visualEffect;
-    private AudioSource soundEffect;
+    private AudioSource audioSource;
 
     // Makes sure a player doesn't take damage for each hitbox
     private HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
@@ -35,7 +37,7 @@ public class ExplosionController : MonoBehaviour
     {
         visualEffect = GetComponent<VisualEffect>();
         visualEffect.enabled = false;
-        soundEffect = GetComponent<AudioSource>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     public void OnDrawGizmos()
@@ -48,7 +50,7 @@ public class ExplosionController : MonoBehaviour
     {
         visualEffect.enabled = true;
         visualEffect.SendEvent(VisualEffectAsset.PlayEventID);
-        soundEffect?.Play();
+        soundEffect.Play(audioSource);
         var targets = Physics.SphereCastAll(transform.position, radius, Vector3.up, 0.01f, hitBoxLayers);
         var hits = new List<(RaycastHit, float)>(targets.Length);
         foreach (var target in targets)
