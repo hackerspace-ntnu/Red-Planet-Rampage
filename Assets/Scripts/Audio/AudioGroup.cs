@@ -23,16 +23,18 @@ public class AudioGroup : ScriptableObject
 #endif
     [SerializeField]
     private FloatRange volumeRange;
-    public void Modulate(AudioSource source)
+
+    private void Modulate(AudioSource source)
     {
-        source.pitch = Mathf.Pow(SEMITONE_PITCH_CONVERSION_UNIT, Random.Range(semitoneRange.Min, semitoneRange.Max));
-        source.volume = Random.Range(volumeRange.Min, volumeRange.Max);
-    }
-    public void Play(AudioSource source)
-    {
-        float pitch = continuousPitchBend ? Random.Range((float)semitoneRange.Min, (float)semitoneRange.Max) : Random.Range(semitoneRange.Min, semitoneRange.Max);
+        // Range has override for ints, so we need to force the endpoints to be floats in order to achieve a continuous scale.
+        var pitch = continuousPitchBend ? Random.Range((float)semitoneRange.Min, (float)semitoneRange.Max) : Random.Range(semitoneRange.Min, semitoneRange.Max);
         source.pitch = Mathf.Pow(SEMITONE_PITCH_CONVERSION_UNIT, pitch);
         source.volume = Random.Range(volumeRange.Min, volumeRange.Max);
+    }
+
+    public void Play(AudioSource source)
+    {
+        Modulate(source);
         source.PlayOneShot(sounds.RandomElement());
     }
 
