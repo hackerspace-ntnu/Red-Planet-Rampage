@@ -311,6 +311,13 @@ public class MainMenuController : MonoBehaviour
         startButton.colors = colors;
     }
 
+    // Currently invoked when entering characterselect menu
+    // TODO: Make dedicated hosting UI instead.
+    public void HostLobby()
+    {
+        SteamManager.Singleton.HostLobby();
+    }
+
     public void Quit()
     {
         Application.Quit();

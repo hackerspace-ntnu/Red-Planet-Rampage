@@ -5,7 +5,7 @@ using UnityEngine;
 public class SteamManager : MonoBehaviour
 {
     private const int steamAppID = 2717710;
-    private SteamManager Singleton;
+    public static SteamManager Singleton;
 
     void Awake()
     {
@@ -36,13 +36,21 @@ public class SteamManager : MonoBehaviour
         }
     }
 
+    public void HostLobby()
+    {
+        var transportSettings = GetComponent<Peer2PeerTransport>();
+        transportSettings.serverId = Steamworks.SteamClient.SteamId;
+        transportSettings.StartServer();
+
+    }
+
     void Update()
     {
         Steamworks.SteamClient.RunCallbacks();
     }
-
-    private void OnDestroy()
+    private void OnApplicationQuit()
     {
         Steamworks.SteamClient.Shutdown();
     }
+
 }
