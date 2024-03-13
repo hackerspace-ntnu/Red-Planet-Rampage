@@ -24,7 +24,12 @@ public class AmmoBoxCollector : MonoBehaviour
         hasAmmoBoxBody = player.identity.Body == ammoBoxBody;
     }
 
-    public bool HasFullMagazine => player.GunController.stats.Ammo >= player.GunController.stats.magazineSize;
+    public void CheckForAmmoBoxBodyAgain()
+    {
+        StartCoroutine(CheckForAmmoBoxBody());
+    }
+
+    public bool HasFullMagazine => player.GunController.stats.Ammo >= player.GunController.stats.MagazineSize;
 
     public void Reload()
     {

@@ -36,9 +36,14 @@ public class StaticInfo : MonoBehaviour
     [SerializeField]
     private Item startingBody;
     public Item StartingBody => startingBody;
+
     [SerializeField]
     private Item startingBarrel;
     public Item StartingBarrel => startingBarrel;
+
+    [SerializeField]
+    private Item startingExtension;
+    public Item StartingExtension => startingExtension;
 
     [Header("Override for certain item combinations")]
     // Overrides of secret names given a specific combination
@@ -49,6 +54,11 @@ public class StaticInfo : MonoBehaviour
     public ReadOnlyArray<Item> Barrels;
     public ReadOnlyArray<Item> Extensions;
     public ReadOnlyArray<OverrideName> SecretNames;
+
+    [Header("Settings")]
+    [SerializeField]
+    private float cameraFov;
+    public float CameraFov => cameraFov;
 
     void Start()
     {

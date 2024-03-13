@@ -18,6 +18,9 @@ public class BiddingPlatform : MonoBehaviour
     public PlayerIdentity LeadingBidder => leadingBidder;
 
     [SerializeField]
+    private AudioSource audioSource;
+
+    [SerializeField]
     private TMP_Text itemNameText;
 
     [SerializeField]
@@ -58,10 +61,23 @@ public class BiddingPlatform : MonoBehaviour
     [SerializeField]
     private Image radialUI;
 
+    [SerializeField]
+    private Image augmentSymbol;
+    [SerializeField]
+    private Sprite bodySymbol;
+    [SerializeField]
+    private Sprite barrelSymbol;
+    [SerializeField]
+    private Sprite extensionSymbol;
+
     private int playerCount = 0;
+
+    private bool isActive = false;
+    public bool IsActive => isActive;
 
     public delegate void BiddingEvent(BiddingPlatform biddingPlatform);
 
+    public BiddingEvent onItemSet;
     public BiddingEvent onBiddingExtended;
     public BiddingEvent onBiddingEnd;
     public BiddingEvent onBidPlaced;
@@ -123,6 +139,12 @@ public class BiddingPlatform : MonoBehaviour
             if (leadingBidder)
             {
                 leadingBidder.UpdateChip(chips);
+                if (playerIdentity != leadingBidder)
+                {
+                    audioSource.Play();
+                    AuctionDriver.Singleton.ScreenShake();
+                }
+                    
             }
             chips++;
             playerIdentity.UpdateChip(-chips);
@@ -156,7 +178,7 @@ public class BiddingPlatform : MonoBehaviour
     private void UpdateTimer()
     {
         timerText.text = Mathf.Round(auctionTimer.WaitTime - auctionTimer.ElapsedTime).ToString();
-        radialUI.material.SetFloat("_Arc1", 360f - 360f*((auctionTimer.WaitTime - auctionTimer.ElapsedTime) / auctionTimer.WaitTime));
+        radialUI.material.SetFloat("_Arc1", 360f - 360f * ((auctionTimer.WaitTime - auctionTimer.ElapsedTime) / auctionTimer.WaitTime));
     }
 
     private void EndAuction()
@@ -165,6 +187,7 @@ public class BiddingPlatform : MonoBehaviour
             leadingBidder.PerformTransaction(item);
 
         Destroy(augmentModel, 0.5f);
+        isActive = false;
         onBiddingEnd?.Invoke(this);
         gameObject.LeanScale(Vector3.zero, 0.5f).setEaseInOutExpo();
     }
@@ -175,16 +198,31 @@ public class BiddingPlatform : MonoBehaviour
         itemNameText.text = item.displayName;
         itemDescriptionText.text = item.displayDescription;
         itemCostText.text = chips.ToString();
+        switch (item.augmentType)
+        {
+            case AugmentType.Body:
+                augmentSymbol.sprite = bodySymbol;
+                break;
+            case AugmentType.Barrel:
+                augmentSymbol.sprite = barrelSymbol;
+                break;
+            case AugmentType.Extension:
+                augmentSymbol.sprite = extensionSymbol;
+                break;
+        }
+
+
         augmentModel = Instantiate(item.augment, modelHolder.transform);
-        augmentModel.transform.localScale = Vector3.one / 20.0f;
-        augmentModel.transform.localPosition = Vector3.zero;
+        augmentModel.transform.localScale = Vector3.one / 20f;
+        augmentModel.transform.localPosition = -Augment.Midpoint(augmentModel, item.augmentType).localPosition / 20f;
+        Augment.DisableInstance(augmentModel, item.augmentType);
 
-        modelHolder.transform.Rotate(new Vector3(90f, 0f));
+        modelHolder.transform.parent.Rotate(new Vector3(90f, 0f));
         LeanTween.sequence()
-            .append(LeanTween.rotateAroundLocal(augmentModel, Vector3.up, 360, 2.5f).setLoopCount(-1))
-            .append(LeanTween.moveLocalY(augmentModel, 0.01f, 3.0f).setLoopPingPong().setEaseInOutSine());
-
-
+            .append(LeanTween.rotateAroundLocal(modelHolder, Vector3.up, 360, 2.5f).setLoopCount(-1))
+            .append(LeanTween.moveLocalY(modelHolder, 0.01f, 3.0f).setLoopPingPong().setEaseInOutSine());
+        isActive = true;
+        onItemSet?.Invoke(this);
 #if UNITY_EDITOR
         auctionTimer.StartTimer(10);
 #else

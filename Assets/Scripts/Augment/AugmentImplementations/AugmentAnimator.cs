@@ -7,9 +7,10 @@ using UnityEngine;
 public abstract class AugmentAnimator : MonoBehaviour
 {
     public delegate void AnimationEvent();
-    public AnimationEvent OnFireAnimationEnd;
+    public AnimationEvent OnShotFiredAnimation;
+    public AnimationEvent OnAnimationEnd;
 
     public abstract void OnInitialize(GunStats stats);
-    public abstract void OnReload(int ammo);
-    public abstract void OnFire(int remainingAmmo);
+    public abstract void OnReload(GunStats stats);
+    public abstract void OnFire(GunStats stats);
 }

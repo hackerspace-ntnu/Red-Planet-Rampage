@@ -25,11 +25,14 @@ public class HackingModifier : MonoBehaviour, ProjectileModifier
         projectile.OnColliderHit -= Hack;
     }
 
-    private void Hack(Collider collider, ref ProjectileState state)
+    private void Hack(RaycastHit hit, ref ProjectileState state)
     {
-        if (!collider.TryGetComponent<HitboxController>(out var hitboxController))
+        if (!hit.collider.TryGetComponent<HitboxController>(out var hitboxController))
             return;
         if (!hitboxController.health.TryGetComponent<PlayerManager>(out var playerManager))
+            return;
+        // TODO: Actually disorient the AIs
+        if (playerManager.identity.IsAI)
             return;
         playerManager.HUDController.PopupSpammer.Spam(Mathf.FloorToInt(state.damage / damageToSpamAmount));
     }

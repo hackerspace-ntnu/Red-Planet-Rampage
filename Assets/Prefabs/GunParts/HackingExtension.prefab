@@ -91,7 +91,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: af95cab87c86bef4b80407724fcb7420, type: 2}
@@ -131,7 +131,7 @@ MonoBehaviour:
   jiggleMaterialIndex: 0
   jiggleFalloff: 0.9
   elasticity: 3
-  movementSensitivity: 0.0005
+  movementSensitivity: 0.1
 --- !u!1 &2978767890328388517
 GameObject:
   m_ObjectHideFlags: 0
@@ -191,7 +191,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: af95cab87c86bef4b80407724fcb7420, type: 2}
@@ -231,7 +231,38 @@ MonoBehaviour:
   jiggleMaterialIndex: 0
   jiggleFalloff: 0.9
   elasticity: 3
-  movementSensitivity: 0.0005
+  movementSensitivity: 0.1
+--- !u!1 &3573304462926112730
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4034079541628885421}
+  m_Layer: 0
+  m_Name: Midpoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4034079541628885421
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3573304462926112730}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.18}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4827614959384518682}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3629719358906180994
 GameObject:
   m_ObjectHideFlags: 0
@@ -291,7 +322,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 8aa3b7d0ba2156f45a8e5fd7b4328f33, type: 2}
@@ -331,7 +362,7 @@ MonoBehaviour:
   jiggleMaterialIndex: 0
   jiggleFalloff: 0.9
   elasticity: 3
-  movementSensitivity: 0.0005
+  movementSensitivity: 0.1
 --- !u!1 &4827614958556121204
 GameObject:
   m_ObjectHideFlags: 0
@@ -356,7 +387,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4827614958556121204}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.18}
+  m_LocalPosition: {x: 0, y: 0, z: 0.4357}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -372,7 +403,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4827614959384518682}
-  - component: {fileID: 4827614959384518683}
+  - component: {fileID: 6124192737764207717}
   - component: {fileID: 643204947169274698}
   m_Layer: 0
   m_Name: HackingExtension
@@ -395,10 +426,11 @@ Transform:
   m_Children:
   - {fileID: 3384109273686525292}
   - {fileID: 4827614958556121207}
+  - {fileID: 4034079541628885421}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4827614959384518683
+--- !u!114 &6124192737764207717
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -407,13 +439,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 4827614959384518680}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a7619e994087ad4383adf04a959152d, type: 3}
+  m_Script: {fileID: 11500000, guid: 20c35178c9c126e4783c473fa251318b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   statModifiers: []
   outputs:
   - {fileID: 4827614958556121207}
+  midpoint: {fileID: 4034079541628885421}
   model: {fileID: 2248296421995411996}
+  meshRenderer: {fileID: 5603072098888237411}
+  hackingScreen: {fileID: 2100000, guid: 8433c20840b9c9f4fb17f23a56da4dfa, type: 2}
+  scrollAmount: 0.1
 --- !u!114 &643204947169274698
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -486,11 +522,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 035e66e4ec53ddb4dae99a8c22dae441, type: 2}
-  - {fileID: 3589333493158463532, guid: 4ce328e6a0dae504e81f30fce0a08a56, type: 3}
+  - {fileID: 2100000, guid: 8433c20840b9c9f4fb17f23a56da4dfa, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

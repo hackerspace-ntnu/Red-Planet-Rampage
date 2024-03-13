@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class RubberSniper : GunExtension
@@ -12,7 +10,7 @@ public class RubberSniper : GunExtension
     private float maxHitDistance = 100f;
 
     private GunController gunController;
-    void Awake()
+    private void Awake()
     {
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
@@ -20,26 +18,44 @@ public class RubberSniper : GunExtension
             Debug.Log("Fire not attached to gun parent!");
             return;
         }
-        jigglePhysics.player = gunController.player;
-        gunController.player.overrideAimTarget = true;
         gunController.onFire += Fire;
+        if (!gunController.Player)
+            return;
+        jigglePhysics.player = gunController.Player;
+        gunController.Player.overrideAimTarget = true;
+        gunController.onFireStart += Aim;
+        gunController.onFire += Aim;
+    }
+
+    private void OnDestroy()
+    {
+        if (!gunController)
+            return;
+        gunController.onFire -= Fire;
+        if (!gunController.Player)
+            return;
+        gunController.onFireStart -= Aim;
+        gunController.onFire -= Aim;
+    }
+
+    private void Aim(GunStats stats)
+    {
+        // Manual override of UpdateAimTarget
+        UpdateAimTarget(stats);
     }
 
     private void Fire(GunStats stats)
     {
-        // Manual override of UpdateAimTarget
-        UpdateAimTarget(stats);
-
         audioSource.Play();
         jigglePhysics.AnimatePushback();
     }
 
     public void UpdateAimTarget(GunStats stats)
     {
-        Vector3 cameraCenter = gunController.player.inputManager.transform.position;
-        Vector3 cameraDirection = gunController.player.inputManager.transform.rotation * jigglePhysics.Direction;
-        Vector3 startPoint = cameraCenter + cameraDirection * gunController.player.TargetStartOffset;
-        if (Physics.Raycast(startPoint, cameraDirection, out RaycastHit hit, maxHitDistance, gunController.player.HitMask))
+        Vector3 cameraCenter = gunController.Player.inputManager.transform.position;
+        Vector3 cameraDirection = gunController.Player.inputManager.transform.rotation * jigglePhysics.Direction;
+        Vector3 startPoint = cameraCenter + cameraDirection * gunController.Player.TargetStartOffset;
+        if (Physics.Raycast(startPoint, cameraDirection, out RaycastHit hit, maxHitDistance, gunController.Player.HitMask))
         {
             gunController.target = hit.point;
         }
@@ -51,7 +67,9 @@ public class RubberSniper : GunExtension
 
     private void FixedUpdate()
     {
-        if (gunController)
-            gunController.player.HUDController.MoveCrosshair(jigglePhysics.NormalizedPointer.x, jigglePhysics.NormalizedPointer.y);
+        if (!gunController || !gunController.Player)
+            return;
+        var correctedDirection = gunController.Player.inputManager.transform.rotation * jigglePhysics.NormalizedPointer;
+        gunController.Player.HUDController.MoveCrosshair(correctedDirection.x, correctedDirection.y);
     }
 }

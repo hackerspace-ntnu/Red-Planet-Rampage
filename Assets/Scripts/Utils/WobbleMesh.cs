@@ -6,29 +6,35 @@ public class WobbleMesh : MonoBehaviour
 {
     [SerializeField]
     private Material jiggleMaterial;
-
+    [SerializeField]
+    protected int jiggleMaterialIndex = 2;
+    [SerializeField]
+    private float wobbleOriginOffset = 0.1f;
     [SerializeField]
     private float elasticity = 4f;
     [SerializeField]
-    [Range(0,1)]
-    private float slerpSpeed = 0.1f;
-    [SerializeField]
-    private float maxBendDistance = 1f;
+    private float distanceScale = 1f;
 
     private Vector3 previousPosition;
     private Vector3 momentum = Vector3.zero;
 
+    protected MeshRenderer meshRenderer;
+
     private void Start()
     {
+        // Intantitate JiggleMaterial
+        meshRenderer = GetComponent<MeshRenderer>();
+        meshRenderer.materials[jiggleMaterialIndex] = Instantiate(meshRenderer.materials[jiggleMaterialIndex]);
+        jiggleMaterial = meshRenderer.materials[jiggleMaterialIndex];
+        jiggleMaterial.SetFloat("_BendStartOffset", wobbleOriginOffset);
         previousPosition = transform.position;
     }
     private void Update()
     {
-        Vector3 target = Vector3.Slerp(previousPosition, transform.position + momentum, Time.deltaTime * elasticity);
-        momentum = (target - transform.position) * slerpSpeed;
+        Vector3 target = Vector3.Slerp(previousPosition, transform.position - momentum, Time.deltaTime * elasticity);
+        momentum = (target - transform.position);
         var distance = target - transform.position;
-        distance = new Vector3(Mathf.Clamp(distance.x, -maxBendDistance, maxBendDistance), Mathf.Clamp(distance.y, -maxBendDistance, maxBendDistance), Mathf.Clamp(distance.z, -maxBendDistance/2, maxBendDistance/2));
-        jiggleMaterial.SetVector("_Distance", Quaternion.Inverse(transform.rotation) * distance);
+        jiggleMaterial.SetVector("_Distance", Quaternion.Inverse(transform.rotation) * -distance * distanceScale);
         previousPosition = target;
     }
 }

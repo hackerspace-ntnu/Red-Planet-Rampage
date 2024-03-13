@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 using System;
+using CollectionExtensions;
 
 /// <summary>
 /// Wrapper struct for tying refference to Player class with the in-game player.
@@ -31,6 +32,7 @@ public class MatchController : MonoBehaviour
 
     public delegate void MatchEvent();
 
+    public MatchEvent onOutcomeDecided;
     public MatchEvent onRoundEnd;
     public MatchEvent onRoundStart;
     public MatchEvent onBiddingStart;
@@ -39,6 +41,9 @@ public class MatchController : MonoBehaviour
     [Header("Timing")]
     [SerializeField]
     private float roundLength;
+
+    [SerializeField]
+    private float delayBeforeRoundResults = 3f;
 
     [SerializeField]
     private float roundEndDelay;
@@ -73,12 +78,25 @@ public class MatchController : MonoBehaviour
     private string currentMapName;
 
     private List<Player> players = new List<Player>();
-    public List<Player> Players { get { return players; } }
+    public List<Player> Players => players;
+    public IEnumerable<Player> AIPlayers => players.Where(p => p.playerManager is AIManager);
+    public IEnumerable<Player> HumanPlayers => players.Where(p => p.playerManager is not AIManager);
+
+    [SerializeField]
+    private List<CollectableChip> collectableChips;
 
     private static List<Round> rounds = new List<Round>();
     public Round GetLastRound { get { return rounds[rounds.Count - 1]; } }
 
     public int RoundCount { get => rounds.Count(); }
+
+    private bool isAuction = false;
+    public bool IsAuction => isAuction;
+
+    [SerializeField]
+    private GameObject loadingScreen;
+
+    private int loadingDuration = 6;
 
     private void Awake()
     {
@@ -114,26 +132,36 @@ public class MatchController : MonoBehaviour
         // Makes shooting end quickly if testing with 1 player
 #if UNITY_EDITOR
         if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
-            roundLength = 5f;
+            roundLength = 100f;
 #endif
-
+        GameObject mainLight = GameObject.FindGameObjectsWithTag("MainLight")[0];
+        RenderSettings.skybox.SetVector("_SunDirection", mainLight.transform.forward);
+        RenderSettings.skybox.SetFloat("_MaxGradientTreshold", 0.25f);
         StartNextRound();
     }
 
     public void StartNextRound()
     {
+        if (collectableChips.Count == 0)
+            collectableChips = FindObjectsOfType<CollectableChip>().ToList();
         // Setup of playerInputs
-        playerFactory.InstantiatePlayersFPS();
+        var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
+            Mathf.Max(4 - PlayerInputManagerController.Singleton.playerInputs.Count, 0) : 0;
+        playerFactory.InstantiatePlayersFPS(aiPlayerCount)
+            .ForEach(player => players.Add(new Player(player.identity, player, startAmount)));
 
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput =>
-        {
-            var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
-            var playerStateController = playerInput.transform.parent.GetComponent<PlayerManager>();
-            players.Add(new Player(playerIdentity, playerStateController, startAmount));
-        });
+        var aiPLayers = players.Where(player => player.playerManager is AIManager)
+            .Select(player => player.playerManager)
+            .Cast<AIManager>()
+            .ToList();
 
-        MusicTrackManager.Singleton.SwitchTo(MusicType.BATTLE);
+        aiPLayers.ForEach(ai =>
+                ai.TrackedPlayers = players.Select(player => player.playerManager)
+                    .Where(player => player != ai).ToList());
+
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
         onRoundStart?.Invoke();
+        isAuction = false;
         rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
         roundTimer.StartTimer(roundLength);
         roundTimer.OnTimerUpdate += AdjustMusic;
@@ -145,27 +173,45 @@ public class MatchController : MonoBehaviour
     {
         if (IsWin())
             return;
+        collectableChips = new List<CollectableChip>();
+
+        StartCoroutine(ShowLoadingScreenBeforeBidding());
+        // TODO: Add Destroy on match win   
+    }   
+    private IEnumerator ShowLoadingScreenBeforeBidding(){
+        loadingScreen.SetActive(true);
+        yield return new WaitForSeconds(loadingDuration);
 
         PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
-        MusicTrackManager.Singleton.SwitchTo(MusicType.BIDDING);
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Bidding);
         onBiddingStart?.Invoke();
-        // TODO: Add Destroy on match win
         SceneManager.LoadSceneAsync("Bidding");
-        PlayerInputManagerController.Singleton.playerInputManager.splitScreen = false;
+        PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = false;
+        isAuction = true;
     }
-
     public void EndActiveRound()
     {
-        onRoundEnd?.Invoke();
+        onOutcomeDecided?.Invoke();
         roundTimer.OnTimerUpdate -= AdjustMusic;
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
+        GlobalHUD.RoundTimer.enabled = false;
+        StartCoroutine(WaitAndShowResults());
+    }
+
+    private IEnumerator WaitAndShowResults()
+    {
+        // Delay first so we can see who killed who
+        yield return new WaitForSeconds(delayBeforeRoundResults);
         AssignRewards();
+        // Scoreboard subscribes here
+        onRoundEnd?.Invoke();
     }
 
     public IEnumerator WaitAndStartNextBidding()
     {
         yield return new WaitForSeconds(roundEndDelay);
+
         StartNextBidding();
     }
 
@@ -217,7 +263,7 @@ public class MatchController : MonoBehaviour
     {
         var winner = rounds.Last().Winner;
         if (winner == null) { return false; }
-        var wins = rounds.Where(round => round.IsWinner(winner)).Count();
+        var wins = PlayerWins(winner);
         Debug.Log($"Current winner ({winner}) has {wins} wins.");
         if (wins >= 3)
         {
@@ -231,19 +277,44 @@ public class MatchController : MonoBehaviour
         }
     }
 
+    public int PlayerWins(PlayerIdentity player)
+    {
+        return rounds.Where(round => round.IsWinner(player)).Count();
+    }
+
+    public void RemoveChip(CollectableChip chip)
+    {
+        collectableChips.Remove(chip);
+    }
+
+    public Transform? GetRandomActiveChip()
+    {
+        if (collectableChips.Count == 0)
+            return null;
+        return collectableChips.RandomElement().transform;
+    }
+
     private IEnumerator DisplayWinScreenAndRestart(PlayerIdentity winner)
     {
         globalHUDController.DisplayWinScreen(winner);
 
         yield return new WaitForSecondsRealtime(matchEndDelay);
 
-        // Update playerInputs in preperation for Menu scene
-        PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
+        ReturnToMainMenu();
+    }
 
-        MusicTrackManager.Singleton.SwitchTo(MusicType.MENU);
+    public void ReturnToMainMenu()
+    {
+        // Update playerInputs / identities in preperation for Menu scene
+        PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
+        // Remove AI identities
+        FindObjectsOfType<PlayerIdentity>()
+            .Where(identity => identity.IsAI)
+            .ToList().ForEach(aiIdentity => Destroy(aiIdentity));
+
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         rounds = new List<Round>();
         PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         SceneManager.LoadSceneAsync("Menu");
-
     }
 }

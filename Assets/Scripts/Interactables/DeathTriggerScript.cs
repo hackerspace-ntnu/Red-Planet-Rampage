@@ -6,7 +6,7 @@ public class DeathTriggerScript : MonoBehaviour
     {
         if (other.TryGetComponent<HitboxController>(out var hitbox)) 
         {
-            hitbox.DamageCollider(new DamageInfo(hitbox.health.GetComponent<PlayerManager>(), 1000, hitbox.transform.position, Vector3.zero));
+            hitbox.DamageCollider(new DamageInfo(hitbox.health.GetComponent<PlayerManager>(), 1000, hitbox.transform.position, Vector3.zero, DamageType.Falling));
         }
     }
 }

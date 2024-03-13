@@ -6,6 +6,9 @@ public class PlayerIdentity : MonoBehaviour
     [Header("Cosmetics")]
     public Color color;
     public string playerName;
+    [SerializeField]
+    private bool isAI = false;
+    public bool IsAI => isAI;
 
     [Header("Augments")]
     [SerializeField]
@@ -76,13 +79,19 @@ public class PlayerIdentity : MonoBehaviour
         switch (item.augmentType)
         {
             case AugmentType.Body:
-                Bodies.Add(item);
+                if (!Bodies.Contains(item))
+                    Bodies.Add(item);
+                body = item;
                 break;
             case AugmentType.Barrel:
-                Barrels.Add(item);
+                if (!Barrels.Contains(item))
+                    Barrels.Add(item);
+                barrel = item;
                 break;
             case AugmentType.Extension:
-                Extensions.Add(item);
+                if (!Extensions.Contains(item))
+                    Extensions.Add(item);
+                extension = item;
                 break;
             default:
                 Debug.Log($"No appropritate augmentType ({item.augmentType}) found in item.");
@@ -98,11 +107,12 @@ public class PlayerIdentity : MonoBehaviour
         Extensions = new List<Item>();
         body = StaticInfo.Singleton.StartingBody;
         barrel = StaticInfo.Singleton.StartingBarrel;
-        extension = null;
+        extension = StaticInfo.Singleton.StartingExtension;
         chips = 0;
     }
 
-    public void SetLoadout(Item body,Item barrel, Item extension){
+    public void SetLoadout(Item body, Item barrel, Item extension)
+    {
         this.body = body;
         this.barrel = barrel;
         this.extension = extension;

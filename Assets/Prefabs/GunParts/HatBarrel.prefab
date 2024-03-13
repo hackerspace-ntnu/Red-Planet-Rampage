@@ -63,6 +63,37 @@ Transform:
   m_Father: {fileID: 3528637472295133252}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 89.98021, y: 0, z: 0}
+--- !u!1 &1481774252538676147
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3377161213218414738}
+  m_Layer: 0
+  m_Name: MidPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3377161213218414738
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1481774252538676147}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0, z: 0.369}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5678091459106387381}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1981383797191481653
 GameObject:
   m_ObjectHideFlags: 0
@@ -386,6 +417,7 @@ GameObject:
   - component: {fileID: -936091643483276450}
   - component: {fileID: -8445443159102885784}
   - component: {fileID: 4878415339882279067}
+  - component: {fileID: 1730519356641753133}
   m_Layer: 0
   m_Name: HatBarrel
   m_TagString: Untagged
@@ -408,6 +440,7 @@ Transform:
   - {fileID: 6881328599104134916}
   - {fileID: 2006913084140856218}
   - {fileID: 430454296743735363}
+  - {fileID: 3377161213218414738}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -432,10 +465,20 @@ MonoBehaviour:
     addition: 25
     multiplier: 0
     exponential: 1
+  - name: ProjectileSpeedFactor
+    addition: 1
+    multiplier: 0
+    exponential: 0.5
+  - name: Magazine
+    addition: 0
+    multiplier: 0
+    exponential: 1.5
   outputs:
   - {fileID: 2006913084140856218}
+  midpoint: {fileID: 3377161213218414738}
   attachmentPoints:
   - {fileID: 2006913084140856218}
+  muzzleFlash: {fileID: 0}
 --- !u!114 &6993121514854208436
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -452,13 +495,15 @@ MonoBehaviour:
   projectileRotation: {x: 0, y: 0, z: 0, w: 1}
   stats: {fileID: 0}
   player: {fileID: 0}
+  HitAssist: 0
   animator: {fileID: 5376405389655812532}
-  maxHatProjectiles: 300
-  hatMaxDistance: 250
-  hatSpeed: 20
-  hatSize: 0.3
-  hatVfx: {fileID: 1746704752495276340}
-  maxLengthBeforeStuck: 150
+  maxProjectiles: 300
+  maxDistance: 250
+  size: 0.35
+  visualSize: 120
+  vfx: {fileID: 1746704752495276340}
+  shouldRicochet: 1
+  maxDistanceBeforeStuck: 100
 --- !u!114 &1607281845865317333
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -597,7 +642,28 @@ MonoBehaviour:
   stuckLifeTime: 5
   triggerOnHit: 1
   onHitInterval: 1
+  affectedLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
   priority: 4
+--- !u!114 &1730519356641753133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5374020728950191348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18b57f7d0109d614c8ff956eff6a9841, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 1
+  decal: {fileID: 5462112114334002006, guid: 9228972996ff4404b8de661fe7a9a3c9, type: 3}
+  depthOffsetFraction: 0.6
+  stickToNormalFraction: 0.1
+  angleVariation: 37.3
+  lifetime: 60
 --- !u!1 &5891994160488146896
 GameObject:
   m_ObjectHideFlags: 0
@@ -704,7 +770,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2006913084140856218}
   m_Layer: 0
-  m_Name: attachPoint
+  m_Name: AttachmentPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -860,7 +926,6 @@ MonoBehaviour:
   hatPrefab: {fileID: 7671496889312377090, guid: 3a3baf8f14610324db1197776333cba3, type: 3}
   bullet: {fileID: 3020309704562934005}
   bulletHeigth: 0.05
-  barrel: {fileID: 6993121514854208436}
   ammunitionHolder: {fileID: 1431844989074518793}
 --- !u!1 &9061618782800774609
 GameObject:
@@ -911,10 +976,10 @@ SkinnedMeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6786cce554114bb4fbd4a86907c7acfc, type: 2}
+  - {fileID: 2100000, guid: 23211738dc0cee24c97548515aa35d7b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -962,6 +1027,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5317923193586596905}
     m_Modifications:
+    - target: {fileID: 7110793639515268558, guid: 3a3baf8f14610324db1197776333cba3, type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 7224140131182847888, guid: 3a3baf8f14610324db1197776333cba3, type: 3}
       propertyPath: m_RootOrder
       value: 0

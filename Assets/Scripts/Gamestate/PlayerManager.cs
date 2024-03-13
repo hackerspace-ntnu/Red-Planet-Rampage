@@ -1,17 +1,28 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.Universal;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(AudioSource))]
 public class PlayerManager : MonoBehaviour
 {
     // Layers 12 through 15 are gun layers.
-    private static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
+    protected static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
     // Only Default and HitBox layers can be hit
     private static int hitMask = 1 | (1 << 3);
+
+    private const int defaultLayer = 1;
     public int HitMask => hitMask;
+
+    [SerializeField]
+    private LayerMask interactMask;
+
+    private bool isAlive = true;
+    public bool IsAlive => isAlive;
 
     [Header("Shooting")]
 
@@ -28,10 +39,23 @@ public class PlayerManager : MonoBehaviour
 
     public HitEvent onDeath;
 
-    private PlayerManager lastPlayerThatHitMe;
+    protected PlayerManager lastPlayerThatHitMe;
 
     public delegate void BiddingPlatformEvent(BiddingPlatform platform);
     public BiddingPlatformEvent onSelectedBiddingPlatformChange;
+
+    [SerializeField]
+    protected Item ammoMaskItem;
+
+    [SerializeField]
+    public Transform GunHolder;
+    [SerializeField]
+    public Transform GunOrigin;
+
+    [SerializeField]
+    protected GameObject aimAssistCollider;
+
+    private int screenShakeTween;
 
     [Header("Related objects")]
 
@@ -42,14 +66,32 @@ public class PlayerManager : MonoBehaviour
     private PlayerHUDController hudController;
     public PlayerHUDController HUDController => hudController;
 
+    [SerializeField]
+    private DecalProjector playerShadow;
+
+    [SerializeField]
+    protected GameObject aiTarget;
+    protected AITarget aiTargetCollider;
+    public Transform AiAimSpot;
+    public Transform AiTarget
+    {
+        get
+        {
+            if (!aiTargetCollider)
+                return transform;
+            return aiTargetCollider.transform;
+        }
+    }
+
 
     [Header("Physics")]
 
     [SerializeField]
-    private GameObject meshBase;
+    protected GameObject meshBase;
 
     [SerializeField]
-    private PlayerIK playerIK;
+    protected PlayerIK playerIK;
+    public PlayerIK PlayerIK => playerIK;
 
     [SerializeField]
     private float deathKnockbackForceMultiplier = 10;
@@ -66,14 +108,14 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    private GunController gunController;
+    protected GunController gunController;
     public GunController GunController => gunController;
 
-    private HealthController healthController;
+    protected HealthController healthController;
 
     [Header("Hit sounds")]
 
-    private AudioSource audioSource;
+    protected AudioSource audioSource;
 
     [SerializeField]
     private AudioGroup hitSounds;
@@ -81,17 +123,28 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private AudioGroup extraHitSounds;
 
-    void Start()
+    private void Start()
     {
         healthController = GetComponent<HealthController>();
         healthController.onDamageTaken += OnDamageTaken;
         healthController.onDeath += OnDeath;
         audioSource = GetComponent<AudioSource>();
+        aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
+        aiTargetCollider.Owner = this;
+        aiTargetCollider.transform.position = transform.position;
+        identity.onChipChange += hudController.OnChipChange;
+    }
+
+    private void Update()
+    {
+        if (GunHolder && inputManager)
+            GunHolder.transform.forward = inputManager.transform.forward;
     }
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
-        hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
+        if (hudController)
+            hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
         PlayOnHit();
         if (info.sourcePlayer != this)
         {
@@ -107,11 +160,15 @@ public class PlayerManager : MonoBehaviour
             killer = lastPlayerThatHitMe;
         }
         onDeath?.Invoke(killer, this);
+        isAlive = false;
+        aimAssistCollider.SetActive(false);
         TurnIntoRagdoll(info);
+        aiTargetCollider.gameObject.SetActive(false);
         hudController.DisplayDeathScreen(killer.identity);
+        playerShadow.gameObject.SetActive(false);
     }
 
-    void TurnIntoRagdoll(DamageInfo info)
+    protected void TurnIntoRagdoll(DamageInfo info)
     {
         GetComponent<Rigidbody>().GetAccumulatedForce();
         // Disable components
@@ -120,13 +177,18 @@ public class PlayerManager : MonoBehaviour
         playerIK.enabled = false;
         // TODO display guns falling to the floor
         gunController.gameObject.SetActive(false);
+        GunHolder.gameObject.SetActive(false);
         // Disable all colliders and physics
         // Ragdollify
 
         // TODO: Make accurate hitbox forces for the different limbs of the player
 
-        var force = info.force.normalized * info.damage * deathKnockbackForceMultiplier;
-        GetComponent<RagdollController>().EnableRagdoll(force);
+        var ragdollController = GetComponent<RagdollController>();
+        if (inputManager)
+            ragdollController.AnimateCamera(inputManager.PlayerCamera, inputManager.transform);
+
+        var force = info.force.normalized * Mathf.Log(info.damage) * deathKnockbackForceMultiplier;
+        ragdollController.EnableRagdoll(force);
     }
 
     /// <summary>
@@ -138,12 +200,15 @@ public class PlayerManager : MonoBehaviour
     {
         inputManager = playerInput;
         identity = inputManager.GetComponent<PlayerIdentity>();
-        GetComponent<PlayerMovement>().SetPlayerInput(inputManager);
+        var playerMovement = GetComponent<PlayerMovement>();
+        playerMovement.SetPlayerInput(inputManager);
+        playerMovement.onMove += UpdateHudOnMove;
         // Subscribe relevant input events
         inputManager.onFirePerformed += Fire;
         inputManager.onFireCanceled += FireEnd;
         inputManager.onSelect += TryPlaceBid;
         inputManager.onFirePerformed += TryPlaceBid;
+        inputManager.onInteract += Interact;
         // Set camera on canvas
         var canvas = hudController.GetComponent<Canvas>();
         canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
@@ -155,16 +220,25 @@ public class PlayerManager : MonoBehaviour
 
     void OnDestroy()
     {
-        healthController.onDamageTaken -= OnDamageTaken;
-        healthController.onDeath -= OnDeath;
+        if (healthController)
+        {
+            healthController.onDamageTaken -= OnDamageTaken;
+            healthController.onDeath -= OnDeath;
+        }
         if (gunController)
         {
+            gunController.onFireStart -= UpdateAimTarget;
             gunController.onFire -= UpdateAimTarget;
-            gunController.onFire -= UpdateHudFire;
+            gunController.onFireEnd -= UpdateHudFire;
             gunController.onReload -= UpdateHudReload;
             //Remove the gun
             Destroy(gunController.gameObject);
         }
+        if (TryGetComponent(out PlayerMovement playerMovement))
+        {
+            playerMovement.onMove -= UpdateHudOnMove;
+        }
+        identity.onChipChange -= hudController.OnChipChange;
     }
 
     private void UpdateAimTarget(GunStats stats)
@@ -174,6 +248,13 @@ public class PlayerManager : MonoBehaviour
         Vector3 cameraCenter = inputManager.transform.position;
         Vector3 cameraDirection = inputManager.transform.forward;
         Vector3 startPoint = cameraCenter + cameraDirection * targetStartOffset;
+        if (Physics.Raycast(cameraCenter, cameraDirection, out RaycastHit hitInfo, targetStartOffset, defaultLayer))
+        {
+            gunController.target = hitInfo.point;
+            GunController.TargetIsTooClose = true;
+            return;
+        }
+        GunController.TargetIsTooClose = false;
         if (Physics.Raycast(startPoint, cameraDirection, out RaycastHit hit, maxHitDistance, hitMask))
         {
             gunController.target = hit.point;
@@ -182,6 +263,18 @@ public class PlayerManager : MonoBehaviour
         {
             gunController.target = cameraCenter + cameraDirection * maxHitDistance;
         }
+    }
+
+    private void Interact(InputAction.CallbackContext ctx)
+    {
+        if (!Physics.Raycast(inputManager.transform.position, inputManager.transform.forward, out var hit,
+                maxHitDistance, interactMask))
+            return;
+
+        if (!hit.transform.TryGetComponent<Interactable>(out var interactable))
+            return;
+
+        interactable.Interact(this);
     }
 
     private void Fire(InputAction.CallbackContext ctx)
@@ -193,18 +286,23 @@ public class PlayerManager : MonoBehaviour
         StartCoroutine(UnpressTrigger());
     }
 
+    private void UpdateHudOnMove(Rigidbody body)
+    {
+        hudController.SetSpeedLines(body.velocity);
+    }
+
     private void UpdateHudFire(GunStats stats)
     {
         // stats variables must be dereferenced
         float ammo = stats.Ammo;
-        float magazine = stats.magazineSize;
+        float magazine = stats.MagazineSize;
         hudController.UpdateOnFire(ammo / magazine);
     }
 
     private void UpdateHudReload(GunStats stats)
     {
         float ammo = stats.Ammo;
-        float magazine = stats.magazineSize;
+        float magazine = stats.MagazineSize;
         hudController.UpdateOnReload(ammo / magazine);
     }
 
@@ -214,7 +312,7 @@ public class PlayerManager : MonoBehaviour
         selectedBiddingPlatform.TryPlaceBid(identity);
     }
 
-    IEnumerator UnpressTrigger()
+    protected IEnumerator UnpressTrigger()
     {
         yield return new WaitForFixedUpdate();
         gunController.triggerPressed = false;
@@ -222,48 +320,82 @@ public class PlayerManager : MonoBehaviour
 
     private void FireEnd(InputAction.CallbackContext ctx)
     {
+        if (!gunController)
+            return;
         gunController.triggerHeld = false;
     }
 
-    public void SetLayer(int playerIndex)
+    private void ScreenShake(GunStats stats)
+    {
+        if (!inputManager)
+            return;
+        if (LeanTween.isTweening(screenShakeTween))
+        {
+            LeanTween.cancel(screenShakeTween);
+            inputManager.PlayerCamera.gameObject.transform.localPosition = Vector3.zero;
+        }
+        screenShakeTween = inputManager.PlayerCamera.gameObject.LeanMoveLocal(new Vector3(0.02f, 0.02f, 0f) * stats.ScreenShakeFactor, 0.1f).setEaseShake().id;
+    }
+
+    public virtual void SetLayer(int playerIndex)
     {
         int playerLayer = LayerMask.NameToLayer("Player " + playerIndex);
 
         // Set layers for the camera to ignore (the other players' gun layers, and this layer)
         // Bitwise negation of this player's model layer and all gun layers that do not belong to this player
         // Gun layers are 4 above their respective player layers.
-        var playerAndGunMask = ((1 << playerLayer) | ((1 << (playerLayer + 4)) ^ allGunsMask));
+        var playerMask = 1 << playerLayer;
+        var gunMask = (1 << (playerLayer + 4)) ^ allGunsMask;
 
-        // Ignore ammo boxes if this player doesn't have the gatling body
-        var hasAmmoBoxBody = identity.Body.displayName == "Gatling";
+        // Ignore ammo boxes if this player doesn't have the required body
+        var hasAmmoBoxBody = identity.Body == ammoMaskItem;
         var ammoMask = hasAmmoBoxBody ? 0 : 1 << 6;
 
-        var negatedMask = ((1 << 16) - 1) ^ (playerAndGunMask | ammoMask);
+        var negatedMask = ((1 << 16) - 1) ^ (playerMask | gunMask | ammoMask);
 
-        inputManager.GetComponent<Camera>().cullingMask = negatedMask;
+        inputManager.PlayerCamera.cullingMask = negatedMask;
 
         // Set correct layer on self, mesh and gun (TODO)
         gameObject.layer = playerLayer;
         SetLayerOnSubtree(meshBase, playerLayer);
+        SetLayerOnSubtree(hudController.gameObject, LayerMask.NameToLayer("Gun " + playerIndex));
     }
 
-    public void SetGun(Transform offset)
+    public virtual void SetGun(Transform offset)
     {
+        overrideAimTarget = false;
         var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, this, offset);
         // Set specific local transform
         gun.transform.localPosition = new Vector3(0.39f, -0.34f, 0.5f);
         gun.transform.localRotation = Quaternion.AngleAxis(0.5f, Vector3.up);
         // Remember gun controller
         gunController = gun.GetComponent<GunController>();
+        gunController.onFireStart += UpdateAimTarget;
         gunController.onFire += UpdateAimTarget;
-        gunController.onFire += UpdateHudFire;
+        gunController.onFireEnd += ScreenShake;
+        gunController.onFireEnd += UpdateHudFire;
         gunController.onReload += UpdateHudReload;
-
+        gunController.projectile.OnHitboxCollision += hudController.HitmarkAnimation;
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
-        playerIK.RightHandIKTarget = gunController.RightHandTarget;
+        if (gunController.RightHandTarget)
+            playerIK.RightHandIKTarget = gunController.RightHandTarget;
+        GetComponent<AmmoBoxCollector>().CheckForAmmoBoxBodyAgain();
     }
 
-    private void SetLayerOnSubtree(GameObject node, int layer)
+    public void RemoveGun()
+    {
+        for (int i = gunController.transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(gunController.transform.GetChild(i).gameObject);
+        }
+        Destroy(gunController.gameObject);
+        for (int i = GunOrigin.transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(GunOrigin.transform.GetChild(i).gameObject);
+        }
+    }
+
+    protected void SetLayerOnSubtree(GameObject node, int layer)
     {
         node.layer = layer;
         foreach (Transform child in node.transform)
@@ -277,9 +409,9 @@ public class PlayerManager : MonoBehaviour
         return "Player " + inputManager.playerInput.playerIndex;
     }
 
-    private void PlayOnHit()
+    protected void PlayOnHit()
     {
-        if (Random.Range(0, 1000) > 5)
+        if (Random.Range(0, 10000) > 5)
         {
             hitSounds.Play(audioSource);
         }

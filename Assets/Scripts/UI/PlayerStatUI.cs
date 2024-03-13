@@ -9,14 +9,9 @@ public class PlayerStatUI : MonoBehaviour
     private CanvasGroup statContainer;
 
     [SerializeField]
-    private TMP_Text playerNameText;
+    private TMP_Text augmentDescription;
 
     public string gunNameText { get; private set; }
-
-    [SerializeField]
-    private RectTransform gunPreviewPanel;
-
-    private GameObject gunPreviewGameObject;
 
     [SerializeField]
     private StatBar damageBar;
@@ -33,11 +28,6 @@ public class PlayerStatUI : MonoBehaviour
     private Outline outline;
 
     private PlayerIdentity playerIdentity;
-
-    [SerializeField]
-    private float gunPreviewScale;
-
-    private float gunPreviewPositionZ = -1f;
 
     public PlayerIdentity PlayerIdentity
     {
@@ -59,14 +49,8 @@ public class PlayerStatUI : MonoBehaviour
         statContainer.alpha = 1;
         outline = GetComponent<Outline>();
 
-        SetName(playerIdentity.playerName);
         SetColor(playerIdentity.color);
-
         SetGunName(playerIdentity.GetGunName());
-        gunPreviewGameObject = GunFactory.InstantiateGun(playerIdentity.Body, playerIdentity.Barrel, playerIdentity.Extension, null, gunPreviewPanel);
-        gunPreviewGameObject.transform.Rotate(new Vector3(0f, 90f));
-        gunPreviewGameObject.transform.localScale = new Vector3(gunPreviewScale, gunPreviewScale, gunPreviewScale);
-        gunPreviewGameObject.transform.Translate(new Vector3(0f, 0f, gunPreviewPositionZ));
 
         // Set current stats
         OnInventoryChange(null);
@@ -86,39 +70,7 @@ public class PlayerStatUI : MonoBehaviour
 
     private void OnInventoryChange(Item item)
     {
-        SetBaseGunStats(GunFactory.GetGunStats(playerIdentity.Body, playerIdentity.Barrel, playerIdentity.Extension));
-    }
-
-    private void OnBiddingPlatformChange(BiddingPlatform platform)
-    {
-        Item body = playerIdentity.Body;
-        Item barrel = playerIdentity.Barrel;
-        Item extension = playerIdentity.Extension;
-
-        if (platform == null || platform.Item == null)
-        {
-            ResetNewGunStats();
-            SetGunName(playerIdentity.GetGunName());
-            SetGunPreview(body, barrel, extension);
-            return;
-        }
-
-        switch (platform.Item.augmentType)
-        {
-            case AugmentType.Body:
-                body = platform.Item;
-                break;
-            case AugmentType.Barrel:
-                barrel = platform.Item;
-                break;
-            case AugmentType.Extension:
-                extension = platform.Item;
-                break;
-            default:
-                Debug.Log($"No appropritate augmentType ({platform.Item.augmentType}) found in item.");
-                break;
-        }
-        UpdateStats();
+        SetBaseGunStats(GunFactory.GetGunStats(StaticInfo.Singleton.StartingBody, StaticInfo.Singleton.StartingBarrel, StaticInfo.Singleton.StartingExtension));
     }
 
     public void UpdateStats()
@@ -126,12 +78,11 @@ public class PlayerStatUI : MonoBehaviour
         GunStats stats = GunFactory.GetGunStats(playerIdentity.Body, playerIdentity.Barrel, playerIdentity.Extension);
         SetNewGunStats(stats);
         SetGunName(GunFactory.GetGunName(playerIdentity.Body, playerIdentity.Barrel, playerIdentity.Extension));
-        SetGunPreview(playerIdentity.Body, playerIdentity.Barrel, playerIdentity.Extension);
     }
 
-    public void SetName(string name)
+    public void SetDescription(string description)
     {
-        playerNameText.SetText(name);
+        augmentDescription.SetText(string.IsNullOrEmpty(description) ? "No extension" : description);
     }
 
     public void SetColor(Color color)
@@ -142,15 +93,6 @@ public class PlayerStatUI : MonoBehaviour
     public void SetGunName(string name)
     {
         gunNameText = name;
-    }
-
-    public void SetGunPreview(Item body, Item barrel, Item extension)
-    {
-        GunFactory gunFactory = gunPreviewGameObject.GetComponent<GunFactory>();
-        gunFactory.Body = body;
-        gunFactory.Barrel = barrel;
-        gunFactory.Extension = extension;
-        gunFactory.InitializeGun();
     }
 
     public void SetBaseGunStats(GunStats gunStats)

@@ -2,6 +2,8 @@ using System;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+using CollectionExtensions;
 
 public class PlayerFactory : MonoBehaviour
 {
@@ -12,62 +14,83 @@ public class PlayerFactory : MonoBehaviour
     private Transform[] spawnPoints;
     [SerializeField]
     private GameObject playerSelectItemPrefab;
+    [SerializeField]
+    private GameObject aIOpponent;
+    [SerializeField]
+    private GameObject aIBidder;
+    [SerializeField]
+    private GameObject aiIdentity;
+    private List<PlayerIdentity> existingAiIdentities;
     private float spawnInterval = 0f;
     private PlayerInputManagerController playerInputManagerController;
 
     [SerializeField]
     private GlobalHUDController globalHUDController;
+    [SerializeField]
+    private bool overrideMatchManager = false;
 
     private static readonly System.Random random = new System.Random();
 
     private void Awake()
     {
-        if(PlayerInputManagerController.Singleton == null)
+        if (PlayerInputManagerController.Singleton == null)
         {
             // We most likely started the game in the game scene, reload menu instead
             SceneManager.LoadSceneAsync("Menu");
             return;
         }
+
         playerInputManagerController = PlayerInputManagerController.Singleton;
 
         // Enable splitscreen
-        playerInputManagerController.playerInputManager.DisableJoining();
-        playerInputManagerController.playerInputManager.splitScreen = true;
+        playerInputManagerController.PlayerInputManager.DisableJoining();
+        playerInputManagerController.PlayerInputManager.splitScreen = true;
+
+        existingAiIdentities = FindObjectsOfType<PlayerIdentity>()
+            .Where(identity => identity.IsAI).ToList();
+
+        if (!overrideMatchManager)
+            return;
+
+        playerInputManagerController.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+        InstantiatePlayersFPS();
     }
 
-    public void InstantiatePlayersFPS()
+    public List<PlayerManager> InstantiatePlayersFPS(int aiPlayerCount = 0)
     {
         playerInputManagerController.ChangeInputMaps("FPS");
-        InstantiateInputsOnSpawnpoints(InstantiateFPSPlayer);
+        return InstantiateInputsOnSpawnpoints(InstantiateFPSPlayer, InstantiateFPSAI, aiPlayerCount);
     }
 
-    public void InstantiatePlayersBidding()
+    public void InstantiatePlayersBidding(int aiPLayerCount = 0)
     {
         playerInputManagerController.ChangeInputMaps("Bidding");
-        InstantiateInputsOnSpawnpoints(InstantiateBiddingPlayer);
+        InstantiateInputsOnSpawnpoints(InstantiateBiddingPlayer, InstantiateBiddingAI, aiPLayerCount);
     }
     public void InstantiatePlayerSelectItems()
     {
         playerInputManagerController.ChangeInputMaps("Menu");
         InstantiateInputsOnSpawnpoints(InstantiateItemSelectPlayer);
-
     }
 
-    private void InstantiateInputsOnSpawnpoints(Action<InputManager, Transform> instantiate)
+    private List<PlayerManager> InstantiateInputsOnSpawnpoints(Func<InputManager, Transform, PlayerManager> instantiate, Func<int, Transform, AIManager> instantiateAI = null, int aiPlayerCount = 0)
     {
-        var shuffledSpawnPoints = new List<Transform>(spawnPoints);
-        // Fisher-Yates shuffle
-        for (int i = spawnPoints.Length - 1; i > 0; i--)
-        {
-            var k = random.Next(i);
-            var firstSwapped = shuffledSpawnPoints[i];
-            shuffledSpawnPoints[i] = shuffledSpawnPoints[k];
-            shuffledSpawnPoints[k] = firstSwapped;
-        }
+
+        var shuffledSpawnPoints = spawnPoints.ShuffledCopy();
+
+        var playerList = new List<PlayerManager>();
         for (int i = 0; i < playerInputManagerController.playerInputs.Count; i++)
         {
-            instantiate(playerInputManagerController.playerInputs[i], shuffledSpawnPoints[i % spawnPoints.Length]);
+            playerList.Add(instantiate(playerInputManagerController.playerInputs[i], shuffledSpawnPoints[i % spawnPoints.Length]));
         }
+        for (int i = playerInputManagerController.playerInputs.Count; i < playerInputManagerController.playerInputs.Count + aiPlayerCount; i++)
+        {
+            var spawnPoint = shuffledSpawnPoints[i % spawnPoints.Length];
+            var aiPlayer = instantiateAI(i, spawnPoint);
+
+            playerList.Add(aiPlayer);
+        }
+        return playerList;
     }
 
 
@@ -76,7 +99,7 @@ public class PlayerFactory : MonoBehaviour
     /// This function is where you should add delegate events for them to be properly invoked.
     /// </summary>
     /// <param name="inputManager">PlayerInput to tie the player prefab to.</param>
-    private void InstantiateFPSPlayer(InputManager inputManager, Transform spawnPoint)
+    private PlayerManager InstantiateFPSPlayer(InputManager inputManager, Transform spawnPoint)
     {
         // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
@@ -87,16 +110,19 @@ public class PlayerFactory : MonoBehaviour
         inputManager.transform.localPosition = cameraOffset.localPosition;
         inputManager.transform.rotation = player.transform.rotation;
         // Enable Camera
-        inputManager.GetComponent<Camera>().enabled = true;
+        inputManager.PlayerCamera.enabled = true;
+        inputManager.PlayerCamera.orthographic = false;
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
         playerManager.SetPlayerInput(inputManager);
-        playerManager.SetGun(inputManager.transform);
+        playerManager.SetGun(inputManager.transform.GetChild(0));
         // Set unique layer for player
         playerManager.SetLayer(inputManager.playerInput.playerIndex);
+        playerManager.GetComponent<PlayerMovement>().SetInitialRotation(spawnPoint.eulerAngles.y * Mathf.Deg2Rad);
+        return playerManager;
     }
 
-    private void InstantiateBiddingPlayer(InputManager inputManager, Transform spawnPoint)
+    private PlayerManager InstantiateBiddingPlayer(InputManager inputManager, Transform spawnPoint)
     {
         // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
@@ -107,23 +133,52 @@ public class PlayerFactory : MonoBehaviour
         inputManager.transform.localPosition = cameraOffset.localPosition;
         inputManager.transform.rotation = player.transform.rotation;
         // Disable Camera
-        inputManager.GetComponent<Camera>().enabled = false;
+        inputManager.PlayerCamera.enabled = false;
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
         playerManager.SetPlayerInput(inputManager);
         player.GetComponent<HealthController>().enabled = false;
+        return playerManager;
     }
-    private void InstantiateItemSelectPlayer(InputManager inputManager, Transform spawnPoint)
+
+    private PlayerManager InstantiateItemSelectPlayer(InputManager inputManager, Transform spawnPoint)
     {
-        GetComponent<AuctionDriver>().Camera.GetComponent<Camera>().enabled = false;
-        inputManager.GetComponent<Camera>().enabled = true;
-        inputManager.gameObject.SetActive(false);
-        PlayerInputManagerController.Singleton.playerInputManager.splitScreen = true;
-        inputManager.gameObject.SetActive(true);
+        inputManager.PlayerCamera.enabled = true;
+        inputManager.PlayerCamera.orthographic = true;
         spawnInterval += 10000f;
         GameObject player = Instantiate(playerSelectItemPrefab, spawnPoint.position + new Vector3(spawnInterval, spawnInterval, 0), spawnPoint.rotation);
-        Camera playerCamera = inputManager.GetComponent<Camera>();
-        playerCamera.transform.position = player.GetComponent<ItemSelectManager>().cameraPosition.transform.position;
-        StartCoroutine(player.GetComponent<ItemSelectManager>().SpawnItems(inputManager));
+        inputManager.transform.position = player.GetComponent<ItemSelectMenu>().CameraPosition.transform.position;
+        StartCoroutine(player.GetComponent<ItemSelectMenu>().SpawnItems(inputManager));
+        return null;
+    }
+
+    private AIManager InstantiateFPSAI(int index, Transform spawnPoint)
+    {
+
+        PlayerIdentity identity = null;
+
+        if (existingAiIdentities.Count == 0)
+        {
+            var identityObject = Instantiate(aiIdentity);
+            identity = identityObject.GetComponent<PlayerIdentity>();
+            identity.playerName = $"HCU {index + 1}";
+            DontDestroyOnLoad(identityObject);
+        }
+
+        var aiOpponent = Instantiate(aIOpponent, spawnPoint.position, spawnPoint.rotation);
+        AIManager manager = aiOpponent.GetComponent<AIManager>();
+        manager.SetLayer(index);
+        manager.SetIdentity(identity ? identity : existingAiIdentities[index - playerInputManagerController.playerInputs.Count]);
+        manager.GetComponent<AIMovement>().SetInitialRotation(spawnPoint.eulerAngles.y * Mathf.Deg2Rad);
+        return manager;
+    }
+
+    private AIManager InstantiateBiddingAI(int index, Transform spawnPoint)
+    {
+        var aiOpponent = Instantiate(aIBidder, spawnPoint.position, spawnPoint.rotation);
+        AIManager manager = aiOpponent.GetComponent<AIManager>();
+        manager.SetLayer(index);
+        manager.SetIdentity(existingAiIdentities[index - playerInputManagerController.playerInputs.Count]);
+        return manager;
     }
 }

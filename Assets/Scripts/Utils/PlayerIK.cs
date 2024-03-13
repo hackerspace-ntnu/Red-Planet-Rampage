@@ -41,12 +41,19 @@ public class PlayerIK : MonoBehaviour
     [SerializeField]
     private float modelScaleOffset;
 
+    [SerializeField]
+    private Transform leftHandIKTransform;
+    public Transform LeftHandIKTransform => leftHandIKTransform;
+    [SerializeField]
+    private Transform rightHandIKTranform;
+    public Transform RightHandIKTransform => rightHandIKTranform;
+
     private void LateUpdate()
     {
-        if (LeftHandIKTarget)
+        if (LeftHandIKTarget && LeftHandIKTarget.gameObject.activeInHierarchy)
             GenericTwoBodyIK.AnimateTransforms(leftArmRoot, leftArmElbow, leftArmHand, leftHandIKPole, LeftHandIKTarget, leftArmRootOffset, leftArmElbowOffset, modelScaleOffset);
         
-        if (RightHandIKTarget)
+        if (RightHandIKTarget && RightHandIKTarget.gameObject.activeInHierarchy)
         {
             GenericTwoBodyIK.AnimateTransforms(rightArmRoot, rightArmElbow, rightArmHand, rightHandIKPole, RightHandIKTarget, rightArmRootOffset, rightArmElbowOffset, modelScaleOffset);
             rightArmHand.rotation = Quaternion.LookRotation(RightHandIKTarget.transform.forward);

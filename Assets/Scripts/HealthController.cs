@@ -15,6 +15,8 @@ public class HealthController : MonoBehaviour
 
     public DamageEvent onDeath;
 
+    public PlayerManager Player { get; private set; }
+
     private void Awake()
     {
         foreach (var box in GetComponentsInChildren<HitboxController>())
@@ -26,6 +28,7 @@ public class HealthController : MonoBehaviour
     private void Start()
     {
         currentHealth = maxhHealth;
+        Player = GetComponent<PlayerManager>();
     }
 
     public void DealDamage(DamageInfo info)

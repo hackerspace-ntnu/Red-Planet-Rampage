@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEditor;
+using SecretName;
 
 [RequireComponent(typeof(GunController))]
 public class GunFactory : MonoBehaviour
@@ -18,7 +19,73 @@ public class GunFactory : MonoBehaviour
         // Initialize everything
         gun.GetComponent<GunFactory>().InitializeGun(owner);
 
+        var cullingLayer = LayerMask.NameToLayer("Gun " + owner.inputManager.playerInput.playerIndex);
+
+        GunFactory displayGun = owner.GunOrigin.GetComponent<GunFactory>();
+        displayGun.Body = bodyPrefab;
+        displayGun.Barrel = barrelPrefab;
+        displayGun.Extension = extensionPrefab;
+        displayGun.InitializeGun();
+
+        var cullingLayerDisplay = LayerMask.NameToLayer("Player " + owner.inputManager.playerInput.playerIndex);
+
+        var firstPersonGunController = gun.GetComponent<GunFactory>().GunController;
+        var gunAnimations = displayGun.GetComponentsInChildren<AugmentAnimator>(includeInactive: true);
+        foreach (var animation in gunAnimations)
+        {
+            animation.OnInitialize(firstPersonGunController.stats);
+            firstPersonGunController.onFireStart += animation.OnFire;
+            firstPersonGunController.onReload += animation.OnReload;
+        }
+
+        // Animator initializers may instantiate objects, so we should set layers *afterwards*.
+        SetGunLayer(gun.GetComponent<GunFactory>(), cullingLayer);
+        SetGunLayer(displayGun, cullingLayerDisplay);
+
+        // Turn off shadow casting for first person gun
+        gun.GetComponentsInChildren<MeshRenderer>(includeInactive: true).ToList()
+            .ForEach(mesh => mesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off);
+        gun.GetComponentsInChildren<SkinnedMeshRenderer>(includeInactive: true).ToList()
+            .ForEach(mesh => mesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off);
+
+        firstPersonGunController.RightHandTarget = displayGun.GunController.RightHandTarget;
+
+        if (displayGun.GunController.HasRecoil)
+            firstPersonGunController.onFire += displayGun.GunController.PlayRecoil;
+
+        if (displayGun.GunController.projectile.GetType() == typeof(BulletController))
+            ((BulletController)gun.GetComponent<GunFactory>().GunController.projectile).Trail.layer = 0;
+
+        if (displayGun.GunController.projectile.GetType() == typeof(MeshProjectileController))
+            ((MeshProjectileController)gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
+
+        if (displayGun.GunController.projectile.GetType() == typeof(LazurController))
+            ((LazurController)gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
+
         return gun;
+    }
+
+    public static GameObject InstantiateGunAI(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, AIManager owner, Transform parent)
+    {
+        GunFactory displayGun = owner.GunOrigin.gameObject.AddComponent<GunFactory>();
+        displayGun.Body = bodyPrefab;
+        displayGun.Barrel = barrelPrefab;
+        displayGun.Extension = extensionPrefab;
+        displayGun.InitializeGun(owner);
+
+        return displayGun.gameObject;
+    }
+
+    private static void SetGunLayer(GunFactory gunFactory, int cullingLayer)
+    {
+        gunFactory.gameObject.layer = cullingLayer;
+
+        var children = gunFactory.GetComponentsInChildren<Transform>(includeInactive: true);
+        foreach (var child in children)
+        {
+            child.gameObject.layer = cullingLayer;
+        }
+
     }
 
     public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, RectTransform parent)
@@ -46,11 +113,16 @@ public class GunFactory : MonoBehaviour
 
     public static string GetGunName(Item body, Item barrel, Item extension)
     {
-        OverrideName result = StaticInfo.Singleton.SecretNames.Where(x => (x.Body == body && x.Barrel == barrel && x.Extension == extension)).FirstOrDefault();
-        if (!(result.Name is null)) { return result.Name; }
+        OverrideName result = StaticInfo.Singleton.SecretNames
+                                        .Where(x => (x.Body == body && x.Barrel == barrel && x.Extension == extension))
+                                        .FirstOrDefault();
+        if (!(result.Name is null))
+            return result.Name;
+
         if (extension == null)
-            return $"The {body.secretName} {barrel.secretName}";
-        return $"The {body.secretName} {extension.secretName} {barrel.secretName}";
+            return $"The {body.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
+
+        return $"The {body.secretName.Capitalized()} {extension.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
     }
 
     // Prefabs of the different parts
@@ -62,8 +134,8 @@ public class GunFactory : MonoBehaviour
 
     [SerializeField]
     public Item Extension;
-
     private GunController gunController;
+    public GunController GunController => gunController;
 
 #if UNITY_EDITOR
     private void Start()
@@ -80,7 +152,8 @@ public class GunFactory : MonoBehaviour
     {
         gunController = GetComponent<GunController>();
         // Make gun remember who shoots with it
-        gunController.player = owner;
+        if (owner)
+            gunController.SetPlayer(owner);
 
         List<ProjectileModifier> modifiers = new List<ProjectileModifier>();
 
@@ -188,6 +261,8 @@ public class GunFactory : MonoBehaviour
                 gunController.fireRateController = new FullAutoFirerateController(gunController.stats.Firerate);
                 break;
         }
+        // Ensure ammo == magazineSize after all modifiers are applied
+        gunController.Reload(1);
     }
 }
 

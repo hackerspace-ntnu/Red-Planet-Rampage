@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -10,6 +11,7 @@ public class ExplosionController : MonoBehaviour
     [SerializeField] private AnimationCurve damageCurve;
 
     [SerializeField] private float radius;
+    public float Radius => radius;
 
     [SerializeField] private float knockbackForce = 2000;
 
@@ -18,6 +20,7 @@ public class ExplosionController : MonoBehaviour
     [SerializeField] private LayerMask hitBoxLayers;
 
     private VisualEffect visualEffect;
+    private AudioSource soundEffect;
 
     // Makes sure a player doesn't take damage for each hitbox
     private HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
@@ -32,6 +35,7 @@ public class ExplosionController : MonoBehaviour
     {
         visualEffect = GetComponent<VisualEffect>();
         visualEffect.enabled = false;
+        soundEffect = GetComponent<AudioSource>();
     }
 
     public void OnDrawGizmos()
@@ -40,27 +44,41 @@ public class ExplosionController : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, radius);
     }
 
-    public void Explode(PlayerManager sourcePlayer)
+    public List<(RaycastHit hit, float damage)> Explode(PlayerManager sourcePlayer)
     {
         visualEffect.enabled = true;
-        visualEffect.SendEvent("OnPlay");
-        var targets = Physics.OverlapSphere(transform.position, radius, hitBoxLayers);
+        visualEffect.SendEvent(VisualEffectAsset.PlayEventID);
+        soundEffect?.Play();
+        var targets = Physics.SphereCastAll(transform.position, radius, Vector3.up, 0.01f, hitBoxLayers);
+        var hits = new List<(RaycastHit, float)>(targets.Length);
         foreach (var target in targets)
         {
-            DealDamage(target, sourcePlayer);
+            DealDamage(target.collider, sourcePlayer, out var shouldBeReturned, out var scaledDamage);
+            if (shouldBeReturned)
+                hits.Add((target, scaledDamage));
         }
         Destroy(gameObject, 4);
+        return hits;
     }
 
-    private void DealDamage(Collider target, PlayerManager sourcePlayer)
+    private void DealDamage(Collider target, PlayerManager sourcePlayer, out bool shouldBeReturned, out float scaledDamage)
     {
-        var hitbox = target.GetComponent<HitboxController>();
+        scaledDamage = 0;
+        if (!target.TryGetComponent<HitboxController>(out var hitbox))
+        {
+            shouldBeReturned = true;
+            return;
+        }
+
         bool hasHealth = hitbox.health;
-        if (hasHealth && !hitHealthControllers.Contains(hitbox.health))
+        bool hasNotBeenRegisteredYet = !hitHealthControllers.Contains(hitbox.health);
+        shouldBeReturned = !hasHealth || hasNotBeenRegisteredYet;
+
+        if (hasHealth && hasNotBeenRegisteredYet)
         {
             hitHealthControllers.Add(hitbox.health);
-            var scaledDamage = damage * damageCurve.Evaluate(Vector3.Distance(target.transform.position, transform.position) / radius);
-            hitbox.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage, target.transform.position, (target.transform.position - transform.position).normalized));
+            scaledDamage = damage * damageCurve.Evaluate(Vector3.Distance(target.transform.position, transform.position) / radius);
+            hitbox.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage, target.transform.position, (target.transform.position - transform.position).normalized, DamageType.Explosion));
         }
 
         if (hasHealth && hitbox.health.TryGetComponent<Rigidbody>(out var rigidbody))

@@ -12,6 +12,7 @@ public class ScoreboardManager : MonoBehaviour
 
     // Actions
     public event Action ShowNextCrime;
+    public event Action ShowVictoryProgress;
 
     [Header("Variables")]
     private List<Player> players = new List<Player>();
@@ -29,7 +30,7 @@ public class ScoreboardManager : MonoBehaviour
     private float newCrimeDelay = 1f;
 
     [SerializeField]
-    private float delayBeforeMatchResults = 3f;
+    public float matchProgressDelay = 5f;
 
     private int step = 0;
     private int maxSteps = 0;
@@ -42,11 +43,11 @@ public class ScoreboardManager : MonoBehaviour
 
     // Refrences
     private MatchController matchController;
-    
+
 
     private void Awake()
     {
-    #region Singleton boilerplate
+        #region Singleton boilerplate
 
         if (Singleton != null)
         {
@@ -57,7 +58,7 @@ public class ScoreboardManager : MonoBehaviour
                 return;
             }
         }
-        
+
         Singleton = this;
 
         #endregion Singleton boilerplate    
@@ -99,10 +100,6 @@ public class ScoreboardManager : MonoBehaviour
 
     public IEnumerator ShowMatchResults()
     {
-        matchController.GlobalHUD.RoundTimer.enabled = false;
-        // Delay first so we can see who killed who
-        yield return new WaitForSeconds(delayBeforeMatchResults);
-
         // Animate the after battle scene
         Camera.main.transform.parent = transform;
         Camera.main.GetComponent<Animator>().SetTrigger("ScoreboardZoom");
@@ -110,13 +107,14 @@ public class ScoreboardManager : MonoBehaviour
         for (int i = 0; i < scoreboards.Count; i++)
         {
             // Disable player camera
-            players[i].playerManager.inputManager.GetComponent<Camera>().enabled = false;
+            if (players[i].playerManager.inputManager)
+                players[i].playerManager.inputManager.PlayerCamera.enabled = false;
         }
 
         // Do not start adding crimes before the camera has finished the animation
         int delay = Mathf.RoundToInt(Camera.main.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
         yield return new WaitForSeconds(delay);
-        
+
         maxSteps = MaxNumberOfCrimes();
 
         StartCoroutine(NextCrime());
@@ -146,8 +144,9 @@ public class ScoreboardManager : MonoBehaviour
         }
         else
         {
+            ShowVictoryProgress?.Invoke();
             // Start next round
-            yield return new WaitForSeconds(newCrimeDelay);
+            yield return new WaitForSeconds(matchProgressDelay);
             matchController.StartNextBidding();
         }
     }
@@ -165,30 +164,33 @@ public class ScoreboardManager : MonoBehaviour
             Player player = players[i];
             Scoreboard scoreboard = scoreboards[i];
 
-            scoreboard.AddPosterCrime("Savings", player.playerIdentity.chips);
+            var baseReward = matchController.RewardBase;
+            var killsReward = matchController.RewardKill * lastRound.KillCount(player.playerManager);
+            var winReward = lastRound.IsWinner(player.playerIdentity) ? matchController.RewardWin : 0;
+
+            var total = player.playerIdentity.chips;
+            var gain = baseReward + killsReward + winReward;
+            var savings = total - gain;
+
+            scoreboard.AddPosterCrime("Savings", savings);
 
             // Participation award
-            scoreboard.AddPosterCrime("Base", matchController.RewardBase);
+            scoreboard.AddPosterCrime("Base", baseReward);
 
             // Kill Award (shows 0 if none)
-            scoreboard.AddPosterCrime("Kills", matchController.RewardKill * lastRound.KillCount(player.playerManager));
+            scoreboard.AddPosterCrime("Kills", killsReward);
 
             // Round winner award
-            if (lastRound.IsWinner(player.playerIdentity))
+            if (winReward > 0)
             {
-                scoreboard.AddPosterCrime("Victor", matchController.RewardWin);
+                scoreboard.AddPosterCrime("Victor", winReward);
             }
             else
             {
                 scoreboard.AddBlankPoster();
             }
 
-            // New total
-            int roundSpoils = matchController.RewardBase
-                + matchController.RewardKill * lastRound.KillCount(player.playerManager)
-                + (lastRound.IsWinner(player.playerIdentity) ? matchController.RewardWin : 0);
-
-            scoreboard.AddPosterCrime("Total", roundSpoils + player.playerIdentity.chips);
+            scoreboard.AddPosterCrime("Total", total);
         }
 
         StartCoroutine(ShowMatchResults());

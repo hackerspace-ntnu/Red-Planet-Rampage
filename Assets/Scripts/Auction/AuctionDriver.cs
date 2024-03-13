@@ -19,6 +19,8 @@ public class AuctionDriver : MonoBehaviour
 
     [SerializeField]
     private BiddingPlatform[] biddingPlatforms;
+    [HideInInspector]
+    public BiddingPlatform[] BiddingPlatforms => biddingPlatforms;
     private RandomisedAuctionStage[] availableAuctionStages;
 
     [SerializeField]
@@ -31,19 +33,25 @@ public class AuctionDriver : MonoBehaviour
 
     [SerializeField]
     private PlayerFactory playerFactory;
-    
+
     [SerializeField]
     private RectTransform[] gunConstructionPanels;
     private float gunConstructionScale = 8f;
 
     [SerializeField]
     private Animator cameraAnimator;
+    [SerializeField]
+    private Vector3 cameraStandbyPosition;
+    private int screenShakeTween;
     public GameObject Camera => cameraAnimator.gameObject;
+    [SerializeField]
+    private Camera extraCamera;
 
     public static AuctionDriver Singleton;
 
-    private void Awake() {
-            #region Singleton boilerplate
+    private void Awake()
+    {
+        #region Singleton boilerplate
 
         if (Singleton != null)
         {
@@ -73,12 +81,14 @@ public class AuctionDriver : MonoBehaviour
         {
             1 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction },
             2 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BarrelAuction },
-            3 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction},
+            3 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction },
             _ => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction }
         };
 
         playerFactory = GetComponent<PlayerFactory>();
-        playerFactory.InstantiatePlayersBidding();
+        var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
+            Mathf.Max(4 - PlayerInputManagerController.Singleton.playerInputs.Count, 0) : 0;
+        playerFactory.InstantiatePlayersBidding(aiPlayerCount);
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
 
         AnimateAuctionStart();
@@ -102,13 +112,24 @@ public class AuctionDriver : MonoBehaviour
     {
         //TODO: Animate auctioneer presenting items instead, meanwhile this functionality should still be here
         GlobalHUDController globalHUD = GetComponentInChildren<GlobalHUDController>();
-        StartCoroutine(globalHUD.DisplayStartScreen(biddingBeginDelay+2));
+        StartCoroutine(globalHUD.DisplayStartScreen(biddingBeginDelay + 2));
     }
 
     private IEnumerator WaitAndStartCameraAnimation()
     {
         yield return new WaitForSeconds(biddingBeginDelay);
         cameraAnimator.SetTrigger("start");
+    }
+
+    public void ScreenShake()
+    {
+        cameraAnimator.enabled = false;
+        if (LeanTween.isTweening(screenShakeTween))
+        {
+            LeanTween.cancel(screenShakeTween);
+            cameraAnimator.transform.localPosition = cameraStandbyPosition;
+        }
+        screenShakeTween = cameraAnimator.gameObject.LeanMoveLocal(cameraStandbyPosition * 1.01f, 0.2f).setEaseShake().id;
     }
 
     private IEnumerator PopulatePlatforms()
@@ -148,25 +169,18 @@ public class AuctionDriver : MonoBehaviour
     private void EndAuction(BiddingPlatform biddingPlatform)
     {
         lastExtendedAuction.onBiddingEnd = null;
-
-        // TODO: Reuse and upgrade for new gun construction in the future
-        //LeanTween.alpha(gunConstructionPanels[0].parent.GetComponent<RectTransform>(), 1f, 1f).setEase(LeanTweenType.linear);
-        //MusicTrackManager.Singleton.SwitchTo(MusicType.CONSTRUCTION_FANFARE);
-        
-        /*
-        for (int i = 0; i < playersInAuction.Count; i++)
-        {
-            StartCoroutine(AnimateGunConstruction(playersInAuction.ElementAt(playersInAuction.Count-i-1), gunConstructionPanels[i]));
-        }
-        */
-        
+        Camera.GetComponent<Camera>().enabled = false;
+        extraCamera.enabled = true;
+        PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = true;
         playerFactory.InstantiatePlayerSelectItems();
+        GetComponent<ItemSelectManager>().StartTrackingMenus();
 
-        
     }
-    public void ChangeScene(){
+
+    public void ChangeScene()
+    {
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());  
+        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
     }
     private IEnumerator AnimateGunConstruction(PlayerManager playerManager, RectTransform parent)
     {
@@ -174,7 +188,7 @@ public class AuctionDriver : MonoBehaviour
         GameObject body = Instantiate(playerManager.identity.Body.augment, parent);
         AnimatePopUp(body);
         GunBody gunBody = body.GetComponent<GunBody>();
-        
+
         yield return new WaitForSeconds(1);
         GameObject barrel = Instantiate(playerManager.identity.Barrel.augment, gunBody.attachmentSite.position, gunBody.attachmentSite.rotation, parent);
         AnimatePopUp(barrel);

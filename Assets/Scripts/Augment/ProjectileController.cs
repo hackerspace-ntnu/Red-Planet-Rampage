@@ -49,7 +49,6 @@ public class ProjectileState
 
     public float damage = 0f;
 
-    // TODO: Make this to anything
     public float size = 0f;
 
     // Dictionary for storing properties that a projectile modifier might need, see SpiralPathModifier for an example
@@ -95,6 +94,9 @@ public abstract class ProjectileController : MonoBehaviour
     [HideInInspector]
     public PlayerManager player;
 
+    // Checks the extra large Hitboxes intended for aim assist
+    public bool HitAssist = false;
+
     // PLEASE READ
     // This is how the event-system of the guns work, all of these delegate are "hooks" that additional effects can be applied to
     // Each implementation of a projectile type must also describe when these events are triggered
@@ -120,13 +122,15 @@ public abstract class ProjectileController : MonoBehaviour
     public HitboxInteraction OnHitboxCollision;
 
     // Used whenever a projectile hits any collider, though 
-    public delegate void CollisionEvent(Collider other, ref ProjectileState state);
+    public delegate void CollisionEvent(RaycastHit other, ref ProjectileState state);
     public CollisionEvent OnColliderHit;
+    public CollisionEvent OnRicochet;
 
     protected GunController gunController;
 
     protected virtual void Awake()
     {
+
         collisionLayers = LayerMask.GetMask("Default", "HitBox");
 
         gunController = transform.parent.GetComponent<GunController>();
@@ -135,8 +139,16 @@ public abstract class ProjectileController : MonoBehaviour
             Debug.Log("Barrel not attached to gun parent!");
             return;
         }
+        if (!gunController.Player)
+        {
+            return;
+        }
         gunController.onInitializeGun += OnInitialize;
         gunController.onReload += OnReload;
+        if (gunController.Player.inputManager)
+            HitAssist = !gunController.Player.inputManager.IsMouseAndKeyboard;
+        if (HitAssist)
+            collisionLayers |= LayerMask.GetMask("AimAssist");
     }
 
     protected virtual void OnDestroy()

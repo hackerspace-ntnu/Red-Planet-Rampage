@@ -1,7 +1,10 @@
+using System;
 using System.Collections;
 using Unity.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 enum PlayerState
 {
@@ -14,75 +17,137 @@ enum PlayerState
 public class PlayerMovement : MonoBehaviour
 {
     private InputManager inputManager;
-    private Rigidbody body;
-    private Collider hitbox;
+    protected Rigidbody body;
+    public Rigidbody Body => body;
+    protected Collider hitbox;
+    private Camera playerCamera;
 
     [SerializeField]
-    private LayerMask ignoreMask;
+    protected LayerMask ignoreMask;
 
     [SerializeField]
     private float lookSpeed = 3;
 
     [SerializeField]
-    private float maxVelocity = 10;
-
-    private float strafeForce;
+    public float LookSpeedZoom = 0.75f;
 
     [SerializeField]
-    private float strafeForceGrounded = 60;
+    [Tooltip("Reduction in look speed for mice when zoomed")]
+    private float mouseZoomSpeedFactor = 0.1f;
+
+    [Header("Drag")]
+    [SerializeField]
+    protected float groundDrag = 6f;
 
     [SerializeField]
-    private float strafeForceCrouched = 30;
+    protected float airDrag = 2f;
 
     [SerializeField]
-    private float strafeForceInAir = 16;
+    protected float maxVelocityBeforeExtraDamping = 20f;
 
     [SerializeField]
-    private float drag = 6f;
+    protected float extraDamping = 25f;
+
+    protected float dragForce = 0;
+
+    [Header("Strafe")]
+    [SerializeField]
+    protected float strafeForceGrounded = 60;
 
     [SerializeField]
-    private float airDrag = 2f;
+    protected float strafeForceCrouched = 30;
 
     [SerializeField]
-    private float jumpForce = 10;
+    protected float strafeForceInAir = 16;
+
+    protected float strafeForce;
+
+    [Header("Jumping")]
+    [SerializeField]
+    protected float jumpForce = 10;
 
     [SerializeField]
-    private float leapForce = 12.5f;
+    protected float leapForce = 12.5f;
 
     [SerializeField]
-    private float jumpTimeout = 0.5f;
+    protected float leapTimeout = 0.25f;
 
     [SerializeField]
-    private float leapTimeout = 0.875f;
+    protected float dashHeightMultiplier = 0.5f;
 
-    private const float MarsGravity = 3.72076f;
+    [SerializeField]
+    protected float dashForwardMultiplier = 1.5f;
 
-    private bool canJump = true;
+    [SerializeField]
+    protected float dashDamping = 4f;
 
+    [SerializeField]
+    protected float minDashVelocity = 8f;
+
+    private bool isDashing = false;
+
+    [Header("State")]
     [SerializeField]
     private float crouchedHeightOffset = 0.3f;
-
-    private float localCameraHeight;
+    [SerializeField]
+    private float crouchedHeightGunOffset = 0.28f;
 
     [SerializeField]
     private float airThreshold = 0.4f;
 
     [SerializeField]
-    private float slopeAngleThreshold = 50;
+    protected float slopeAngleThreshold = 50;
 
     [SerializeField, ReadOnly]
     private PlayerState state = PlayerState.GROUNDED;
+    public bool StateIsAir => state == PlayerState.IN_AIR;
 
     [SerializeField]
-    private Animator animator;
+    protected Animator animator;
 
-    private Vector2 aimAngle = Vector2.zero;
+    protected GameObject gunHolder;
 
-    void Start()
+    protected const float MarsGravity = 3.7f;
+
+    private float localCameraHeight;
+    protected float localGunHolderHeight;
+    protected float localGunHolderX;
+
+    [SerializeField]
+    public float ZoomFov = 30f;
+    private float startingFov;
+
+    protected Vector2 aimAngle = Vector2.zero;
+
+    public delegate void MovementEvent();
+    public MovementEvent onLanding;
+    public delegate void MovementEventBody(Rigidbody body);
+    public MovementEventBody onMove;
+
+    private int gunCrouchPerformedTween;
+    private int cameraCrouchPerformedTween;
+    private int gunCrouchCanceledTween;
+    private int cameraCrouchCanceledTween;
+
+    [Header("Step climb")]
+    [SerializeField]
+    private GameObject bottomCaster;
+    [SerializeField]
+    private GameObject topCaster;
+    [SerializeField] 
+    private float stepHeight = 0.5f;
+    [SerializeField]
+    private Transform playerRoot;
+    [SerializeField]
+    protected LayerMask steppingIgnoreMask;
+
+
+    protected virtual void Start()
     {
         body = GetComponent<Rigidbody>();
         hitbox = GetComponent<BoxCollider>();
         strafeForce = strafeForceGrounded;
+        topCaster.transform.localPosition = new Vector3 (0f, stepHeight, 0f);
     }
 
     /// <summary>
@@ -92,76 +157,139 @@ public class PlayerMovement : MonoBehaviour
     public void SetPlayerInput(InputManager player)
     {
         inputManager = player;
+        var playerManager = GetComponent<PlayerManager>();
+        gunHolder = playerManager.GunHolder.gameObject;
         inputManager.onSelect += OnJump;
-        inputManager.onCrouchPerformed += SetCrouch;
-        inputManager.onCrouchCanceled += SetCrouch;
+        inputManager.onCrouchPerformed += OnCrouch;
+        inputManager.onCrouchCanceled += OnCrouch;
+        inputManager.onZoomPerformed += OnZoom;
+        inputManager.onZoomCanceled += OnZoomCanceled;
         localCameraHeight = inputManager.transform.localPosition.y;
+        localGunHolderX = gunHolder.transform.localPosition.x;
+        localGunHolderHeight = gunHolder.transform.localPosition.y;
+        playerCamera = inputManager.PlayerCamera;
+        startingFov = StaticInfo.Singleton.CameraFov;
+
+        if (MatchController.Singleton)
+            MatchController.Singleton.onRoundEnd += ResetZoom;
+    }
+
+    public void SetInitialRotation(float radians)
+    {
+        aimAngle = new Vector2(radians, aimAngle.y);
     }
 
     private void OnJump(InputAction.CallbackContext ctx)
     {
-        if (!(canJump && state == PlayerState.GROUNDED))
+        if (!(state == PlayerState.GROUNDED))
             return;
 
-        // Leap jump
+        // Leap/dash jump
         if (animator.GetBool("Crouching"))
         {
-            body.AddForce(Vector3.up * leapForce, ForceMode.VelocityChange);
+            body.AddForce(Vector3.up * leapForce * (isDashing ? dashHeightMultiplier : 1f), ForceMode.VelocityChange);
             Vector3 forwardDirection = new Vector3(inputManager.transform.forward.x, 0, inputManager.transform.forward.z);
-            body.AddForce(forwardDirection * leapForce, ForceMode.VelocityChange);
+            body.AddForce(forwardDirection * leapForce * (isDashing ? dashForwardMultiplier : 1f), ForceMode.VelocityChange);
             animator.SetTrigger("Leap");
-            StartCoroutine(JumpTimeout(leapTimeout));
+            onLanding += EnableDash;
             return;
         }
-        
         // Normal jump
         body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
-        StartCoroutine(JumpTimeout(jumpTimeout));
     }
 
-    private void SetCrouch(InputAction.CallbackContext ctx)
+    private void OnZoom(InputAction.CallbackContext ctx)
     {
-        if (LeanTween.isTweening(inputManager.gameObject))
-        {
-            LeanTween.cancel(inputManager.gameObject);
-            inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localCameraHeight, inputManager.transform.localPosition.z);
-        }
+        LeanTween.value(gameObject, (fov) => playerCamera.fieldOfView = fov, playerCamera.fieldOfView, ZoomFov, 0.2f).setEaseInOutCubic();
+        gunHolder.LeanMoveLocalX(0f, 0.2f);
+    }
 
+    private void OnZoomCanceled(InputAction.CallbackContext ctx)
+    {
+        CancelZoom();
+    }
+
+    private void CancelZoom()
+    {
+        LeanTween.value(gameObject, (fov) => playerCamera.fieldOfView = fov, playerCamera.fieldOfView, startingFov, 0.2f).setEaseInOutCubic();
+        gunHolder.LeanMoveLocalX(localGunHolderX, 0.2f);
+    }
+
+    private void ResetZoom()
+    {
+        inputManager.ZoomActive = false;
+        inputManager.onZoomPerformed -= OnZoom;
+        inputManager.onZoomCanceled -= OnZoomCanceled;
+        CancelZoom();
+    }
+
+    private void OnCrouch(InputAction.CallbackContext ctx)
+    {
+        if (LeanTween.isTweening(cameraCrouchCanceledTween))
+        {
+            LeanTween.cancel(cameraCrouchCanceledTween);
+            LeanTween.cancel(gunCrouchCanceledTween);
+            inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localCameraHeight, inputManager.transform.localPosition.z);
+            gunHolder.transform.localPosition = new Vector3(gunHolder.transform.localPosition.x, localGunHolderHeight, gunHolder.transform.localPosition.z);
+        }
+        if (LeanTween.isTweening(cameraCrouchPerformedTween))
+        {
+            LeanTween.cancel(cameraCrouchPerformedTween);
+            LeanTween.cancel(gunCrouchPerformedTween);
+            inputManager.transform.localPosition = new Vector3(inputManager.transform.localPosition.x, localCameraHeight, inputManager.transform.localPosition.z);
+            gunHolder.transform.localPosition = new Vector3(gunHolder.transform.localPosition.x, localGunHolderHeight, gunHolder.transform.localPosition.z);
+        }
 
         if (ctx.performed)
         {
             if (IsInAir())
+            {
+                onLanding += StartCrouch;
                 return;
-            animator.SetBool("Crouching", true);
-            strafeForce = strafeForceCrouched;
-            inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f);
+            }
+            StartCrouch();
         }
-            
+
         if (ctx.canceled)
         {
             animator.SetBool("Crouching", false);
             strafeForce = strafeForceGrounded;
-            inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f);
+            cameraCrouchCanceledTween = inputManager.gameObject.LeanMoveLocalY(localCameraHeight, 0.2f).id;
+            gunCrouchCanceledTween = gunHolder.LeanMoveLocalY(localGunHolderHeight, 0.2f).id;
+            isDashing = false;
+            onLanding -= StartCrouch;
         }
-            
+
+    }
+
+    protected virtual void StartCrouch()
+    {
+        animator.SetBool("Crouching", true);
+        strafeForce = strafeForceCrouched;
+        cameraCrouchPerformedTween = inputManager.gameObject.LeanMoveLocalY(localCameraHeight - crouchedHeightOffset, 0.2f).id;
+        gunCrouchCanceledTween = gunHolder.LeanMoveLocalY(localGunHolderHeight - crouchedHeightGunOffset, 0.2f).id;
+    }
+
+    private void EnableDash()
+    {
+        StartCoroutine(JumpTimeout(leapTimeout));
     }
 
     private IEnumerator JumpTimeout(float time)
     {
-        canJump = false;
         yield return new WaitForSeconds(time);
-        canJump = true;
+        isDashing = IsInAir();
+        onLanding -= EnableDash;
     }
-
 
     private bool IsInAir()
     {
         // Cast a box to detect (partial) ground. See OnDrawGizmos for what I think is the extent of the box cast.
         // No, this does not work if the cast start at the bottom.
-        return !Physics.BoxCast(hitbox.bounds.center, 0.5f * Vector3.one, Vector3.down, Quaternion.identity, 0.5f + airThreshold, ignoreMask); ;
+        return !Physics.BoxCast(hitbox.bounds.center, new Vector3(.5f, .5f, .2f), Vector3.down, Quaternion.identity, 0.5f + airThreshold, ignoreMask); ;
     }
 
-    private Vector3 GroundNormal()
+    protected Vector3 GroundNormal()
     {
         // Cast a box to detect (partial) ground. See OnDrawGizmos for what I think is the extent of the box cast.
         // No, this does not work if the cast start at the bottom.
@@ -175,9 +303,7 @@ public class PlayerMovement : MonoBehaviour
         return Vector3.up;
     }
 
-
-
-    private void UpdatePosition(Vector3 input)
+    protected void UpdatePosition(Vector3 input)
     {
         // Modify input to addforce with relation to current rotation.
         input = transform.forward * input.z + transform.right * input.x;
@@ -185,22 +311,23 @@ public class PlayerMovement : MonoBehaviour
         {
             case PlayerState.IN_AIR:
                 {
-                    // Strafe slightly with less drag.
-                    body.drag = airDrag;
-                    body.AddForce(input * strafeForceInAir, ForceMode.VelocityChange);
-                    body.AddForce(Vector3.down * MarsGravity, ForceMode.Acceleration);
-                    if (!IsInAir()) state = PlayerState.GROUNDED;
+                    dragForce = airDrag;
+                    body.AddForce(input * strafeForceInAir * Time.deltaTime, ForceMode.VelocityChange);
+                    body.AddForce(Vector3.down * MarsGravity * Time.deltaTime, ForceMode.Acceleration);
+                    if (IsInAir())
+                        break;
+                    state = PlayerState.GROUNDED;
+                    onLanding?.Invoke();
                     break;
                 }
             case PlayerState.GROUNDED:
                 {
-                    // Strafe normally with heavy drag.
-                    body.drag = drag;
+                    dragForce = groundDrag;
                     // Walk along ground normal (adjusted if on heavy slope).
                     var groundNormal = GroundNormal();
                     var direction = Vector3.ProjectOnPlane(input, groundNormal);
-                    body.AddForce(direction * strafeForce, ForceMode.VelocityChange);
-                    body.AddForce(direction * strafeForce, ForceMode.Impulse);
+                    body.AddForce(direction * strafeForce * Time.deltaTime, ForceMode.VelocityChange);
+                    body.AddForce(direction * strafeForce * Time.deltaTime, ForceMode.Impulse);
                     if (IsInAir()) state = PlayerState.IN_AIR;
                     break;
                 }
@@ -210,13 +337,24 @@ public class PlayerMovement : MonoBehaviour
                     break;
                 }
         }
+        var yDrag = body.velocity.y < 0 ? 0f : body.velocity.y;
+        body.AddForce(-dragForce * body.mass * new Vector3(body.velocity.x, yDrag, body.velocity.z), ForceMode.Force);
     }
 
     private void UpdateRotation()
     {
-        aimAngle += inputManager.lookInput * lookSpeed * Time.deltaTime;
+        var lookSpeedFactor = inputManager.ZoomActive
+            ? inputManager.IsMouseAndKeyboard ? LookSpeedZoom * mouseZoomSpeedFactor : LookSpeedZoom
+            : lookSpeed;
+        var lookInput = inputManager.IsMouseAndKeyboard
+            ? inputManager.lookInput
+            : inputManager.lookInput * Time.deltaTime;
+        aimAngle += lookInput * lookSpeedFactor;
         // Constrain aiming angle vertically and wrap horizontally.
-        aimAngle.y = Mathf.Clamp(aimAngle.y, -Mathf.PI / 2, Mathf.PI / 2);
+        // + and - Mathf.Deg2Rad is offsetting with 1 degree in radians,
+        // which is neccesary to avoid IK shortest path slerping that causes aniamtions to break at exactly the halfway points.
+        // This is way more computationaly efficient than creating edgecase checks in IK with practically no gameplay impact
+        aimAngle.y = Mathf.Clamp(aimAngle.y, -Mathf.PI / 2 + Mathf.Deg2Rad, Mathf.PI / 2 - Mathf.Deg2Rad);
         aimAngle.x = (aimAngle.x + Mathf.PI) % (2 * Mathf.PI) - Mathf.PI;
         // Rotate rigidbody.
         body.MoveRotation(Quaternion.AngleAxis(aimAngle.x * Mathf.Rad2Deg, Vector3.up));
@@ -224,10 +362,10 @@ public class PlayerMovement : MonoBehaviour
         inputManager.transform.localRotation = Quaternion.AngleAxis(aimAngle.y * Mathf.Rad2Deg, Vector3.left);
     }
 
-    private void UpdateAnimatorParameters()
+    protected void UpdateAnimatorParameters()
     {
-        animator.SetFloat("Forward", Vector3.Dot(body.velocity, transform.forward) / maxVelocity);
-        animator.SetFloat("Right", Vector3.Dot(body.velocity, transform.right) / maxVelocity);
+        animator.SetFloat("Forward", Vector3.Dot(body.velocity, transform.forward) / maxVelocityBeforeExtraDamping);
+        animator.SetFloat("Right", Vector3.Dot(body.velocity, transform.right) / maxVelocityBeforeExtraDamping);
     }
 
     void OnDrawGizmos()
@@ -238,19 +376,106 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.DrawWireCube(center, extents);
     }
 
-    void FixedUpdate()
+    /// <summary>
+    /// More accurate ground detection for use in stepping up edges. Uses raycast to check for ground directly beneath the player.
+    /// </summary>
+    /// <returns>true if player is touching the ground, false if not touching ground </returns>
+    private bool FindSteppingGround()
     {
+        RaycastHit hitGround;
+        if (Physics.Raycast(playerRoot.position, Vector3.down, out hitGround, 0.01f))
+        {
+            if(hitGround.normal.y > 0.0001f && state == PlayerState.GROUNDED)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Check for an edge to step up using a short raycast, also checks for a ledge if the short raycast doesn't hit anything.
+    /// </summary>
+    private void FindStep()
+    {
+        Vector3 rayDirection = new Vector3(body.velocity.x, 0, body.velocity.z);
+        if (Physics.Raycast(bottomCaster.transform.position, rayDirection, out var hitBottom, 0.5f, steppingIgnoreMask))
+        {
+            OnStepDetected(hitBottom, rayDirection);
+            return;
+        }
+        if(Physics.Raycast(bottomCaster.transform.position + rayDirection.normalized * 0.5f, Vector3.up, out var hitBottomSurface, stepHeight, steppingIgnoreMask))
+        {
+            OnStepDetected(hitBottomSurface, rayDirection);
+        }
+    }
+
+    /// <summary>
+    /// Called when a edge or ledge is detected, checks for free area on top of edge and moves the player ontop if there is space.
+    /// </summary>
+    /// <param name="raycastHit"></param>
+    /// <param name="rayDirection"></param>
+    private void OnStepDetected(RaycastHit raycastHit, Vector3 rayDirection)
+    {
+        if (!Physics.Raycast(topCaster.transform.position, rayDirection, 1f, steppingIgnoreMask))
+        {
+            if (raycastHit.normal.y < 0.0001f && raycastHit.collider.name != "Terrain")
+            {
+                Physics.Raycast(topCaster.transform.position + rayDirection.normalized * 0.5f, Vector3.down, out var hitTopSurface, stepHeight, steppingIgnoreMask);
+                body.position += new Vector3(0f, stepHeight - hitTopSurface.distance + 0.05f, 0f) + body.velocity.normalized * 0.4f;
+            }
+        }
+    }
+    protected virtual void FixedUpdate()
+    {
+        if (FindSteppingGround() && body.velocity.magnitude > 0.08f)
+        {
+            FindStep();
+        }
+
         var positionInput = new Vector3(inputManager.moveInput.x, 0, inputManager.moveInput.y);
-        UpdatePosition(positionInput * Time.deltaTime);
+        UpdatePosition(positionInput);
         // Limit velocity when not grounded
         if (state == PlayerState.GROUNDED)
             return;
-        body.velocity = new Vector3(Mathf.Clamp(body.velocity.x, -maxVelocity, maxVelocity), body.velocity.y, Mathf.Clamp(body.velocity.z, -maxVelocity, maxVelocity));
+
+        if (isDashing)
+        {
+            var directionalForces = new Vector3(body.velocity.x, 0, body.velocity.z);
+            if (directionalForces.magnitude < minDashVelocity)
+                isDashing = false;
+        }
+        // Add extra drag when player velocity is too high
+        var maxVelocityReached = Mathf.Abs(body.velocity.x) > maxVelocityBeforeExtraDamping || Mathf.Abs(body.velocity.z) > maxVelocityBeforeExtraDamping;
+        if (maxVelocityReached)
+            body.AddForce(-(isDashing ? dashDamping : extraDamping) * body.mass * new Vector3(body.velocity.x, 0, body.velocity.z), ForceMode.Force);
     }
 
-    void Update()
+    private void Update()
     {
         UpdateRotation();
         UpdateAnimatorParameters();
+        onMove?.Invoke(body);
+    }
+
+    private void OnDestroy()
+    {
+        if (!inputManager)
+            return;
+        ResetZoom();
+        inputManager.onSelect -= OnJump;
+        inputManager.onCrouchPerformed -= OnCrouch;
+        inputManager.onCrouchCanceled -= OnCrouch;
+        inputManager.onZoomPerformed -= OnZoom;
+        inputManager.onZoomCanceled -= OnZoomCanceled;
+        var playerManager = GetComponent<PlayerManager>();
+        if (playerManager?.GunController)
+        {
+            inputManager.onZoomPerformed -= playerManager.GunController.OnZoom;
+            inputManager.onZoomCanceled -= playerManager.GunController.OnZoomCanceled;
+        }
+
+        if (MatchController.Singleton)
+            MatchController.Singleton.onRoundEnd -= ResetZoom;
     }
 }

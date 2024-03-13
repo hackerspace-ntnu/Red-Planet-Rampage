@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -21,11 +18,15 @@ public class InputManager : MonoBehaviour
     public InputEvent onCancel;
     public InputEvent onLeftTab;
     public InputEvent onRightTab;
+    public InputEvent onAnyKey;
     // FPS-related
+    public InputEvent onInteract;
     public InputEvent onFirePerformed;
     public InputEvent onFireCanceled;
     public InputEvent onCrouchPerformed;
     public InputEvent onCrouchCanceled;
+    public InputEvent onZoomPerformed;
+    public InputEvent onZoomCanceled;
     private InputEvent onLookPerformed;
     private InputEvent onLookCanceled;
 
@@ -42,11 +43,17 @@ public class InputManager : MonoBehaviour
     public Vector2 lookInput { get; private set; } = Vector2.zero;
 
     [SerializeField]
-    private float mouseLookScale = 0.1f;
+    private float mouseLookScale = 0.02f;
     [SerializeField]
     private float gamepadLookScale = 0.75f;
+    [SerializeField]
+    private Camera playerCamera;
+    public Camera PlayerCamera => playerCamera;
 
     private bool isMouseAndKeyboard = false;
+    public bool IsMouseAndKeyboard => isMouseAndKeyboard;
+
+    public bool ZoomActive = false;
 
     void Start()
     {
@@ -69,16 +76,20 @@ public class InputManager : MonoBehaviour
         onLookPerformed += LookInputPerformed;
         onLookCanceled += LookInputCanceled;
         // Subscribe delegates to inputs
+        playerInput.actions["Join"].performed += AnyKey;
         playerInput.actions["Select"].performed += Select;
         playerInput.actions["Cancel"].performed += Cancel;
         playerInput.actions["Move"].performed += Move;
         playerInput.actions["Move"].canceled += Move;
         playerInput.actions["LeftTab"].performed += LeftTab;
         playerInput.actions["RightTab"].performed += RightTab;
+        playerInput.actions["Interact"].performed += Interact;
         playerInput.actions["Fire"].performed += Fire;
         playerInput.actions["Fire"].canceled += Fire;
         playerInput.actions["Crouch"].performed += Crouch;
         playerInput.actions["Crouch"].canceled += Crouch;
+        playerInput.actions["Zoom"].performed += Zoom;
+        playerInput.actions["Zoom"].canceled += Zoom;
         playerInput.actions["Look"].performed += Look;
         playerInput.actions["Look"].canceled += Look;
 
@@ -96,6 +107,8 @@ public class InputManager : MonoBehaviour
     {
         RemoveAllListeners();
         RemoveExtraListeners();
+        moveInput = Vector2.zero;
+        lookInput = Vector2.zero;
     }
 
     /// <summary>
@@ -154,8 +167,11 @@ public class InputManager : MonoBehaviour
         onFireCanceled = null;
         onCrouchPerformed = null;
         onCrouchCanceled = null;
+        onZoomPerformed = null;
+        onZoomCanceled = null;
         onLookPerformed = null;
         onLookCanceled = null;
+        onInteract = null;
 
         // Free the mouse
         if (isMouseAndKeyboard)
@@ -165,6 +181,11 @@ public class InputManager : MonoBehaviour
     }
 
     #region OnEvent Functions
+    private void AnyKey(InputAction.CallbackContext ctx)
+    {
+        onAnyKey?.Invoke(ctx);
+    }
+
     private void Select(InputAction.CallbackContext ctx)
     {
         onSelect?.Invoke(ctx);
@@ -185,6 +206,11 @@ public class InputManager : MonoBehaviour
         onRightTab?.Invoke(ctx);
     }
 
+    private void Interact(InputAction.CallbackContext ctx)
+    {
+        onInteract?.Invoke(ctx);
+    }
+
     private void Move(InputAction.CallbackContext ctx)
     {
         if (ctx.performed) { onMovePerformed?.Invoke(ctx); return; }
@@ -201,6 +227,23 @@ public class InputManager : MonoBehaviour
     {
         if (ctx.performed) { onCrouchPerformed?.Invoke(ctx); return; }
         onCrouchCanceled?.Invoke(ctx);
+    }
+
+    private void Zoom(InputAction.CallbackContext ctx)
+    {
+        if (isMouseAndKeyboard)
+        {
+            if (ctx.performed) { onZoomPerformed?.Invoke(ctx); return; }
+            onZoomCanceled?.Invoke(ctx);
+            return;
+        }
+
+        if (ctx.performed)
+        {
+            ZoomActive = !ZoomActive;
+            if (!ZoomActive) { onZoomCanceled?.Invoke(ctx); return; }
+            onZoomPerformed?.Invoke(ctx);
+        }
     }
 
     private void Look(InputAction.CallbackContext ctx)

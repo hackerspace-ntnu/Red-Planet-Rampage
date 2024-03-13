@@ -2,9 +2,38 @@
 
 ---
 
-Red Planet Rampage is a first person shooter game, where you fight against other players in arenas with dynamically constructed weapons made from weapon parts.
+Red Planet Rampage is a dieselpunk western-themed arena shooter where players face off with wacky modular guns.
+The game is developed by volunteers at Hackerspace NTNU and is free and open source!
 
-The weapon parts are obtained from auctions between shooting rounds, where players bid against each other. Due to the amount of weapon parts, there are hundreds of possible weapon combinations!
+*Red Planet Rampage won the "Gamer's Choice" Award at Norwegian Game Awards 2024!*
+
+---
+
+# Story
+
+The robots responsible for terraforming Mars have donned cowboy hats and started wreaking havoc with staged shootouts and competitions where they auction off rudimentary weapon parts assembled from scrap. Terraforming Inc. is still investigating the cause of this disturbance, but rumors point to a fateful upload of a western film.
+
+# Features
+
+- Modular weapons with wildly different parts; over 250 different combinations
+- Auctions where players bid on these weapon parts
+- Splitscreen multiplayer
+- Fast-paced movement
+
+The weapon parts add even more to the mix! 
+- Reload by playing a rhythm minigame or shaking a soda can
+- Shoot bouncing cowboy hats
+- Mount a frying pan at the end of your gun as a makeshift shield
+- Slay your frenemies in one hit with a rubber barrel that wiggles uncontrollably
+- And many more!
+
+# Links
+- The official [Steam page of Red Planet Rampage](https://store.steampowered.com/app/2717710/Red_Planet_Rampage/)
+- The official [Itch.io page of Red Planet Rampage](https://hackerspace.itch.io/red-planet-rampage)
+
+# Trailer
+
+[![Gameplay trailer](https://img.youtube.com/vi/GWk-cmHjhu8/0.jpg)](https://www.youtube.com/watch?v=GWk-cmHjhu8)
 
 ---
 

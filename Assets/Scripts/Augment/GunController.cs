@@ -1,8 +1,10 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GunController : MonoBehaviour
 {
     private const float outputTransitionDistance = 2;
+    public float OutputTransitionDistance => outputTransitionDistance;
 
     [HideInInspector]
     public ProjectileController projectile;
@@ -14,27 +16,86 @@ public class GunController : MonoBehaviour
     // Where players will hold the gun
     public Transform RightHandTarget;
     public Transform LeftHandTarget;
+    private float localGunXOffset;
+    private float localGunZOffset;
 
     // Keeps track of when gun should be fired
     [HideInInspector]
     public FireRateController fireRateController;
 
     [HideInInspector]
-    public PlayerManager player;
+    public PlayerManager Player { get; private set; }
 
     // All the stats of the gun and projectile
     public GunStats stats { get; set; }
-    public bool HasRecoil = true; 
+    public bool HasRecoil = true;
 
     // Inputs
     public bool triggerHeld, triggerPressed;
     public Vector3 target;
+    public bool TargetIsTooClose;
 
     public delegate void GunEvent(GunStats gunStats);
 
     public GunEvent onReload;
+    public GunEvent onFireStart;
     public GunEvent onFire;
+    public GunEvent onFireEnd;
     public GunEvent onInitializeGun;
+    public GunEvent onInitializeBullet;
+
+    public void SetPlayer(PlayerManager player)
+    {
+        Player = player;
+        if (!Player.inputManager)
+            return;
+        Player.inputManager.onZoomPerformed += OnZoom;
+        Player.inputManager.onZoomCanceled += OnZoomCanceled;
+        Player.inputManager.GetComponentInChildren<JiggleBone>().body = Player.GetComponent<PlayerMovement>().Body;
+        if (MatchController.Singleton)
+            MatchController.Singleton.onRoundEnd += CancelZoom;
+    }
+
+    private AugmentAnimator barrelAnimator;
+
+    private bool isFiring = false;
+
+    private int recoilTween;
+    private int zoomTween;
+
+    private void Start()
+    {
+        var barrel = GetComponentInChildren<GunBarrel>();
+        if (!barrel)
+            return;
+        barrelAnimator = barrel.GetComponentInChildren<AugmentAnimator>();
+        barrelAnimator.OnShotFiredAnimation += PlayRecoil;
+        barrelAnimator.OnShotFiredAnimation += ShotFired;
+        barrelAnimator.OnAnimationEnd += FireEnd;
+
+        localGunXOffset = transform.localPosition.x;
+        localGunZOffset = transform.localPosition.z;
+    }
+
+    private void OnDestroy()
+    {
+        if (!barrelAnimator)
+            return;
+
+        if (HasRecoil)
+            barrelAnimator.OnShotFiredAnimation -= PlayRecoil;
+        barrelAnimator.OnShotFiredAnimation -= ShotFired;
+        barrelAnimator.OnAnimationEnd -= FireEnd;
+
+        if (!Player || !Player.inputManager)
+            return;
+
+        Player.inputManager.onZoomPerformed -= OnZoom;
+        Player.inputManager.onZoomCanceled -= OnZoomCanceled;
+
+        if (MatchController.Singleton)
+            MatchController.Singleton.onRoundEnd -= CancelZoom;
+    }
 
     private void FixedUpdate()
     {
@@ -43,7 +104,7 @@ public class GunController : MonoBehaviour
             // No fireratecontroller exists
             return;
         }
-        if (fireRateController.shouldFire(triggerPressed, triggerHeld))
+        if (!isFiring && fireRateController.shouldFire(triggerPressed, triggerHeld))
         {
             FireGun();
         }
@@ -55,9 +116,25 @@ public class GunController : MonoBehaviour
     /// <param name="fractionNormalized">Percentage of ammunition to be reloaded.</param>
     public void Reload(float fractionNormalized)
     {
-        int amount = Mathf.Max(1, Mathf.FloorToInt(stats.magazineSize * fractionNormalized));
-        stats.Ammo = Mathf.Min(stats.Ammo + amount, stats.magazineSize);
+        int amount = Mathf.Max(1, Mathf.FloorToInt(stats.MagazineSize * fractionNormalized));
+        stats.Ammo = Mathf.Min(stats.Ammo + amount, stats.MagazineSize);
         onReload?.Invoke(stats);
+    }
+
+    public void OnZoom(InputAction.CallbackContext ctx)
+    {
+        gameObject.LeanMoveLocalX(0f, 0.2f).setEaseInOutCubic();
+    }
+
+    public void OnZoomCanceled(InputAction.CallbackContext ctx)
+    {
+        CancelZoom();
+    }
+
+    private void CancelZoom()
+    {
+        if (gameObject)
+            gameObject.LeanMoveLocalX(localGunXOffset, 0.2f).setEaseInOutCubic();
     }
 
     private void FireGun()
@@ -67,11 +144,18 @@ public class GunController : MonoBehaviour
             return;
         }
 
-        stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.magazineSize);
+        isFiring = true;
+        onFireStart?.Invoke(stats);
+        AimAtTarget();
+        projectile.InitializeProjectile(stats);
+        onInitializeBullet?.Invoke(stats);
+    }
 
-        onFire?.Invoke(stats);
-        if (HasRecoil)
-            gameObject.LeanMoveLocalZ(0.3f, 0.2f).setEasePunch();
+    private void AimAtTarget()
+    {
+        // Output become camera when distance hit is closer than weaponOutput
+        if (Player)
+            projectile.projectileOutput = TargetIsTooClose ? Player.inputManager.transform : outputs[0];
 
         // Aim at target but lerp in original direction if target is close
         Vector3 targetedOutput = (target - projectile.projectileOutput.position).normalized;
@@ -79,7 +163,36 @@ public class GunController : MonoBehaviour
         float distanceToTarget = Vector3.Distance(projectile.projectileOutput.position, target);
         Vector3 lerpedOutput = Vector3.Lerp(defaultOutput, targetedOutput, distanceToTarget / outputTransitionDistance);
         projectile.projectileRotation = Quaternion.AngleAxis(Vector3.Angle(defaultOutput, lerpedOutput), Vector3.Cross(defaultOutput, lerpedOutput));
+    }
 
-        projectile.InitializeProjectile(stats);
+    public void PlayRecoil()
+    {
+        if (HasRecoil)
+            PlayRecoil(stats);
+    }
+
+    public void PlayRecoil(GunStats stats)
+    {
+        if (LeanTween.isTweening(recoilTween))
+        {
+            LeanTween.cancel(recoilTween);
+            transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, localGunZOffset);
+        }
+        var moveAmount = Player != null ? 0.3f : 0.6f;
+        // TODO reduce tween time based on fire rate
+        recoilTween = gameObject.LeanMoveLocalZ(moveAmount, 0.2f).setEasePunch().id;
+    }
+
+    private void ShotFired()
+    {
+        onFire?.Invoke(stats);
+        AimAtTarget();
+    }
+
+    private void FireEnd()
+    {
+        stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.MagazineSize);
+        isFiring = false;
+        onFireEnd?.Invoke(stats);
     }
 }

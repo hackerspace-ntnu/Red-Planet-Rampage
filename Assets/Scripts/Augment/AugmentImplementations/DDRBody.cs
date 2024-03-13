@@ -9,6 +9,7 @@ public struct Precision
     public string text;
     public Color color;
     public float awardFactor;
+    public AudioClip audio;
 }
 public enum ArrowDirection
 {
@@ -28,6 +29,11 @@ public class DDRBody : GunBody
     [SerializeField]
     private AugmentAnimator animator;
 
+    [SerializeField]
+    private PlayerHand playerHandLeft;
+    [SerializeField]
+    private PlayerHand playerHandRight;
+
     private Material ddrMaterial;
 
     private const int screenMaterialIndex = 2;
@@ -45,11 +51,15 @@ public class DDRBody : GunBody
     [SerializeField]
     private Precision[] precisionsGoodToBad;
 
-    LTDescr arrowMover;
+    int arrowMoverTween;
+    int screenFlasherTween;
+    int screenPulseAnimatorTween;
+    int textAnimatorTween;
 
     private float secondsPerUnitHeight;
     private float musicPace;
 
+    private AudioSource audioSource;
 
     public override void Start()
     {
@@ -68,24 +78,34 @@ public class DDRBody : GunBody
             return;
         }
 
-        if (gunController.player)
+        if (gunController.Player)
         {
-            gunController.player.inputManager.onFirePerformed += Fire;
-            gunController.player.inputManager.onMovePerformed += ArrowSelect;
+            gunController.Player.inputManager.onFirePerformed += Fire;
+            gunController.Player.inputManager.onMovePerformed += ArrowSelect;
 
-            arrowMover = LeanTween.value(gameObject, SetArrowHeigth, startHeight, screenHeight, secondsPerUnitHeight * (screenHeight - startHeight))
-                .setDelay(MusicTrackManager.Singleton.TrackOffset)
+            var delay = (float)(MusicTrackManager.Singleton.IsfadingOutPreviousTrack
+                ? MusicTrackManager.Singleton.TrackOffset
+                : secondsPerArrow - (MusicTrackManager.Singleton.TimeSinceTrackStart % secondsPerArrow));
+
+            arrowMoverTween = LeanTween.value(gameObject, SetArrowHeigth, startHeight, screenHeight, secondsPerUnitHeight * (screenHeight - startHeight))
+                .setDelay(delay)
                 .setRepeat(-1)
-                .setOnComplete(ResetArrow);
+                .setOnComplete(ResetArrow).id;
 
-            LeanTween.value(gameObject, SetBackgroundZoom, 0.5f, 1.5f, musicPace)
-                .setDelay(MusicTrackManager.Singleton.TrackOffset)
+            screenPulseAnimatorTween = LeanTween.value(gameObject, SetBackgroundZoom, 0.5f, 1.5f, musicPace)
+                .setDelay(delay)
                 .setLoopPingPong()
                 .setOnComplete(
-                () => animator.OnFire(0));
+                () => animator.OnFire(gunController.stats)).id;
 
             animator.OnInitialize(gunController.stats);
 
+            playerHandLeft.SetPlayer(gunController.Player);
+            playerHandLeft.gameObject.SetActive(true);
+            playerHandRight.SetPlayer(gunController.Player);
+            playerHandRight.gameObject.SetActive(true);
+
+            audioSource = GetComponent<AudioSource>();
         }
 
     }
@@ -105,24 +125,32 @@ public class DDRBody : GunBody
 
         if (!precision.HasValue)
             return;
-
+        if (LeanTween.isTweening(textAnimatorTween))
+            LeanTween.cancel(textAnimatorTween);
         precisionText.enabled = true;
         precisionText.text = precision.Value.text;
         precisionText.color = precision.Value.color;
-        precisionText.gameObject.LeanScale(new Vector3(1.1f, 1.1f, 1.1f), 0.5f)
+        textAnimatorTween = LeanTween.scale(precisionText.gameObject, new Vector3(1.1f, 1.1f, 1.1f), 0.5f)
             .setEasePunch()
             .setOnComplete(
-            () => precisionText.enabled = false);
-
-        LeanTween.value(gameObject, SetFlashFactor, 0, 20f, 0.5f).setEasePunch();
+            () => precisionText.enabled = false).id;
+        if (LeanTween.isTweening(screenFlasherTween))
+            LeanTween.cancel(screenFlasherTween);
+        screenFlasherTween = LeanTween.value(gameObject, SetFlashFactor, 0, 50f, 0.5f).setEasePunch().id;
 
         gunController.Reload(reloadEfficiencyPercentage * precision.Value.awardFactor);
-        animator.OnReload(1);
+        animator.OnReload(gunController.stats);
+
+        if (precision.Value.audio)
+        {
+            audioSource.clip = precision.Value.audio;
+            audioSource.Play();
+        }
     }
 
     private void Fire(InputAction.CallbackContext ctx)
     {
-        animator.OnFire(gunController.stats.Ammo);
+        animator.OnFire(gunController.stats);
     }
 
     private void ArrowSelect(InputAction.CallbackContext ctx)
@@ -133,19 +161,19 @@ public class DDRBody : GunBody
         switch (arrowDirection)
         {
             case ArrowDirection.NORTH:
-                if (!(gunController.player.inputManager.moveInput.y > 1 - errorMarginInput))
+                if (!(gunController.Player.inputManager.moveInput.y > 1 - errorMarginInput))
                     return;
                 break;
             case ArrowDirection.EAST:
-                if (!(gunController.player.inputManager.moveInput.x > 1 - errorMarginInput))
+                if (!(gunController.Player.inputManager.moveInput.x > 1 - errorMarginInput))
                     return;
                 break;
             case ArrowDirection.SOUTH:
-                if (!(gunController.player.inputManager.moveInput.y < -1 + errorMarginInput))
+                if (!(gunController.Player.inputManager.moveInput.y < -1 + errorMarginInput))
                     return;
                 break;
             case ArrowDirection.WEST:
-                if (!(gunController.player.inputManager.moveInput.x < -1 + errorMarginInput))
+                if (!(gunController.Player.inputManager.moveInput.x < -1 + errorMarginInput))
                     return;
                 break;
         }
@@ -156,11 +184,12 @@ public class DDRBody : GunBody
 
     private void ResetAndStartArrowTween()
     {
-        LeanTween.cancel(arrowMover.id);
+        if (LeanTween.isTweening(arrowMoverTween))
+            LeanTween.cancel(arrowMoverTween);
         ResetArrow();
-        arrowMover = LeanTween.value(gameObject, SetArrowHeigth, arrowHeight, screenHeight, secondsPerUnitHeight * (screenHeight - arrowHeight))
+        arrowMoverTween = LeanTween.value(gameObject, SetArrowHeigth, arrowHeight, screenHeight, secondsPerUnitHeight * (screenHeight - arrowHeight))
             .setRepeat(-1)
-            .setOnComplete(ResetArrow);
+            .setOnComplete(ResetArrow).id;
     }
 
     private void SetArrowHeigth(float heigth)
@@ -199,10 +228,10 @@ public class DDRBody : GunBody
     {
         if (!gunController)
             return;
-        if (!gunController.player)
+        if (!gunController.Player)
             return;
 
-        gunController.player.inputManager.onFirePerformed -= Fire;
-        gunController.player.inputManager.onMovePerformed -= ArrowSelect;
+        gunController.Player.inputManager.onFirePerformed -= Fire;
+        gunController.Player.inputManager.onMovePerformed -= ArrowSelect;
     }
 }

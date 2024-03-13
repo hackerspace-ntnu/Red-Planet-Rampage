@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
+public class KnockbackOnShotModifier : MonoBehaviour, ProjectileModifier
 {
     [SerializeField]
     private float pushPower;
@@ -37,6 +37,12 @@ public class KnockbackOnShotModifier: MonoBehaviour, ProjectileModifier
     {
         Vector3 normal = gunController.transform.forward;
 
-        controller.health.GetComponent<Rigidbody>().AddForce(normal * calculatedPushPower * 2f, ForceMode.Impulse);
+        if (controller.health.TryGetComponent<Rigidbody>(out var rigidbody))
+        {
+            // If AI, enable physics for a small time frame
+            if (controller.health.Player is AIManager ai)
+                StartCoroutine(ai.WaitAndToggleAgent());
+            rigidbody.AddForce(normal * calculatedPushPower * 2f, ForceMode.Impulse);
+        }
     }
 }

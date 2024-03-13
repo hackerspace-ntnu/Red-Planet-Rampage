@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &231985519124905289
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2405683338447845934}
+  m_Layer: 0
+  m_Name: Midpoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2405683338447845934
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 231985519124905289}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.197, z: 0.017}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3419770485010761646}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1475061858364199191
 GameObject:
   m_ObjectHideFlags: 0
@@ -58,7 +89,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: bfeeaf72ad0a52d41958a7c3e1a8991b, type: 2}
@@ -109,8 +140,8 @@ Transform:
   m_GameObject: {fileID: 3178402892298529207}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.323, z: -0.076}
-  m_LocalScale: {x: 1.35, y: 1.35, z: 1.35}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.68, y: 1.68, z: 1.68}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 3419770485010761646}
   m_RootOrder: -1
@@ -161,7 +192,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3814014548272511076}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.12, z: 0.062}
+  m_LocalPosition: {x: -0.067, y: -0.068, z: 0.495}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -177,7 +208,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3419770485010761646}
-  - component: {fileID: 6976606761525997296}
+  - component: {fileID: 7468767519880026116}
   m_Layer: 0
   m_Name: PanExtension
   m_TagString: Untagged
@@ -200,10 +231,11 @@ Transform:
   - {fileID: 2653487337986137078}
   - {fileID: 4958003131718040908}
   - {fileID: 5374628805481425307}
+  - {fileID: 2405683338447845934}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!114 &6976606761525997296
+--- !u!114 &7468767519880026116
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -212,10 +244,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 8603926061785734399}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a7619e994087ad4383adf04a959152d, type: 3}
+  m_Script: {fileID: 11500000, guid: 524249192328347428b2ae3261914aa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   statModifiers: []
   outputs:
   - {fileID: 2653487337986137078}
+  midpoint: {fileID: 2405683338447845934}
   model: {fileID: 1475061858364199191}
+  hitboxCollider: {fileID: 3645794686006523650}
+  panModel: {fileID: 4958003131718040908}

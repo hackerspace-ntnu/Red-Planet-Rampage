@@ -13,6 +13,11 @@ public class SolarBody : GunBody
     [SerializeField]
     private LayerMask obscuringLayers;
 
+    [SerializeField]
+    private PlayerHand playerHandRight;
+    [SerializeField]
+    private PlayerHand playerHandLeft;
+
     private Material solarPanelMaterial;
 
     [SerializeField, Range(0, 1)]
@@ -21,11 +26,18 @@ public class SolarBody : GunBody
     private Transform globalLightDirection;
 
     private const float maxObscuringCheckDistance = 15f;
-    private const float coolDownSeconds = 0.5f;
-    private const float chargeUpSeconds = 1; 
+    private const float coolDownSeconds = 2f;
+    private const float chargeUpSeconds = 1;
+
     private bool isCooldown = false;
 
     private const int solarPanelMaterialIndex = 3;
+
+    private AudioSource audioSource;
+    [SerializeField]
+    private AudioClip chargeUp;
+    [SerializeField]
+    private AudioClip chargeDown;
 
     public override void Start()
     {
@@ -40,6 +52,14 @@ public class SolarBody : GunBody
             Debug.Log("SolarBody not attached to gun parent!");
             return;
         }
+
+        if (!gunController.Player)
+            return;
+        playerHandRight.SetPlayer(gunController.Player);
+        playerHandRight.gameObject.SetActive(true);
+        playerHandLeft.SetPlayer(gunController.Player);
+        playerHandLeft.gameObject.SetActive(true);
+        audioSource = GetComponent<AudioSource>();
     }
 
 
@@ -50,6 +70,11 @@ public class SolarBody : GunBody
         if (solarPanelMaterial.GetFloat("_On") == 0)
         {
             LeanTween.value(gameObject, SetEmissionStrength, 0, 1, chargeUpSeconds);
+            if (audioSource)
+            {
+                audioSource.clip = chargeUp;
+                audioSource.Play();
+            }
         }
         solarPanelMaterial.SetFloat("_On", 1);
         gunController.Reload(reloadEfficiencyPercentagen);
@@ -68,14 +93,22 @@ public class SolarBody : GunBody
         solarPanelMaterial.SetFloat("_EmissionStrength", strength);
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
+        if (!gunController)
+            return;
+
         if (!Physics.Raycast(rayCastOrigin.position, -globalLightDirection.forward, maxObscuringCheckDistance, obscuringLayers.value))
         {
             Reload(gunController.stats);
         }
         else
         {
+            if (audioSource && solarPanelMaterial.GetFloat("_On") == 1)
+            {
+                audioSource.clip = chargeDown;
+                audioSource.Play();
+            }
             SetEmissionStrength(0);
             solarPanelMaterial.SetFloat("_On", 0);
         }

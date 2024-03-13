@@ -63,7 +63,7 @@ public class Round
         {
             player.onDeath += OnDeath;
         }
-        MatchController.Singleton.onRoundEnd += OnRoundEnd;
+        MatchController.Singleton.onOutcomeDecided += OnOutcomeDecided;
     }
 
     public int KillCount(PlayerManager player)
@@ -79,13 +79,13 @@ public class Round
         return player == Winner;
     }
 
-    public void OnRoundEnd()
+    public void OnOutcomeDecided()
     {
         foreach (var player in players)
         {
             player.onDeath -= OnDeath;
         }
-        MatchController.Singleton.onRoundEnd -= OnRoundEnd;
+        MatchController.Singleton.onOutcomeDecided -= OnOutcomeDecided;
     }
 
     //TODO: Create struct for damagecontext with info about who was killed as parameter instead
@@ -119,7 +119,7 @@ public class Round
     {
         if (livingPlayers.Count < 2)
         {
-            winner = lastKiller?.identity;
+            winner = livingPlayers.FirstOrDefault()?.identity;
             MatchController.Singleton.EndActiveRound();
         }
     }

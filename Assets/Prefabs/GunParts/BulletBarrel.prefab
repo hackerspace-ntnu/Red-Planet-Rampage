@@ -59,7 +59,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 101c4836e405616489580439704f20cd, type: 2}
@@ -459,7 +459,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 101c4836e405616489580439704f20cd, type: 2}
@@ -548,6 +548,37 @@ Transform:
   m_Father: {fileID: 6537988700951070003}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5766396924037705662
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5139843727155892186}
+  m_Layer: 0
+  m_Name: Midpoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5139843727155892186
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5766396924037705662}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.2529}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6537988700951070003}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6861618831928518119
 GameObject:
   m_ObjectHideFlags: 0
@@ -559,10 +590,11 @@ GameObject:
   - component: {fileID: 6537988700951070003}
   - component: {fileID: 7617790890687186095}
   - component: {fileID: 8515215133120317911}
-  - component: {fileID: 4002559375541309876}
   - component: {fileID: 7327065496144923300}
   - component: {fileID: 5073592139580318145}
   - component: {fileID: 1897810737203425439}
+  - component: {fileID: 6794990578115447036}
+  - component: {fileID: 1926966365889666219}
   m_Layer: 0
   m_Name: BulletBarrel
   m_TagString: Untagged
@@ -586,6 +618,7 @@ Transform:
   - {fileID: 6841302673657052848}
   - {fileID: 9146799714363851199}
   - {fileID: 3966310535711765354}
+  - {fileID: 5139843727155892186}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -612,8 +645,10 @@ MonoBehaviour:
     exponential: 2
   outputs:
   - {fileID: 5765902433490691002}
+  midpoint: {fileID: 5139843727155892186}
   attachmentPoints:
   - {fileID: 5765902433490691002}
+  muzzleFlash: {fileID: 261841362781268065}
 --- !u!114 &8515215133120317911
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -630,25 +665,11 @@ MonoBehaviour:
   projectileRotation: {x: 0, y: 0, z: 0, w: 1}
   stats: {fileID: 0}
   player: {fileID: 0}
+  HitAssist: 0
   maxDistance: 100
   collisionSamplesPerUnit: 2
   trail: {fileID: 1393106611541694855}
-  flash: {fileID: 261841362781268065}
   animator: {fileID: 2824888147584701410}
---- !u!114 &4002559375541309876
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6861618831928518119}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49ba4bdeb4a0c8548b6b50d2d03dc38a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pushPower: 10
-  baseFireRateAdder: 2
 --- !u!114 &7327065496144923300
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -771,3 +792,41 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firingSound: {fileID: 11400000, guid: b1c2515828913ba4d80a8799b82dab79, type: 2}
+--- !u!114 &6794990578115447036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6861618831928518119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18b57f7d0109d614c8ff956eff6a9841, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 0
+  decal: {fileID: 5462112114334002006, guid: 65b7186194b414d4bb212807630f62c9, type: 3}
+  depthOffsetFraction: 0.6
+  stickToNormalFraction: 0.202
+  angleVariation: 180
+  lifetime: 60
+--- !u!114 &1926966365889666219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6861618831928518119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b0ba1bb34e28d142b759ea886c785ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stuckObject: {fileID: 4443407124464210628, guid: b9bbb710a484f04458322e51c5bb8171, type: 3}
+  stuckLifeTime: 1
+  triggerOnHit: 0
+  onHitInterval: 1
+  affectedLayers:
+    serializedVersion: 2
+    m_Bits: 65655
+  priority: 4
