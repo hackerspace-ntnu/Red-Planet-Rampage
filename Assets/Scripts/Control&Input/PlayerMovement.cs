@@ -104,6 +104,7 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField]
     protected Animator animator;
+    public Animator Animator => animator;
 
     protected GameObject gunHolder;
 

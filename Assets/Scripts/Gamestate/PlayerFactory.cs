@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using CollectionExtensions;
+using Mirror;
 
 public class PlayerFactory : MonoBehaviour
 {
@@ -106,6 +107,9 @@ public class PlayerFactory : MonoBehaviour
         Transform cameraOffset = player.transform.Find("CameraOffset");
         // Make playerInput child of player it's attached to
         inputManager.transform.parent = player.transform;
+        // Tell the network synchronization that the player prefab should be synced
+        inputManager.GetComponent<NetworkTransformReliable>().target = player.transform;
+        inputManager.GetComponent<NetworkAnimator>().animator = player.GetComponent<PlayerMovement>().Animator;
         // Set recieved playerInput (and most importantly its camera) at an offset from player's position
         inputManager.transform.localPosition = cameraOffset.localPosition;
         inputManager.transform.rotation = player.transform.rotation;

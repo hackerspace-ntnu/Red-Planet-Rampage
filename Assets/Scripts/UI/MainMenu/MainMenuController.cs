@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using Unity.Collections;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -309,6 +310,13 @@ public class MainMenuController : MonoBehaviour
         var colors = startButton.colors;
         colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
         startButton.colors = colors;
+    }
+
+    // Currently invoked when entering characterselect menu
+    // TODO: Make dedicated hosting UI instead.
+    public void HostLobby()
+    {
+        SteamManager.Singleton.HostLobby();
     }
 
     public void Quit()
