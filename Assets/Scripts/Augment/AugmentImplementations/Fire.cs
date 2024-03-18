@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.VFX;
 
 public class Fire : GunExtension
 {
@@ -14,6 +15,11 @@ public class Fire : GunExtension
     [SerializeField]
     private AudioClip[] lighterSounds;
 
+    [SerializeField]
+    private VisualEffect fireTrail;
+    [SerializeField]
+    private LessJallaVFXPositionEncoder trailPositions;
+
     void Awake()
     {
         audioSource = GetComponent<AudioSource>();
@@ -24,9 +30,25 @@ public class Fire : GunExtension
             return;
         }
         gunController.onInitializeGun += AddFireToProjectile;
-        gunController.onFireEnd += PlayShotAudio; 
+        gunController.onFireEnd += PlayShotAudio;
+        gunController.projectile.UpdateProjectileMovement += ApplyTrails;
     }
 
+    void Start()
+    {
+        fireTrail.SetGraphicsBuffer("StartEndPositions", trailPositions.StartEndPositionsBuffer);
+    }
+
+    private void ApplyTrails(float distance, ref ProjectileState state)
+    {
+        if (!state.active)
+            return;
+        // TODO: Draw longer lines along path instead of many small lines
+        trailPositions.AddLine(state.oldPosition, state.position);
+        trailPositions.PopulateBuffer();
+        fireTrail.SetInt("SpawnCount", 1);
+        fireTrail.SendEvent("OnPlay");
+    }
 
     private void AddFireToProjectile(GunStats gunstats)
     {

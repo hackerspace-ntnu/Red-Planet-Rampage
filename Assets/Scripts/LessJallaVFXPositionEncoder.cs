@@ -8,7 +8,6 @@ public class LessJallaVFXPositionEncoder : MonoBehaviour
 
     [SerializeField]
     private int MaxLines = 10;
-    // Start is called before the first frame update
 
     private Vector3[] startEndPositions;
 
