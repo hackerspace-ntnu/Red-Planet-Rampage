@@ -22,7 +22,7 @@ public class Fire : GunExtension
     private int maxProjectiles = 1000;
     private ProjectileState[] projectiles;
 
-    private ProjectileState loadedProjectile;
+    private float particleCount = 0;
 
     //index of last initialized state in array
     private int currentStateIndex = 0;
@@ -57,6 +57,8 @@ public class Fire : GunExtension
         currentStateIndex++;
         currentStateIndex %= maxProjectiles;
         Debug.Log("Tracking projectile!");
+        particleCount++;
+        fireTrail.SetFloat("Amount", particleCount);
     }
 
     private void ApplyTrails(float distance, ref ProjectileState state)
@@ -64,12 +66,20 @@ public class Fire : GunExtension
         for (int i = 0; i < maxProjectiles; i++)
         {
             var projectile = projectiles[i];
-            if (projectile == null || !projectile.active)
+            if (projectile == null)
             {
                 positionActiveTexture.setAlpha(i, 0f);
                 continue;
             }
-            
+            if (!projectile.active)
+            {
+                particleCount -= 1;
+                positionActiveTexture.setAlpha(i, 0f);
+                projectiles[i] = null;
+                continue;
+            }
+
+
             Collider[] hitColliders = Physics.OverlapSphere(projectile.oldPosition, 0.5f, trailLayers);
             foreach (var hitCollider in hitColliders)
             {
@@ -83,9 +93,9 @@ public class Fire : GunExtension
             positionActiveTexture.setValue(i, projectile.oldPosition);
             positionActiveTexture.setAlpha(i, 1f);
         }
+        fireTrail.SetFloat("Amount", particleCount);
         positionActiveTexture.ApplyChanges();
-        //fireTrail.SetInt("Amount", count);
-        //fireTrail.SendEvent(VisualEffectAsset.PlayEventID);
+        fireTrail.SendEvent(VisualEffectAsset.PlayEventID);
     }
 
     private void AddFireToProjectile(GunStats gunstats)
