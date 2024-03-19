@@ -159,7 +159,6 @@ GameObject:
   - component: {fileID: 717236793793690108}
   - component: {fileID: 216606538572171217}
   - component: {fileID: 2120041839913339544}
-  - component: {fileID: 3264051287619512903}
   m_Layer: 0
   m_Name: FireExtension
   m_TagString: Untagged
@@ -208,12 +207,14 @@ MonoBehaviour:
   midpoint: {fileID: 5704832397885290910}
   model: {fileID: 1979776678523386665}
   fire: {fileID: 7250958099768915120, guid: 8b742fbe3d30f044c914e269f5ae66fa, type: 3}
+  trailLayers:
+    serializedVersion: 2
+    m_Bits: 8
   lighterSounds:
   - {fileID: 8300000, guid: f9821d3790f5b9a459dccf3bbd826d79, type: 3}
   - {fileID: 8300000, guid: 1db501fe17a07584aa6a11c3849936c5, type: 3}
   - {fileID: 8300000, guid: 5652b5238ed02ec4bbf23700bafc59a1, type: 3}
   fireTrail: {fileID: 1382308675925352878}
-  trailPositions: {fileID: 3264051287619512903}
 --- !u!114 &216606538572171217
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -330,19 +331,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &3264051287619512903
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3480215319653512381}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9e865e80579682448814c291ac49e5d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  MaxLines: 100
 --- !u!1 &5502384701070042330
 GameObject:
   m_ObjectHideFlags: 0
@@ -415,7 +403,7 @@ VisualEffect:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7232486737550762651}
   m_Enabled: 1
-  m_Asset: {fileID: 8926484042661614526, guid: d6c5553923932ca4a9477e5643299f38, type: 3}
+  m_Asset: {fileID: 8926484042661614526, guid: e05bfbe7cd838eb43b4e712225673b52, type: 3}
   m_InitialEventName: OnPlay
   m_InitialEventNameOverriden: 0
   m_StartSeed: 0

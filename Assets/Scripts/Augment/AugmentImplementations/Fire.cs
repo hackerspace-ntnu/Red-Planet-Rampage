@@ -9,7 +9,8 @@ public class Fire : GunExtension
 {
     [SerializeField]
     private GameObject fire;
-
+    [SerializeField]
+    private LayerMask trailLayers;
     private GunController gunController;
     private AudioSource audioSource;
     [SerializeField]
@@ -17,8 +18,17 @@ public class Fire : GunExtension
 
     [SerializeField]
     private VisualEffect fireTrail;
-    [SerializeField]
-    private LessJallaVFXPositionEncoder trailPositions;
+
+    private int maxProjectiles = 1000;
+    private ProjectileState[] projectiles;
+
+    private ProjectileState loadedProjectile;
+
+    //index of last initialized state in array
+    private int currentStateIndex = 0;
+
+    // texture used to update the vfx position and alive-state of particles, RGB is used for position A for alive/dead
+    private VFXTextureFormatter positionActiveTexture;
 
     void Awake()
     {
@@ -31,23 +41,51 @@ public class Fire : GunExtension
         }
         gunController.onInitializeGun += AddFireToProjectile;
         gunController.onFireEnd += PlayShotAudio;
+        gunController.projectile.OnProjectileInit += TrackProjectile;
         gunController.projectile.UpdateProjectileMovement += ApplyTrails;
+        positionActiveTexture = new VFXTextureFormatter(maxProjectiles);
+        fireTrail.SetInt("MaxParticleCount", maxProjectiles);
+        fireTrail.SetTexture("Positions", positionActiveTexture.Texture);
+        fireTrail.SendEvent(VisualEffectAsset.PlayEventID);
+        projectiles = new ProjectileState[maxProjectiles];
+        //InvokeRepeating("ApplyTrails", 0, 0.05f);
     }
 
-    void Start()
+    private void TrackProjectile(ref ProjectileState state, GunStats stats)
     {
-        fireTrail.SetGraphicsBuffer("StartEndPositions", trailPositions.StartEndPositionsBuffer);
+        projectiles[currentStateIndex] = state;
+        currentStateIndex++;
+        currentStateIndex %= maxProjectiles;
+        Debug.Log("Tracking projectile!");
     }
 
     private void ApplyTrails(float distance, ref ProjectileState state)
     {
-        if (!state.active)
-            return;
-        // TODO: Draw longer lines along path instead of many small lines
-        trailPositions.AddLine(state.oldPosition, state.position);
-        trailPositions.PopulateBuffer();
-        fireTrail.SetInt("SpawnCount", 1);
-        fireTrail.SendEvent("OnPlay");
+        for (int i = 0; i < maxProjectiles; i++)
+        {
+            var projectile = projectiles[i];
+            if (projectile == null || !projectile.active)
+            {
+                positionActiveTexture.setAlpha(i, 0f);
+                continue;
+            }
+            
+            Collider[] hitColliders = Physics.OverlapSphere(projectile.oldPosition, 0.5f, trailLayers);
+            foreach (var hitCollider in hitColliders)
+            {
+                HitboxController hitbox = hitCollider.GetComponent<HitboxController>();
+
+                if (hitbox != null)
+                    Debug.Log("Hit!");
+            }
+            //fireTrail.SetVector3("Position", projectile.oldPosition);
+
+            positionActiveTexture.setValue(i, projectile.oldPosition);
+            positionActiveTexture.setAlpha(i, 1f);
+        }
+        positionActiveTexture.ApplyChanges();
+        //fireTrail.SetInt("Amount", count);
+        //fireTrail.SendEvent(VisualEffectAsset.PlayEventID);
     }
 
     private void AddFireToProjectile(GunStats gunstats)
