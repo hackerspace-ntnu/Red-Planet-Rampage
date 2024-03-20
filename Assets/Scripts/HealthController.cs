@@ -15,6 +15,9 @@ public class HealthController : MonoBehaviour
 
     public DamageEvent onDeath;
 
+    public bool IsBurning { get; set; }
+
+
     public PlayerManager Player { get; private set; }
 
     private void Awake()
