@@ -15,6 +15,8 @@ public class MainMenuMoveCamera : MonoBehaviour
     [SerializeField]
     private GameObject directionalLight;
 
+    private bool inLevelSelect;
+
     public void MoveToOptions()
     {
         LeanTween.sequence()
@@ -36,5 +38,17 @@ public class MainMenuMoveCamera : MonoBehaviour
         playerSelectCamera.gameObject.SetActive(true);
         mainMenuCamera.gameObject.SetActive(false);
         directionalLight.SetActive(false);
+        
+        if (inLevelSelect)
+        {
+            inLevelSelect = false;
+            LeanTween.sequence().append(LeanTween.rotateX(playerSelectCamera.gameObject, 9f, 1).setEaseInOutExpo());
+        }
+    }
+
+    public void MoveToLevelSelect()
+    {
+        inLevelSelect = true;
+        LeanTween.sequence().append(LeanTween.rotateX(playerSelectCamera.gameObject, 68f, 1).setEaseInOutExpo());
     }
 }
