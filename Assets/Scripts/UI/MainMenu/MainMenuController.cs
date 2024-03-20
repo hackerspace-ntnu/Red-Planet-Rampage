@@ -72,6 +72,9 @@ public class MainMenuController : MonoBehaviour
 
     private Coroutine introRoutine;
 
+    [SerializeField]
+    private GameObject mainMenuCamera;
+
     private void Awake()
     {
         if (!FindAnyObjectByType<PlayerInputManagerController>())
@@ -213,6 +216,12 @@ public class MainMenuController : MonoBehaviour
         menu.SetActive(true);
         currentMenu = menu;
         SelectControl(menu.GetComponentInChildren<Selectable>());
+
+        //Change camera angle to level select. Must be done here to not bypass AI-check in playerselect
+        if(menu == mapSelectMenu)
+        {
+            mainMenuCamera.GetComponentInChildren<MainMenuMoveCamera>().MoveToLevelSelect();
+        }
     }
 
     /// <summary>
