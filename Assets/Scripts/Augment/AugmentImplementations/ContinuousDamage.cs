@@ -39,7 +39,7 @@ public class ContinuousDamage : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (!hitbox && hitbox?.health)
+        if (hitbox && hitbox.health)
             hitbox.health.onDeath -= OnDeath;
     }
 }
