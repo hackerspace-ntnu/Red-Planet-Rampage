@@ -19,9 +19,8 @@ public class ContinuousDamage : MonoBehaviour
     {
         hitbox = transform.parent.GetComponent<HitboxController>();
         if (hitbox && hitbox.health)
-        {
             hitbox.health.onDeath += OnDeath;
-        }
+            
     }
 
     private void OnDeath(HealthController healthController, float damage, DamageInfo info)

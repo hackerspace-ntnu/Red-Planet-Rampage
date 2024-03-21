@@ -41,6 +41,11 @@ public class BulletController : ProjectileController
         animator.OnShotFiredAnimation += FireProjectile;
     }
 
+    public void SetTrail(VisualEffect newTrail)
+    {
+        trail = newTrail;
+    }
+
     private void Start()
     {
         collisionSamples = Mathf.CeilToInt(collisionSamplesPerUnit * maxDistance);
