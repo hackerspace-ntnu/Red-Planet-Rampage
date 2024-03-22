@@ -42,7 +42,7 @@ public class SteamManager : MonoBehaviour
         DontDestroyOnLoad(this);
         try
         {
-            SteamAPI.RestartAppIfNecessary((AppId_t)steamAppID);
+            //SteamAPI.RestartAppIfNecessary((AppId_t)steamAppID);
             isSteamInitialized = SteamAPI.Init();
         }
         catch (System.Exception e)
@@ -89,16 +89,19 @@ public class SteamManager : MonoBehaviour
 
     public void HostLobby()
     {
-        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, transportProtocol.maxConnections);
+        if (isSteamInitialized)
+            SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, transportProtocol.maxConnections);
     }
 
     void Update()
     {
-        SteamAPI.RunCallbacks();
+        if (isSteamInitialized)
+            SteamAPI.RunCallbacks();
     }
     private void OnApplicationQuit()
     {
-        SteamAPI.Shutdown();
+        if (isSteamInitialized)
+            SteamAPI.Shutdown();
     }
 
 }
