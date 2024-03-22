@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -28,7 +24,7 @@ public class AIMovement : PlayerMovement
         if (timeSinceJump >= 3f)
         {
             timeSinceJump = timeSinceJump % 3f;
-            if (Physics.Raycast(transform.position, Target.position, ignoreMask) && !StateIsAir)
+            if (Physics.Raycast(transform.position, Target.position, groundCheckMask) && !StateIsAir)
                 this.enabled = false;
             Jump();
         }
@@ -38,7 +34,7 @@ public class AIMovement : PlayerMovement
     {
         if (!StateIsAir && (!Target || Vector3.Distance(Target.position, transform.position) > 35))
         {
-            this.enabled = false;
+            enabled = false;
             return;
         }
         var direction = (Target.position - transform.position).normalized;
@@ -63,7 +59,7 @@ public class AIMovement : PlayerMovement
         agent.enabled = true;
     }
 
-    public void Jump()
+    private void Jump()
     {
         if (StateIsAir)
             return;
