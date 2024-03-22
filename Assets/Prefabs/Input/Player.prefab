@@ -61,9 +61,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe68c66043cf4fa30b1b60bfdcd38608, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ignoreMask:
+  groundCheckMask:
     serializedVersion: 2
-    m_Bits: 65399
+    m_Bits: 83
   lookSpeed: 3
   LookSpeedZoom: 0.75
   mouseZoomSpeedFactor: 0.1
@@ -83,9 +83,10 @@ MonoBehaviour:
   minDashVelocity: 8
   crouchedHeightOffset: 0.8
   crouchedHeightGunOffset: 0.5
-  airThreshold: 0.4
+  airThreshold: 0.17
   slopeAngleThreshold: 50
   state: 1
+  jumpState: 0
   animator: {fileID: 289053663840324231}
   ZoomFov: 30
   bottomCaster: {fileID: 4643888824660388301}
@@ -278,7 +279,7 @@ MonoBehaviour:
   cameraParent: {fileID: 8159248892074053650}
   ragdollMask:
     serializedVersion: 2
-    m_Bits: 2147483647
+    m_Bits: 4294967295
 --- !u!82 &7607358150439154286
 AudioSource:
   m_ObjectHideFlags: 0
