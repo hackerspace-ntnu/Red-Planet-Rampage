@@ -129,6 +129,8 @@ public class PlayerMovement : MonoBehaviour
     private int cameraCrouchPerformedTween;
     private int gunCrouchCanceledTween;
     private int cameraCrouchCanceledTween;
+    private int zoomFovTween;
+    private int zoomGunTween;
 
     [Header("Step climb")]
     [SerializeField]
@@ -142,6 +144,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     protected LayerMask steppingIgnoreMask;
 
+    public bool ShouldNotRespondToInputs = false;
+
 
     protected virtual void Start()
     {
@@ -154,17 +158,12 @@ public class PlayerMovement : MonoBehaviour
     /// <summary>
     /// Function for setting a playerInput and adding movement related listeners to it.
     /// </summary>
-    /// <param name="player"></param>
-    public void SetPlayerInput(InputManager player)
+    /// <param name="input"></param>
+    public void SetPlayerInput(InputManager input)
     {
-        inputManager = player;
+        ReassignPlayerInput(input);
         var playerManager = GetComponent<PlayerManager>();
         gunHolder = playerManager.GunHolder.gameObject;
-        inputManager.onSelect += OnJump;
-        inputManager.onCrouchPerformed += OnCrouch;
-        inputManager.onCrouchCanceled += OnCrouch;
-        inputManager.onZoomPerformed += OnZoom;
-        inputManager.onZoomCanceled += OnZoomCanceled;
         localCameraHeight = inputManager.transform.localPosition.y;
         localGunHolderX = gunHolder.transform.localPosition.x;
         localGunHolderHeight = gunHolder.transform.localPosition.y;
@@ -173,6 +172,16 @@ public class PlayerMovement : MonoBehaviour
 
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += ResetZoom;
+    }
+
+    public void ReassignPlayerInput(InputManager input)
+    {
+        inputManager = input;
+        inputManager.onSelect += OnJump;
+        inputManager.onCrouchPerformed += OnCrouch;
+        inputManager.onCrouchCanceled += OnCrouch;
+        inputManager.onZoomPerformed += OnZoom;
+        inputManager.onZoomCanceled += OnZoomCanceled;
     }
 
     public void SetInitialRotation(float radians)
@@ -201,8 +210,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnZoom(InputAction.CallbackContext ctx)
     {
-        LeanTween.value(gameObject, (fov) => playerCamera.fieldOfView = fov, playerCamera.fieldOfView, ZoomFov, 0.2f).setEaseInOutCubic();
-        gunHolder.LeanMoveLocalX(0f, 0.2f);
+        if (LeanTween.isTweening(zoomFovTween))
+            LeanTween.cancel(zoomFovTween);
+        zoomFovTween = LeanTween.value(gameObject, fov => playerCamera.fieldOfView = fov, playerCamera.fieldOfView, ZoomFov, 0.2f).setEaseInOutCubic().id;
+        if (LeanTween.isTweening(zoomGunTween))
+            LeanTween.cancel(zoomGunTween);
+        zoomGunTween = gunHolder.LeanMoveLocalX(0f, 0.2f).id;
     }
 
     private void OnZoomCanceled(InputAction.CallbackContext ctx)
@@ -212,11 +225,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void CancelZoom()
     {
-        LeanTween.value(gameObject, (fov) => playerCamera.fieldOfView = fov, playerCamera.fieldOfView, startingFov, 0.2f).setEaseInOutCubic();
-        gunHolder.LeanMoveLocalX(localGunHolderX, 0.2f);
+        if (LeanTween.isTweening(zoomFovTween))
+            LeanTween.cancel(zoomFovTween);
+        zoomFovTween = LeanTween.value(gameObject, fov => playerCamera.fieldOfView = fov, playerCamera.fieldOfView, startingFov, 0.2f).setEaseInOutCubic().id;
+        if (LeanTween.isTweening(zoomGunTween))
+            LeanTween.cancel(zoomGunTween);
+        zoomGunTween = gunHolder.LeanMoveLocalX(localGunHolderX, 0.2f).id;
     }
 
-    private void ResetZoom()
+    public void ResetZoom()
     {
         inputManager.ZoomActive = false;
         inputManager.onZoomPerformed -= OnZoom;
@@ -344,6 +361,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateRotation()
     {
+        if (ShouldNotRespondToInputs)
+            return;
         var lookSpeedFactor = inputManager.ZoomActive
             ? inputManager.IsMouseAndKeyboard ? LookSpeedZoom * mouseZoomSpeedFactor : LookSpeedZoom
             : lookSpeed;
@@ -369,7 +388,7 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("Right", Vector3.Dot(body.velocity, transform.right) / maxVelocityBeforeExtraDamping);
     }
 
-    void OnDrawGizmos()
+    private void OnDrawGizmos()
     {
         if (!hitbox) return;
         var extents = new Vector3(1, 1.5f + airThreshold, 1);
@@ -427,6 +446,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
     }
+
     protected virtual void FixedUpdate()
     {
         if (FindSteppingGround() && body.velocity.magnitude > 0.08f)
@@ -434,7 +454,7 @@ public class PlayerMovement : MonoBehaviour
             FindStep();
         }
 
-        var positionInput = new Vector3(inputManager.moveInput.x, 0, inputManager.moveInput.y);
+        var positionInput = ShouldNotRespondToInputs ? Vector3.zero : new Vector3(inputManager.moveInput.x, 0, inputManager.moveInput.y);
         UpdatePosition(positionInput);
         // Limit velocity when not grounded
         if (state == PlayerState.GROUNDED)

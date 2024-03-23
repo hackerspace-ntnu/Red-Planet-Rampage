@@ -168,6 +168,11 @@ public class PlayerManager : MonoBehaviour
         playerShadow.gameObject.SetActive(false);
     }
 
+    private void OnPause(InputAction.CallbackContext ctx)
+    {
+        hudController?.PauseMenu?.SetPlayerInput(inputManager, this);
+    }
+
     protected void TurnIntoRagdoll(DamageInfo info)
     {
         GetComponent<Rigidbody>().GetAccumulatedForce();
@@ -198,27 +203,43 @@ public class PlayerManager : MonoBehaviour
     /// <param name="playerInput"></param>
     public void SetPlayerInput(InputManager playerInput)
     {
-        inputManager = playerInput;
-        identity = inputManager.GetComponent<PlayerIdentity>();
+        ListenToPlayerInput(playerInput);
+
         var playerMovement = GetComponent<PlayerMovement>();
         playerMovement.SetPlayerInput(inputManager);
         playerMovement.onMove += UpdateHudOnMove;
-        // Subscribe relevant input events
-        inputManager.onFirePerformed += Fire;
-        inputManager.onFireCanceled += FireEnd;
-        inputManager.onSelect += TryPlaceBid;
-        inputManager.onFirePerformed += TryPlaceBid;
-        inputManager.onInteract += Interact;
+
         // Set camera on canvas
         var canvas = hudController.GetComponent<Canvas>();
         canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
         canvas.planeDistance = 0.11f;
 
         // Set player color
-        var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
+        meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
     }
 
-    void OnDestroy()
+    private void ListenToPlayerInput(InputManager playerInput)
+    {
+        inputManager = playerInput;
+        identity = inputManager.GetComponent<PlayerIdentity>();
+        // Subscribe relevant input events
+        inputManager.onFirePerformed += Fire;
+        inputManager.onFireCanceled += FireEnd;
+        inputManager.onSelect += TryPlaceBid;
+        inputManager.onFirePerformed += TryPlaceBid;
+        inputManager.onInteract += Interact;
+        inputManager.onExit += OnPause;
+    }
+
+    public void ReassignPlayerInput(InputManager playerInput)
+    {
+        ListenToPlayerInput(playerInput);
+
+        var playerMovement = GetComponent<PlayerMovement>();
+        playerMovement.ReassignPlayerInput(inputManager);
+    }
+
+    private void OnDestroy()
     {
         if (healthController)
         {

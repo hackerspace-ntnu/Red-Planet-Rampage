@@ -79,10 +79,7 @@ public class PlayerInputManagerController : MonoBehaviour
     {
         playerInputs.ForEach(playerInput =>
         {
-            playerInput.playerInput.SwitchCurrentActionMap(mapNameOrId);
-            playerInput.RemoveListeners();
-            playerInput.AddListeners();
-
+            ChangeInputMapForPlayer(mapNameOrId, playerInput);
             // Free the playerInputs from their mortail coils (Player prefab or similar assets)
             var previousParent = playerInput.transform.parent;
             playerInput.transform.parent = null;
@@ -90,5 +87,12 @@ public class PlayerInputManagerController : MonoBehaviour
             if (previousParent)
                 Destroy(previousParent.gameObject);
         });
+    }
+
+    public void ChangeInputMapForPlayer(string mapNameOrId, InputManager playerInput)
+    {
+        playerInput.playerInput.SwitchCurrentActionMap(mapNameOrId);
+        playerInput.RemoveListeners();
+        playerInput.AddListeners();
     }
 }

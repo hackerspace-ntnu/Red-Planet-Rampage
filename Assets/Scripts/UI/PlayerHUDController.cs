@@ -70,6 +70,9 @@ public class PlayerHUDController : MonoBehaviour
 
     private Material damageBorder;
 
+    [SerializeField]
+    private PauseMenu pauseMenu;
+    public PauseMenu PauseMenu => pauseMenu;
 
     [Header("Effects")]
 
