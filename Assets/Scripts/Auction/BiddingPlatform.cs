@@ -30,9 +30,6 @@ public class BiddingPlatform : MonoBehaviour
     private TMP_Text itemCostText;
 
     [SerializeField]
-    private TMP_Text timerText;
-
-    [SerializeField]
     private GameObject modelHolder;
 
     [SerializeField]
@@ -109,7 +106,6 @@ public class BiddingPlatform : MonoBehaviour
     private void Awake()
     {
         auctionTimer = GetComponent<Timer>();
-        auctionTimer.OnTimerUpdate += UpdateTimer;
         auctionTimer.OnTimerRunCompleted += EndAuction;
         material = GetComponent<MeshRenderer>().material;
         material.SetFloat("_Scale", 0f);
@@ -121,7 +117,6 @@ public class BiddingPlatform : MonoBehaviour
 
     private void OnDestroy()
     {
-        auctionTimer.OnTimerUpdate -= UpdateTimer;
         auctionTimer.OnTimerRunCompleted -= EndAuction;
     }
 
@@ -144,7 +139,7 @@ public class BiddingPlatform : MonoBehaviour
                     audioSource.Play();
                     AuctionDriver.Singleton.ScreenShake();
                 }
-                    
+
             }
             chips++;
             playerIdentity.UpdateChip(-chips);
@@ -173,12 +168,6 @@ public class BiddingPlatform : MonoBehaviour
     private void UpdateBorder(float scale)
     {
         material.SetFloat("_Scale", scale);
-    }
-
-    private void UpdateTimer()
-    {
-        timerText.text = Mathf.Round(auctionTimer.WaitTime - auctionTimer.ElapsedTime).ToString();
-        radialUI.material.SetFloat("_Arc1", 360f - 360f * ((auctionTimer.WaitTime - auctionTimer.ElapsedTime) / auctionTimer.WaitTime));
     }
 
     private void EndAuction()

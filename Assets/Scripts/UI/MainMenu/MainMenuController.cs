@@ -49,7 +49,7 @@ public class MainMenuController : MonoBehaviour
     private ToggleButton aIButton;
     private Vector3 aiButtonOriginalPosition;
     private int aiButtonTween;
-    [SerializeField] 
+    [SerializeField]
     private Button startButton;
     [SerializeField]
     private GameObject innputManagerPrefab;
@@ -67,7 +67,7 @@ public class MainMenuController : MonoBehaviour
 
     [SerializeField]
     private GameObject loadingScreen;
-    
+
     private int loadingDuration = 6;
 
     private Coroutine introRoutine;
@@ -225,13 +225,18 @@ public class MainMenuController : MonoBehaviour
         StartCoroutine(LoadAndChangeScene(name));
     }
 
-    private IEnumerator LoadAndChangeScene(string name){
+    private IEnumerator LoadAndChangeScene(string name)
+    {
         // Disable menus we may enter a new scene from
         defaultMenu.SetActive(false);
         mapSelectMenu.SetActive(false);
         // Show loading screen and switch scenes eventually
         loadingScreen.SetActive(true);
+#if UNITY_EDITOR
+        yield return new WaitForSeconds(.5f);
+#else
         yield return new WaitForSeconds(loadingDuration);
+#endif      
         SceneManager.LoadSceneAsync(name);
     }
 
