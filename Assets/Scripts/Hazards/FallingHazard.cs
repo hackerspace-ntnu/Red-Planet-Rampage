@@ -1,67 +1,63 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FallingHazard : MonoBehaviour
 {
-    [SerializeField] private float deadlyVelocityThreshold = 50;
-    [SerializeField] private float damage = 50;
+    [SerializeField] private float deadlyVelocityThreshold = 100;
+    [SerializeField] private float audibleVelocityThreshold = 50;
+    [SerializeField] private AudioGroup soundEffect;
+    [SerializeField] private ExplosionController impactExplosion;
 
-    private Rigidbody body;
     private PlayerManager player;
-
     public PlayerManager Player
     {
         get => player;
         set => player = value;
     }
 
-    private HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
+    private Rigidbody body;
+    private AudioSource audioSource;
+
+    private bool isFirstImpact = true;
+
+    private float lastVelocity = 0f;
 
     private void Start()
     {
         body = GetComponent<Rigidbody>();
-        body.AddForce(300f * Vector3.down, ForceMode.Impulse);
+        body.AddForce(500f * Vector3.down, ForceMode.Impulse);
+        body.AddForce(50f * Vector3.down, ForceMode.VelocityChange);
+        audioSource = GetComponent<AudioSource>();
+    }
+
+    private void LateUpdate()
+    {
+        lastVelocity = Mathf.Lerp(lastVelocity, body.velocity.sqrMagnitude, .2f);
     }
 
     private void OnCollisionEnter(Collision other)
     {
+        var isCollidingWithOtherHazard = other.gameObject.TryGetComponent<FallingHazard>(out var _);
+        if (isCollidingWithOtherHazard)
+            return;
+
+        var isMovingFastEnoughToMakeNoise = lastVelocity > audibleVelocityThreshold;
+        if (!isMovingFastEnoughToMakeNoise)
+            return;
+
+        soundEffect.Play(audioSource);
+
+        if (!isFirstImpact)
+            return;
+
         // Squared magnitude performs better cuz no square root is required :)
-        var isMovingFastEnoughToKill = body.velocity.sqrMagnitude > deadlyVelocityThreshold;
+        var isMovingFastEnoughToKill = lastVelocity > deadlyVelocityThreshold;
         if (!isMovingFastEnoughToKill)
             return;
 
-        foreach (var contact in other.contacts)
-        {
-            DealDamage(contact);
-        }
-    }
+        isFirstImpact = false;
 
-    private void DealDamage(ContactPoint contact)
-    {
-        var damageInfo = new DamageInfo
-        {
-            damage = damage,
-            damageType = DamageType.Weapon,
-            position = contact.point,
-            force = damage * body.velocity,
-            sourcePlayer = player
-        };
-
-        HealthController healthController = null;
-
-        if (contact.otherCollider.TryGetComponent<HitboxController>(out var hitbox))
-        {
-            healthController = hitbox.health;
-        }
-        else if (contact.otherCollider.TryGetComponent<HealthController>(out var health))
-        {
-            healthController = health;
-        }
-
-        if (!healthController || hitHealthControllers.Contains(healthController))
-            return;
-
-        hitHealthControllers.Add(healthController);
-        healthController.DealDamage(damageInfo);
+        var instance = Instantiate(impactExplosion, transform.position, Quaternion.identity);
+        instance.Init();
+        instance.Explode(player);
     }
 }

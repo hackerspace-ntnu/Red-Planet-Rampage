@@ -136,7 +136,6 @@ public abstract class ProjectileController : MonoBehaviour
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
-            Debug.Log("Barrel not attached to gun parent!");
             return;
         }
         if (!gunController.Player)

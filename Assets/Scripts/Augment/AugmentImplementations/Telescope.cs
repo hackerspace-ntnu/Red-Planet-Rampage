@@ -22,7 +22,6 @@ public class Telescope : GunExtension
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
-            Debug.Log("Telescope not attached to gun parent!");
             return;
         }
 

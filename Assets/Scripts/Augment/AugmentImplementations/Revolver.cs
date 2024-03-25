@@ -27,7 +27,6 @@ public class Revolver : GunBody
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
-            Debug.Log("Revolver not attached to gun parent!");
             return;
         }
         gunController.onFireEnd += Reload;

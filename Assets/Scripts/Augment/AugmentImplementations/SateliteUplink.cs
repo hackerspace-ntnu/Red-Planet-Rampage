@@ -1,4 +1,5 @@
 using CollectionExtensions;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,14 +14,21 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
     [SerializeField]
     private float launchHeight = 100;
 
+    [SerializeField]
+    private float cooldown = 10;
+
+    [SerializeField]
+    private float maxLaunchesPerShot = 20;
+
+    private float launchesThisShot = 0;
+
     private GunController gunController;
-    private Transform targetingReticleInstance;
+    private Timer timer;
 
-    private Vector3 target = Vector3.zero;
-
-    private bool isTrackingCurrentShot = true;
-    private const float trackingTimeout = .1f;
     private HashSet<ProjectileState> trackedProjectiles = new HashSet<ProjectileState>();
+
+    private bool isTrackingCurrentShot = false;
+    private bool isReady = false;
 
     private void Start()
     {
@@ -30,12 +38,30 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
 
         gunController.onFireStart += StartTracking;
         gunController.onFireEnd += StopTracking;
-        //targetingReticleInstance = Instantiate(targetingReticle, Vector3.zero, Quaternion.identity).transform;
+
+        timer = GetComponent<Timer>();
+        timer.OnTimerRunCompleted += OnCooldownEnd;
+        timer.StartTimer(cooldown);
+    }
+
+    private void RestartCooldown()
+    {
+        isReady = false;
+        timer.StartTimer(cooldown);
+    }
+
+    private void OnCooldownEnd()
+    {
+        isReady = true;
     }
 
     private void StartTracking(GunStats stats)
     {
+        if (!isReady)
+            return;
         isTrackingCurrentShot = true;
+        launchesThisShot = 0;
+        RestartCooldown();
     }
 
     private void StopTracking(GunStats stats)
@@ -62,36 +88,49 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
         if (!isTrackingCurrentShot)
             return;
         trackedProjectiles.Add(state);
-        // TODO stop tracking each state after a few seconds, so the hashset doesn't grow huge
+        StartCoroutine(UnTrack(state));
+    }
+
+    private IEnumerator UnTrack(ProjectileState state)
+    {
+        yield return new WaitForSeconds(10);
+        trackedProjectiles.Remove(state);
+
     }
 
     private void Target(RaycastHit hit, ref ProjectileState state)
     {
         if (!trackedProjectiles.Contains(state))
             return;
-        Launch(hit.point);
+        if (hit.point.sqrMagnitude < .00001f)
+            // Avoid issue with spherecasts not returning proper points sometimes
+            Launch(hit.collider.transform.position);
+        else
+            Launch(hit.point);
     }
 
     private void Launch(Vector3 target)
     {
-        // TODO have a max cap for the amount that can be spawned
         if (!gunController)
             return;
-        // TODO don't launch until cooldown is over
+
+        if (launchesThisShot >= maxLaunchesPerShot)
+            return;
+        launchesThisShot += 1;
+
         var offset = Random.Range(30f, 0);
         var launchPoint = target + (launchHeight + offset) * Vector3.up;
-        var launchee = spaceGarbage.RandomElement();
-        var instance = Instantiate(launchee, launchPoint, Quaternion.identity);
+
+        var garbage = spaceGarbage.RandomElement();
+        var garbageInstance = Instantiate(garbage, launchPoint, Quaternion.AngleAxis(Random.Range(0f, 360f), Vector3.up));
+        garbageInstance.Player = gunController.Player;
+
         var targetInstance = Instantiate(targetingReticle, target, Quaternion.identity);
-        Destroy(targetInstance, 4); // TODO destroy only when we hit the ground
-        // TODO set targeting reticle solid and set its garbage instance
+        Destroy(targetInstance, 2); // TODO destroy only when we hit the ground (?)
     }
 
     private void OnDestroy()
     {
-        //if (!targetingReticleInstance)
-        //return;
-        //Destroy(targetingReticleInstance);
         if (!gunController)
             return;
         gunController.onFireStart -= StartTracking;

@@ -144,11 +144,19 @@ public class GunController : MonoBehaviour
             return;
         }
 
-        isFiring = true;
-        onFireStart?.Invoke(stats);
-        AimAtTarget();
-        projectile.InitializeProjectile(stats);
-        onInitializeBullet?.Invoke(stats);
+        try
+        {
+            onFireStart?.Invoke(stats);
+            AimAtTarget();
+            projectile.InitializeProjectile(stats);
+            onInitializeBullet?.Invoke(stats);
+        }
+        catch (System.Exception e)
+        {
+            // Hopefully recoverable error. Firing has had lots of bugs before,
+            // hopefully we avoid displaying them in their gruesome nature to the user this way.
+            Debug.LogError(e);
+        }
     }
 
     private void AimAtTarget()
