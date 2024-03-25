@@ -15,7 +15,6 @@ public class RubberSniper : GunExtension
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
-            Debug.Log("Fire not attached to gun parent!");
             return;
         }
         gunController.onFire += Fire;

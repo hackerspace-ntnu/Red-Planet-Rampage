@@ -17,7 +17,6 @@ public class KnockbackOnShotModifier : MonoBehaviour, ProjectileModifier
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
-            Debug.Log("Fire not attached to gun parent!");
             return;
         }
     }

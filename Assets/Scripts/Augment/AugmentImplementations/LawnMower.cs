@@ -54,7 +54,6 @@ public class LawnMower : GunBody
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
-            Debug.Log("MowerBody not attached to gun parent!");
             return;
         }
         gunController.onFireStart += Fire;

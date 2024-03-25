@@ -20,7 +20,6 @@ public class AmmoBoxBody : GunBody
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
-            Debug.Log("Seeker not attached to gun parent!");
             return;
         }
         gunController.onFireStart += Reload;

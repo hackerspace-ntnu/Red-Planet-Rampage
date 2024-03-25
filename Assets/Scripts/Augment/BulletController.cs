@@ -13,10 +13,10 @@ public class BulletController : ProjectileController
     private int collisionSamplesPerUnit = 3;
 
     private int collisionSamples;
-    
+
     [SerializeField]
     private int collisionsBeforeInactive = 1;
-    
+
     private const int vfxPositionsPerSample = 3;
 
     private const float baseSpeed = 50f;
@@ -78,18 +78,21 @@ public class BulletController : ProjectileController
         {
             Quaternion randomSpread = Quaternion.Lerp(Quaternion.identity, Random.rotation, stats.ProjectileSpread);
 
-            // TODO: Possibly standardize this better
-            projectile.active = true;
-            projectile.distanceTraveled = 0f;
-            projectile.damage = stats.ProjectileDamage;
-            projectile.position = projectileOutput.position;
-            projectile.oldPosition = projectileOutput.position;
-            projectile.direction = randomSpread * projectileRotation * projectileOutput.forward;
-            projectile.maxDistance = this.maxDistance;
-            projectile.rotation = randomSpread * projectileRotation * projectileOutput.rotation;
-            projectile.initializationTime = Time.fixedTime;
-            projectile.speedFactor = stats.ProjectileSpeedFactor;
-            projectile.gravity = stats.ProjectileGravityModifier * 9.81f;
+            projectile = new()
+            {
+                // TODO: Possibly standardize this better
+                active = true,
+                distanceTraveled = 0f,
+                damage = stats.ProjectileDamage,
+                position = projectileOutput.position,
+                oldPosition = projectileOutput.position,
+                direction = randomSpread * projectileRotation * projectileOutput.forward,
+                maxDistance = this.maxDistance,
+                rotation = randomSpread * projectileRotation * projectileOutput.rotation,
+                initializationTime = Time.fixedTime,
+                speedFactor = stats.ProjectileSpeedFactor,
+                gravity = stats.ProjectileGravityModifier * 9.81f
+            };
             projectile.additionalProperties.Clear();
             projectile.hitHealthControllers.Clear();
 
@@ -116,7 +119,7 @@ public class BulletController : ProjectileController
 
                 RaycastHit[] collisions = ProjectileMotions.GetPathCollisions(projectile, collisionLayers).Where(p => p.collider != lastCollider).ToArray();
                 sampleNum += 1;
-                for (int i = 0; i < collisions.Length && projectile.active; i++) 
+                for (int i = 0; i < collisions.Length && projectile.active; i++)
                 {
                     totalCollisions += 1;
                     var collider = collisions[i].collider;
@@ -130,14 +133,14 @@ public class BulletController : ProjectileController
                         OnHitboxCollision?.Invoke(hitbox, ref projectile);
 
                     OnColliderHit?.Invoke(collisions[i], ref projectile);
-                    
-                    if(totalCollisions == this.collisionsBeforeInactive)
+
+                    if (totalCollisions == this.collisionsBeforeInactive)
                         projectile.active = false;
 
-                        if (sampleNum < collisionSamples)
-                            TrySetTextureValue(sampleNum * vfxPositionsPerSample + k * vfxPositionsPerSample * collisionSamples, projectile.position);
+                    if (sampleNum < collisionSamples)
+                        TrySetTextureValue(sampleNum * vfxPositionsPerSample + k * vfxPositionsPerSample * collisionSamples, projectile.position);
                 }
-                if(collisions.Length > 0)
+                if (collisions.Length > 0)
                     lastCollider = collisions[collisions.Length - 1].collider;
 
             }
