@@ -19,7 +19,6 @@ public class HackingExtension : GunExtension
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
-            Debug.Log("HackingExtension not attached to gun parent!");
             return;
         }
         gunController.onFireStart += Fire;

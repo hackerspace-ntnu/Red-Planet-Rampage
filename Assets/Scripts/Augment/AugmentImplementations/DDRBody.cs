@@ -74,7 +74,6 @@ public class DDRBody : GunBody
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
         {
-            Debug.Log("DanceBody not attached to gun parent!");
             return;
         }
 
