@@ -135,13 +135,9 @@ public abstract class ProjectileController : MonoBehaviour
 
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
             return;
-        }
         if (!gunController.Player)
-        {
             return;
-        }
         gunController.onInitializeGun += OnInitialize;
         gunController.onReload += OnReload;
         if (gunController.Player.inputManager)

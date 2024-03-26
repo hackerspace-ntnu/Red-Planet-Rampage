@@ -18,9 +18,7 @@ public class HackingExtension : GunExtension
         hackingScreen = meshRenderer.materials[hackingScreenMaterialIndex];
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
             return;
-        }
         gunController.onFireStart += Fire;
     }
 

@@ -53,9 +53,7 @@ public class LawnMower : GunBody
         mowerScreen = meshRenderer.materials[mowerScreenMaterialIndex];
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
             return;
-        }
         gunController.onFireStart += Fire;
         gunController.onFireEnd += FireEnd;
 

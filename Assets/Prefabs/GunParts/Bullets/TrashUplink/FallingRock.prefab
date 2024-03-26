@@ -48,8 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   deadlyVelocityThreshold: 50
-  audibleVelocityThreshold: 30
-  damage: 50
+  audibleVelocityThreshold: 20
   soundEffect: {fileID: 11400000, guid: 793a2e8c56b13f2e188e5fd0c9a99d09, type: 2}
   impactExplosion: {fileID: 2954352013874095910, guid: 08bcac62798bad66b9c29629194984b7, type: 3}
 --- !u!54 &995852786161839922
@@ -78,7 +77,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!82 &2990520310954272431
 AudioSource:
   m_ObjectHideFlags: 0

@@ -14,9 +14,7 @@ public class RubberSniper : GunExtension
     {
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
             return;
-        }
         gunController.onFire += Fire;
         if (!gunController.Player)
             return;

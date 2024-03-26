@@ -48,9 +48,7 @@ public class SolarBody : GunBody
 
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
             return;
-        }
 
         if (!gunController.Player)
             return;
