@@ -132,9 +132,8 @@ public class MeshProjectileController : ProjectileController
     private void FixedUpdate()
     {
         if (!gunController)
-        {
             return;
-        }
+
         for (int i = 0; i < maxProjectiles; i++)
         {
             var state = projectiles[i];

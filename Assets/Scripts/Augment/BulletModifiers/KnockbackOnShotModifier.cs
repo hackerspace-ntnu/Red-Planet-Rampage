@@ -16,9 +16,7 @@ public class KnockbackOnShotModifier : MonoBehaviour, ProjectileModifier
     {
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
             return;
-        }
     }
     public void Attach(ProjectileController projectile)
     {

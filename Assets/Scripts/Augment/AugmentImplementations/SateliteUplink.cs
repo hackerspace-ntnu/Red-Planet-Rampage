@@ -1,6 +1,7 @@
 using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class SateliteUplink : MonoBehaviour, ProjectileModifier
@@ -10,6 +11,12 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
 
     [SerializeField]
     private GameObject targetingReticle;
+
+    [SerializeField]
+    private TMP_Text timerText;
+
+    [SerializeField]
+    private TMP_Text readyText;
 
     [SerializeField]
     private float launchHeight = 100;
@@ -48,11 +55,15 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
     {
         isReady = false;
         timer.StartTimer(cooldown);
+        timerText.gameObject.SetActive(true);
+        readyText.gameObject.SetActive(false);
     }
 
     private void OnCooldownEnd()
     {
         isReady = true;
+        timerText.gameObject.SetActive(false);
+        readyText.gameObject.SetActive(true);
     }
 
     private void StartTracking(GunStats stats)

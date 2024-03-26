@@ -21,9 +21,7 @@ public class Telescope : GunExtension
     {
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
             return;
-        }
 
         if (!gunController.Player)
             return;
