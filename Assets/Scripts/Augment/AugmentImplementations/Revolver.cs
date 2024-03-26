@@ -26,9 +26,7 @@ public class Revolver : GunBody
         audioSource = GetComponent<AudioSource>();
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
             return;
-        }
         gunController.onFireEnd += Reload;
 
         if (!gunController.Player)

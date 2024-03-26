@@ -19,9 +19,7 @@ public class AmmoBoxBody : GunBody
     {
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
             return;
-        }
         gunController.onFireStart += Reload;
         StartCoroutine(SetClosestAmmoBox());
         if (!gunController.Player)

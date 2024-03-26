@@ -28,9 +28,7 @@ public class GunBody : MonoBehaviour
     {
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
             return;
-        }
         // TODO: refactor this, which additionaly only exists to support placeholder weapons with no reload implementation
         gunController.onFireEnd += Reload;
     }
