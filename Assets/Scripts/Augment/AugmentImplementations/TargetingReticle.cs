@@ -7,8 +7,6 @@ public class TargetingReticle : MonoBehaviour
 
     private void Start()
     {
-        // TODO change color on suff
         mesh.transform.LeanRotateAroundLocal(Vector3.forward, 360, 1).setLoopClamp();
-
     }
 }
