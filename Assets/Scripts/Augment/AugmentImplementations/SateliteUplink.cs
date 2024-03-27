@@ -10,7 +10,7 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
     private FallingHazard[] spaceGarbage;
 
     [SerializeField]
-    private GameObject targetingReticle;
+    private TargetingReticle targetingReticle;
 
     [SerializeField]
     private TMP_Text timerText;
@@ -25,7 +25,10 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
     private float cooldown = 10;
 
     [SerializeField]
-    private float maxLaunchesPerShot = 20;
+    private int maxLaunchesPerShot = 20;
+
+    [SerializeField]
+    private int maxGarbagePresent = 50;
 
     private float launchesThisShot = 0;
 
@@ -33,6 +36,9 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
     private Timer timer;
 
     private HashSet<ProjectileState> trackedProjectiles = new HashSet<ProjectileState>();
+    private ObjectPool<FallingHazard> garbagePool;
+    private ObjectPool<TargetingReticle> targetingReticlePool;
+    private Transform garbageParent;
 
     private bool isTrackingCurrentShot = false;
     private bool isReady = false;
@@ -46,9 +52,20 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
         gunController.onFireStart += StartTracking;
         gunController.onFireEnd += StopTracking;
 
+        garbagePool = new ObjectPool<FallingHazard>(PickTemplate, maxGarbagePresent);
+        targetingReticlePool = new ObjectPool<TargetingReticle>(targetingReticle, maxLaunchesPerShot);
+
+        garbageParent = (new GameObject()).transform;
+        garbageParent.gameObject.name = "TrashUplinkGarbageHolder";
+
         timer = GetComponent<Timer>();
         timer.OnTimerRunCompleted += OnCooldownEnd;
         timer.StartTimer(cooldown);
+    }
+
+    private FallingHazard PickTemplate()
+    {
+        return spaceGarbage.RandomElement();
     }
 
     private void RestartCooldown()
@@ -132,12 +149,14 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
         var offset = Random.Range(30f, 0);
         var launchPoint = target + (launchHeight + offset) * Vector3.up;
 
-        var garbage = spaceGarbage.RandomElement();
-        var garbageInstance = Instantiate(garbage, launchPoint, Quaternion.AngleAxis(Random.Range(0f, 360f), Vector3.up));
+        var garbageInstance = garbagePool.Get();
+        garbageInstance.transform.parent = garbageParent;
         garbageInstance.Player = gunController.Player;
+        garbageInstance.Launch(launchPoint);
 
-        var targetInstance = Instantiate(targetingReticle, target, Quaternion.identity);
-        Destroy(targetInstance, 2); // TODO destroy only when we hit the ground (?)
+        var targetInstance = targetingReticlePool.GetAndReturnLater(2);
+        garbageInstance.transform.parent = garbageParent;
+        targetInstance.transform.position = target;
     }
 
     private void OnDestroy()
