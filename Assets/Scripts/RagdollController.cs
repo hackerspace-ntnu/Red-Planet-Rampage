@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class RagdollController : MonoBehaviour
@@ -86,7 +85,7 @@ public class RagdollController : MonoBehaviour
 
     private void OnDestroy()
     {
-        if(!camera)
+        if (!camera)
             return;
         camera.position = Vector3.zero;
         camera.localPosition = Vector3.zero;
