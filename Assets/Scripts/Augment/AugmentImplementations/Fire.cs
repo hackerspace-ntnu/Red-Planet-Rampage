@@ -2,7 +2,6 @@ using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.VFX;
 
 public enum ProjectileType
@@ -60,7 +59,7 @@ public class Fire : GunExtension
             fireTrailInstances.SendEvent(VisualEffectAsset.PlayEventID);
             projectileType = ProjectileType.Mesh;
         }
-        else if(gunController.projectile is BulletController)
+        else if (gunController.projectile is BulletController)
         {
             ((BulletController)gunController.projectile).SetTrail(fireTrail);
             projectileType = ProjectileType.Hitscan;
@@ -69,7 +68,7 @@ public class Fire : GunExtension
         {
             projectileType = ProjectileType.Laser;
         }
-            
+
     }
 
     private void TrackProjectile(ref ProjectileState state, GunStats stats)
@@ -118,8 +117,8 @@ public class Fire : GunExtension
         foreach (var state in trackedProjectiles)
         {
             var halfDistance = state.distanceTraveled / 2;
-            Debug.DrawRay(state.position - state.direction * halfDistance, state.direction* halfDistance, Color.blue);
-            var extraArea = gunController.stats.ProjectileSize.Value() + gunController.stats.ProjectileSpread.Value(); 
+            Debug.DrawRay(state.position - state.direction * halfDistance, state.direction * halfDistance, Color.blue);
+            var extraArea = gunController.stats.ProjectileSize.Value() + gunController.stats.ProjectileSpread.Value();
             var hitColliders = Physics.OverlapBox(state.position - state.direction * halfDistance * 0.9f, new Vector3(0.4f + extraArea * 0.5f, 0.4f + extraArea * 0.5f, halfDistance), state.rotation, trailLayers);
             foreach (var hitCollider in hitColliders)
             {
