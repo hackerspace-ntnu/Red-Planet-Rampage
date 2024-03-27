@@ -26,10 +26,7 @@ public class Revolver : GunBody
         audioSource = GetComponent<AudioSource>();
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
-            Debug.Log("Revolver not attached to gun parent!");
             return;
-        }
         gunController.onFireEnd += Reload;
 
         if (!gunController.Player)

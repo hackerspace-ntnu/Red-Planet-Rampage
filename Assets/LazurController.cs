@@ -39,14 +39,17 @@ public class LazurController : ProjectileController
 
     public void FireLazur()
     {
-        projectile.active = true;
-        projectile.distanceTraveled = 0f;
-        projectile.damage = stats.ProjectileDamage;
-        projectile.position = projectileOutput.position;
-        projectile.oldPosition = projectileOutput.position;
-        projectile.direction = projectileRotation * projectileOutput.forward;
-        projectile.maxDistance = this.MaxDistance;
-        projectile.initializationTime = Time.fixedTime;
+        projectile = new()
+        {
+            active = true,
+            distanceTraveled = 0f,
+            damage = stats.ProjectileDamage,
+            position = projectileOutput.position,
+            oldPosition = projectileOutput.position,
+            direction = projectileRotation * projectileOutput.forward,
+            maxDistance = this.MaxDistance,
+            initializationTime = Time.fixedTime
+        };
         projectile.additionalProperties.Clear();
         projectile.hitHealthControllers.Clear();
 

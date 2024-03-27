@@ -48,10 +48,7 @@ public class SolarBody : GunBody
 
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
-            Debug.Log("SolarBody not attached to gun parent!");
             return;
-        }
 
         if (!gunController.Player)
             return;

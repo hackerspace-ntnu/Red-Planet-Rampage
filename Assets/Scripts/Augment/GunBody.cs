@@ -28,10 +28,7 @@ public class GunBody : MonoBehaviour
     {
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
-            Debug.Log("HatBarrel not attached to gun parent!");
             return;
-        }
         // TODO: refactor this, which additionaly only exists to support placeholder weapons with no reload implementation
         gunController.onFireEnd += Reload;
     }
