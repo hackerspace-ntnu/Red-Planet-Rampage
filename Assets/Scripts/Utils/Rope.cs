@@ -58,7 +58,7 @@ public class Rope : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!anchor || !Target)
+        if (!anchor || !Target || collisionPoints.Count == 0)
             return;
 
         if (Physics.Linecast(Target.position, collisionPoints[collisionPoints.Count - 1], out RaycastHit hitInfo, colliderLayers))
