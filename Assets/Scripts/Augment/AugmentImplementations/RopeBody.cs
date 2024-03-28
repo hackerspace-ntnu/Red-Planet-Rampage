@@ -6,7 +6,13 @@ public class RopeBody : GunBody
 {
     [SerializeField]
     private Rope rope;
+    [SerializeField]
+    private Transform ropeTarget;
     private Rigidbody playerBody;
+    [SerializeField]
+    private PlayerHand playerHandLeft;
+    [SerializeField]
+    private PlayerHand playerHandRight;
 
     [SerializeField]
     private float pullForce = 10f;
@@ -22,15 +28,19 @@ public class RopeBody : GunBody
             rope.enabled = false;
             return;
         }
-        rope.Target = gunController.Player.GunHolder;
+        rope.Target = ropeTarget;
         playerBody = gunController.Player.GetComponent<Rigidbody>();
+        playerHandRight.SetPlayer(gunController.Player);
+        playerHandRight.gameObject.SetActive(true);
+        playerHandLeft.SetPlayer(gunController.Player);
+        playerHandLeft.gameObject.SetActive(true);
     }
 
     private void PullingWire()
     {
         playerBody.AddForce(-(playerBody.position - rope.CurrentAnchor).normalized * pullForce, ForceMode.Acceleration);
         if (rope.RopeLength > ropeLength + 4f)
-            rope.ResetRope(gunController.Player.GunHolder.position);
+            rope.ResetRope(ropeTarget.position);
     }
 
 
