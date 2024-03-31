@@ -7,6 +7,18 @@ public class Rope : MonoBehaviour
     private List<Vector3> collisionPoints = new List<Vector3>();
     [SerializeField]
     private Transform anchor;
+    public Transform Anchor 
+    {
+        get
+        {
+            return anchor;
+        }
+        set
+        {
+            collisionPoints.Add(value.position);
+            anchor = value;
+        }
+    }
     [SerializeField]
     public Transform Target { get; set; }
     [SerializeField]
@@ -32,17 +44,20 @@ public class Rope : MonoBehaviour
     void Start()
     {
         if (!anchor)
-        {
-            anchor = new GameObject().transform;
-            anchor.position = transform.position;
-        }
+            return;
         collisionPoints.Add(anchor.position);
     }
 
     public void ResetRope(Vector3 position)
     {
         collisionPoints = new List<Vector3>();
-        anchor.position = position;
+        collisionPoints.Add(position);
+        accumulatedAnchorLength = 0f;
+    }
+    public void ResetRope(Transform anchor)
+    {
+        collisionPoints = new List<Vector3>();
+        this.anchor = anchor;
         collisionPoints.Add(anchor.position);
         accumulatedAnchorLength = 0f;
     }
@@ -100,5 +115,15 @@ public class Rope : MonoBehaviour
         line.positionCount = collisionPoints.Count + 1;
         line.SetPositions(collisionPoints.ToArray());
         line.SetPosition(collisionPoints.Count, Target.position);
+    }
+
+    private void OnEnable()
+    {
+        line.enabled = true;
+    }
+
+    private void OnDisable()
+    {
+        line.enabled = false;
     }
 }

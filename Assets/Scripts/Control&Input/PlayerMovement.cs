@@ -136,6 +136,9 @@ public class PlayerMovement : MonoBehaviour
     private int gunCrouchCanceledTween;
     private int cameraCrouchCanceledTween;
 
+    public bool CanMove = true;
+    public bool CanLook = true;
+
     [Header("Step climb")]
     [SerializeField]
     private GameObject bottomCaster;
@@ -349,6 +352,8 @@ public class PlayerMovement : MonoBehaviour
 
     protected void UpdatePosition(Vector3 input)
     {
+        if (!CanMove)
+            input = Vector3.zero;
         // Modify input to addforce with relation to current rotation.
         input = transform.forward * input.z + transform.right * input.x;
 
@@ -410,6 +415,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateRotation()
     {
+        if (!CanLook)
+            return;
         var lookSpeedFactor = inputManager.ZoomActive
             ? inputManager.IsMouseAndKeyboard ? LookSpeedZoom * mouseZoomSpeedFactor : LookSpeedZoom
             : lookSpeed;
