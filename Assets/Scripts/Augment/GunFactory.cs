@@ -114,15 +114,28 @@ public class GunFactory : MonoBehaviour
     public static string GetGunName(Item body, Item barrel, Item extension)
     {
         OverrideName result = StaticInfo.Singleton.SecretNames
-                                        .Where(x => (x.Body == body && x.Barrel == barrel && x.Extension == extension))
-                                        .FirstOrDefault();
-        if (!(result.Name is null))
+                                        .FirstOrDefault(x => x.Body == body && x.Barrel == barrel && x.Extension == extension);
+
+        if (result.Name is not null)
             return result.Name;
 
         if (extension == null)
             return $"The {body.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
 
         return $"The {body.secretName.Capitalized()} {extension.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
+    }
+
+    public static bool TryGetGunAchievement(Item body, Item barrel, Item extension, out AchievementType achievement)
+    {
+        OverrideName result = StaticInfo.Singleton.SecretNames
+                                        .FirstOrDefault(x => x.Body == body && x.Barrel == barrel && x.Extension == extension);
+
+        achievement = AchievementType.None;
+        if (result.Name is null)
+            return false;
+
+        achievement = result.Achievement;
+        return true;
     }
 
     // Prefabs of the different parts

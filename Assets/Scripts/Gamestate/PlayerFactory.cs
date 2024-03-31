@@ -105,21 +105,31 @@ public class PlayerFactory : MonoBehaviour
         // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
         Transform cameraOffset = player.transform.Find("CameraOffset");
+
         // Make playerInput child of player it's attached to
         inputManager.transform.parent = player.transform;
+
         // Tell the network synchronization that the player prefab should be synced
         inputManager.GetComponent<NetworkTransformReliable>().target = player.transform;
         inputManager.GetComponent<NetworkAnimator>().animator = player.GetComponent<PlayerMovement>().Animator;
+
         // Set recieved playerInput (and most importantly its camera) at an offset from player's position
         inputManager.transform.localPosition = cameraOffset.localPosition;
         inputManager.transform.rotation = player.transform.rotation;
+
         // Enable Camera
         inputManager.PlayerCamera.enabled = true;
         inputManager.PlayerCamera.orthographic = false;
+
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
         playerManager.SetPlayerInput(inputManager);
         playerManager.SetGun(inputManager.transform.GetChild(0));
+
+        // TODO determine a better place to put this!
+        if (GunFactory.TryGetGunAchievement(playerManager.identity.Body, playerManager.identity.Barrel, playerManager.identity.Extension, out var achievement))
+            SteamManager.Singleton.UnlockAchievement(achievement);
+
         // Set unique layer for player
         playerManager.SetLayer(inputManager.playerInput.playerIndex);
         playerManager.GetComponent<PlayerMovement>().SetInitialRotation(spawnPoint.eulerAngles.y * Mathf.Deg2Rad);
