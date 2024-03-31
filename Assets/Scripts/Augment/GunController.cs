@@ -41,6 +41,7 @@ public class GunController : MonoBehaviour
     public GunEvent onFireStart;
     public GunEvent onFire;
     public GunEvent onFireEnd;
+    public GunEvent onFireNoAmmo;
     public GunEvent onInitializeGun;
     public GunEvent onInitializeBullet;
 
@@ -141,6 +142,7 @@ public class GunController : MonoBehaviour
     {
         if (stats.Ammo <= 0)
         {
+            onFireNoAmmo?.Invoke(stats);
             return;
         }
 
