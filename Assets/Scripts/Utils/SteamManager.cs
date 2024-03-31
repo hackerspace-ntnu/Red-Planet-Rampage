@@ -4,6 +4,24 @@ using UnityEngine;
 using Mirror;
 using Steamworks;
 
+public enum AchievementType
+{
+    None,
+    DiscoInferno,
+    WireFraud,
+    SchizoidMan,
+    BlueHat,
+    BlackHat,
+    EagleEyed,
+    PogoStick,
+    Skater,
+    SprayNPray,
+    PingPonginator,
+    Flamethrower,
+    OrbitalTrashCannon,
+    ItalianPlumber
+}
+
 public class SteamManager : MonoBehaviour
 {
     private const int steamAppID = 2717710;
@@ -11,6 +29,8 @@ public class SteamManager : MonoBehaviour
     public int ConnectedPlayers => transportProtocol.numPlayers;
     private bool isSteamInitialized;
     public bool IsHosting = false;
+
+    private bool shouldStoreStats = false;
 
     private Callback<LobbyCreated_t> lobbyCreated;
     private Callback<LobbyEnter_t> lobbyEnter;
@@ -21,7 +41,7 @@ public class SteamManager : MonoBehaviour
     [SerializeField]
     private Peer2PeerTransport transportProtocol;
 
-    void Awake()
+    private void Awake()
     {
         #region Singleton boilerplate
 
@@ -55,10 +75,60 @@ public class SteamManager : MonoBehaviour
     {
         if (!isSteamInitialized)
             return;
+
         lobbyCreated = Callback<LobbyCreated_t>.Create(OnlobbyCreated);
         lobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEnter);
         joinRequest = Callback<GameLobbyJoinRequested_t>.Create(OnJoinRequest);
+
+        RequestStats();
     }
+
+    private void RequestStats()
+    {
+        if (!isSteamInitialized)
+            return;
+
+        SteamUserStats.RequestCurrentStats();
+    }
+
+    #region Achievements
+
+    private readonly Dictionary<AchievementType, string> achievementNames = new()
+    {
+        { AchievementType.DiscoInferno, "WEAPON_DISCO_INFERNO" },
+        { AchievementType.WireFraud, "WEAPON_WIRE_FRAUD" },
+        { AchievementType.SchizoidMan, "WEAPON_SCHIZOID_MAN" },
+        { AchievementType.BlueHat, "WEAPON_BLUE_HAT" },
+        { AchievementType.BlackHat, "WEAPON_BLACK_HAT" },
+        { AchievementType.EagleEyed, "WEAPON_EAGLE_EYED" },
+        { AchievementType.PogoStick, "WEAPON_POGO_STICK" },
+        { AchievementType.Skater, "WEAPON_SKATER" },
+        { AchievementType.SprayNPray, "WEAPON_SPRAY_N_PRAY" },
+        { AchievementType.PingPonginator, "WEAPON_PING_PONG" },
+        { AchievementType.Flamethrower, "WEAPON_FLAMETHROWER" },
+        { AchievementType.OrbitalTrashCannon, "WEAPON_ORBITAL_TRASH_CANNON" },
+        { AchievementType.ItalianPlumber, "WEAPON_ITALIAN_PLUMBER" }
+    };
+
+    public void UnlockAchievement(AchievementType type)
+    {
+        if (!isSteamInitialized)
+            return;
+        if (type is AchievementType.None || !achievementNames.TryGetValue(type, out var name))
+            return;
+
+        SteamUserStats.GetAchievement(name, out var isAlreadyUnlocked);
+
+        if (isAlreadyUnlocked)
+            return;
+
+        SteamUserStats.SetAchievement(name);
+        shouldStoreStats = true;
+    }
+
+    #endregion Achievements
+
+    #region Lobby
 
     private void OnlobbyCreated(LobbyCreated_t callback)
     {
@@ -93,11 +163,22 @@ public class SteamManager : MonoBehaviour
             SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, transportProtocol.maxConnections);
     }
 
-    void Update()
+    #endregion Lobby
+
+    private void Update()
     {
-        if (isSteamInitialized)
-            SteamAPI.RunCallbacks();
+        if (!isSteamInitialized)
+            return;
+
+        SteamAPI.RunCallbacks();
+
+        if (shouldStoreStats)
+        {
+            // Try storing stats again if this attempt failed.
+            shouldStoreStats = !SteamUserStats.StoreStats();
+        }
     }
+
     private void OnApplicationQuit()
     {
         if (isSteamInitialized)
