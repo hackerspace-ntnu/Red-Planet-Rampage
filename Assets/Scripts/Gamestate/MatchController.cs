@@ -6,6 +6,8 @@ using UnityEngine;
 using System;
 using CollectionExtensions;
 
+#nullable enable
+
 /// <summary>
 /// Wrapper struct for tying refference to Player class with the in-game player.
 /// </summary>
@@ -177,8 +179,9 @@ public class MatchController : MonoBehaviour
 
         StartCoroutine(ShowLoadingScreenBeforeBidding());
         // TODO: Add Destroy on match win   
-    }   
-    private IEnumerator ShowLoadingScreenBeforeBidding(){
+    }
+    private IEnumerator ShowLoadingScreenBeforeBidding()
+    {
         loadingScreen.SetActive(true);
         yield return new WaitForSeconds(loadingDuration);
 
@@ -270,6 +273,8 @@ public class MatchController : MonoBehaviour
         {
             // We have a winner!
             StartCoroutine(DisplayWinScreenAndRestart(winner));
+            // Remember stats from this match.
+            PersistentInfo.SavePersistentData();
             return true;
         }
         else
