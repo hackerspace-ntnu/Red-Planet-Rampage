@@ -32,6 +32,13 @@ public class LessJallaVFXPositionEncoder : MonoBehaviour
         currentId = currentId % (MaxLines * 2);
     }
 
+    public void OverWriteLines(List<Vector3> lines)
+    {
+        resetBuffer();
+        for (int i = 0; i < lines.Count - 1; i++)
+            AddLine(lines[i], lines[i + 1]);
+    }
+
     public void PopulateBuffer()
     {
         startEndPositionsBuffer.SetData(startEndPositions);
@@ -41,5 +48,9 @@ public class LessJallaVFXPositionEncoder : MonoBehaviour
     {
         Array.Fill(startEndPositions, Vector3.zero);
         currentId = 0;
+    }
+    private void OnDestroy()
+    {
+        startEndPositionsBuffer.Release();
     }
 }
