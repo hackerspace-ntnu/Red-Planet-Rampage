@@ -237,7 +237,8 @@ public class MainMenuController : MonoBehaviour
 #else
         yield return new WaitForSeconds(loadingDuration);
 #endif      
-        SceneManager.LoadSceneAsync(name);
+        if (!SteamManager.Singleton.ChangeScene(name))
+            SceneManager.LoadSceneAsync(name);
     }
 
     /// <summary>
@@ -322,6 +323,11 @@ public class MainMenuController : MonoBehaviour
     public void HostLobby()
     {
         SteamManager.Singleton.HostLobby();
+    }
+
+    public void LeaveLobby()
+    {
+        SteamManager.Singleton.LeaveLobby();
     }
 
     public void Quit()

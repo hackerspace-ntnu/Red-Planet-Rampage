@@ -185,7 +185,8 @@ public class MatchController : MonoBehaviour
         PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.Bidding);
         onBiddingStart?.Invoke();
-        SceneManager.LoadSceneAsync("Bidding");
+        if (!SteamManager.Singleton.ChangeScene("Bidding"))
+            SceneManager.LoadSceneAsync("Bidding");
         PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = false;
         isAuction = true;
     }
@@ -315,6 +316,7 @@ public class MatchController : MonoBehaviour
         MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         rounds = new List<Round>();
         PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
-        SceneManager.LoadSceneAsync("Menu");
+        if (!SteamManager.Singleton.ChangeScene("Menu"))
+            SceneManager.LoadSceneAsync("Menu");
     }
 }

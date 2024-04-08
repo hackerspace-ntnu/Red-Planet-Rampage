@@ -7,20 +7,20 @@ public class PlayerIdentity : MonoBehaviour
     public Color color;
     public string playerName;
     [SerializeField]
-    private bool isAI = false;
+    protected bool isAI = false;
     public bool IsAI => isAI;
 
     [Header("Augments")]
     [SerializeField]
-    private Item body;
+    protected Item body;
     public Item Body => body;
 
     [SerializeField]
-    private Item barrel;
+    protected Item barrel;
     public Item Barrel => barrel;
 
     [SerializeField]
-    private Item extension;
+    protected Item extension;
     public Item Extension => extension;
 
     public List<Item> Bodies { get; private set; } = new List<Item>();

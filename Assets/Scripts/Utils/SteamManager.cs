@@ -35,8 +35,8 @@ public class SteamManager : MonoBehaviour
     private Callback<LobbyCreated_t> lobbyCreated;
     private Callback<LobbyEnter_t> lobbyEnter;
     private Callback<GameLobbyJoinRequested_t> joinRequest;
+    private Callback<LobbyChatUpdate_t> lobbyUpdate;
 
-    private ulong hostId;
     private const string hostkey = "HostAddress";
     [SerializeField]
     private Peer2PeerTransport transportProtocol;
@@ -79,6 +79,7 @@ public class SteamManager : MonoBehaviour
         lobbyCreated = Callback<LobbyCreated_t>.Create(OnlobbyCreated);
         lobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEnter);
         joinRequest = Callback<GameLobbyJoinRequested_t>.Create(OnJoinRequest);
+        lobbyUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyUpdate);
 
         RequestStats();
     }
@@ -147,14 +148,17 @@ public class SteamManager : MonoBehaviour
     private void OnLobbyEnter(LobbyEnter_t callback)
     {
         // All users
-        hostId = callback.m_ulSteamIDLobby;
         // TODO: set steam names over players
-
         if (NetworkServer.active)
             return;
         // Only clients from here!
-        Instantiate(transportProtocol.playerPrefab);
+        transportProtocol.networkAddress = SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey);
         transportProtocol.StartClient();
+    }
+
+    private void OnLobbyUpdate(LobbyChatUpdate_t callback)
+    {
+        //TODO: handle other players leaving/joining
     }
 
     public void HostLobby()
@@ -163,7 +167,31 @@ public class SteamManager : MonoBehaviour
             SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, transportProtocol.maxConnections);
     }
 
+    public void LeaveLobby()
+    {
+        if (!isSteamInitialized)
+            return;
+        if (IsHosting)
+        {
+            transportProtocol.StopHost();
+            IsHosting = false;
+        }
+        else
+        {
+            if (transportProtocol.isNetworkActive)
+                transportProtocol.StopClient();
+        }
+    }
+
     #endregion Lobby
+
+    public bool ChangeScene(string sceneName)
+    {
+        if (!isSteamInitialized || !transportProtocol.isNetworkActive)
+            return false;
+        transportProtocol.ServerChangeScene(sceneName);
+        return true;
+    }
 
     private void Update()
     {
