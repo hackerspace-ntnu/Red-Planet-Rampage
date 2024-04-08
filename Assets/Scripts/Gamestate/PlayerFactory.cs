@@ -37,7 +37,8 @@ public class PlayerFactory : MonoBehaviour
         if (PlayerInputManagerController.Singleton == null)
         {
             // We most likely started the game in the game scene, reload menu instead
-            SceneManager.LoadSceneAsync("Menu");
+            if (!SteamManager.Singleton.ChangeScene("Menu"))
+                SceneManager.LoadSceneAsync("Menu");
             return;
         }
 
@@ -111,7 +112,9 @@ public class PlayerFactory : MonoBehaviour
 
         // Tell the network synchronization that the player prefab should be synced
         inputManager.GetComponent<NetworkTransformReliable>().target = player.transform;
-        inputManager.GetComponent<NetworkAnimator>().animator = player.GetComponent<PlayerMovement>().Animator;
+        var animator = inputManager.GetComponent<NetworkAnimator>();
+        animator.animator = player.GetComponent<PlayerMovement>().Animator;
+        animator.enabled = true;
 
         // Set recieved playerInput (and most importantly its camera) at an offset from player's position
         inputManager.transform.localPosition = cameraOffset.localPosition;
