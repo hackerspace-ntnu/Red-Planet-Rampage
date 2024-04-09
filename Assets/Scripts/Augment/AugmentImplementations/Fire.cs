@@ -33,7 +33,8 @@ public class Fire : GunExtension
     private int maxProjectiles = 1000;
 
     // texture used to update the vfx position and alive-state of particles, RGB is used for position A for alive/dead
-    private VFXTextureFormatter positionActiveTexture;
+    [SerializeField]
+    private VFXTextureFormatter positionActiveBuffer;
 
     private HashSet<ProjectileState> trackedProjectiles = new HashSet<ProjectileState>();
     // Used to keep track of the healthControllers currently burning
@@ -53,9 +54,9 @@ public class Fire : GunExtension
 
         if (gunController.projectile is MeshProjectileController)
         {
-            positionActiveTexture = new VFXTextureFormatter(maxProjectiles);
+            positionActiveBuffer.Initialize(maxProjectiles);
             fireTrailInstances.SetInt("MaxParticleCount", maxProjectiles);
-            fireTrailInstances.SetTexture("Positions", positionActiveTexture.Texture);
+            fireTrailInstances.SetGraphicsBuffer("Positions", positionActiveBuffer.Buffer);
             fireTrailInstances.SendEvent(VisualEffectAsset.PlayEventID);
             projectileType = ProjectileType.Mesh;
         }
@@ -95,12 +96,12 @@ public class Fire : GunExtension
                         CheckTrailPathHits(projectile.oldPosition - projectile.direction * 3f);
                     }
 
-                    positionActiveTexture.setValue(count, projectile.oldPosition);
-                    positionActiveTexture.setAlpha(count, 1f);
+                    positionActiveBuffer.setValue(count, projectile.oldPosition);
+                    positionActiveBuffer.setAlpha(count, 1f);
                     count++;
                 }
                 fireTrailInstances.SetFloat("Amount", count);
-                positionActiveTexture.ApplyChanges();
+                positionActiveBuffer.ApplyChanges();
                 fireTrailInstances.SendEvent(VisualEffectAsset.PlayEventID);
                 break;
             case ProjectileType.Hitscan:
