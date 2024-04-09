@@ -416,6 +416,7 @@ GameObject:
   - component: {fileID: 6841302673657052848}
   - component: {fileID: 1393106611541694855}
   - component: {fileID: 6634608303689490325}
+  - component: {fileID: 9109607024242748006}
   m_Layer: 0
   m_Name: SmokeTrail_Instant
   m_TagString: Untagged
@@ -519,6 +520,18 @@ VFXRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &9109607024242748006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3326378598288421249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aec959625e8916744804da5d90a1d188, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3894901145996896954
 GameObject:
   m_ObjectHideFlags: 0
@@ -768,6 +781,7 @@ MonoBehaviour:
   maxDistance: 15
   collisionSamplesPerUnit: 3
   collisionsBeforeInactive: 1
+  trailPositionBuffer: {fileID: 9109607024242748006}
   trail: {fileID: 1393106611541694855}
   animator: {fileID: 6403918129687704287}
 --- !u!114 &7327065496144923300

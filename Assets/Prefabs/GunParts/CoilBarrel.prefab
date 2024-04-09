@@ -190,6 +190,7 @@ GameObject:
   - component: {fileID: 6878003628532888851}
   - component: {fileID: 6753720039035056053}
   - component: {fileID: 8949108511989618750}
+  - component: {fileID: 3457043674489199398}
   m_Layer: 0
   m_Name: LightningTrail
   m_TagString: Untagged
@@ -322,6 +323,18 @@ VFXRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &3457043674489199398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6596789104075643902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aec959625e8916744804da5d90a1d188, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6861618831928518119
 GameObject:
   m_ObjectHideFlags: 0
@@ -417,6 +430,7 @@ MonoBehaviour:
   maxDistance: 100
   collisionSamplesPerUnit: 2
   collisionsBeforeInactive: 1
+  trailPositionBuffer: {fileID: 3457043674489199398}
   trail: {fileID: 6753720039035056053}
   animator: {fileID: 2021749910137901998}
 --- !u!114 &3975746179230621477

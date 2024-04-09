@@ -105,6 +105,7 @@ GameObject:
   - component: {fileID: 430454296743735363}
   - component: {fileID: 1746704752495276340}
   - component: {fileID: 323724655480115327}
+  - component: {fileID: 376516339167167690}
   m_Layer: 0
   m_Name: MeshProjectile
   m_TagString: Untagged
@@ -208,6 +209,18 @@ VFXRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &376516339167167690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1981383797191481653}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aec959625e8916744804da5d90a1d188, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3106240830091513120
 GameObject:
   m_ObjectHideFlags: 0
@@ -501,6 +514,7 @@ MonoBehaviour:
   maxDistance: 250
   size: 0.35
   visualSize: 120
+  positionActiveBuffer: {fileID: 376516339167167690}
   vfx: {fileID: 1746704752495276340}
   shouldRicochet: 1
   maxDistanceBeforeStuck: 100
@@ -663,7 +677,6 @@ MonoBehaviour:
   depthOffsetFraction: 0.6
   stickToNormalFraction: 0.1
   angleVariation: 37.3
-  lifetime: 60
 --- !u!1 &5891994160488146896
 GameObject:
   m_ObjectHideFlags: 0

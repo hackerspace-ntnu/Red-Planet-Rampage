@@ -215,6 +215,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 5652b5238ed02ec4bbf23700bafc59a1, type: 3}
   fireTrail: {fileID: 1119212264029477965}
   fireTrailInstances: {fileID: 1382308675925352878}
+  positionActiveBuffer: {fileID: 1141831215458723034}
 --- !u!114 &216606538572171217
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -386,6 +387,7 @@ GameObject:
   - component: {fileID: 7774442288155003448}
   - component: {fileID: 1382308675925352878}
   - component: {fileID: 8585387827938568363}
+  - component: {fileID: 1141831215458723034}
   m_Layer: 0
   m_Name: FireTrailInstances
   m_TagString: Untagged
@@ -456,6 +458,9 @@ VisualEffect:
       - m_Value: {fileID: 2800000, guid: 1d8481de16af723418a688958c41224b, type: 3}
         m_Name: Position
         m_Overridden: 1
+      - m_Value: {fileID: 2800000, guid: 117fbe39f6a59b542ad74ebc9ae722cd, type: 3}
+        m_Name: Positions
+        m_Overridden: 0
     m_Bool:
       m_Array: []
 --- !u!73398921 &8585387827938568363
@@ -498,6 +503,18 @@ VFXRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &1141831215458723034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7232486737550762651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aec959625e8916744804da5d90a1d188, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8797659438203753145
 GameObject:
   m_ObjectHideFlags: 0

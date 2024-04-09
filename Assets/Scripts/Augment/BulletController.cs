@@ -21,7 +21,8 @@ public class BulletController : ProjectileController
 
     private const float baseSpeed = 50f;
 
-    private VFXTextureFormatter trailPosTexture;
+    [SerializeField]
+    private VFXTextureFormatter trailPositionBuffer;
 
     [SerializeField]
     private VisualEffect trail;
@@ -43,6 +44,8 @@ public class BulletController : ProjectileController
 
     public void SetTrail(VisualEffect newTrail)
     {
+        if (trailPositionBuffer.Buffer != null)
+            trailPositionBuffer.Buffer.Release();
         trail = newTrail;
     }
 
@@ -50,8 +53,8 @@ public class BulletController : ProjectileController
     {
         collisionSamples = Mathf.CeilToInt(collisionSamplesPerUnit * maxDistance);
         var bulletsPerShot = Mathf.CeilToInt(stats.ProjectilesPerShot);
-        trailPosTexture = new VFXTextureFormatter(vfxPositionsPerSample * collisionSamples * bulletsPerShot);
-        trail.SetTexture("Position", this.trailPosTexture.Texture);
+        trailPositionBuffer.Initialize(vfxPositionsPerSample * collisionSamples * bulletsPerShot);
+        trail.SetGraphicsBuffer("Position", trailPositionBuffer.Buffer);
         trail.SetInt("StripLength", vfxPositionsPerSample * collisionSamples);
         trail.SetInt("TextureSize", vfxPositionsPerSample * collisionSamples * bulletsPerShot);
         trail.SetInt("TrailsPerEvent", bulletsPerShot);
@@ -150,7 +153,7 @@ public class BulletController : ProjectileController
                 TrySetTextureValue(i + k * vfxPositionsPerSample * collisionSamples, projectile.position);
             }
 
-            trailPosTexture.ApplyChanges();
+            trailPositionBuffer.ApplyChanges();
         }
         // Play the trail
         trail.SendEvent(VisualEffectAsset.PlayEventID);
@@ -160,7 +163,7 @@ public class BulletController : ProjectileController
     {
         try
         {
-            trailPosTexture.setValue(index, position);
+            trailPositionBuffer.setValue(index, position);
         }
         catch (IndexOutOfRangeException _)
         {
