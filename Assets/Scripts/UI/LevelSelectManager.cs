@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
 
 public class LevelSelectManager : MonoBehaviour
@@ -39,11 +40,47 @@ public class LevelSelectManager : MonoBehaviour
             
             //Instantiate levelcard and attatch to cardparent
             GameObject levelCard = Instantiate(levelCards[i], newParent.transform.position, Quaternion.Euler(-90f, 180f, 180f), newParent.transform);
-            levelCard.transform.localPosition += new Vector3(newParent.transform.localPosition.x, newParent.transform.localPosition.y, newParent.transform.localPosition.z - 1f);
+            levelCard.transform.localPosition += new Vector3(newParent.transform.localPosition.x, newParent.transform.localPosition.y, newParent.transform.localPosition.z - 0.8f);
             newParent.transform.rotation = rotation;
 
             //Add levelcard to list for later use
             instantiatedCards.Add(levelCard);
+        }
+
+        for (int i = 0; i < levelCards.Count; i++)
+        {
+            UnityEngine.UI.Button currentButton = instantiatedCards[i].GetComponent<UnityEngine.UI.Button>();
+
+            if (currentButton != null)
+            {
+                Navigation navigation = currentButton.navigation;
+                navigation.mode = Navigation.Mode.Explicit;
+                
+                if (i == 0)
+                {
+                    UnityEngine.UI.Button nextButton = instantiatedCards[i + 1].GetComponent<UnityEngine.UI.Button>();
+                    if (nextButton != null)
+                    {
+                        navigation.selectOnRight = nextButton;
+                    }
+                }
+                else if (i == levelCards.Count - 1)
+                {
+                    UnityEngine.UI.Button prevButton = instantiatedCards[i - 1].GetComponent<UnityEngine.UI.Button>();
+                    if (prevButton != null)
+                    {
+                        navigation.selectOnLeft = prevButton;
+                    }
+                }
+                else
+                {
+                    UnityEngine.UI.Button nextButton = instantiatedCards[i + 1].GetComponent<UnityEngine.UI.Button>();
+                    UnityEngine.UI.Button prevButton = instantiatedCards[i - 1].GetComponent<UnityEngine.UI.Button>();
+                    navigation.selectOnRight = nextButton;
+                    navigation.selectOnLeft = prevButton;
+                }
+            }
+            
         }
     }
 }
