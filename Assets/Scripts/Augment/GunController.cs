@@ -1,7 +1,8 @@
+using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class GunController : MonoBehaviour
+public class GunController : NetworkBehaviour
 {
     private const float outputTransitionDistance = 2;
     public float OutputTransitionDistance => outputTransitionDistance;
@@ -39,8 +40,14 @@ public class GunController : MonoBehaviour
 
     public GunEvent onReload;
     public GunEvent onFireStart;
+    /// <summary>
+    /// Invoked on each shot
+    /// </summary>
     public GunEvent onFire;
     public GunEvent onFireEnd;
+    /// <summary>
+    /// Invoked when trying to fire a shot while the magazine is empty
+    /// </summary>
     public GunEvent onFireNoAmmo;
     public GunEvent onInitializeGun;
     public GunEvent onInitializeBullet;
@@ -98,6 +105,7 @@ public class GunController : MonoBehaviour
             MatchController.Singleton.onRoundEnd -= CancelZoom;
     }
 
+    [Client]
     private void FixedUpdate()
     {
         if (fireRateController == null)
@@ -107,9 +115,12 @@ public class GunController : MonoBehaviour
         }
         if (!isFiring && fireRateController.shouldFire(triggerPressed, triggerHeld))
         {
+            // TODO unscrongle this stuff properly
             FireGun();
+            CmdFireGun();
         }
     }
+
     /// <summary>
     /// Expects a fraction of ammunition to be reloaded.
     /// This fraction is normalized eg. min = 0, max = 1.
@@ -136,6 +147,20 @@ public class GunController : MonoBehaviour
     {
         if (gameObject)
             gameObject.LeanMoveLocalX(localGunXOffset, 0.2f).setEaseInOutCubic();
+    }
+
+    [Command]
+    private void CmdFireGun()
+    {
+        Debug.Log("FIRE COMMAND CALLED");
+        RpcFireGun();
+    }
+
+    [ClientRpc]
+    private void RpcFireGun()
+    {
+        Debug.Log("FIRE RPC CALLED");
+        FireGun();
     }
 
     private void FireGun()

@@ -116,6 +116,10 @@ public class PlayerFactory : MonoBehaviour
         animator.animator = player.GetComponent<PlayerMovement>().Animator;
         animator.enabled = true;
 
+        var networkTransform = inputManager.GetComponent<NetworkTransformReliable>();
+        networkTransform.target = player.transform;
+        networkTransform.enabled = true;
+
         // Set recieved playerInput (and most importantly its camera) at an offset from player's position
         inputManager.transform.localPosition = cameraOffset.localPosition;
         inputManager.transform.rotation = player.transform.rotation;
