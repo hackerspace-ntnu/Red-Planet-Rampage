@@ -314,7 +314,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: aae41f17be7106f458d2c6adb2a82cfa, type: 2}
     - target: {fileID: 919132149155446097, guid: e941031f9ce9f4c48a2014de115df97f, type: 3}
       propertyPath: m_Name
-      value: LevelCard
+      value: CraterTown
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -383,7 +383,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 0}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1098348358083011975, guid: cbf30f348674af6ecb2ba42ec2aacaf6, type: 3}
+        m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
+        m_MethodName: ChangeScene
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: CraterTown
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!95 &8961160922874870232
 Animator:
   serializedVersion: 5

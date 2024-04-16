@@ -230,6 +230,12 @@ public class MainMenuController : MonoBehaviour
     /// <param name="sceneName"></param>
     public void ChangeScene(string name)
     {
+        if (playerInputManagerController == null)
+        {
+            Debug.LogError("playerInputManagerController is not initialized!");
+            return;
+        }
+        Debug.Log("mapname: " + name);
         playerInputManagerController.RemoveJoinListener();
         StartCoroutine(LoadAndChangeScene(name));
     }
