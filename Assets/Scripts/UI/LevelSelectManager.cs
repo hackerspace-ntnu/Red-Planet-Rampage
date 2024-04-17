@@ -54,9 +54,7 @@ public class LevelSelectManager : MonoBehaviour
 
         if (startButton != null && mainMenuController != null)
         {
-            startButton.onClick.AddListener(() => {
-                mainMenuController.StartGameButton(instantiatedCards[0].GetComponent<UnityEngine.UI.Button>());
-            });
+            startButton.onClick.AddListener(HandleStartClick);
 
             Navigation backNavigation = backButton.navigation;
             backNavigation.mode = Navigation.Mode.Explicit;
@@ -93,20 +91,14 @@ public class LevelSelectManager : MonoBehaviour
             navigation.selectOnRight = instantiatedCards[index + 1].GetComponent<UnityEngine.UI.Button>();
             navigation.selectOnDown = backButton;
 
-            button.onClick.AddListener(() =>
-            {
-                mainMenuController.ChangeScene(sceneName);
-            });
+            button.onClick.AddListener(HandleCardClick);
         }
         else if (index == totalCount - 1) //Second levelcard button
         {
             navigation.selectOnLeft = instantiatedCards[index - 1].GetComponent<UnityEngine.UI.Button>();
             navigation.selectOnDown = backButton;
 
-            button.onClick.AddListener(() =>
-            {
-                mainMenuController.ChangeScene(sceneName);
-            });
+            button.onClick.AddListener(HandleCardClick);
         }
         else //Middle levelcard buttons
         {
@@ -114,12 +106,22 @@ public class LevelSelectManager : MonoBehaviour
             navigation.selectOnLeft = instantiatedCards[index - 1].GetComponent<UnityEngine.UI.Button>();
             navigation.selectOnDown = backButton;
 
-            button.onClick.AddListener(() =>
-            {
-                mainMenuController.ChangeScene(sceneName);
-            });
+            button.onClick.AddListener(HandleCardClick);
+
         }
 
         button.navigation = navigation; 
+    }
+
+    private void HandleCardClick()
+    {
+        if (mainMenuController)
+            mainMenuController.ChangeScene(sceneName);
+    }
+
+    private void HandleStartClick()
+    {
+        if (mainMenuController)
+            mainMenuController.StartGameButton(instantiatedCards[0].GetComponent<UnityEngine.UI.Button>());
     }
 }
