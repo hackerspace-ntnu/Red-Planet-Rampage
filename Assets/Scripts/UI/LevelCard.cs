@@ -1,12 +1,28 @@
-
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
-[CreateAssetMenu(menuName = "LevelSelectMenu/LevelCard")]
-public class LevelCard : ScriptableObject
+public class LevelCard : MonoBehaviour
 {
-    public string displayName;
-    public Image mapImage;
+    [SerializeField]
+    private GameObject levelCard;
+    [SerializeField]
+    private string cardName;
 
+    public GameObject getLevelCard()
+    {
+        if (levelCard != null) {
+            return levelCard;
+        }
+        return null;
+    }
+
+    public string getCardName()
+    {
+        if (!string.IsNullOrEmpty(cardName))
+        {
+            return cardName;
+        }
+        return null;
+    }
 }
-

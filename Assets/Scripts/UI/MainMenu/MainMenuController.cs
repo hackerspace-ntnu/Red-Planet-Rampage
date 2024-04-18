@@ -1,6 +1,7 @@
 using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.Collections;
 using Unity.Netcode;
@@ -43,6 +44,8 @@ public class MainMenuController : MonoBehaviour
     private CreditsMenu creditsMenu;
     [SerializeField]
     private GameObject mapSelectMenu;
+    [SerializeField] 
+    private LevelSelectManager levelSelectManager;
     [SerializeField]
     private PlayerSelectManager playerSelectManager;
     [SerializeField]
@@ -63,7 +66,6 @@ public class MainMenuController : MonoBehaviour
 
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
-    private List<GameObject> playerBackgrounds = new List<GameObject>();
 
     [SerializeField]
     private GameObject loadingScreen;
@@ -230,14 +232,6 @@ public class MainMenuController : MonoBehaviour
     /// <param name="sceneName"></param>
     public void ChangeScene(string name)
     {
-        /*
-        if (playerInputManagerController == null)
-        {
-            Debug.LogError("playerInputManagerController is not initialized!");
-            return;
-        }
-        */
-        Debug.Log("mapname: " + name);
         PlayerInputManagerController.Singleton.RemoveJoinListener();
         StartCoroutine(LoadAndChangeScene(name));
     }
@@ -282,6 +276,7 @@ public class MainMenuController : MonoBehaviour
 
         galleryMenu.SetPlayerInput(inputManager);
         creditsMenu.SetPlayerInput(inputManager);
+        levelSelectManager.SetPlayerInput(inputManager);
 
         for (int i = 0; i < playerInputs.Count; i++)
         {

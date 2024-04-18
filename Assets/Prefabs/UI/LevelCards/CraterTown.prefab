@@ -328,6 +328,9 @@ PrefabInstance:
       addedObject: {fileID: 8820096461913442954}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e941031f9ce9f4c48a2014de115df97f, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 470787930101447655}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e941031f9ce9f4c48a2014de115df97f, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 8961160922874870232}
   m_SourcePrefab: {fileID: 100100000, guid: e941031f9ce9f4c48a2014de115df97f, type: 3}
 --- !u!4 &7084676899362520905 stripped
@@ -383,19 +386,21 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 0}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1098348358083011975, guid: cbf30f348674af6ecb2ba42ec2aacaf6, type: 3}
-        m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
-        m_MethodName: ChangeScene
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: CraterTown
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
+--- !u!114 &470787930101447655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7573370903449003507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdc510b8effdc9e4e8d82bae294546a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  levelCard: {fileID: 7573370903449003507}
+  cardName: CraterTown
 --- !u!95 &8961160922874870232
 Animator:
   serializedVersion: 5

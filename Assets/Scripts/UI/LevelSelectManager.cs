@@ -1,10 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
-using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 public class LevelSelectManager : MonoBehaviour
 {
@@ -17,7 +15,7 @@ public class LevelSelectManager : MonoBehaviour
     [SerializeField]
     private GameObject parent;
     [SerializeField]
-    private List<GameObject> levelCards;
+    private List<LevelCard> levelCards;
     [SerializeField]
     private float totalDegrees = 130f;
     [SerializeField]
@@ -25,10 +23,13 @@ public class LevelSelectManager : MonoBehaviour
 
 
     private List<GameObject> instantiatedCards = new List<GameObject>();
-    private string sceneName;
+    private InputManager input;
+    private EventSystem eventSystem;
 
     public void Start()
     {
+        eventSystem = EventSystem.current;
+        
         float angleBetween = totalDegrees / ((float)levelCards.Count + 1);
         float startAngle = 180 - totalDegrees / 2;
         
@@ -44,7 +45,7 @@ public class LevelSelectManager : MonoBehaviour
             newParent.transform.localScale = Vector3.one;
             
             //Instantiate levelcard and attatch to cardparent
-            GameObject levelCard = Instantiate(levelCards[i], newParent.transform.position, Quaternion.Euler(-90f, 180f, 180f), newParent.transform);
+            GameObject levelCard = Instantiate(levelCards[i].getLevelCard(), newParent.transform.position, Quaternion.Euler(-90f, 180f, 180f), newParent.transform);
             levelCard.transform.localPosition += new Vector3(newParent.transform.localPosition.x, newParent.transform.localPosition.y, newParent.transform.localPosition.z - 0.8f);
             newParent.transform.rotation = rotation;
 
@@ -73,12 +74,15 @@ public class LevelSelectManager : MonoBehaviour
             UnityEngine.UI.Button currentButton = instantiatedCards[i].GetComponent<UnityEngine.UI.Button>();
             if (currentButton != null)
             {
-                sceneName = instantiatedCards[i].name;
-                sceneName = sceneName.TrimEnd("(Clone)");
-                Debug.Log(sceneName);
                 SetupButtonNavigation(currentButton, i, levelCards.Count);
             }
         }
+    }
+
+    public void SetPlayerInput(InputManager input)
+    {
+        this.input = input;
+        input.onSelect += HandleCardClick;
     }
 
     private void SetupButtonNavigation(UnityEngine.UI.Button button, int index, int totalCount)
@@ -90,38 +94,41 @@ public class LevelSelectManager : MonoBehaviour
         {
             navigation.selectOnRight = instantiatedCards[index + 1].GetComponent<UnityEngine.UI.Button>();
             navigation.selectOnDown = backButton;
-
-            button.onClick.AddListener(HandleCardClick);
         }
-        else if (index == totalCount - 1) //Second levelcard button
+        else if (index == totalCount - 1) //Last levelcard button
         {
             navigation.selectOnLeft = instantiatedCards[index - 1].GetComponent<UnityEngine.UI.Button>();
             navigation.selectOnDown = backButton;
-
-            button.onClick.AddListener(HandleCardClick);
         }
         else //Middle levelcard buttons
         {
             navigation.selectOnRight = instantiatedCards[index + 1].GetComponent<UnityEngine.UI.Button>();
             navigation.selectOnLeft = instantiatedCards[index - 1].GetComponent<UnityEngine.UI.Button>();
             navigation.selectOnDown = backButton;
-
-            button.onClick.AddListener(HandleCardClick);
-
         }
 
         button.navigation = navigation; 
     }
 
-    private void HandleCardClick()
+    private void HandleCardClick(InputAction.CallbackContext ctx)
     {
-        if (mainMenuController)
-            mainMenuController.ChangeScene(sceneName);
+        GameObject selected = eventSystem.currentSelectedGameObject;
+
+        if (selected != null && instantiatedCards.Contains(eventSystem.currentSelectedGameObject))
+        {
+            string levelName = selected.GetComponent<LevelCard>().getCardName();
+            mainMenuController.ChangeScene(levelName);
+        }
     }
 
     private void HandleStartClick()
     {
         if (mainMenuController)
             mainMenuController.StartGameButton(instantiatedCards[0].GetComponent<UnityEngine.UI.Button>());
+    }
+
+    private void OnDestroy()
+    {
+        input.onSelect -= HandleCardClick;
     }
 }
