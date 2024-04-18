@@ -18,9 +18,9 @@ float repeatedRhombus_float(float2 position, float2 rhombusSize)
 	float i = floor(a / b);
 
 	float c1 = b * (i + 0.0); 
-	float2 p1 = mul(float2x2(cos(c1), -sin(c1), sin(c1), cos(c1)), position);
+	float2 p1 = mul(float2x2(cos(c1), sin(c1), -sin(c1), cos(c1)), position);
 	float c2 = b * (i + 1.0); 
-	float2 p2 = mul(float2x2(cos(c2), -sin(c2), sin(c2), cos(c2)), position);
+	float2 p2 = mul(float2x2(cos(c2), sin(c2), -sin(c2), cos(c2)), position);
 
 	return min(sdRhombus_float(p1 / (sin(c1 + iTime / 7.)), rhombusSize), sdRhombus_float(p2 / (sin(c2 + iTime / 7.)), rhombusSize));
 }
