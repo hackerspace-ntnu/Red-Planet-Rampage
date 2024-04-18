@@ -62,7 +62,7 @@ float mirroredStars_float(float2 p, float s)
 		{
 			float2 rid = id + float2(i, j) * o;
 			float2 r = p - s * rid;
-			d = min(d, sdStar5_float(r * 40., rid, 1., 0.5));
+			d = min(d, sdStar5_float(r * 60., rid, 1., 0.5));
 		}
 	return d;
 }
@@ -70,7 +70,7 @@ float mirroredStars_float(float2 p, float s)
 float skyBackground_float(float2 position, inout float4 skyColor)
 {
 	float2 dNoise = voronoi_float(position);
-	float d = mirroredStars_float(position, 0.1);
+	float d = mirroredStars_float(position/2., 0.1);
 	skyColor = d > 0.0 ? skyColor : float4(1., 1., 1., 1.);
 	return d;
 }

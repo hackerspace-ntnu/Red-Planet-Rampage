@@ -25,9 +25,22 @@ float repeatedRhombus_float(float2 position, float2 rhombusSize)
 	return min(sdRhombus_float(p1 / (sin(c1 + iTime / 7.)), rhombusSize), sdRhombus_float(p2 / (sin(c2 + iTime / 7.)), rhombusSize));
 }
 
+float2 wobble_float(float2 position)
+{
+	const float frequency = 80;
+	const float amount = 0.012;
+	float offset = iTime/10.;
+	offset = fmod(offset, 6.283185 / frequency);
+	position += offset;
+	float2 wobble = sin(position.y * frequency) * amount;
+	position = position + wobble;
+	position -= offset;
+	return position;
+}
+
 float solarSdf_float(float2 position, inout float4 sunColor)
 {
-	float d = length(position) - 0.27;
+	float d = length(wobble_float(position)) - 0.27;
 	sunColor = (d > 0.0) ? sunColor : float4(1., 0.8, 0., 1.);
 	float dShine = min(length(position) - 0.2, repeatedRhombus_float(position, float2(0.6f, 0.05f)));
 	sunColor = (dShine > 0.0) ? sunColor : float4(1., 1., 1., 1.);
