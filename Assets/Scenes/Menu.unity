@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 785370674}
-  m_IndirectSpecularColor: {r: 0.0967264, g: 0.2403425, b: 0.49264517, a: 1}
+  m_IndirectSpecularColor: {r: 0.096527144, g: 0.24014506, b: 0.49245036, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3621,6 +3621,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e941031f9ce9f4c48a2014de115df97f, type: 3}
   m_PrefabInstance: {fileID: 188986396}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &939071912 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1779457638045825994, guid: 4763a5c7e837127479f1a46192a29e0d, type: 3}
+  m_PrefabInstance: {fileID: 1782619221}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &954105975
 GameObject:
   m_ObjectHideFlags: 0
@@ -5526,6 +5531,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f056f61b047345e4e9de9d8fb7f84d40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  selectables: []
 --- !u!4 &1475816811 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e941031f9ce9f4c48a2014de115df97f, type: 3}
@@ -5900,12 +5906,25 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 590147567367065669, guid: 4763a5c7e837127479f1a46192a29e0d, type: 3}
   m_PrefabInstance: {fileID: 1782619221}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 939071912}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b743370ac3e4ec2a1668f5455a8ef8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1536589470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 939071912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f056f61b047345e4e9de9d8fb7f84d40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selectables: []
 --- !u!4 &1558937224 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e941031f9ce9f4c48a2014de115df97f, type: 3}
@@ -7807,6 +7826,10 @@ PrefabInstance:
       propertyPath: m_Colors.m_SelectedColor.g
       value: 0.23921569
       objectReference: {fileID: 0}
+    - target: {fileID: 7465878108635510755, guid: 4763a5c7e837127479f1a46192a29e0d, type: 3}
+      propertyPath: m_Navigation.m_SelectOnDown
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 7832273279576874509, guid: 4763a5c7e837127479f1a46192a29e0d, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -7939,6 +7962,9 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1022980667}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1779457638045825994, guid: 4763a5c7e837127479f1a46192a29e0d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1536589470}
     - targetCorrespondingSourceObject: {fileID: 6568335650733006725, guid: 4763a5c7e837127479f1a46192a29e0d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1451468291}

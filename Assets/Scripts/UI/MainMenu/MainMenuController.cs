@@ -109,6 +109,13 @@ public class MainMenuController : MonoBehaviour
             defaultMenu.SetActive(false);
             introRoutine = StartCoroutine(WaitForIntroVideoToEnd());
         }
+
+        // Reset all menu elements
+        foreach (Selectable s in GetComponentsInChildren<Selectable>())
+        {
+            s.interactable = false;
+        }
+        ToggleMenu(currentMenu, true);
     }
 
     private void StopFirstFrame(VideoPlayer source)
@@ -210,10 +217,18 @@ public class MainMenuController : MonoBehaviour
     /// <param name="menu">The gameObject of the UI-wrapper that should be set to active onclick</param>    
     public void SwitchToMenu(GameObject menu)
     {
-        currentMenu.SetActive(false);
-        menu.SetActive(true);
+        ToggleMenu(currentMenu, false);
+        ToggleMenu(menu, true);
         currentMenu = menu;
         SelectControl(menu.GetComponentInChildren<Selectable>());
+    }
+
+    private void ToggleMenu(GameObject menu, bool state)
+    {
+        foreach(Selectable s in menu.GetComponentsInChildren<Selectable>())
+        {
+            s.interactable = state;
+        }
     }
 
     /// <summary>

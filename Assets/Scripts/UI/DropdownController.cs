@@ -1,37 +1,57 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using System.Collections;
+using Unity.VisualScripting;
 
 /// <summary>
 /// Allows for our controllers to freely act in dropdown menus
 /// </summary>
 public class DropdownController : MonoBehaviour, ISelectHandler
 {
-    private ScrollRect scrollRect;
-    //private TMPro.TMP_ScrollbarEventHandler eventHandler;
-    private float scrollPosition;
+    [SerializeField]
+    private Selectable[] selectables;
+    [SerializeField]
+    private TMP_Dropdown scrollbar;
+    [SerializeField]
+    private Selectable CurrentSelected;
 
     void Start()
     {
-        scrollRect = GetComponentInParent<ScrollRect>(true);
-        
-        
-        int childCount = scrollRect.content.childCount - 1;
-        int childIndex = transform.GetSiblingIndex();
-
-        // Slightly adjusts the child index to prevent ugly cutoff when at the extremities.
-        childIndex = childIndex < ((float)childCount / 2f) ? childIndex - 1 : childIndex;
-
-        scrollPosition = 1 - ((float)childIndex / childCount);
+        scrollbar = GetComponent<TMP_Dropdown>();
     }
 
     public void OnSelect(BaseEventData eventData)
     {
-        //GetComponentInParent<MainMenuController>().SelectControl(GetComponentInChildren<Selectable>());
+        try
+        {
+            if (scrollbar.IsExpanded) {
+                selectables = GetComponentsInChildren<Selectable>();
+                print(selectables.Length);
+            }
+        }
+        catch 
+        {
+            selectables = GetComponentsInChildren<Selectable>();
+            print(selectables[0].name);
+            print("selected gameobject: " + EventSystem.current.currentSelectedGameObject.name);
+            CurrentSelected = EventSystem.current.currentSelectedGameObject.GetComponent<Selectable>();
+            print(CurrentSelected.navigation.selectOnDown.name);
 
-        if(scrollRect)
-            scrollRect.verticalScrollbar.value = scrollPosition;
-    
+            selectables[0].Select();
+            //StartCoroutine("UIDelay");
+            //scrollbar.FindSelectableOnDown().Select();
+        }
+    }
+
+    private IEnumerator UIDelay()
+    {
+        yield return new WaitForEndOfFrame();
+        selectables = GetComponentsInChildren<Selectable>();
+        print(selectables.Length);
+        if (selectables.Length > 1)
+            yield return null;
+        StartCoroutine("UIDelay");
     }
 }
