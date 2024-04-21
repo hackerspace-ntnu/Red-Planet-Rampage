@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Linq;
 using CollectionExtensions;
 using Mirror;
+using Unity.Netcode;
 
 public class PlayerFactory : MonoBehaviour
 {
@@ -110,23 +111,33 @@ public class PlayerFactory : MonoBehaviour
         // Make playerInput child of player it's attached to
         inputManager.transform.parent = player.transform;
 
-        // Tell the network synchronization that the player prefab should be synced
-        inputManager.GetComponent<NetworkTransformReliable>().target = player.transform;
-        var animator = inputManager.GetComponent<NetworkAnimator>();
-        animator.animator = player.GetComponent<PlayerMovement>().Animator;
-        animator.enabled = true;
-
-        var networkTransform = inputManager.GetComponent<NetworkTransformReliable>();
-        networkTransform.target = player.transform;
-        networkTransform.enabled = true;
+        // Transfer network identity to the top of the player hierarcy
+        // TODO make sure to transfer it back to the player input on round end!
+        var networkIdentity = inputManager.GetComponent<NetworkIdentity>();
+        Debug.Log($"net conn: {networkIdentity.connectionToClient}");
+        if (networkIdentity.isServer)
+        {
+            NetworkServer.ReplacePlayerForConnection(networkIdentity.connectionToClient, player, true);
+        }
 
         // Set recieved playerInput (and most importantly its camera) at an offset from player's position
         inputManager.transform.localPosition = cameraOffset.localPosition;
         inputManager.transform.rotation = player.transform.rotation;
 
         // Enable Camera
-        inputManager.PlayerCamera.enabled = true;
-        inputManager.PlayerCamera.orthographic = false;
+        // TODO don't enable camera on network-controlled players
+        Debug.Log($"is client {networkIdentity.isClient} only {networkIdentity.isClientOnly} is server {networkIdentity.isServer} only {networkIdentity.isServerOnly} is local {networkIdentity.isLocalPlayer} is owned {networkIdentity.isOwned}");
+        //if ((!networkIdentity.isClient && networkIdentity.isOwned) || networkIdentity.isLocalPlayer)
+        if (networkIdentity.isLocalPlayer || networkIdentity.connectionToClient == null)
+        {
+            inputManager.PlayerCamera.enabled = true;
+            inputManager.PlayerCamera.orthographic = false;
+        }
+        else
+        {
+            // Disable movement on network players (TODO fix things in some other way :)))
+            player.GetComponent<PlayerMovement>().enabled = false;
+        }
 
         // Update player's movement script with which playerInput it should attach listeners to
         var playerManager = player.GetComponent<PlayerManager>();
