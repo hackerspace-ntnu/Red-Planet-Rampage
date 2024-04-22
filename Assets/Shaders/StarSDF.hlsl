@@ -71,7 +71,7 @@ float skyBackground_float(float2 position, inout float4 skyColor)
 {
 	float2 dNoise = voronoi_float(position);
 	float d = mirroredStars_float(position/2., 0.1);
-	skyColor = d > 0.0 ? skyColor : float4(1., 1., 1., 1.);
+	skyColor = d > 0.0 ? skyColor : float4(1., 1., 0.4, 1.);
 	return d;
 }
 
