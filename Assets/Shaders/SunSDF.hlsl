@@ -29,7 +29,7 @@ float2 wobble_float(float2 position)
 {
 	const float frequency = 80;
 	const float amount = 0.012;
-	float offset = iTime/10.;
+	float offset = iTime/30.;
 	offset = fmod(offset, 6.283185 / frequency);
 	position += offset;
 	float2 wobble = sin(position.y * frequency) * amount;
