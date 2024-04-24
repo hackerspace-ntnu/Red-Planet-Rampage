@@ -1,6 +1,7 @@
 using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.Collections;
 using Unity.Netcode;
@@ -43,6 +44,8 @@ public class MainMenuController : MonoBehaviour
     private CreditsMenu creditsMenu;
     [SerializeField]
     private GameObject mapSelectMenu;
+    [SerializeField] 
+    private LevelSelectManager levelSelectManager;
     [SerializeField]
     private PlayerSelectManager playerSelectManager;
     [SerializeField]
@@ -63,7 +66,6 @@ public class MainMenuController : MonoBehaviour
 
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
-    private List<GameObject> playerBackgrounds = new List<GameObject>();
 
     [SerializeField]
     private GameObject loadingScreen;
@@ -71,6 +73,9 @@ public class MainMenuController : MonoBehaviour
     private int loadingDuration = 6;
 
     private Coroutine introRoutine;
+
+    [SerializeField]
+    private GameObject mainMenuCamera;
 
     private void Awake()
     {
@@ -213,6 +218,12 @@ public class MainMenuController : MonoBehaviour
         menu.SetActive(true);
         currentMenu = menu;
         SelectControl(menu.GetComponentInChildren<Selectable>());
+
+        //Change camera angle to level select. Must be done here to not bypass AI-check in playerselect
+        if(menu == mapSelectMenu)
+        {
+            mainMenuCamera.GetComponentInChildren<MainMenuMoveCamera>().MoveToLevelSelect();
+        }
     }
 
     /// <summary>
@@ -221,7 +232,7 @@ public class MainMenuController : MonoBehaviour
     /// <param name="sceneName"></param>
     public void ChangeScene(string name)
     {
-        playerInputManagerController.RemoveJoinListener();
+        PlayerInputManagerController.Singleton.RemoveJoinListener();
         StartCoroutine(LoadAndChangeScene(name));
     }
 
@@ -265,6 +276,7 @@ public class MainMenuController : MonoBehaviour
 
         galleryMenu.SetPlayerInput(inputManager);
         creditsMenu.SetPlayerInput(inputManager);
+        levelSelectManager.SetPlayerInput(inputManager);
 
         for (int i = 0; i < playerInputs.Count; i++)
         {
