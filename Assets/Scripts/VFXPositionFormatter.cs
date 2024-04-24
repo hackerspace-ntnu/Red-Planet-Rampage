@@ -15,7 +15,7 @@ public class VFXTextureFormatter : MonoBehaviour
     public GraphicsBuffer Buffer { get => buffer; }
 
     /// <summary>
-    /// 
+    /// Sets the buffer with current data.
     /// </summary>
     /// <param name="size">Size of the texture, typically the maximum number of particles or the number of patricles in each strip</param>
     public void Initialize(int size)
