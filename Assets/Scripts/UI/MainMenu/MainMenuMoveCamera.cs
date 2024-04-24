@@ -57,6 +57,5 @@ public class MainMenuMoveCamera : MonoBehaviour
         inLevelSelect = true;
         LeanTween.sequence().append(LeanTween.moveLocal(playerSelectCamera.gameObject, secondPosition.localPosition, 1).setEaseInOutExpo());
         LeanTween.sequence().append(LeanTween.rotateX(playerSelectCamera.gameObject, 90f, 1).setEaseInOutExpo());
-        //68
     }
 }

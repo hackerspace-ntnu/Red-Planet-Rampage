@@ -1,3 +1,4 @@
+using OperatorExtensions;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -45,7 +46,7 @@ public class LevelSelectManager : MonoBehaviour
             newParent.transform.localScale = Vector3.one;
             
             //Instantiate levelcard and attatch to cardparent
-            GameObject levelCard = Instantiate(levelCards[i].getLevelCard(), newParent.transform.position, Quaternion.Euler(-90f, 180f, 180f), newParent.transform);
+            GameObject levelCard = Instantiate(levelCards[i].LevelCardPrefab, newParent.transform.position, Quaternion.Euler(-90f, 180f, 180f), newParent.transform);
             levelCard.transform.localPosition += new Vector3(newParent.transform.localPosition.x, newParent.transform.localPosition.y, newParent.transform.localPosition.z - 0.8f);
             newParent.transform.rotation = rotation;
 
@@ -64,6 +65,7 @@ public class LevelSelectManager : MonoBehaviour
             if (firstButton != null)
             {
                 backNavigation.selectOnUp = firstButton;
+                backNavigation.selectOnDown = firstButton;
             }
 
             backButton.navigation = backNavigation;
@@ -90,22 +92,10 @@ public class LevelSelectManager : MonoBehaviour
         Navigation navigation = button.navigation;
         navigation.mode = Navigation.Mode.Explicit;
 
-        if (index == 0 && totalCount > 1) //First levelcard button
-        {
-            navigation.selectOnRight = instantiatedCards[index + 1].GetComponent<UnityEngine.UI.Button>();
-            navigation.selectOnDown = backButton;
-        }
-        else if (index == totalCount - 1) //Last levelcard button
-        {
-            navigation.selectOnLeft = instantiatedCards[index - 1].GetComponent<UnityEngine.UI.Button>();
-            navigation.selectOnDown = backButton;
-        }
-        else //Middle levelcard buttons
-        {
-            navigation.selectOnRight = instantiatedCards[index + 1].GetComponent<UnityEngine.UI.Button>();
-            navigation.selectOnLeft = instantiatedCards[index - 1].GetComponent<UnityEngine.UI.Button>();
-            navigation.selectOnDown = backButton;
-        }
+        navigation.selectOnRight = instantiatedCards[(index + 1).Mod(totalCount)].GetComponent<UnityEngine.UI.Button>();
+        navigation.selectOnLeft = instantiatedCards[(index - 1).Mod(totalCount)].GetComponent<UnityEngine.UI.Button>();
+        navigation.selectOnDown = backButton;
+        navigation.selectOnUp = backButton;
 
         button.navigation = navigation; 
     }
@@ -116,7 +106,7 @@ public class LevelSelectManager : MonoBehaviour
 
         if (selected != null && instantiatedCards.Contains(eventSystem.currentSelectedGameObject))
         {
-            string levelName = selected.GetComponent<LevelCard>().getCardName();
+            string levelName = selected.GetComponent<LevelCard>().CardName;
             mainMenuController.ChangeScene(levelName);
         }
     }

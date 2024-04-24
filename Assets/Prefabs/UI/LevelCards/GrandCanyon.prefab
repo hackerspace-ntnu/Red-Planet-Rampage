@@ -12,6 +12,26 @@ PrefabInstance:
       propertyPath: cardName
       value: GrandCanyon
       objectReference: {fileID: 0}
+    - target: {fileID: 470787930101447655, guid: 956c10ff770133741b3c7dc9f4c3e35d, type: 3}
+      propertyPath: cardBorder
+      value: 
+      objectReference: {fileID: 7140094553243819944}
+    - target: {fileID: 4132575802709327440, guid: 956c10ff770133741b3c7dc9f4c3e35d, type: 3}
+      propertyPath: m_UseGraphicAlpha
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4132575802709327440, guid: 956c10ff770133741b3c7dc9f4c3e35d, type: 3}
+      propertyPath: m_EffectDistance.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4132575802709327440, guid: 956c10ff770133741b3c7dc9f4c3e35d, type: 3}
+      propertyPath: m_EffectDistance.y
+      value: -2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6761202104202177364, guid: 956c10ff770133741b3c7dc9f4c3e35d, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7084676899362520905, guid: 956c10ff770133741b3c7dc9f4c3e35d, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -61,6 +81,10 @@ PrefabInstance:
       value: GrandCanyon
       objectReference: {fileID: 0}
     - target: {fileID: 8222157599591941158, guid: 956c10ff770133741b3c7dc9f4c3e35d, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8222157599591941158, guid: 956c10ff770133741b3c7dc9f4c3e35d, type: 3}
       propertyPath: m_Materials.Array.data[1]
       value: 
       objectReference: {fileID: 2100000, guid: f3f0d7bba40d88d40a40d5a1958e1339, type: 2}
@@ -102,8 +126,38 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4132575802709327440, guid: 956c10ff770133741b3c7dc9f4c3e35d, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6241793169963905518, guid: 956c10ff770133741b3c7dc9f4c3e35d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 392767319100413280}
   m_SourcePrefab: {fileID: 100100000, guid: 956c10ff770133741b3c7dc9f4c3e35d, type: 3}
+--- !u!1 &7140094553243819944 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6241793169963905518, guid: 956c10ff770133741b3c7dc9f4c3e35d, type: 3}
+  m_PrefabInstance: {fileID: 3857891614595018310}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &392767319100413280
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7140094553243819944}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 9ca6a63beb740fd4d91705f795cc0d6b, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
