@@ -20,7 +20,7 @@ public class GlobalHUDController : MonoBehaviour
     void Start()
     {
         // Places the roundTimer at appropriate place on split screen
-        if (PlayerInputManagerController.Singleton.playerInputs.Count > 2)
+        if (PlayerInputManagerController.Singleton.LocalPlayerInputs.Count > 2)
         {
             roundTimer.alignment = TextAlignmentOptions.Center;
         }

@@ -54,7 +54,7 @@ public class PlayerFactory : MonoBehaviour
         if (!overrideMatchManager)
             return;
 
-        playerInputManagerController.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+        playerInputManagerController.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         InstantiatePlayersFPS();
     }
 
@@ -81,11 +81,11 @@ public class PlayerFactory : MonoBehaviour
         var shuffledSpawnPoints = spawnPoints.ShuffledCopy();
 
         var playerList = new List<PlayerManager>();
-        for (int i = 0; i < playerInputManagerController.playerInputs.Count; i++)
+        for (int i = 0; i < playerInputManagerController.LocalPlayerInputs.Count; i++)
         {
-            playerList.Add(instantiate(playerInputManagerController.playerInputs[i], shuffledSpawnPoints[i % spawnPoints.Length]));
+            playerList.Add(instantiate(playerInputManagerController.LocalPlayerInputs[i], shuffledSpawnPoints[i % spawnPoints.Length]));
         }
-        for (int i = playerInputManagerController.playerInputs.Count; i < playerInputManagerController.playerInputs.Count + aiPlayerCount; i++)
+        for (int i = playerInputManagerController.LocalPlayerInputs.Count; i < playerInputManagerController.LocalPlayerInputs.Count + aiPlayerCount; i++)
         {
             var spawnPoint = shuffledSpawnPoints[i % spawnPoints.Length];
             var aiPlayer = instantiateAI(i, spawnPoint);
@@ -185,7 +185,7 @@ public class PlayerFactory : MonoBehaviour
         var aiOpponent = Instantiate(aIOpponent, spawnPoint.position, spawnPoint.rotation);
         AIManager manager = aiOpponent.GetComponent<AIManager>();
         manager.SetLayer(index);
-        manager.SetIdentity(identity ? identity : existingAiIdentities[index - playerInputManagerController.playerInputs.Count]);
+        manager.SetIdentity(identity ? identity : existingAiIdentities[index - playerInputManagerController.LocalPlayerInputs.Count]);
         manager.GetComponent<AIMovement>().SetInitialRotation(spawnPoint.eulerAngles.y * Mathf.Deg2Rad);
         return manager;
     }
@@ -195,7 +195,7 @@ public class PlayerFactory : MonoBehaviour
         var aiOpponent = Instantiate(aIBidder, spawnPoint.position, spawnPoint.rotation);
         AIManager manager = aiOpponent.GetComponent<AIManager>();
         manager.SetLayer(index);
-        manager.SetIdentity(existingAiIdentities[index - playerInputManagerController.playerInputs.Count]);
+        manager.SetIdentity(existingAiIdentities[index - playerInputManagerController.LocalPlayerInputs.Count]);
         return manager;
     }
 }

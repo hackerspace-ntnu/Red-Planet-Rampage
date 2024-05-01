@@ -124,7 +124,7 @@ public class MatchController : MonoBehaviour
     {
         if (rounds.Count == 0)
         {
-            PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+            PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         }
         playerFactory = FindObjectOfType<PlayerFactory>();
 
@@ -133,7 +133,7 @@ public class MatchController : MonoBehaviour
 
         // Makes shooting end quickly if testing with 1 player
 #if UNITY_EDITOR
-        if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
+        if (PlayerInputManagerController.Singleton.LocalPlayerInputs.Count == 1)
             roundLength = 100f;
 #endif
         GameObject mainLight = GameObject.FindGameObjectsWithTag("MainLight")[0];
@@ -148,7 +148,7 @@ public class MatchController : MonoBehaviour
             collectableChips = FindObjectsOfType<CollectableChip>().ToList();
         // Setup of playerInputs
         var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
-            Mathf.Max(4 - PlayerInputManagerController.Singleton.playerInputs.Count, 0) : 0;
+            Mathf.Max(4 - PlayerInputManagerController.Singleton.LocalPlayerInputs.Count, 0) : 0;
         playerFactory.InstantiatePlayersFPS(aiPlayerCount)
             .ForEach(player => players.Add(new Player(player.identity, player, startAmount)));
 
@@ -320,7 +320,7 @@ public class MatchController : MonoBehaviour
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         rounds = new List<Round>();
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         if (!SteamManager.Singleton.ChangeScene("Menu"))
             SceneManager.LoadSceneAsync("Menu");
     }

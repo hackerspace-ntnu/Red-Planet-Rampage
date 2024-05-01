@@ -34,7 +34,7 @@ public class Peer2PeerTransport : NetworkManager
     public override void OnClientConnect()
     {
         base.OnClientConnect();
-        // TODO: A better check than this so we can have multple local players agains online
+        // TODO: A better check than this so we can have multiple local players again online
         if (NetworkServer.connections.Count == 1)
         {
             NetworkClient.Send(new PlayerInfo(PlayerType.Local));
@@ -50,14 +50,18 @@ public class Peer2PeerTransport : NetworkManager
         // TODO: Edit joined players manually here (steamname, colors, numbers etc)
         if (info.type == PlayerType.Local)
         {
-            Debug.Log(PlayerInputManagerController.Singleton.playerInputs[0].gameObject.name);
+            Debug.Log(PlayerInputManagerController.Singleton.LocalPlayerInputs[0].gameObject.name);
             GameObject player = Instantiate(playerPrefab);
+            player.GetComponent<InputManager>().PlayerCamera.enabled = false;
             NetworkServer.AddPlayerForConnection(connection, player);
             //NetworkServer.ReplacePlayerForConnection(connection, PlayerInputManagerController.Singleton.playerInputs[0].gameObject);
         }
         else
         {
             GameObject player = Instantiate(playerPrefab);
+            var playerInput = player.GetComponent<InputManager>();
+            playerInput.PlayerCamera.enabled = false;
+            playerInput.enabled = false;
             NetworkServer.AddPlayerForConnection(connection, player);
         }
             
