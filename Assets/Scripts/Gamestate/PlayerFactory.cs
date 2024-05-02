@@ -111,10 +111,14 @@ public class PlayerFactory : MonoBehaviour
         inputManager.transform.parent = player.transform;
 
         // Tell the network synchronization that the player prefab should be synced
-        inputManager.GetComponent<NetworkTransformReliable>().target = player.transform;
-        var animator = inputManager.GetComponent<NetworkAnimator>();
-        animator.animator = player.GetComponent<PlayerMovement>().Animator;
-        animator.enabled = true;
+        if (inputManager.TryGetComponent<NetworkTransformReliable>(out var networkTransform))
+        { 
+            networkTransform.target = player.transform;
+            var animator = inputManager.GetComponent<NetworkAnimator>();
+            animator.animator = player.GetComponent<PlayerMovement>().Animator;
+            animator.enabled = true;
+        }
+
 
         // Set recieved playerInput (and most importantly its camera) at an offset from player's position
         inputManager.transform.localPosition = cameraOffset.localPosition;
