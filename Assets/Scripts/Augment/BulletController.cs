@@ -90,7 +90,7 @@ public class BulletController : ProjectileController
                 position = projectileOutput.position,
                 oldPosition = projectileOutput.position,
                 direction = randomSpread * projectileRotation * projectileOutput.forward,
-                maxDistance = this.maxDistance,
+                maxDistance = maxDistance,
                 rotation = randomSpread * projectileRotation * projectileOutput.rotation,
                 initializationTime = Time.fixedTime,
                 speedFactor = stats.ProjectileSpeedFactor,
