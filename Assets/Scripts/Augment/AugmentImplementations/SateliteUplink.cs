@@ -1,6 +1,7 @@
 using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
+using RandomExtensions;
 using TMPro;
 using UnityEngine;
 
@@ -45,6 +46,9 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
 
     private bool isTrackingCurrentShot = false;
     private bool isReady = false;
+
+    // TODO synchronize and perhaps put in ProjectileModifier superclass
+    private System.Random random = new System.Random();
 
     private void Start()
     {
@@ -149,8 +153,8 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
             return;
         launchesThisShot += 1;
 
-        var offset = Random.Range(30f, 0);
-        var randomAdjustment = Random.Range(launchPointVariance, -launchPointVariance) * Vector3.forward + Random.Range(launchPointVariance, -launchPointVariance) * Vector3.right;
+        var offset = random.Range(30f, 0);
+        var randomAdjustment = random.Range(launchPointVariance, -launchPointVariance) * Vector3.forward + random.Range(launchPointVariance, -launchPointVariance) * Vector3.right;
         var launchPoint = target + (launchHeight + offset) * Vector3.up + randomAdjustment;
 
         var garbageInstance = garbagePool.Get();

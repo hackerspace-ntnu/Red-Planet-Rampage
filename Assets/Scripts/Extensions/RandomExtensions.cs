@@ -26,7 +26,7 @@ namespace RandomExtensions
 
         public static Vector3 UnitVector(this Random random)
         {
-            return new Vector3(random.NextSingle(), random.NextSingle(), random.NextSingle()).normalized;
+            return new Vector3(2 * random.NextSingle() - 1, 2 * random.NextSingle() - 1, 2 * random.NextSingle() - 1).normalized;
         }
     }
 }

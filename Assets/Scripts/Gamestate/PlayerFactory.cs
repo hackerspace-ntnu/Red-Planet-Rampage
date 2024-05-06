@@ -30,6 +30,7 @@ public class PlayerFactory : MonoBehaviour
     [SerializeField]
     private bool overrideMatchManager = false;
 
+    // TODO synchronize
     private static readonly System.Random random = new System.Random();
 
     private void Awake()
@@ -77,8 +78,7 @@ public class PlayerFactory : MonoBehaviour
 
     private List<PlayerManager> InstantiateInputsOnSpawnpoints(Func<InputManager, Transform, PlayerManager> instantiate, Func<int, Transform, AIManager> instantiateAI = null, int aiPlayerCount = 0)
     {
-
-        var shuffledSpawnPoints = spawnPoints.ShuffledCopy();
+        var shuffledSpawnPoints = spawnPoints.ShuffledCopy(random);
 
         var playerList = new List<PlayerManager>();
         for (int i = 0; i < playerInputManagerController.playerInputs.Count; i++)
