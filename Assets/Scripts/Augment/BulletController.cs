@@ -2,7 +2,8 @@ using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.VFX;
-using Random = UnityEngine.Random;
+using Random = System.Random;
+using RandomExtensions;
 
 public class BulletController : ProjectileController
 {
@@ -32,6 +33,9 @@ public class BulletController : ProjectileController
     private AugmentAnimator animator;
 
     private ProjectileState projectile = new ProjectileState();
+
+    // TODO synchronize
+    private Random random = new Random();
 
     protected override void Awake()
     {
@@ -79,7 +83,7 @@ public class BulletController : ProjectileController
     {
         for (int k = 0; k < stats.ProjectilesPerShot; k++)
         {
-            Quaternion randomSpread = Quaternion.Lerp(Quaternion.identity, Random.rotation, stats.ProjectileSpread);
+            Quaternion randomSpread = Quaternion.Lerp(Quaternion.identity, random.Rotation(), stats.ProjectileSpread);
 
             projectile = new()
             {

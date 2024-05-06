@@ -1,4 +1,3 @@
-using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,6 +48,9 @@ public class AuctionDriver : MonoBehaviour
 
     public static AuctionDriver Singleton;
 
+    // TODO synchronize
+    private System.Random random = new System.Random();
+
     private void Awake()
     {
         #region Singleton boilerplate
@@ -84,6 +86,11 @@ public class AuctionDriver : MonoBehaviour
             3 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction },
             _ => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction }
         };
+        foreach (var stage in availableAuctionStages)
+        {
+            // Ensure they all use the same seed
+            stage.Random = random;
+        }
 
         playerFactory = GetComponent<PlayerFactory>();
         var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
