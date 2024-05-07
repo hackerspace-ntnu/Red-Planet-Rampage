@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine;
 using System;
 using CollectionExtensions;
+using Mirror;
 
 #nullable enable
 
@@ -160,6 +161,28 @@ public class MatchController : MonoBehaviour
         aiPLayers.ForEach(ai =>
                 ai.TrackedPlayers = players.Select(player => player.playerManager)
                     .Where(player => player != ai).ToList());
+
+        if (NetworkManager.singleton.isNetworkActive)
+        {
+            StartCoroutine(WaitForClientsAndInitialize());
+            return;
+        }
+
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
+        onRoundStart?.Invoke();
+        isAuction = false;
+        rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
+        roundTimer.StartTimer(roundLength);
+        roundTimer.OnTimerUpdate += AdjustMusic;
+        roundTimer.OnTimerUpdate += HUDTimerUpdate;
+        roundTimer.OnTimerRunCompleted += EndActiveRound;
+    }
+
+    private IEnumerator WaitForClientsAndInitialize()
+    {
+        while (NetworkManager.singleton.numPlayers == 0 || NetworkManager.singleton.numPlayers != NetworkServer.connections.Count) yield return null;
+        // Must skip a frame to ensure connection timing for last joined player is ok
+        yield return null;
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
         onRoundStart?.Invoke();

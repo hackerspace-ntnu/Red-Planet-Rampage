@@ -32,7 +32,7 @@ public class SteamManager : MonoBehaviour
     public bool IsHosting = false;
     public string UserName;
     public List<string> PlayerNames = new List<string>();
-
+    public Dictionary<int, (string, int)> PlayerDictionary = new Dictionary<int, (string, int)>();
     public delegate void LobbyEvent();
     public LobbyEvent LobbyPlayerUpdate;
 

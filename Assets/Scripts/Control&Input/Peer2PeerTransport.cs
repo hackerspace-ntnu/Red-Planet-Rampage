@@ -64,13 +64,13 @@ public class Peer2PeerTransport : NetworkManager
     {
 
         PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
-        // TODO: Edit joined players manually here (steamname, colors, numbers etc)
+        var steamName = SteamManager.Singleton.PlayerNames[SteamManager.Singleton.PlayerNames.Count - 1];
+        SteamManager.Singleton.PlayerDictionary.Add(connection.connectionId, (steamName, SteamManager.Singleton.PlayerNames.Count - 1));
         if (info.type == PlayerType.Local)
         {
             GameObject player = Instantiate(playerPrefab);
             player.GetComponent<InputManager>().PlayerCamera.enabled = false;
             NetworkServer.AddPlayerForConnection(connection, player);
-            //NetworkServer.ReplacePlayerForConnection(connection, PlayerInputManagerController.Singleton.playerInputs[0].gameObject);
         }
         else
         {
@@ -86,7 +86,20 @@ public class Peer2PeerTransport : NetworkManager
     public override void OnServerChangeScene(string newSceneName)
     {
         base.OnServerChangeScene(newSceneName);
-        NetworkServer.RegisterHandler<PlayerFPSInfo>(OnSpawnFPSPlayers);
+        switch (newSceneName)
+        {
+            case "Bidding":
+                // TODO: Handle bidding properly
+                NetworkServer.RegisterHandler<PlayerFPSInfo>(OnSpawnFPSPlayers);
+                break;
+            case "Menu":
+                NetworkServer.RegisterHandler<PlayerInfo>(OnSpawnPlayerInput);
+                break;
+            default:
+                NetworkServer.RegisterHandler<PlayerFPSInfo>(OnSpawnFPSPlayers);
+                break;
+        }
+        
     }
 
     public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
@@ -107,9 +120,12 @@ public class Peer2PeerTransport : NetworkManager
         playerIndex++;
         var player = Instantiate(spawnPrefabs[0], spawn.position, spawn.rotation);
         var playerManager = player.GetComponent<PlayerManager>();
+        if (SteamManager.Singleton.PlayerDictionary.TryGetValue(connection.connectionId, out var playerDetails))
+        {
+            playerManager.identity.playerName = playerDetails.Item1;
+            playerManager.identity.color = PlayerInputManagerController.Singleton.PlayerColors[playerDetails.Item2];
+        }
 
-        
-        
         NetworkServer.AddPlayerForConnection(connection, playerManager.gameObject);
 
         player.transform.position = spawn.position;
@@ -129,6 +145,8 @@ public class Peer2PeerTransport : NetworkManager
             // Enable Camera
             input.PlayerCamera.enabled = true;
             input.PlayerCamera.orthographic = false;
+
+            input.GetComponent<PlayerIdentity>().playerName = SteamManager.Singleton.PlayerNames[0];
 
             playerManager.GetComponent<AmmoBoxCollector>().enabled = true;
             playerManager.HUDController.gameObject.SetActive(true);
@@ -151,6 +169,7 @@ public class Peer2PeerTransport : NetworkManager
         {
             // TODO: Set up networkPlayers akin to AI players (no control)
             Debug.Log("Not local!");
+            playerManager.identity.playerName = SteamManager.Singleton.PlayerNames[playerIndex];
         }
         //TODO: Properly update MatchManager with async joined clients
         MatchController.Singleton?.Players.Add(new Player(playerManager.identity, playerManager, MatchController.Singleton.StartAmount));
