@@ -1,3 +1,4 @@
+using Mirror;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Animations;
@@ -7,7 +8,7 @@ using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(AudioSource))]
-public class PlayerManager : MonoBehaviour
+public class PlayerManager : NetworkBehaviour
 {
     // Layers 12 through 15 are gun layers.
     protected static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
@@ -132,7 +133,8 @@ public class PlayerManager : MonoBehaviour
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
-        identity.onChipChange += hudController.OnChipChange;
+        if (identity)
+            identity.onChipChange += hudController.OnChipChange;
     }
 
     private void Update()

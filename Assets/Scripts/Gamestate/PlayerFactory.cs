@@ -61,6 +61,8 @@ public class PlayerFactory : MonoBehaviour
     public List<PlayerManager> InstantiatePlayersFPS(int aiPlayerCount = 0)
     {
         playerInputManagerController.ChangeInputMaps("FPS");
+        if (NetworkManager.singleton.isNetworkActive)
+            return new List<PlayerManager>();
         return InstantiateInputsOnSpawnpoints(InstantiateFPSPlayer, InstantiateFPSAI, aiPlayerCount);
     }
 
@@ -95,13 +97,18 @@ public class PlayerFactory : MonoBehaviour
         return playerList;
     }
 
+    public Transform[] GetRandomSpawnpoints()
+    {
+        return spawnPoints.ShuffledCopy();
+    }
+
 
     /// <summary>
     /// Spawns a playerPrefab and attaches a playerInput to it as a child.
     /// This function is where you should add delegate events for them to be properly invoked.
     /// </summary>
     /// <param name="inputManager">PlayerInput to tie the player prefab to.</param>
-    private PlayerManager InstantiateFPSPlayer(InputManager inputManager, Transform spawnPoint)
+    public PlayerManager InstantiateFPSPlayer(InputManager inputManager, Transform spawnPoint)
     {
         // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);

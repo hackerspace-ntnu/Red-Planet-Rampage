@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using CollectionExtensions;
 
 using Mirror;
 using UnityEngine;
@@ -17,6 +18,16 @@ public struct PlayerInfo : NetworkMessage
     public PlayerType type;
 }
 
+public struct PlayerFPSInfo : NetworkMessage
+{
+    public PlayerFPSInfo(PlayerType type)
+    {
+        this.type = type;
+    }
+    // TODO: Add stuff like colors and other identity parameters
+    public PlayerType type;
+}
+
 public enum PlayerType
 {
     Local,
@@ -25,6 +36,10 @@ public enum PlayerType
 
 public class Peer2PeerTransport : NetworkManager
 {
+    private PlayerFactory playerFactory;
+    private static Transform[] spawnPoints;
+    private static int playerIndex;
+
     public override void OnStartServer()
     {
         base.OnStartServer();
@@ -47,10 +62,11 @@ public class Peer2PeerTransport : NetworkManager
 
     private void OnSpawnPlayerInput(NetworkConnectionToClient connection, PlayerInfo info)
     {
+
+        PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
         // TODO: Edit joined players manually here (steamname, colors, numbers etc)
         if (info.type == PlayerType.Local)
         {
-            Debug.Log(PlayerInputManagerController.Singleton.LocalPlayerInputs[0].gameObject.name);
             GameObject player = Instantiate(playerPrefab);
             player.GetComponent<InputManager>().PlayerCamera.enabled = false;
             NetworkServer.AddPlayerForConnection(connection, player);
@@ -65,5 +81,78 @@ public class Peer2PeerTransport : NetworkManager
             NetworkServer.AddPlayerForConnection(connection, player);
         }
             
+    }
+
+    public override void OnServerChangeScene(string newSceneName)
+    {
+        base.OnServerChangeScene(newSceneName);
+        NetworkServer.RegisterHandler<PlayerFPSInfo>(OnSpawnFPSPlayers);
+    }
+
+    public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
+    {
+        base.OnClientChangeScene(newSceneName, sceneOperation, customHandling);
+        NetworkClient.Send(new PlayerFPSInfo(PlayerType.Remote));
+    }
+
+    private void OnSpawnFPSPlayers(NetworkConnectionToClient connection, PlayerFPSInfo info)
+    {
+        if (!playerFactory)
+        {
+            playerFactory = FindAnyObjectByType<PlayerFactory>();
+            spawnPoints = playerFactory.GetRandomSpawnpoints();
+            playerIndex = 0;
+        }
+        var spawn = spawnPoints[playerIndex];
+        playerIndex++;
+        var player = Instantiate(spawnPrefabs[0], spawn.position, spawn.rotation);
+        var playerManager = player.GetComponent<PlayerManager>();
+
+        
+        
+        NetworkServer.AddPlayerForConnection(connection, playerManager.gameObject);
+
+        player.transform.position = spawn.position;
+        player.transform.rotation = spawn.rotation;
+
+        if (playerManager.isLocalPlayer)
+        {
+            Debug.Log("Is local!!");
+            Transform cameraOffset = player.transform.Find("CameraOffset");
+            var input = PlayerInputManagerController.Singleton.LocalPlayerInputs[0];
+            // Make playerInput child of player it's attached to
+            input.transform.parent = player.transform;
+            // Set recieved playerInput (and most importantly its camera) at an offset from player's position
+            input.transform.localPosition = cameraOffset.localPosition;
+            input.transform.rotation = player.transform.rotation;
+
+            // Enable Camera
+            input.PlayerCamera.enabled = true;
+            input.PlayerCamera.orthographic = false;
+
+            playerManager.GetComponent<AmmoBoxCollector>().enabled = true;
+            playerManager.HUDController.gameObject.SetActive(true);
+            var movement = player.GetComponent<PlayerMovement>();
+            movement.enabled = true;
+
+            // Update player's movement script with which playerInput it should attach listeners to
+            playerManager.SetPlayerInput(input);
+            playerManager.SetGun(input.transform.GetChild(0));
+
+            if (GunFactory.TryGetGunAchievement(playerManager.identity.Body, playerManager.identity.Barrel, playerManager.identity.Extension, out var achievement))
+                SteamManager.Singleton.UnlockAchievement(achievement);
+
+            // Set unique layer for player
+            playerManager.SetLayer(input.playerInput.playerIndex);
+            movement.SetInitialRotation(spawn.eulerAngles.y * Mathf.Deg2Rad);
+
+        }
+        else
+        {
+            // TODO: Set up networkPlayers akin to AI players (no control)
+            Debug.Log("Not local!");
+        }
+        //TODO: Properly update MatchManager with async joined clients
+        MatchController.Singleton?.Players.Add(new Player(playerManager.identity, playerManager, MatchController.Singleton.StartAmount));
     }
 }

@@ -1,3 +1,4 @@
+using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,7 +8,7 @@ public class PlayerInputManagerController : MonoBehaviour
     public static PlayerInputManagerController Singleton { get; private set; }
 
     public List<InputManager> LocalPlayerInputs = new List<InputManager>();
-    public List<PlayerIdentityNetwork> NetworkClients = new List<PlayerIdentityNetwork>();
+    public List<NetworkConnectionToClient> NetworkClients = new List<NetworkConnectionToClient>();
     public int PlayerCount => NetworkClients.Count > 0 ? NetworkClients.Count : LocalPlayerInputs.Count;
 
     public PlayerInputManager PlayerInputManager;

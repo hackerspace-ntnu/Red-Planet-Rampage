@@ -303,7 +303,7 @@ public class MainMenuController : MonoBehaviour
 
     public void StartGameButton(Selectable target)
     {
-        bool canPlay = (playerInputManagerController.MatchHasAI || playerInputs.Count > 1);
+        bool canPlay = (playerInputManagerController.MatchHasAI || PlayerInputManagerController.Singleton.PlayerCount > 1);
         if (canPlay)
         {
             SwitchToMenu(mapSelectMenu);
