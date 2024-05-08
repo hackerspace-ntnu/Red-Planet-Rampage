@@ -39,11 +39,13 @@ public class RopeBody : GunBody
             rope.enabled = false;
             return;
         }
+        rope.Line.gameObject.layer = 0;
         rope.Target = ropeTarget;
         plugAnchor = Instantiate(plugAnchorPrefab);
         plugAnchor.transform.position = gunController.Player.transform.position;
         rope.Anchor = plugAnchor.transform;
         rope.ResetRope(plugAnchor.WireOrigin);
+        plugAnchor.Health.onDeath += KillRope;
         playerBody = gunController.Player.GetComponent<Rigidbody>();
         playerHandRight.SetPlayer(gunController.Player);
         playerHandRight.gameObject.SetActive(true);
@@ -56,7 +58,7 @@ public class RopeBody : GunBody
     private void PullingWire()
     {
         playerBody.AddForce(-(playerBody.position - rope.CurrentAnchor).normalized * pullForce, ForceMode.Acceleration);
-        if (rope.RopeLength > ropeLength + 4f)
+        if (rope.RopeLength > ropeLength + 4f || (movement.StateIsAir && rope.RopeLength > ropeLength + 1f))
         {
             isWired = false;
             rope.enabled = false;
@@ -64,6 +66,14 @@ public class RopeBody : GunBody
             plugAnchor.gameObject.SetActive(false);
         }
             
+    }
+
+    private void KillRope(HealthController healthController, float damage, DamageInfo info)
+    {
+        isWired = false;
+        rope.enabled = false;
+        gunController.stats.Ammo = 0;
+        plugAnchor.gameObject.SetActive(false);
     }
 
     private void CheckForWirePlanting(GunStats stats)
@@ -111,6 +121,7 @@ public class RopeBody : GunBody
 
     private void OnDestroy()
     {
+        plugAnchor.Health.onDeath -= KillRope;
         Destroy(plugAnchor);
     }
 
