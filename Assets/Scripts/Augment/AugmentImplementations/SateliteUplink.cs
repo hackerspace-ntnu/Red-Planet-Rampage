@@ -22,6 +22,9 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
     private float launchHeight = 100;
 
     [SerializeField]
+    private float launchPointVariance = 1;
+
+    [SerializeField]
     private float cooldown = 10;
 
     [SerializeField]
@@ -147,7 +150,8 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
         launchesThisShot += 1;
 
         var offset = Random.Range(30f, 0);
-        var launchPoint = target + (launchHeight + offset) * Vector3.up;
+        var randomAdjustment = Random.Range(launchPointVariance, -launchPointVariance) * Vector3.forward + Random.Range(launchPointVariance, -launchPointVariance) * Vector3.right;
+        var launchPoint = target + (launchHeight + offset) * Vector3.up + randomAdjustment;
 
         var garbageInstance = garbagePool.Get();
         garbageInstance.transform.parent = garbageParent;

@@ -164,7 +164,6 @@ public class Fire : GunExtension
     private IEnumerator WaitAndStopBurning(GameObject flame, HealthController health)
     {
         yield return new WaitForSeconds(3f);
-        Destroy(flame);
         hitHealthControllers.Remove(health);
     }
 
