@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using CollectionExtensions;
@@ -119,19 +120,22 @@ public class Peer2PeerTransport : NetworkManager
         var spawn = spawnPoints[playerIndex];
         playerIndex++;
         var player = Instantiate(spawnPrefabs[0], spawn.position, spawn.rotation);
+        if (!player)
+            return;
         var playerManager = player.GetComponent<PlayerManager>();
+        bool isLocalClient = false;
+        string playerName = "";
         if (SteamManager.Singleton.PlayerDictionary.TryGetValue(connection.connectionId, out var playerDetails))
         {
             playerManager.identity.playerName = playerDetails.Item1;
+            isLocalClient = playerDetails.Item1.Equals(SteamManager.Singleton.UserName);
+            playerName = playerDetails.Item1;
             playerManager.identity.color = PlayerInputManagerController.Singleton.PlayerColors[playerDetails.Item2];
         }
-
-        NetworkServer.AddPlayerForConnection(connection, playerManager.gameObject);
-
+        //NetworkServer.AddPlayerForConnection(connection, playerManager.gameObject);
         player.transform.position = spawn.position;
         player.transform.rotation = spawn.rotation;
-
-        if (playerManager.isLocalPlayer)
+        if (isLocalClient)
         {
             Debug.Log("Is local!!");
             Transform cameraOffset = player.transform.Find("CameraOffset");
@@ -163,13 +167,14 @@ public class Peer2PeerTransport : NetworkManager
             // Set unique layer for player
             playerManager.SetLayer(input.playerInput.playerIndex);
             movement.SetInitialRotation(spawn.eulerAngles.y * Mathf.Deg2Rad);
-
+            NetworkServer.Spawn(player, connection);
         }
         else
         {
             // TODO: Set up networkPlayers akin to AI players (no control)
             Debug.Log("Not local!");
-            playerManager.identity.playerName = SteamManager.Singleton.PlayerNames[playerIndex];
+            if (!playerName.Equals(""))
+                playerManager.identity.playerName = playerName;
         }
         //TODO: Properly update MatchManager with async joined clients
         MatchController.Singleton?.Players.Add(new Player(playerManager.identity, playerManager, MatchController.Singleton.StartAmount));
