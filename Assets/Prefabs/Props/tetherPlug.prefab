@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3584753480456904832}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WireOutput
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,7 +43,10 @@ GameObject:
   - component: {fileID: 3250719995098322654}
   - component: {fileID: 1045219798877102689}
   - component: {fileID: 300042602626509186}
-  m_Layer: 0
+  - component: {fileID: 8669054684614710486}
+  - component: {fileID: 4874961312557591926}
+  - component: {fileID: 8650420277899103521}
+  m_Layer: 3
   m_Name: tetherPlug
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -129,4 +132,53 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   plugOutput: {fileID: 3584753480456904832}
-  plantingDust: {fileID: 0}
+  Health: {fileID: 4874961312557591926}
+--- !u!65 &8669054684614710486
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8566753368686727188}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.022, y: 0.021999996, z: 0.023365084}
+  m_Center: {x: 0, y: 0, z: 0.005317456}
+--- !u!114 &4874961312557591926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8566753368686727188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cab246ee1d4ad25498887ea1df8ef6f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxhHealth: 1
+  currentHealth: 1
+--- !u!114 &8650420277899103521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8566753368686727188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 819cc9d108cf99f4eae1397824403dbc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isCritical: 0
+  health: {fileID: 4874961312557591926}

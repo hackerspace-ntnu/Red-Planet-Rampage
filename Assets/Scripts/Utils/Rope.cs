@@ -25,6 +25,7 @@ public class Rope : MonoBehaviour
     private LayerMask colliderLayers;
     [SerializeField]
     private LineRenderer line;
+    public LineRenderer Line => line;
     private float accumulatedAnchorLength = 0f;
     public float RopeLength 
     {
