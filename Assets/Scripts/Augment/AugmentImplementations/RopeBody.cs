@@ -26,6 +26,8 @@ public class RopeBody : GunBody
     private PlayerHand playerHandLeft;
     [SerializeField]
     private PlayerHand playerHandRight;
+    [SerializeField]
+    private AudioSource audioSource;
 
     [SerializeField]
     private float pullForce = 10f;
@@ -64,21 +66,22 @@ public class RopeBody : GunBody
     {
         playerBody.AddForce(-(playerBody.position - rope.CurrentAnchor).normalized * pullForce, ForceMode.Acceleration);
         if (rope.RopeLength > ropeLength + 4f || (movement.StateIsAir && rope.RopeLength > ropeLength + 1f))
-        {
-            isWired = false;
-            rope.enabled = false;
-            gunController.stats.Ammo = 0;
-            plugAnchor.gameObject.SetActive(false);
-        }
+            RemoveRope();
             
     }
 
     private void KillRope(HealthController healthController, float damage, DamageInfo info)
     {
+        RemoveRope();
+    }
+
+    private void RemoveRope()
+    {
         isWired = false;
         rope.enabled = false;
         gunController.stats.Ammo = 0;
         plugAnchor.gameObject.SetActive(false);
+        audioSource.Play();
     }
 
     private void CheckForWirePlanting(GunStats stats)
