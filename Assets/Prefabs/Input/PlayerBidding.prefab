@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 6717855691676836013}
   - component: {fileID: 3252978923923797766}
   - component: {fileID: 7607358150439154286}
+  - component: {fileID: 2046519985899559615}
   m_Layer: 0
   m_Name: PlayerBidding
   m_TagString: Untagged
@@ -55,11 +56,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe68c66043cf4fa30b1b60bfdcd38608, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ignoreMask:
+  groundCheckMask:
     serializedVersion: 2
     m_Bits: 65335
   lookSpeed: 3
   LookSpeedZoom: 0.75
+  mouseZoomSpeedFactor: 0.1
   groundDrag: 2
   airDrag: 1
   maxVelocityBeforeExtraDamping: 20
@@ -79,12 +81,18 @@ MonoBehaviour:
   airThreshold: 0.4
   slopeAngleThreshold: 50
   state: 1
+  jumpState: 0
   animator: {fileID: 289053663840324231}
   ZoomFov: 30
+  CanMove: 1
+  CanLook: 1
   bottomCaster: {fileID: 943828384506437906}
   topCaster: {fileID: 943828384506437906}
   stepHeight: 0.5
   playerRoot: {fileID: 5539336408495370967}
+  steppingIgnoreMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!23 &71015680234268065
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -187,6 +195,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b92c430e6e288cc42a9a091e7fefacaf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   interactMask:
     serializedVersion: 2
     m_Bits: 0
@@ -200,6 +211,7 @@ MonoBehaviour:
   inputManager: {fileID: 0}
   identity: {fileID: 0}
   hudController: {fileID: 555885729091202788}
+  playerShadow: {fileID: 0}
   aiTarget: {fileID: 8325754837701600379, guid: c133d38b202cbc94dbc1e02d7ee2e7ba, type: 3}
   AiAimSpot: {fileID: 0}
   meshBase: {fileID: 5330336945653279977}
@@ -363,6 +375,23 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &2046519985899559615
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71015680234268067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 4265713113
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &650044701630506088
 GameObject:
   m_ObjectHideFlags: 0

@@ -50,6 +50,14 @@ public class PlayerSelectManager : MonoBehaviour
         {
             animatorParameters.Add(playerAnimators[0].GetParameter(i).name);
         }
+        if (SteamManager.IsSteamActive)
+            SteamManager.Singleton.LobbyPlayerUpdate += SetLobby;
+    }
+
+    public void SetLobby()
+    {
+        for (int i = 0; i < SteamManager.Singleton.PlayerNames.Count; i++)
+            SetupPlayerSelectModels(SteamManager.Singleton.PlayerNames[i], playerInputManagerController.PlayerColors[i], i);
     }
 
     /// <summary>
@@ -119,13 +127,13 @@ public class PlayerSelectManager : MonoBehaviour
         yield return new WaitForSeconds(5f);
         while (true)
         {
-            int randomAnimatorNumber = Random.Range(0, playerInputManagerController.playerInputs.Count); // Choose random playermodel to animate
+            int randomAnimatorNumber = Random.Range(0, playerInputManagerController.PlayerCount); // Choose random playermodel to animate
 
             Animator randomAnimator = playerAnimators[randomAnimatorNumber]; // Get the animator for one of the players that has a connected input
 
             // If randomAnimatorNumber is player all the way to the right, don't include cardpeek trigger
             string randomTrigger = "";
-            if (randomAnimatorNumber == playerInputManagerController.playerInputs.Count - 1)
+            if (randomAnimatorNumber == playerInputManagerController.PlayerCount - 1)
             {
                 randomTrigger = randomAnimator.GetParameter(Random.Range(2, randomAnimator.parameterCount)).name; // Choose a random trigger to set, excluding CardPeek
             }
@@ -139,7 +147,7 @@ public class PlayerSelectManager : MonoBehaviour
             }
             
 
-            if ((randomTrigger == "CardPeek" || randomTrigger == "CardPeekReaction") && (playerInputManagerController.playerInputs.Count > 1) && (cardPeekCounter == 0))
+            if ((randomTrigger == "CardPeek" || randomTrigger == "CardPeekReaction") && (playerInputManagerController.PlayerCount > 1) && (cardPeekCounter == 0))
             {
                 randomAnimator.SetTrigger("CardPeek");
                 playerAnimators[randomAnimatorNumber + 1].SetTrigger("CardPeekReaction");
@@ -161,5 +169,10 @@ public class PlayerSelectManager : MonoBehaviour
             yield return new WaitForSeconds(Random.Range(minimumTime, maximumTime));
         }
     }
-    
+
+    private void OnDestroy()
+    {
+        if (SteamManager.IsSteamActive)
+            SteamManager.Singleton.LobbyPlayerUpdate -= SetLobby;
+    }
 }

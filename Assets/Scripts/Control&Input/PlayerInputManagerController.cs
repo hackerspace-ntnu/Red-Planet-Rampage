@@ -1,3 +1,4 @@
+using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -6,12 +7,15 @@ public class PlayerInputManagerController : MonoBehaviour
 {
     public static PlayerInputManagerController Singleton { get; private set; }
 
-    public List<InputManager> playerInputs = new List<InputManager>();
+    public List<InputManager> LocalPlayerInputs = new List<InputManager>();
+    public List<NetworkConnectionToClient> NetworkClients = new List<NetworkConnectionToClient>();
+    public int PlayerCount => NetworkClients.Count > 0 ? NetworkClients.Count : LocalPlayerInputs.Count;
 
     public PlayerInputManager PlayerInputManager;
 
     [SerializeField]
     private Color[] playerColors;
+    public Color[] PlayerColors => playerColors;
 
     [SerializeField]
     private string[] playerNames;
@@ -57,16 +61,16 @@ public class PlayerInputManagerController : MonoBehaviour
 
     public void RemoveListeners()
     {
-        playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
+        LocalPlayerInputs.ForEach(playerInput => playerInput.RemoveListeners());
     }
 
     private void OnPlayerJoined(PlayerInput playerInput)
     {
         var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
-        playerIdentity.color = playerColors[playerInputs.Count];
-        playerIdentity.playerName = playerNames[playerInputs.Count];
+        playerIdentity.color = playerColors[LocalPlayerInputs.Count];
+        playerIdentity.playerName = playerNames[LocalPlayerInputs.Count];
         InputManager inputManager = playerInput.GetComponent<InputManager>();
-        playerInputs.Add(inputManager);
+        LocalPlayerInputs.Add(inputManager);
         onPlayerInputJoined(inputManager);
     }
 
@@ -77,7 +81,7 @@ public class PlayerInputManagerController : MonoBehaviour
     /// <param name="mapNameOrId">Name of the inputMap you want to change to</param>
     public void ChangeInputMaps(string mapNameOrId)
     {
-        playerInputs.ForEach(playerInput =>
+        LocalPlayerInputs.ForEach(playerInput =>
         {
             playerInput.playerInput.SwitchCurrentActionMap(mapNameOrId);
             playerInput.RemoveListeners();

@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine;
 using System;
 using CollectionExtensions;
+using Mirror;
 
 #nullable enable
 
@@ -124,7 +125,7 @@ public class MatchController : MonoBehaviour
     {
         if (rounds.Count == 0)
         {
-            PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+            PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         }
         playerFactory = FindObjectOfType<PlayerFactory>();
 
@@ -133,7 +134,7 @@ public class MatchController : MonoBehaviour
 
         // Makes shooting end quickly if testing with 1 player
 #if UNITY_EDITOR
-        if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
+        if (PlayerInputManagerController.Singleton.LocalPlayerInputs.Count == 1)
             roundLength = 100f;
 #endif
         GameObject mainLight = GameObject.FindGameObjectsWithTag("MainLight")[0];
@@ -148,7 +149,7 @@ public class MatchController : MonoBehaviour
             collectableChips = FindObjectsOfType<CollectableChip>().ToList();
         // Setup of playerInputs
         var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
-            Mathf.Max(4 - PlayerInputManagerController.Singleton.playerInputs.Count, 0) : 0;
+            Mathf.Max(4 - PlayerInputManagerController.Singleton.PlayerCount, 0) : 0;
         playerFactory.InstantiatePlayersFPS(aiPlayerCount)
             .ForEach(player => players.Add(new Player(player.identity, player, startAmount)));
 
@@ -160,6 +161,28 @@ public class MatchController : MonoBehaviour
         aiPLayers.ForEach(ai =>
                 ai.TrackedPlayers = players.Select(player => player.playerManager)
                     .Where(player => player != ai).ToList());
+
+        if (NetworkManager.singleton.isNetworkActive)
+        {
+            StartCoroutine(WaitForClientsAndInitialize());
+            return;
+        }
+
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
+        onRoundStart?.Invoke();
+        isAuction = false;
+        rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
+        roundTimer.StartTimer(roundLength);
+        roundTimer.OnTimerUpdate += AdjustMusic;
+        roundTimer.OnTimerUpdate += HUDTimerUpdate;
+        roundTimer.OnTimerRunCompleted += EndActiveRound;
+    }
+
+    private IEnumerator WaitForClientsAndInitialize()
+    {
+        while (NetworkManager.singleton.numPlayers == 0 || NetworkManager.singleton.numPlayers != NetworkServer.connections.Count) yield return null;
+        // Must skip a frame to ensure connection timing for last joined player is ok
+        yield return null;
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
         onRoundStart?.Invoke();
@@ -320,7 +343,7 @@ public class MatchController : MonoBehaviour
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         rounds = new List<Round>();
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         if (!SteamManager.Singleton.ChangeScene("Menu"))
             SceneManager.LoadSceneAsync("Menu");
     }

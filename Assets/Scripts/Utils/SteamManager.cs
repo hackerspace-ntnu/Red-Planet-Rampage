@@ -27,8 +27,14 @@ public class SteamManager : MonoBehaviour
     private const int steamAppID = 2717710;
     public static SteamManager Singleton;
     public int ConnectedPlayers => transportProtocol.numPlayers;
-    private bool isSteamInitialized;
+    private static bool isSteamInitialized;
+    public static bool IsSteamActive => isSteamInitialized;
     public bool IsHosting = false;
+    public string UserName;
+    public List<string> PlayerNames = new List<string>();
+    public Dictionary<int, (string, int)> PlayerDictionary = new Dictionary<int, (string, int)>();
+    public delegate void LobbyEvent();
+    public LobbyEvent LobbyPlayerUpdate;
 
     private bool shouldStoreStats = false;
 
@@ -82,6 +88,7 @@ public class SteamManager : MonoBehaviour
         lobbyUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyUpdate);
 
         RequestStats();
+        UserName = SteamFriends.GetPersonaName();
     }
 
     private void RequestStats()
@@ -148,7 +155,17 @@ public class SteamManager : MonoBehaviour
     private void OnLobbyEnter(LobbyEnter_t callback)
     {
         // All users
+        PlayerInputManagerController.Singleton.RemoveJoinListener();
         // TODO: set steam names over players
+        var lobbyId = new CSteamID(callback.m_ulSteamIDLobby);
+        Debug.Log("onLobbyUp");
+        for (int i = 0; i < SteamMatchmaking.GetNumLobbyMembers(lobbyId); i++)
+        {
+            string name = SteamFriends.GetFriendPersonaName(SteamMatchmaking.GetLobbyMemberByIndex(lobbyId, i));
+            if (!PlayerNames.Contains(name))
+                PlayerNames.Add(name);
+        }
+        LobbyPlayerUpdate.Invoke();
         if (NetworkServer.active)
             return;
         // Only clients from here!
@@ -158,13 +175,31 @@ public class SteamManager : MonoBehaviour
 
     private void OnLobbyUpdate(LobbyChatUpdate_t callback)
     {
-        //TODO: handle other players leaving/joining
+        var lobbyId = new CSteamID(callback.m_ulSteamIDLobby);
+        Debug.Log("onLobbyUp");
+        for (int i = 0; i < SteamMatchmaking.GetNumLobbyMembers(lobbyId); i++)
+        {
+            string name = SteamFriends.GetFriendPersonaName(SteamMatchmaking.GetLobbyMemberByIndex(lobbyId, i));
+            if (!PlayerNames.Contains(name))
+                PlayerNames.Add(name);
+        }
+        LobbyPlayerUpdate.Invoke();
     }
 
     public void HostLobby()
     {
-        if (isSteamInitialized)
-            SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, transportProtocol.maxConnections);
+        if (!isSteamInitialized)
+            return;
+
+        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, transportProtocol.maxConnections);
+        // Disable local joining
+        PlayerInputManagerController.Singleton.RemoveJoinListener();
+        for (int i = 0; i < PlayerInputManagerController.Singleton.LocalPlayerInputs.Count; i++)
+        {
+            if (i == 0)
+                continue;
+            PlayerInputManagerController.Singleton.LocalPlayerInputs[i].gameObject.SetActive(false);
+        } 
     }
 
     public void LeaveLobby()

@@ -94,7 +94,7 @@ public class AuctionDriver : MonoBehaviour
 
         playerFactory = GetComponent<PlayerFactory>();
         var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
-            Mathf.Max(4 - PlayerInputManagerController.Singleton.playerInputs.Count, 0) : 0;
+            Mathf.Max(4 - PlayerInputManagerController.Singleton.LocalPlayerInputs.Count, 0) : 0;
         playerFactory.InstantiatePlayersBidding(aiPlayerCount);
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
 
@@ -187,7 +187,7 @@ public class AuctionDriver : MonoBehaviour
     public void ChangeScene()
     {
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
+        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(playerInput => playerInput.RemoveListeners());
     }
     private IEnumerator AnimateGunConstruction(PlayerManager playerManager, RectTransform parent)
     {

@@ -94,7 +94,7 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.AddJoinListener();
         playerInputManagerController.PlayerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
-        if (playerInputManagerController.playerInputs.Count > 0)
+        if (playerInputManagerController.LocalPlayerInputs.Count > 0)
         {
             // Already played, just show the menu.
             TransferExistingInputs();
@@ -201,7 +201,7 @@ public class MainMenuController : MonoBehaviour
     private void TransferExistingInputs()
     {
         playerInputManagerController.ChangeInputMaps("Menu");
-        foreach (InputManager inputs in playerInputManagerController.playerInputs)
+        foreach (InputManager inputs in playerInputManagerController.LocalPlayerInputs)
         {
             AddPlayer(inputs);
         }
@@ -303,7 +303,7 @@ public class MainMenuController : MonoBehaviour
 
     public void StartGameButton(Selectable target)
     {
-        bool canPlay = (playerInputManagerController.MatchHasAI || playerInputs.Count > 1);
+        bool canPlay = (playerInputManagerController.MatchHasAI || PlayerInputManagerController.Singleton.PlayerCount > 1);
         if (canPlay)
         {
             SwitchToMenu(mapSelectMenu);
@@ -334,7 +334,10 @@ public class MainMenuController : MonoBehaviour
     // TODO: Make dedicated hosting UI instead.
     public void HostLobby()
     {
+        if (!SteamManager.IsSteamActive)
+            return;
         SteamManager.Singleton.HostLobby();
+        playerSelectManager.SetLobby();
     }
 
     public void LeaveLobby()

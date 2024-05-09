@@ -18,7 +18,7 @@ public class ReturnToMainMenuGate : MonoBehaviour, Interactable
     private void ReturnToMainMenu()
     {
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         if (!SteamManager.Singleton.ChangeScene("Menu"))
             SceneManager.LoadSceneAsync("Menu");
     }

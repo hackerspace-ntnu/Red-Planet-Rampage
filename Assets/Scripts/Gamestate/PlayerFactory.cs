@@ -55,13 +55,15 @@ public class PlayerFactory : MonoBehaviour
         if (!overrideMatchManager)
             return;
 
-        playerInputManagerController.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+        playerInputManagerController.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
         InstantiatePlayersFPS();
     }
 
     public List<PlayerManager> InstantiatePlayersFPS(int aiPlayerCount = 0)
     {
         playerInputManagerController.ChangeInputMaps("FPS");
+        if (NetworkManager.singleton.isNetworkActive)
+            return new List<PlayerManager>();
         return InstantiateInputsOnSpawnpoints(InstantiateFPSPlayer, InstantiateFPSAI, aiPlayerCount);
     }
 
@@ -81,11 +83,11 @@ public class PlayerFactory : MonoBehaviour
         var shuffledSpawnPoints = spawnPoints.ShuffledCopy(random);
 
         var playerList = new List<PlayerManager>();
-        for (int i = 0; i < playerInputManagerController.playerInputs.Count; i++)
+        for (int i = 0; i < playerInputManagerController.LocalPlayerInputs.Count; i++)
         {
-            playerList.Add(instantiate(playerInputManagerController.playerInputs[i], shuffledSpawnPoints[i % spawnPoints.Length]));
+            playerList.Add(instantiate(playerInputManagerController.LocalPlayerInputs[i], shuffledSpawnPoints[i % spawnPoints.Length]));
         }
-        for (int i = playerInputManagerController.playerInputs.Count; i < playerInputManagerController.playerInputs.Count + aiPlayerCount; i++)
+        for (int i = playerInputManagerController.LocalPlayerInputs.Count; i < playerInputManagerController.LocalPlayerInputs.Count + aiPlayerCount; i++)
         {
             var spawnPoint = shuffledSpawnPoints[i % spawnPoints.Length];
             var aiPlayer = instantiateAI(i, spawnPoint);
@@ -95,13 +97,18 @@ public class PlayerFactory : MonoBehaviour
         return playerList;
     }
 
+    public Transform[] GetRandomSpawnpoints()
+    {
+        return spawnPoints.ShuffledCopy();
+    }
+
 
     /// <summary>
     /// Spawns a playerPrefab and attaches a playerInput to it as a child.
     /// This function is where you should add delegate events for them to be properly invoked.
     /// </summary>
     /// <param name="inputManager">PlayerInput to tie the player prefab to.</param>
-    private PlayerManager InstantiateFPSPlayer(InputManager inputManager, Transform spawnPoint)
+    public PlayerManager InstantiateFPSPlayer(InputManager inputManager, Transform spawnPoint)
     {
         // Spawn player at spawnPoint's position with spawnPoint's rotation
         GameObject player = Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
@@ -111,10 +118,14 @@ public class PlayerFactory : MonoBehaviour
         inputManager.transform.parent = player.transform;
 
         // Tell the network synchronization that the player prefab should be synced
-        inputManager.GetComponent<NetworkTransformReliable>().target = player.transform;
-        var animator = inputManager.GetComponent<NetworkAnimator>();
-        animator.animator = player.GetComponent<PlayerMovement>().Animator;
-        animator.enabled = true;
+        if (inputManager.TryGetComponent<NetworkTransformReliable>(out var networkTransform))
+        { 
+            networkTransform.target = player.transform;
+            var animator = inputManager.GetComponent<NetworkAnimator>();
+            animator.animator = player.GetComponent<PlayerMovement>().Animator;
+            animator.enabled = true;
+        }
+
 
         // Set recieved playerInput (and most importantly its camera) at an offset from player's position
         inputManager.transform.localPosition = cameraOffset.localPosition;
@@ -185,7 +196,7 @@ public class PlayerFactory : MonoBehaviour
         var aiOpponent = Instantiate(aIOpponent, spawnPoint.position, spawnPoint.rotation);
         AIManager manager = aiOpponent.GetComponent<AIManager>();
         manager.SetLayer(index);
-        manager.SetIdentity(identity ? identity : existingAiIdentities[index - playerInputManagerController.playerInputs.Count]);
+        manager.SetIdentity(identity ? identity : existingAiIdentities[index - playerInputManagerController.LocalPlayerInputs.Count]);
         manager.GetComponent<AIMovement>().SetInitialRotation(spawnPoint.eulerAngles.y * Mathf.Deg2Rad);
         return manager;
     }
@@ -195,7 +206,7 @@ public class PlayerFactory : MonoBehaviour
         var aiOpponent = Instantiate(aIBidder, spawnPoint.position, spawnPoint.rotation);
         AIManager manager = aiOpponent.GetComponent<AIManager>();
         manager.SetLayer(index);
-        manager.SetIdentity(existingAiIdentities[index - playerInputManagerController.playerInputs.Count]);
+        manager.SetIdentity(existingAiIdentities[index - playerInputManagerController.LocalPlayerInputs.Count]);
         return manager;
     }
 }
