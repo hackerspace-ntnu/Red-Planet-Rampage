@@ -89,7 +89,7 @@ public class AIManager : PlayerManager
         gameObject.layer = playerLayer;
     }
 
-    public override void SetGun(Transform offset)
+    public override void SetGun(Transform offset, bool isNetwork = false)
     {
         overrideAimTarget = false;
         bool hasDisabledBody = IsDisabledItem(identity.Body);

@@ -165,7 +165,7 @@ public class SteamManager : MonoBehaviour
             if (!PlayerNames.Contains(name))
                 PlayerNames.Add(name);
         }
-        LobbyPlayerUpdate.Invoke();
+        LobbyPlayerUpdate?.Invoke();
         if (NetworkServer.active)
             return;
         // Only clients from here!
@@ -183,7 +183,7 @@ public class SteamManager : MonoBehaviour
             if (!PlayerNames.Contains(name))
                 PlayerNames.Add(name);
         }
-        LobbyPlayerUpdate.Invoke();
+        LobbyPlayerUpdate?.Invoke();
     }
 
     public void HostLobby()
