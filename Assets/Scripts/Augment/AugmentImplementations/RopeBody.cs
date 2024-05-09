@@ -52,7 +52,7 @@ public class RopeBody : GunBody
         plugAnchor.transform.position = gunController.Player.transform.position;
         rope.Anchor = plugAnchor.transform;
         rope.ResetRope(plugAnchor.WireOrigin);
-        plugAnchor.Health.onDeath += KillRope;
+        plugAnchor.Health.onDeath += RemoveRope;
         playerBody = gunController.Player.GetComponent<Rigidbody>();
         playerHandRight.SetPlayer(gunController.Player);
         playerHandRight.gameObject.SetActive(true);
@@ -70,12 +70,16 @@ public class RopeBody : GunBody
             
     }
 
-    private void KillRope(HealthController healthController, float damage, DamageInfo info)
+    private void RemoveRope()
     {
-        RemoveRope();
+        isWired = false;
+        rope.enabled = false;
+        gunController.stats.Ammo = 0;
+        plugAnchor.gameObject.SetActive(false);
+        audioSource.Play();
     }
 
-    private void RemoveRope()
+    private void RemoveRope(HealthController healthController, float damage, DamageInfo info)
     {
         isWired = false;
         rope.enabled = false;
@@ -88,7 +92,6 @@ public class RopeBody : GunBody
     {
         if (isWired || movement.StateIsAir)
             return;
-        rope.enabled = true;
         plugAnchor.transform.position = gunController.Player.transform.position;
         movement.CanMove = false;
         movement.CanLook = false;
@@ -102,6 +105,7 @@ public class RopeBody : GunBody
     {
         if (!plugAnchor)
             return;
+        rope.enabled = true;
         plugAnchor.gameObject.SetActive(true);
         movement.CanMove = true;
         movement.CanLook = true;
@@ -139,7 +143,7 @@ public class RopeBody : GunBody
 
     private void OnDestroy()
     {
-        plugAnchor.Health.onDeath -= KillRope;
+        plugAnchor.Health.onDeath -= RemoveRope;
         Destroy(plugAnchor);
     }
 
