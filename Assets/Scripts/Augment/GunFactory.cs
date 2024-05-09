@@ -8,7 +8,7 @@ using SecretName;
 [RequireComponent(typeof(GunController))]
 public class GunFactory : MonoBehaviour
 {
-    public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, Transform parent)
+    public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, Transform parent, bool isNetworkGun = false)
     {
         GameObject gun = Instantiate(new GameObject(), parent);
         GunFactory controller = gun.AddComponent<GunFactory>();
@@ -19,7 +19,8 @@ public class GunFactory : MonoBehaviour
         // Initialize everything
         gun.GetComponent<GunFactory>().InitializeGun(owner);
 
-        var cullingLayer = LayerMask.NameToLayer("Gun " + owner.inputManager.playerInput.playerIndex);
+        var playerIndex = owner.inputManager && owner.inputManager.playerInput ? owner.inputManager.playerInput.playerIndex : 3;
+        var cullingLayer = LayerMask.NameToLayer("Gun " + playerIndex);
 
         GunFactory displayGun = owner.GunOrigin.GetComponent<GunFactory>();
         displayGun.Body = bodyPrefab;
@@ -27,7 +28,7 @@ public class GunFactory : MonoBehaviour
         displayGun.Extension = extensionPrefab;
         displayGun.InitializeGun();
 
-        var cullingLayerDisplay = LayerMask.NameToLayer("Player " + owner.inputManager.playerInput.playerIndex);
+        var cullingLayerDisplay = LayerMask.NameToLayer("Player " + playerIndex);
 
         var firstPersonGunController = gun.GetComponent<GunFactory>().GunController;
         var gunAnimations = displayGun.GetComponentsInChildren<AugmentAnimator>(includeInactive: true);
@@ -53,19 +54,24 @@ public class GunFactory : MonoBehaviour
         if (displayGun.GunController.HasRecoil)
             firstPersonGunController.onFire += displayGun.GunController.PlayRecoil;
 
-        if (displayGun.GunController.projectile.GetType() == typeof(BulletController))
+        // Bypass the layer disabling here
+        // actually it probably isn't disabling, so keep it!
+        //if (isNetworkGun)
+            //return gun;
+
+        if (displayGun.GunController.projectile is BulletController)
             ((BulletController)gun.GetComponent<GunFactory>().GunController.projectile).Trail.layer = 0;
 
-        if (displayGun.GunController.projectile.GetType() == typeof(MeshProjectileController))
+        if (displayGun.GunController.projectile is MeshProjectileController)
             ((MeshProjectileController)gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
 
-        if (displayGun.GunController.projectile.GetType() == typeof(LazurController))
+        if (displayGun.GunController.projectile is LazurController)
             ((LazurController)gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
 
         return gun;
     }
 
-    public static GameObject InstantiateGunAI(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, AIManager owner, Transform parent)
+    public static GameObject InstantiateGunAI(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, Transform parent)
     {
         GunFactory displayGun = owner.GunOrigin.gameObject.AddComponent<GunFactory>();
         displayGun.Body = bodyPrefab;

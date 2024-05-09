@@ -15,7 +15,7 @@ public class ScoreboardManager : MonoBehaviour
     public event Action ShowVictoryProgress;
 
     [Header("Variables")]
-    private List<Player> players = new List<Player>();
+    private List<Player> players = new();
 
     [SerializeField]
     public List<string> wantedSubtitles = new();
@@ -39,7 +39,7 @@ public class ScoreboardManager : MonoBehaviour
     [SerializeField]
     private GameObject scoreboard;
 
-    private List<Scoreboard> scoreboards = new List<Scoreboard>();
+    private List<Scoreboard> scoreboards = new();
 
     // Refrences
     private MatchController matchController;

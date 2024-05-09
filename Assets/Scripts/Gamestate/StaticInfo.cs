@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
@@ -14,6 +13,7 @@ using System.Linq;
 public class StaticInfo : MonoBehaviour
 {
     public static StaticInfo Singleton { get; private set; }
+
     [Header("Available Items")]
     // All items that should populate the game
     [SerializeField]
@@ -54,6 +54,7 @@ public class StaticInfo : MonoBehaviour
     public ReadOnlyArray<Item> Barrels;
     public ReadOnlyArray<Item> Extensions;
     public ReadOnlyArray<OverrideName> SecretNames;
+    public ReadOnlyDictionary<string, Item> ItemsById;
 
     [Header("Settings")]
     [SerializeField]
@@ -78,6 +79,7 @@ public class StaticInfo : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
+
         Bodies = new ReadOnlyArray<Item>(bodies);
         Barrels = new ReadOnlyArray<Item>(barrels);
         Extensions = new ReadOnlyArray<Item>(extensions);
@@ -85,6 +87,7 @@ public class StaticInfo : MonoBehaviour
         bodyAuction.SetItems(bodies);
         barrelAuction.SetItems(barrels);
         extensionAuction.SetItems(extensions);
+        ItemsById = new ReadOnlyDictionary<string, Item>(new Dictionary<string, Item>(bodies.Union(barrels)
+            .Union(extensions).Select(item => new KeyValuePair<string, Item>(item.id, item))));
     }
-
 }

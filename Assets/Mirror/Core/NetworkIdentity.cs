@@ -294,10 +294,13 @@ namespace Mirror
         [SerializeField, HideInInspector] bool hasSpawned;
         public bool SpawnedFromInstantiate { get; private set; }
 
-        // NetworkBehaviour components are initialized in Awake once.
-        // Changing them at runtime would get client & server out of sync.
-        // BUT internal so tests can add them after creating the NetworkIdentity
-        internal void InitializeNetworkBehaviours()
+        /// <summary>
+        /// Made public to support gun init. DO NOT USE IN OTHER PLACES, PLEASE.
+        /// NetworkBehaviour components are initialized in Awake once.
+        /// Changing them at runtime would get client & server out of sync.
+        /// BUT internal so tests can add them after creating the NetworkIdentity
+        /// </summary>
+        public void InitializeNetworkBehaviours()
         {
             // Get all NetworkBehaviour components, including children.
             // Some users need NetworkTransform on child bones, etc.

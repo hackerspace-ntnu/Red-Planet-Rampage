@@ -1,15 +1,17 @@
 using Mirror;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Animations;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(AudioSource))]
 public class PlayerManager : NetworkBehaviour
 {
+    [SyncVar]
+    public uint id;
+    
+    
     // Layers 12 through 15 are gun layers.
     protected static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
@@ -355,7 +357,8 @@ public class PlayerManager : NetworkBehaviour
 
         var negatedMask = ((1 << 16) - 1) ^ (playerMask | gunMask | ammoMask);
 
-        inputManager.PlayerCamera.cullingMask = negatedMask;
+        if (inputManager)
+            inputManager.PlayerCamera.cullingMask = negatedMask;
 
         // Set correct layer on self, mesh and gun (TODO)
         gameObject.layer = playerLayer;
@@ -363,21 +366,39 @@ public class PlayerManager : NetworkBehaviour
         SetLayerOnSubtree(hudController.gameObject, LayerMask.NameToLayer("Gun " + playerIndex));
     }
 
-    public virtual void SetGun(Transform offset)
+    public virtual void SetGun(Transform offset, bool isNetwork = false)
     {
         overrideAimTarget = false;
-        var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, this, offset);
+        var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity.Extension, this, offset, isNetwork);
         // Set specific local transform
         gun.transform.localPosition = new Vector3(0.39f, -0.34f, 0.5f);
         gun.transform.localRotation = Quaternion.AngleAxis(0.5f, Vector3.up);
         // Remember gun controller
         gunController = gun.GetComponent<GunController>();
-        gunController.onFireStart += UpdateAimTarget;
-        gunController.onFire += UpdateAimTarget;
-        gunController.onFireEnd += ScreenShake;
-        gunController.onFireEnd += UpdateHudFire;
-        gunController.onReload += UpdateHudReload;
-        gunController.projectile.OnHitboxCollision += hudController.HitmarkAnimation;
+        if (inputManager)
+        {
+            gunController.onFireStart += UpdateAimTarget;
+            gunController.onFire += UpdateAimTarget;
+            gunController.onFireEnd += ScreenShake;
+            gunController.onFireEnd += UpdateHudFire;
+            gunController.onReload += UpdateHudReload;
+            gunController.projectile.OnHitboxCollision += hudController.HitmarkAnimation;
+        }
+        playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
+        if (gunController.RightHandTarget)
+            playerIK.RightHandIKTarget = gunController.RightHandTarget;
+        GetComponent<AmmoBoxCollector>().CheckForAmmoBoxBodyAgain();
+    }
+
+    public void SetGunNetwork(Transform offset)
+    {
+        overrideAimTarget = false;
+        var gun = GunFactory.InstantiateGunAI(
+             identity.Body,
+             identity.Barrel,
+             identity.Extension,
+            this, offset);
+        gunController = gun.GetComponent<GunController>();
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
         if (gunController.RightHandTarget)
             playerIK.RightHandIKTarget = gunController.RightHandTarget;

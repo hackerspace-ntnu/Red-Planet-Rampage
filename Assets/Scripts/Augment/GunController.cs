@@ -1,7 +1,8 @@
+using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class GunController : MonoBehaviour
+public class GunController : NetworkBehaviour
 {
     private const float outputTransitionDistance = 2;
     public float OutputTransitionDistance => outputTransitionDistance;
@@ -39,10 +40,19 @@ public class GunController : MonoBehaviour
 
     public GunEvent onReload;
     public GunEvent onFireStart;
+    /// <summary>
+    /// Invoked on each shot
+    /// </summary>
     public GunEvent onFire;
     public GunEvent onFireEnd;
+    /// <summary>
+    /// Invoked when trying to fire a shot while the magazine is empty
+    /// </summary>
     public GunEvent onFireNoAmmo;
     public GunEvent onInitializeGun;
+    /// <summary>
+    /// Invoked when a projectile is initialized
+    /// </summary>
     public GunEvent onInitializeBullet;
 
     public void SetPlayer(PlayerManager player)
@@ -110,6 +120,7 @@ public class GunController : MonoBehaviour
             FireGun();
         }
     }
+
     /// <summary>
     /// Expects a fraction of ammunition to be reloaded.
     /// This fraction is normalized eg. min = 0, max = 1.
@@ -138,6 +149,23 @@ public class GunController : MonoBehaviour
             gameObject.LeanMoveLocalX(localGunXOffset, 0.2f).setEaseInOutCubic();
     }
 
+    [Command]
+    private void CmdFire(Quaternion rotation)
+    {
+        Debug.Log("FIRE COMMAND CALLED");
+        RpcFire(rotation);
+    }
+
+    [ClientRpc]
+    private void RpcFire(Quaternion rotation)
+    {
+        Debug.Log("FIRE RPC CALLED");
+        onFireStart?.Invoke(stats);
+        projectile.projectileOutput = outputs[0];
+        projectile.projectileRotation = rotation;
+        ActuallyFire();
+    }
+
     private void FireGun()
     {
         if (stats.Ammo <= 0)
@@ -150,8 +178,14 @@ public class GunController : MonoBehaviour
         {
             onFireStart?.Invoke(stats);
             AimAtTarget();
-            projectile.InitializeProjectile(stats);
-            onInitializeBullet?.Invoke(stats);
+            if (isNetworked)
+            {
+                CmdFire(projectile.projectileRotation);
+            }
+            else
+            {
+                ActuallyFire();
+            }
         }
         catch (System.Exception e)
         {
@@ -159,6 +193,12 @@ public class GunController : MonoBehaviour
             // hopefully we avoid displaying them in their gruesome nature to the user this way.
             Debug.LogError(e);
         }
+    }
+
+    private void ActuallyFire()
+    {
+        projectile.InitializeProjectile(stats);
+        onInitializeBullet?.Invoke(stats);
     }
 
     private void AimAtTarget()

@@ -120,6 +120,8 @@ namespace Mirror
         /// <summary>Returns the NetworkIdentity of this object</summary>
         public NetworkIdentity netIdentity { get; internal set; }
 
+        public bool isNetworked => netIdentity is not null;
+
         /// <summary>Returns the index of the component on this object</summary>
         public byte ComponentIndex { get; internal set; }
 
