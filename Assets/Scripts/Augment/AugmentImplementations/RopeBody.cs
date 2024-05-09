@@ -12,6 +12,10 @@ public class RopeBody : GunBody
     [SerializeField]
     private TetherPlug plugAnchorPrefab;
     private TetherPlug plugAnchor;
+    [SerializeField]
+    private GameObject handle;
+    [SerializeField]
+    private GameObject[] coils;
     private Rigidbody playerBody;
     private PlayerMovement movement;
     [SerializeField]
@@ -29,6 +33,7 @@ public class RopeBody : GunBody
     private float ropeLength = 60f;
 
     private bool isWired = true;
+    private float oldLength = 0f;
 
     public override void Start()
     {
@@ -115,8 +120,18 @@ public class RopeBody : GunBody
     {
         if (!rope || !rope.enabled)
             return;
-        if (rope.RopeLength > ropeLength)
+        var currentLength = rope.RopeLength;
+        handle.transform.Rotate(Vector3.up, (oldLength - currentLength) * 40f);
+        oldLength = currentLength;
+        if (currentLength > ropeLength)
             PullingWire();
+    }
+
+    private void Update()
+    {
+        var cutOffIndex = Mathf.FloorToInt((oldLength / ropeLength) * 11);
+        for (int i = 0; i < coils.Length; i++)
+            coils[i].SetActive(i > cutOffIndex);
     }
 
     private void OnDestroy()
