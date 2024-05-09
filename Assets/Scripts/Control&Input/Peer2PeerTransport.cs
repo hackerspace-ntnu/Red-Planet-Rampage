@@ -125,6 +125,7 @@ public class Peer2PeerTransport : NetworkManager
         var playerManager = player.GetComponent<PlayerManager>();
         bool isLocalClient = false;
         string playerName = "";
+        //TODO: Use this dictionary to control connection IDs and playerIdentities, instead of all this nonsene string.equals stuff
         if (SteamManager.Singleton.PlayerDictionary.TryGetValue(connection.connectionId, out var playerDetails))
         {
             playerManager.identity.playerName = playerDetails.Item1;
@@ -132,7 +133,7 @@ public class Peer2PeerTransport : NetworkManager
             playerName = playerDetails.Item1;
             playerManager.identity.color = PlayerInputManagerController.Singleton.PlayerColors[playerDetails.Item2];
         }
-        //NetworkServer.AddPlayerForConnection(connection, playerManager.gameObject);
+        NetworkServer.AddPlayerForConnection(connection, playerManager.gameObject);
         player.transform.position = spawn.position;
         player.transform.rotation = spawn.rotation;
         if (isLocalClient)
@@ -167,7 +168,6 @@ public class Peer2PeerTransport : NetworkManager
             // Set unique layer for player
             playerManager.SetLayer(input.playerInput.playerIndex);
             movement.SetInitialRotation(spawn.eulerAngles.y * Mathf.Deg2Rad);
-            NetworkServer.Spawn(player, connection);
         }
         else
         {
