@@ -11,8 +11,6 @@ public class MainMenuMoveCamera : MonoBehaviour
     [SerializeField]
     private float cameraSpeed;
     [SerializeField]
-    private float rotationAngle;
-    [SerializeField]
     private GameObject directionalLight;
 
     [SerializeField]
@@ -54,6 +52,8 @@ public class MainMenuMoveCamera : MonoBehaviour
 
     public void MoveToLevelSelect()
     {
+        if (!(PlayerInputManagerController.Singleton.MatchHasAI || PlayerInputManagerController.Singleton.PlayerCount > 1))
+            return;
         inLevelSelect = true;
         LeanTween.sequence().append(LeanTween.moveLocal(playerSelectCamera.gameObject, secondPosition.localPosition, 1).setEaseInOutExpo());
         LeanTween.sequence().append(LeanTween.rotateX(playerSelectCamera.gameObject, 90f, 1).setEaseInOutExpo());
