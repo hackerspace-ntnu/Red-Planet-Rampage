@@ -220,7 +220,7 @@ public class MainMenuController : MonoBehaviour
         SelectControl(menu.GetComponentInChildren<Selectable>());
 
         //Change camera angle to level select. Must be done here to not bypass AI-check in playerselect
-        if(menu == mapSelectMenu)
+        if (menu == mapSelectMenu)
         {
             mainMenuCamera.GetComponentInChildren<MainMenuMoveCamera>().MoveToLevelSelect();
         }
