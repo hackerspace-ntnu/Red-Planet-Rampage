@@ -168,7 +168,8 @@ public class PlayerManager : NetworkBehaviour
         aimAssistCollider.SetActive(false);
         TurnIntoRagdoll(info);
         aiTargetCollider.gameObject.SetActive(false);
-        hudController.DisplayDeathScreen(killer.identity);
+        if (hudController)
+            hudController.DisplayDeathScreen(killer.identity);
         playerShadow.gameObject.SetActive(false);
     }
 
@@ -242,7 +243,8 @@ public class PlayerManager : NetworkBehaviour
         {
             playerMovement.onMove -= UpdateHudOnMove;
         }
-        identity.onChipChange -= hudController.OnChipChange;
+        if (hudController)
+            identity.onChipChange -= hudController.OnChipChange;
     }
 
     private void UpdateAimTarget(GunStats stats)
@@ -363,7 +365,8 @@ public class PlayerManager : NetworkBehaviour
         // Set correct layer on self, mesh and gun (TODO)
         gameObject.layer = playerLayer;
         SetLayerOnSubtree(meshBase, playerLayer);
-        SetLayerOnSubtree(hudController.gameObject, LayerMask.NameToLayer("Gun " + playerIndex));
+        if (hudController)
+            SetLayerOnSubtree(hudController.gameObject, LayerMask.NameToLayer("Gun " + playerIndex));
     }
 
     public virtual void SetGun(Transform offset, bool isNetwork = false)
