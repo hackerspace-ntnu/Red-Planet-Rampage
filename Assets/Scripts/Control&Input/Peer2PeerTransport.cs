@@ -309,6 +309,13 @@ public class Peer2PeerTransport : NetworkManager
                 StaticInfo.Singleton.StartingExtension);
             Debug.Log($"{playerManager.identity.Body}");
 
+            // TODO do some other version of disabling HUD completely
+            Destroy(playerManager.HUDController);
+
+            // Disable physics
+            playerManager.GetComponent<Rigidbody>().isKinematic = true;
+
+            // Create display gun structure
             var gunHolderParent = new GameObject("GunHolderParent").transform;
             gunHolderParent.parent = player.transform;
             gunHolderParent.position = cameraOffset.position;

@@ -34,6 +34,7 @@ public class HackingModifier : MonoBehaviour, ProjectileModifier
         // TODO: Actually disorient the AIs
         if (playerManager.identity.IsAI)
             return;
-        playerManager.HUDController.PopupSpammer.Spam(Mathf.FloorToInt(state.damage / damageToSpamAmount));
+        if (playerManager.HUDController)
+            playerManager.HUDController.PopupSpammer.Spam(Mathf.FloorToInt(state.damage / damageToSpamAmount));
     }
 }
