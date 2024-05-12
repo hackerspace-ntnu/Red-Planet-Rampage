@@ -145,8 +145,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: AUCTION START
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d92f5c8d18e777e438cc7641fb4b8324, type: 2}
-  m_sharedMaterial: {fileID: -9072920058959301574, guid: d92f5c8d18e777e438cc7641fb4b8324, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: aa99fff0688574ba78204625170fa6e0, type: 2}
+  m_sharedMaterial: {fileID: 7168929159514863053, guid: aa99fff0688574ba78204625170fa6e0, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -155,12 +155,12 @@ MonoBehaviour:
     rgba: 16777215
   m_fontColor: {r: 1, g: 1, b: 1, a: 0}
   m_enableVertexGradient: 1
-  m_colorMode: 1
+  m_colorMode: 2
   m_fontColorGradient:
-    topLeft: {r: 1, g: 0, b: 0, a: 1}
-    topRight: {r: 0.7264151, g: 0.67057645, b: 0.24944818, a: 1}
-    bottomLeft: {r: 1, g: 0, b: 0, a: 1}
-    bottomRight: {r: 0.7264151, g: 0.67057645, b: 0.24944818, a: 1}
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 0.77765065, g: 0, b: 0, a: 1}
+    bottomRight: {r: 0.77765065, g: 0, b: 0, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
@@ -170,14 +170,14 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 38
+  m_fontSizeBase: 38
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 1
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -1020,6 +1020,8 @@ MonoBehaviour:
   - {fileID: 1688390419487114531}
   - {fileID: 8445967310637888740}
   cameraAnimator: {fileID: 0}
+  cameraStandbyPosition: {x: 0, y: 18.1, z: 10.8}
+  extraCamera: {fileID: 0}
 --- !u!114 &6490865783486692312
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1032,6 +1034,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d488a44f13f1ff5bab7892dee8efb65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  graceTime: 1
+  loadingScreen: {fileID: 0}
 --- !u!114 &7844404747135833139
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1044,7 +1048,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b18a938eb13d13540b14e958b874d1b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 71015680234268067, guid: 3dc25421e909fbc47960797088403e48, type: 3}
+  playerPrefab: {fileID: 294039805103147639, guid: 62ff0a41a0da10a4386b333ddc7f5908, type: 3}
   spawnPoints:
   - {fileID: 0}
   - {fileID: 0}
@@ -1052,7 +1056,8 @@ MonoBehaviour:
   - {fileID: 0}
   playerSelectItemPrefab: {fileID: 6596575034333967962, guid: 6f9988a3327983940a8001c11c3fe0e7, type: 3}
   aIOpponent: {fileID: 5961719937516333757, guid: 665c6c63c29b79046872a819561ba343, type: 3}
-  aIBidder: {fileID: 71015680234268067, guid: 7ec1e45c9b311c847972fa5463546163, type: 3}
+  aIBidder: {fileID: 6437219339333054928, guid: fe3fd52f858e12142bceb87cdbce7a77, type: 3}
+  aiIdentity: {fileID: 8959912941406370206, guid: e915b82d39eb5ca4ba5977d1c718d4ed, type: 3}
   globalHUDController: {fileID: 8308620075618543877}
   overrideMatchManager: 0
 --- !u!82 &6019567151198838881

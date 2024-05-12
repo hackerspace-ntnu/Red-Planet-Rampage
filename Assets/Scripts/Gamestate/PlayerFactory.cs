@@ -38,7 +38,7 @@ public class PlayerFactory : MonoBehaviour
         if (PlayerInputManagerController.Singleton == null)
         {
             // We most likely started the game in the game scene, reload menu instead
-            if (!SteamManager.Singleton.ChangeScene("Menu"))
+            if (!SteamManager.Singleton || !SteamManager.Singleton.ChangeScene("Menu"))
                 SceneManager.LoadSceneAsync("Menu");
             return;
         }

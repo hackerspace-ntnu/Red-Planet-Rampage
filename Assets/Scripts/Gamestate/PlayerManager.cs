@@ -135,7 +135,7 @@ public class PlayerManager : NetworkBehaviour
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
-        if (identity)
+        if (identity && hudController)
             identity.onChipChange += hudController.OnChipChange;
     }
 
@@ -215,12 +215,15 @@ public class PlayerManager : NetworkBehaviour
         inputManager.onFirePerformed += TryPlaceBid;
         inputManager.onInteract += Interact;
         // Set camera on canvas
-        var canvas = hudController.GetComponent<Canvas>();
-        canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
-        canvas.planeDistance = 0.11f;
+        if (hudController)
+        {
+            var canvas = hudController.GetComponent<Canvas>();
+            canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
+            canvas.planeDistance = 0.11f;
+        }
 
         // Set player color
-        var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
+        meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
     }
 
     void OnDestroy()
@@ -294,7 +297,8 @@ public class PlayerManager : NetworkBehaviour
 
     private void UpdateHudOnMove(Rigidbody body)
     {
-        hudController.SetSpeedLines(body.velocity);
+        if (hudController)
+            hudController.SetSpeedLines(body.velocity);
     }
 
     private void UpdateHudFire(GunStats stats)
@@ -369,10 +373,10 @@ public class PlayerManager : NetworkBehaviour
             SetLayerOnSubtree(hudController.gameObject, LayerMask.NameToLayer("Gun " + playerIndex));
     }
 
-    public virtual void SetGun(Transform offset, bool isNetwork = false)
+    public virtual void SetGun(Transform offset)
     {
         overrideAimTarget = false;
-        var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity.Extension, this, offset, isNetwork);
+        var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity.Extension, this, offset);
         // Set specific local transform
         gun.transform.localPosition = new Vector3(0.39f, -0.34f, 0.5f);
         gun.transform.localRotation = Quaternion.AngleAxis(0.5f, Vector3.up);

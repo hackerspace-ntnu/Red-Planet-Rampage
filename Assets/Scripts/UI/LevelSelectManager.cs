@@ -119,6 +119,7 @@ public class LevelSelectManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        input.onSelect -= HandleCardClick;
+        if (input)
+            input.onSelect -= HandleCardClick;
     }
 }
