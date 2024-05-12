@@ -8,6 +8,7 @@ using UnityEngine.InputSystem;
 public struct PlayerDetails
 {
     public uint id;
+    public ulong steamID;
     public PlayerType type;
 
     public string name;
@@ -76,7 +77,7 @@ public class Peer2PeerTransport : NetworkManager
     private SpawnHandlerDelegate onSpawnPlayer;
     private UnSpawnDelegate onUnSpawnPlayer;
     
-    private const int FPSPlayerIndex = 0;
+    private const int FPSPlayerPrefabIndex = 0;
 
     private readonly Dictionary<uint, PlayerDetails> players = new();
     
@@ -124,9 +125,7 @@ public class Peer2PeerTransport : NetworkManager
         PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
         var index = SteamManager.Singleton.PlayerNames.Count - 1;
         var steamName = SteamManager.Singleton.PlayerNames[index];
-        SteamManager.Singleton.PlayerDictionary.Add(connection.connectionId,
-            (steamName, index));
-
+        var steamID = SteamManager.Singleton.PlayerIDs[index];
 
         var player = Instantiate(playerPrefab);
         var playerInput = player.GetComponent<InputManager>();
@@ -145,6 +144,7 @@ public class Peer2PeerTransport : NetworkManager
         var details = new PlayerDetails
         {
             id = (uint)index,
+            steamID = steamID,
             type = message.type,
             name = steamName,
             color = PlayerInputManagerController.Singleton.PlayerColors[index],
@@ -158,8 +158,7 @@ public class Peer2PeerTransport : NetworkManager
         var details = message.details;
         if (players.ContainsKey(details.id))
             return;
-        // TODO replace this check with sth else, find your netId somehow? Or use steam id?
-        details.type = SteamManager.Singleton.UserName == details.name ? PlayerType.Local : PlayerType.Remote;
+        details.type = SteamManager.Singleton.SteamID.m_SteamID == details.steamID ? PlayerType.Local : PlayerType.Remote;
         if (details.type is PlayerType.Local) myId = details.id;
         Debug.Log($"Received info for player {details.id}: name={details.name} type={details.type} color={details.color}");
         players.Add(details.id, details);
@@ -218,11 +217,9 @@ public class Peer2PeerTransport : NetworkManager
         }
 
         var spawnPoint = spawnPoints[playerIndex];
-        // TODO reset this
         playerIndex++;
 
-        // TODO check if this is kenough
-        var player = Instantiate(spawnPrefabs[FPSPlayerIndex], spawnPoint.position, spawnPoint.rotation);
+        var player = Instantiate(spawnPrefabs[FPSPlayerPrefabIndex], spawnPoint.position, spawnPoint.rotation);
         player.GetComponent<PlayerManager>().id = message.id;
         NetworkServer.AddPlayerForConnection(connection, player);
         NetworkServer.SendToAll(new InitializeFPSPlayerMessage(message.id, spawnPoint.position, spawnPoint.rotation));
@@ -271,7 +268,7 @@ public class Peer2PeerTransport : NetworkManager
             var input = PlayerInputManagerController.Singleton.LocalPlayerInputs[0];
             // Make playerInput child of player it's attached to
             input.transform.parent = player.transform;
-            // Set recieved playerInput (and most importantly its camera) at an offset from player's position
+            // Set received playerInput (and most importantly its camera) at an offset from player's position
             input.transform.localPosition = cameraOffset.localPosition;
             input.transform.rotation = player.transform.rotation;
 
@@ -307,7 +304,6 @@ public class Peer2PeerTransport : NetworkManager
             // TODO set based on playerdetails (and edit playerdetails)
             playerManager.identity.SetLoadout(StaticInfo.Singleton.StartingBody, StaticInfo.Singleton.StartingBarrel,
                 StaticInfo.Singleton.StartingExtension);
-            Debug.Log($"{playerManager.identity.Body}");
 
             // TODO do some other version of disabling HUD completely
             Destroy(playerManager.HUDController);
@@ -316,11 +312,11 @@ public class Peer2PeerTransport : NetworkManager
             playerManager.GetComponent<Rigidbody>().isKinematic = true;
 
             // Create display gun structure
-            var gunHolderParent = new GameObject("GunHolderParent").transform;
+            var gunHolderParent = new GameObject("DisplayGunParent").transform;
             gunHolderParent.parent = player.transform;
             gunHolderParent.position = cameraOffset.position;
             gunHolderParent.rotation = player.transform.rotation;
-            var gunHolder = new GameObject("GunHolder").transform;
+            var gunHolder = new GameObject("DisplayGunHolder").transform;
             gunHolder.parent = gunHolderParent.transform;
             gunHolder.localPosition = Vector3.zero;
             gunHolder.localRotation = Quaternion.identity;
