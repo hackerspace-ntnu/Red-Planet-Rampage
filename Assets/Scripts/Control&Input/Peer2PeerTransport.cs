@@ -322,7 +322,7 @@ public class Peer2PeerTransport : NetworkManager
             gunHolder.localRotation = Quaternion.identity;
             playerManager.SetLayer(3);
             // Can't initialize quite like the AIs because of where the GunController network behaviour is located :(
-            playerManager.SetGun(gunHolder, true);
+            playerManager.SetGun(gunHolder);
         }
 
 

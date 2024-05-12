@@ -8,7 +8,7 @@ using SecretName;
 [RequireComponent(typeof(GunController))]
 public class GunFactory : MonoBehaviour
 {
-    public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, Transform parent, bool isNetworkGun = false)
+    public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, Transform parent)
     {
         GameObject gun = Instantiate(new GameObject(), parent);
         GunFactory controller = gun.AddComponent<GunFactory>();
@@ -53,11 +53,6 @@ public class GunFactory : MonoBehaviour
 
         if (displayGun.GunController.HasRecoil)
             firstPersonGunController.onFire += displayGun.GunController.PlayRecoil;
-
-        // Bypass the layer disabling here
-        // actually it probably isn't disabling, so keep it!
-        //if (isNetworkGun)
-            //return gun;
 
         if (displayGun.GunController.projectile is BulletController)
             ((BulletController)gun.GetComponent<GunFactory>().GunController.projectile).Trail.layer = 0;
