@@ -31,8 +31,9 @@ public class SteamManager : MonoBehaviour
     public static bool IsSteamActive => isSteamInitialized;
     public bool IsHosting = false;
     public string UserName;
-    public List<string> PlayerNames = new List<string>();
-    public Dictionary<int, (string, int)> PlayerDictionary = new Dictionary<int, (string, int)>();
+    public CSteamID SteamID;
+    public List<string> PlayerNames = new();
+    public List<ulong> PlayerIDs = new();
     public delegate void LobbyEvent();
     public LobbyEvent LobbyPlayerUpdate;
 
@@ -89,6 +90,7 @@ public class SteamManager : MonoBehaviour
 
         RequestStats();
         UserName = SteamFriends.GetPersonaName();
+        SteamID = SteamUser.GetSteamID();
     }
 
     private void RequestStats()
@@ -152,20 +154,31 @@ public class SteamManager : MonoBehaviour
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
     }
 
+    private void UpdateLobbyData(ulong lobbyID)
+    {
+        var lobbyId = new CSteamID(lobbyID);
+        Debug.Log("Lobby entered");
+        for (int i = 0; i < SteamMatchmaking.GetNumLobbyMembers(lobbyId); i++)
+        {
+            var id = SteamMatchmaking.GetLobbyMemberByIndex(lobbyId, i);
+            var name = SteamFriends.GetFriendPersonaName(id);
+
+            if (PlayerIDs.Contains(id.m_SteamID))
+                continue;
+            Debug.Log($"Steam user {name} (id={id.m_SteamID}) entered lobby");
+
+            // TODO replace these separate lists with *one*
+            PlayerNames.Add(name);
+            PlayerIDs.Add(id.m_SteamID);
+        }
+        LobbyPlayerUpdate?.Invoke();
+    }
+
     private void OnLobbyEnter(LobbyEnter_t callback)
     {
         // All users
         PlayerInputManagerController.Singleton.RemoveJoinListener();
-        // TODO: set steam names over players
-        var lobbyId = new CSteamID(callback.m_ulSteamIDLobby);
-        Debug.Log("onLobbyUp");
-        for (int i = 0; i < SteamMatchmaking.GetNumLobbyMembers(lobbyId); i++)
-        {
-            string name = SteamFriends.GetFriendPersonaName(SteamMatchmaking.GetLobbyMemberByIndex(lobbyId, i));
-            if (!PlayerNames.Contains(name))
-                PlayerNames.Add(name);
-        }
-        LobbyPlayerUpdate?.Invoke();
+        UpdateLobbyData(callback.m_ulSteamIDLobby);
         if (NetworkServer.active)
             return;
         // Only clients from here!
@@ -175,15 +188,8 @@ public class SteamManager : MonoBehaviour
 
     private void OnLobbyUpdate(LobbyChatUpdate_t callback)
     {
-        var lobbyId = new CSteamID(callback.m_ulSteamIDLobby);
-        Debug.Log("onLobbyUp");
-        for (int i = 0; i < SteamMatchmaking.GetNumLobbyMembers(lobbyId); i++)
-        {
-            string name = SteamFriends.GetFriendPersonaName(SteamMatchmaking.GetLobbyMemberByIndex(lobbyId, i));
-            if (!PlayerNames.Contains(name))
-                PlayerNames.Add(name);
-        }
-        LobbyPlayerUpdate?.Invoke();
+        Debug.Log("Lobby updated");
+        UpdateLobbyData(callback.m_ulSteamIDLobby);
     }
 
     public void HostLobby()
@@ -194,6 +200,7 @@ public class SteamManager : MonoBehaviour
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, transportProtocol.maxConnections);
         // Disable local joining
         PlayerInputManagerController.Singleton.RemoveJoinListener();
+        // TODO make it possible to have multiple local players in online match, then remove this
         for (int i = 0; i < PlayerInputManagerController.Singleton.LocalPlayerInputs.Count; i++)
         {
             if (i == 0)

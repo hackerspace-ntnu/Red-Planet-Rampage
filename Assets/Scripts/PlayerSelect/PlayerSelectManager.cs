@@ -51,10 +51,10 @@ public class PlayerSelectManager : MonoBehaviour
             animatorParameters.Add(playerAnimators[0].GetParameter(i).name);
         }
         if (SteamManager.IsSteamActive)
-            SteamManager.Singleton.LobbyPlayerUpdate += SetLobby;
+            SteamManager.Singleton.LobbyPlayerUpdate += UpdateLobby;
     }
 
-    public void SetLobby()
+    public void UpdateLobby()
     {
         for (int i = 0; i < SteamManager.Singleton.PlayerNames.Count; i++)
             SetupPlayerSelectModels(SteamManager.Singleton.PlayerNames[i], playerInputManagerController.PlayerColors[i], i);
@@ -173,6 +173,6 @@ public class PlayerSelectManager : MonoBehaviour
     private void OnDestroy()
     {
         if (SteamManager.IsSteamActive)
-            SteamManager.Singleton.LobbyPlayerUpdate -= SetLobby;
+            SteamManager.Singleton.LobbyPlayerUpdate -= UpdateLobby;
     }
 }

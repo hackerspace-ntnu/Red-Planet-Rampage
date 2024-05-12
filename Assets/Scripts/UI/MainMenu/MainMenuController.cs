@@ -337,7 +337,7 @@ public class MainMenuController : MonoBehaviour
         if (!SteamManager.IsSteamActive)
             return;
         SteamManager.Singleton.HostLobby();
-        playerSelectManager.SetLobby();
+        playerSelectManager.UpdateLobby();
     }
 
     public void LeaveLobby()
