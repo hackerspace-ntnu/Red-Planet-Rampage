@@ -35,6 +35,7 @@ public class GunController : NetworkBehaviour
     public bool triggerHeld, triggerPressed;
     public Vector3 target;
     public bool TargetIsTooClose;
+    public bool AimCorrectionEnabled = true;
 
     public delegate void GunEvent(GunStats gunStats);
 
@@ -135,7 +136,7 @@ public class GunController : NetworkBehaviour
 
     public void OnZoom(InputAction.CallbackContext ctx)
     {
-        gameObject.LeanMoveLocalX(0f, 0.2f).setEaseInOutCubic();
+            gameObject.LeanMoveLocalX(0f, 0.2f).setEaseInOutCubic();
     }
 
     public void OnZoomCanceled(InputAction.CallbackContext ctx)
@@ -144,7 +145,8 @@ public class GunController : NetworkBehaviour
     }
 
     private void CancelZoom()
-    {
+    {   
+
         if (gameObject)
             gameObject.LeanMoveLocalX(localGunXOffset, 0.2f).setEaseInOutCubic();
     }
@@ -203,6 +205,12 @@ public class GunController : NetworkBehaviour
 
     private void AimAtTarget()
     {
+        if (!AimCorrectionEnabled)
+        {
+            projectile.projectileOutput = outputs[0];
+            projectile.projectileRotation = Quaternion.identity;
+            return;
+        }
         // Output become camera when distance hit is closer than weaponOutput
         if (Player)
             projectile.projectileOutput = TargetIsTooClose ? Player.inputManager.transform : outputs[0];

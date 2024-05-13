@@ -233,7 +233,12 @@ public class InputManager : MonoBehaviour
     {
         if (isMouseAndKeyboard)
         {
-            if (ctx.performed) { onZoomPerformed?.Invoke(ctx); return; }
+            if (ctx.performed) { 
+                ZoomActive = true;
+                onZoomPerformed?.Invoke(ctx);
+                return; 
+            }
+            ZoomActive = false;
             onZoomCanceled?.Invoke(ctx);
             return;
         }
