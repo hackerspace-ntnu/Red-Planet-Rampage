@@ -104,7 +104,6 @@ public class BulletController : ProjectileController
             projectile.hitHealthControllers.Clear();
 
             OnProjectileInit?.Invoke(ref projectile, stats);
-
             projectile.speed = baseSpeed * stats.ProjectileSpeedFactor;
 
             int sampleNum = 0;
