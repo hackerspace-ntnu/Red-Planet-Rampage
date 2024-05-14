@@ -120,7 +120,7 @@ namespace Mirror
         /// <summary>Returns the NetworkIdentity of this object</summary>
         public NetworkIdentity netIdentity { get; internal set; }
 
-        public bool isNetworked => netIdentity is not null;
+        public bool isNetworked => netIdentity is not null && NetworkManager.singleton.isNetworkActive;
 
         /// <summary>Returns the index of the component on this object</summary>
         public byte ComponentIndex { get; internal set; }
@@ -1341,28 +1341,28 @@ namespace Mirror
         }
 
         /// <summary>Like Start(), but only called on server and host.</summary>
-        public virtual void OnStartServer() {}
+        public virtual void OnStartServer() { }
 
         /// <summary>Stop event, only called on server and host.</summary>
-        public virtual void OnStopServer() {}
+        public virtual void OnStopServer() { }
 
         /// <summary>Like Start(), but only called on client and host.</summary>
-        public virtual void OnStartClient() {}
+        public virtual void OnStartClient() { }
 
         /// <summary>Stop event, only called on client and host.</summary>
-        public virtual void OnStopClient() {}
+        public virtual void OnStopClient() { }
 
         /// <summary>Like Start(), but only called on client and host for the local player object.</summary>
-        public virtual void OnStartLocalPlayer() {}
+        public virtual void OnStartLocalPlayer() { }
 
         /// <summary>Stop event, but only called on client and host for the local player object.</summary>
-        public virtual void OnStopLocalPlayer() {}
+        public virtual void OnStopLocalPlayer() { }
 
         /// <summary>Like Start(), but only called for objects the client has authority over.</summary>
-        public virtual void OnStartAuthority() {}
+        public virtual void OnStartAuthority() { }
 
         /// <summary>Stop event, only called for objects the client has authority over.</summary>
-        public virtual void OnStopAuthority() {}
+        public virtual void OnStopAuthority() { }
 
         // Weaver injects this into inheriting classes to return true.
         // allows runtime & tests to check if a type was weaved.

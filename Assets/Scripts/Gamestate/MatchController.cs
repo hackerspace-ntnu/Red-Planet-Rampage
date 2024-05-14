@@ -10,7 +10,7 @@ using Mirror;
 #nullable enable
 
 /// <summary>
-/// Wrapper struct for tying refference to Player class with the in-game player.
+/// Wrapper struct for tying reference to Player class with the in-game player.
 /// </summary>
 [Serializable]
 public struct Player
@@ -35,11 +35,11 @@ public class MatchController : MonoBehaviour
 
     public delegate void MatchEvent();
 
-    public MatchEvent onOutcomeDecided;
-    public MatchEvent onRoundEnd;
-    public MatchEvent onRoundStart;
-    public MatchEvent onBiddingStart;
-    public MatchEvent onBiddingEnd;
+    public MatchEvent? onOutcomeDecided;
+    public MatchEvent? onRoundEnd;
+    public MatchEvent? onRoundStart;
+    public MatchEvent? onBiddingStart;
+    public MatchEvent? onBiddingEnd;
 
     [Header("Timing")]
     [SerializeField]
@@ -80,7 +80,8 @@ public class MatchController : MonoBehaviour
 
     private string currentMapName;
 
-    private List<Player> players = new List<Player>();
+    public Dictionary<uint, PlayerManager> PlayerById = new();
+    private List<Player> players = new();
     public List<Player> Players => players;
     public IEnumerable<Player> AIPlayers => players.Where(p => p.playerManager is AIManager);
     public IEnumerable<Player> HumanPlayers => players.Where(p => p.playerManager is not AIManager);
@@ -147,12 +148,38 @@ public class MatchController : MonoBehaviour
     {
         if (collectableChips.Count == 0)
             collectableChips = FindObjectsOfType<CollectableChip>().ToList();
+
+        if (NetworkManager.singleton.isNetworkActive)
+        {
+            StartCoroutine(WaitForClientsAndInitialize());
+            return;
+        }
+
+        InitializePlayers();
+
+        InitializeRound();
+    }
+
+    private void InitializePlayers()
+    {
         // Setup of playerInputs
         var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
             Mathf.Max(4 - PlayerInputManagerController.Singleton.PlayerCount, 0) : 0;
         playerFactory.InstantiatePlayersFPS(aiPlayerCount)
             .ForEach(player => players.Add(new Player(player.identity, player, startAmount)));
 
+        UpdateAIPlayers();
+
+        PlayerById = new();
+
+        foreach (var player in players)
+        {
+            PlayerById.Add(player.playerManager.id, player.playerManager);
+        }
+    }
+
+    private void UpdateAIPlayers()
+    {
         var aiPLayers = players.Where(player => player.playerManager is AIManager)
             .Select(player => player.playerManager)
             .Cast<AIManager>()
@@ -161,13 +188,10 @@ public class MatchController : MonoBehaviour
         aiPLayers.ForEach(ai =>
                 ai.TrackedPlayers = players.Select(player => player.playerManager)
                     .Where(player => player != ai).ToList());
+    }
 
-        if (NetworkManager.singleton.isNetworkActive)
-        {
-            StartCoroutine(WaitForClientsAndInitialize());
-            return;
-        }
-
+    private void InitializeRound()
+    {
         MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
         onRoundStart?.Invoke();
         isAuction = false;
@@ -180,18 +204,13 @@ public class MatchController : MonoBehaviour
 
     private IEnumerator WaitForClientsAndInitialize()
     {
+        PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
         while (NetworkManager.singleton.numPlayers == 0 || NetworkManager.singleton.numPlayers != NetworkServer.connections.Count) yield return null;
         // Must skip a frame to ensure connection timing for last joined player is ok
         yield return null;
 
-        MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
-        onRoundStart?.Invoke();
-        isAuction = false;
-        rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
-        roundTimer.StartTimer(roundLength);
-        roundTimer.OnTimerUpdate += AdjustMusic;
-        roundTimer.OnTimerUpdate += HUDTimerUpdate;
-        roundTimer.OnTimerRunCompleted += EndActiveRound;
+        // TODO initialize players somehow?
+        InitializeRound();
     }
 
     public void StartNextBidding()
@@ -201,8 +220,9 @@ public class MatchController : MonoBehaviour
         collectableChips = new List<CollectableChip>();
 
         StartCoroutine(ShowLoadingScreenBeforeBidding());
-        // TODO: Add Destroy on match win   
+        // TODO: Add Destroy on match win
     }
+
     private IEnumerator ShowLoadingScreenBeforeBidding()
     {
         loadingScreen.SetActive(true);

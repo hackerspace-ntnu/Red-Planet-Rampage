@@ -48,6 +48,7 @@ public class ProjectileState
     public bool active = false;
 
     public float damage = 0f;
+    public DamageType damageType = DamageType.Weapon;
 
     public float size = 0f;
 

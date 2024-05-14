@@ -73,14 +73,14 @@ public class Peer2PeerTransport : NetworkManager
     private PlayerFactory playerFactory;
     private static Transform[] spawnPoints;
     private static int playerIndex;
-    
+
     private SpawnHandlerDelegate onSpawnPlayer;
     private UnSpawnDelegate onUnSpawnPlayer;
-    
+
     private const int FPSPlayerPrefabIndex = 0;
 
-    private readonly Dictionary<uint, PlayerDetails> players = new();
-    
+    private Dictionary<uint, PlayerDetails> players = new();
+
     private uint myId; // TODO this is inflexible for multiple local players
 
     public delegate void LobbyPlayerEvent(PlayerDetails details);
@@ -90,8 +90,10 @@ public class Peer2PeerTransport : NetworkManager
     {
         base.OnStartServer();
         NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
-        
-        
+
+        // Reinitialize player lookups
+        players = new();
+
         // We don't receive a join message for the host, so it should add its own info.
         var hostDetails = new PlayerDetails
         {
@@ -102,13 +104,13 @@ public class Peer2PeerTransport : NetworkManager
         };
         players.Add(hostDetails.id, hostDetails);
     }
-    
+
     #region Player joining 
-    
+
     public override void OnClientConnect()
     {
         base.OnClientConnect();
-        
+
         NetworkClient.RegisterHandler<InitialPlayerDetailsMessage>(OnReceivePlayerDetails);
         NetworkClient.RegisterHandler<InitializeFPSPlayerMessage>(InitializeFPSPlayer);
 
@@ -135,14 +137,14 @@ public class Peer2PeerTransport : NetworkManager
         playerInput.PlayerCamera.enabled = false;
         playerInput.enabled = message.type is PlayerType.Local;
         NetworkServer.AddPlayerForConnection(connection, player);
-        
-        
+
+
         // Send information about existing players to the new one
         foreach (var existingPlayer in players.Values)
         {
             connection.Send(new InitialPlayerDetailsMessage(existingPlayer));
         }
-        
+
         // TODO consider just putting this stuff into the InitialPlayerDetailsMessage
         var details = new PlayerDetails
         {
@@ -169,7 +171,7 @@ public class Peer2PeerTransport : NetworkManager
     }
 
     #endregion
-    
+
     #region Spawn in match
 
     public override void OnServerChangeScene(string newSceneName)
@@ -236,8 +238,10 @@ public class Peer2PeerTransport : NetworkManager
 
     private IEnumerator WaitAndInitializeFPSPlayer(InitializeFPSPlayerMessage message)
     {
-        // Wait until things should be synced
-        yield return new WaitForSeconds(.2f);
+        // Wait until players must've been spawned
+        //while (numPlayers == 0 || numPlayers != NetworkServer.connections.Count) yield return null;
+        yield return null;
+        yield return null;
 
         var player = FindObjectsOfType<PlayerManager>()
             .FirstOrDefault(p => p.id == message.id);
@@ -255,11 +259,10 @@ public class Peer2PeerTransport : NetworkManager
         }
 
         var playerManager = player.GetComponent<PlayerManager>();
-        
-        
+
         playerManager.identity.playerName = playerDetails.name;
         playerManager.identity.color = playerDetails.color;
-        
+
         player.transform.position = message.position;
         player.transform.rotation = message.rotation;
 
@@ -280,11 +283,14 @@ public class Peer2PeerTransport : NetworkManager
             input.PlayerCamera.enabled = true;
             input.PlayerCamera.orthographic = false;
 
-            input.GetComponent<PlayerIdentity>().playerName = SteamManager.Singleton.PlayerNames[0];
-
             playerManager.HUDController.gameObject.SetActive(true);
             var movement = player.GetComponent<PlayerMovement>();
             movement.enabled = true;
+
+            // The identity sits on the input in this case, so edit that
+            var identity = input.GetComponent<PlayerIdentity>();
+            identity.playerName = playerDetails.name;
+            identity.color = playerDetails.color;
 
             // Update player's movement script with which playerInput it should attach listeners to
             playerManager.SetPlayerInput(input);
@@ -294,7 +300,7 @@ public class Peer2PeerTransport : NetworkManager
             // Set unique layer for player
             playerManager.SetLayer(input.playerInput.playerIndex);
             movement.SetInitialRotation(message.rotation.eulerAngles.y * Mathf.Deg2Rad);
-            
+
             // TODO jeez this should stay elsewhere
             if (GunFactory.TryGetGunAchievement(playerManager.identity.Body, playerManager.identity.Barrel,
                     playerManager.identity.Extension, out var achievement))
@@ -339,6 +345,7 @@ public class Peer2PeerTransport : NetworkManager
         {
             MatchController.Singleton.Players.Add(new Player(playerManager.identity, playerManager,
                 MatchController.Singleton.StartAmount));
+            MatchController.Singleton.PlayerById.Add(playerManager.id, playerManager);
         }
     }
 
