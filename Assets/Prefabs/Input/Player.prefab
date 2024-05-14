@@ -9,11 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 71015680234268071}
+  - component: {fileID: -437592331247616425}
   - component: {fileID: 71015680234268069}
   - component: {fileID: 71015680234268065}
   - component: {fileID: 9672907109803670}
   - component: {fileID: 71015680234268068}
-  - component: {fileID: -437592331247616425}
   - component: {fileID: 6717855691676836013}
   - component: {fileID: 3252978923923797766}
   - component: {fileID: 7607358150439154286}
@@ -50,6 +50,43 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-437592331247616425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71015680234268067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b92c430e6e288cc42a9a091e7fefacaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  id: 0
+  interactMask:
+    serializedVersion: 2
+    m_Bits: 1
+  maxHitDistance: 100
+  targetStartOffset: 0.9
+  overrideAimTarget: 0
+  ammoMaskItem: {fileID: 11400000, guid: a99e4b806f963ac45a0635c34182107a, type: 2}
+  GunHolder: {fileID: 2192650951514295549}
+  GunOrigin: {fileID: 5285924196574601758}
+  aimAssistCollider: {fileID: 712417654543469888}
+  inputManager: {fileID: 0}
+  identity: {fileID: 0}
+  hudController: {fileID: 555885729091202788}
+  playerShadow: {fileID: 5212658928600365944}
+  aiTarget: {fileID: 8325754837701600379, guid: c133d38b202cbc94dbc1e02d7ee2e7ba, type: 3}
+  AiAimSpot: {fileID: 5780737505092297358}
+  meshBase: {fileID: 5330336945653279977}
+  playerIK: {fileID: 142658303258642700}
+  deathKnockbackForceMultiplier: 150
+  hitSounds: {fileID: 11400000, guid: 90b0dc5583765d64f81545c255b0fa3a, type: 2}
+  extraHitSounds: {fileID: 11400000, guid: c5daa2802fa89a54986d53f2fc13cb8f, type: 2}
 --- !u!114 &71015680234268069
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -189,43 +226,6 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 1
---- !u!114 &-437592331247616425
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 71015680234268067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b92c430e6e288cc42a9a091e7fefacaf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  id: 0
-  interactMask:
-    serializedVersion: 2
-    m_Bits: 1
-  maxHitDistance: 100
-  targetStartOffset: 0.9
-  overrideAimTarget: 0
-  ammoMaskItem: {fileID: 11400000, guid: a99e4b806f963ac45a0635c34182107a, type: 2}
-  GunHolder: {fileID: 2192650951514295549}
-  GunOrigin: {fileID: 5285924196574601758}
-  aimAssistCollider: {fileID: 712417654543469888}
-  inputManager: {fileID: 0}
-  identity: {fileID: 0}
-  hudController: {fileID: 555885729091202788}
-  playerShadow: {fileID: 5212658928600365944}
-  aiTarget: {fileID: 8325754837701600379, guid: c133d38b202cbc94dbc1e02d7ee2e7ba, type: 3}
-  AiAimSpot: {fileID: 5780737505092297358}
-  meshBase: {fileID: 5330336945653279977}
-  playerIK: {fileID: 142658303258642700}
-  deathKnockbackForceMultiplier: 150
-  hitSounds: {fileID: 11400000, guid: 90b0dc5583765d64f81545c255b0fa3a, type: 2}
-  extraHitSounds: {fileID: 11400000, guid: c5daa2802fa89a54986d53f2fc13cb8f, type: 2}
 --- !u!114 &6717855691676836013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -238,6 +238,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cab246ee1d4ad25498887ea1df8ef6f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   maxhHealth: 100
   currentHealth: 0
 --- !u!114 &3252978923923797766
