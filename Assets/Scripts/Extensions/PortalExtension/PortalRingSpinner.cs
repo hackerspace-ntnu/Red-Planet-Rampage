@@ -10,12 +10,9 @@ public class PortalRingSpinner : MonoBehaviour
 
     public float[] rotationSpeed = null;
 
-    // Update is called once per frame
     void Update()
     {
         for(int i = 0; i < rotationTransforms.Length; i++)
-        {
             rotationTransforms[i].localRotation = Quaternion.AngleAxis(rotationSpeed[i]*Time.deltaTime, rotationAxes[i]) * rotationTransforms[i].localRotation;
-        }
     }
 }

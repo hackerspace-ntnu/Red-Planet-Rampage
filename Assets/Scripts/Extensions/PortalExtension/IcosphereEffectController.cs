@@ -5,16 +5,20 @@ using UnityEngine;
 public class IcosphereEffectController : MonoBehaviour
 {
     [SerializeField]
-    private Material material;
-
-    [SerializeField]
     private Transform orientation;
 
-    Quaternion rotationPerS = Quaternion.Euler(90, 30, 15);
-    // Update is called once per frame
-    void Update()
+    [SerializeField]
+    private MeshRenderer meshRenderer;
+    private Material material;
+
+    private void Start()
+    {
+        meshRenderer.materials[0] = Instantiate(meshRenderer.materials[0]);
+        material = meshRenderer.materials[0];
+    }
+
+    private void Update()
     {
         material.SetVector("_Dir", orientation.right);
-        //transform.rotation *= Quaternion.Lerp(Quaternion.identity, rotationPerS, Time.deltaTime*3);   
     }
 }

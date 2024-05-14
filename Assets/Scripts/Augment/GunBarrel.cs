@@ -11,6 +11,7 @@ public class GunBarrel : Augment
 
     [SerializeField]
     private VisualEffect muzzleFlash;
+    public VisualEffect MuzzleFlash => muzzleFlash;
 
     private GunController gunController;
 

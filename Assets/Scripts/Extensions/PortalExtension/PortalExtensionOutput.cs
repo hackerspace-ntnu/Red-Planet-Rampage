@@ -7,7 +7,6 @@ public class PortalExtensionOutput : MonoBehaviour
     [SerializeField]
     private Transform output;
 
-    public Transform Output { get { return output; } }
-    // Start is called before the first frame update
+    public Transform Output => output;
 
 }
