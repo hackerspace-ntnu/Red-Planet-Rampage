@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class CameraDepthModeSetter : MonoBehaviour
 {
-    // Start is called before the first frame update
     void Start()
     {
         Camera camera = GetComponent<Camera>();
