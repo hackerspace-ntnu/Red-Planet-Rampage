@@ -205,6 +205,7 @@ public class MatchController : MonoBehaviour
     private IEnumerator WaitForClientsAndInitialize()
     {
         PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
+        // TODO This spins forever on clients, actually. Should be done differently.
         while (NetworkManager.singleton.numPlayers == 0 || NetworkManager.singleton.numPlayers != NetworkServer.connections.Count) yield return null;
         // Must skip a frame to ensure connection timing for last joined player is ok
         yield return null;

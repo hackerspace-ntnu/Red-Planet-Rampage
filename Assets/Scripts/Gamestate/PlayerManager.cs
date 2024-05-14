@@ -11,11 +11,6 @@ public class PlayerManager : NetworkBehaviour
     [SyncVar]
     public uint id;
 
-    // TODO this should ideally sit in its own component!
-    [SyncVar]
-    public Vector2 AimAngle;
-
-
     // Layers 12 through 15 are gun layers.
     protected static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
@@ -152,13 +147,27 @@ public class PlayerManager : NetworkBehaviour
         if (GunHolder && inputManager)
         {
             GunHolder.transform.forward = inputManager.transform.forward;
-            AimAngle = movement.AimAngle;
+            UpdateAimAngleCmd(movement.AimAngle.y);
         }
-        else if (isNetworked)
-        {
-            // Not client
-            GunHolder.transform.localRotation = Quaternion.AngleAxis(AimAngle.y * Mathf.Rad2Deg, Vector3.left);
-        }
+    }
+
+    // Hijinks for syncing aim from server to players
+    [Command]
+    private void UpdateAimAngleCmd(float yAngle)
+    {
+        UpdateAimAngleRpc(yAngle);
+    }
+
+    [ClientRpc]
+    private void UpdateAimAngleRpc(float yAngle)
+    {
+        // Avoid updating if this is a local player
+        if (inputManager)
+            return;
+        GunHolder.transform.localRotation = Quaternion.AngleAxis(yAngle * Mathf.Rad2Deg, Vector3.left);
+        // Same-ish location as GunHolder for the real gun
+        if (gunController)
+            gunController.transform.parent.localRotation = Quaternion.AngleAxis(yAngle * Mathf.Rad2Deg, Vector3.left);
     }
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)

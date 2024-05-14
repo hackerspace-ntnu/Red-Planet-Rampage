@@ -239,7 +239,7 @@ public class Peer2PeerTransport : NetworkManager
     private IEnumerator WaitAndInitializeFPSPlayer(InitializeFPSPlayerMessage message)
     {
         // Wait until players must've been spawned
-        //while (numPlayers == 0 || numPlayers != NetworkServer.connections.Count) yield return null;
+        // TODO find a better way to wait for that
         yield return null;
         yield return null;
 
