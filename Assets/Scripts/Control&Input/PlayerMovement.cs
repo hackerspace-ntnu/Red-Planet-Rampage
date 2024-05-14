@@ -127,6 +127,7 @@ public class PlayerMovement : MonoBehaviour
     private float startingFov;
 
     private Vector2 aimAngle = Vector2.zero;
+    public Vector2 AimAngle => aimAngle;
 
     public delegate void MovementEventBody(Rigidbody body);
     public MovementEventBody onMove;

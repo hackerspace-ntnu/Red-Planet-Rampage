@@ -10,8 +10,12 @@ public class PlayerManager : NetworkBehaviour
 {
     [SyncVar]
     public uint id;
-    
-    
+
+    // TODO this should ideally sit in its own component!
+    [SyncVar]
+    public Vector2 AimAngle;
+
+
     // Layers 12 through 15 are gun layers.
     protected static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
@@ -126,6 +130,8 @@ public class PlayerManager : NetworkBehaviour
     [SerializeField]
     private AudioGroup extraHitSounds;
 
+    private PlayerMovement movement;
+
     private void Start()
     {
         healthController = GetComponent<HealthController>();
@@ -135,14 +141,24 @@ public class PlayerManager : NetworkBehaviour
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
+        movement = GetComponent<PlayerMovement>();
         if (identity && hudController)
             identity.onChipChange += hudController.OnChipChange;
     }
 
     private void Update()
     {
+        // TODO Do aiming in a different component please
         if (GunHolder && inputManager)
+        {
             GunHolder.transform.forward = inputManager.transform.forward;
+            AimAngle = movement.AimAngle;
+        }
+        else if (isNetworked)
+        {
+            // Not client
+            GunHolder.transform.localRotation = Quaternion.AngleAxis(AimAngle.y * Mathf.Rad2Deg, Vector3.left);
+        }
     }
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
