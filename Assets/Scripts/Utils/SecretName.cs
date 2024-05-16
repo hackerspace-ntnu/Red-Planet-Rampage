@@ -19,6 +19,13 @@ namespace SecretName
             return playerManager.identity.GetGunName();
         }
 
+        public static string GetGunName(this PlayerIdentity playerIdentity, out bool isSecret)
+        {
+            string name = GunFactory.GetGunName(playerIdentity.Body, playerIdentity.Barrel, playerIdentity.Extension, out var secret);
+            isSecret = secret;
+            return name;
+        }
+
         public static string Capitalized(this string s)
         {
             return $"{s.Substring(0, 1).ToUpper()}{s.Substring(1).ToLower()}";

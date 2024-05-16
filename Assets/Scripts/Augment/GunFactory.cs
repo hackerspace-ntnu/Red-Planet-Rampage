@@ -126,6 +126,20 @@ public class GunFactory : MonoBehaviour
         return $"The {body.secretName.Capitalized()} {extension.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
     }
 
+    public static string GetGunName(Item body, Item barrel, Item extension, out bool isSecret)
+    {
+        OverrideName result = StaticInfo.Singleton.SecretNames
+                                        .FirstOrDefault(x => x.Body == body && x.Barrel == barrel && x.Extension == extension);
+        isSecret = result.Name is not null;
+        if (isSecret)
+            return result.Name;
+
+        if (extension == null)
+            return $"The {body.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
+
+        return $"The {body.secretName.Capitalized()} {extension.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
+    }
+
     public static bool TryGetGunAchievement(Item body, Item barrel, Item extension, out AchievementType achievement)
     {
         OverrideName result = StaticInfo.Singleton.SecretNames
