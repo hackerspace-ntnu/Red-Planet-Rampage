@@ -540,9 +540,27 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "CrouchToggle",
+                    "type": "Button",
+                    "id": "8d731947-226e-4543-a97c-a83b3391ea36",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Zoom",
                     "type": "Button",
                     "id": "03e4cf1a-97d6-4cd2-956e-0a3809664868",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ZoomToggle",
+                    "type": "Button",
+                    "id": "1b173d76-269b-47ac-971a-f7c2a2b9a9a0",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -716,7 +734,7 @@
                 {
                     "name": "",
                     "id": "14967268-3847-4e31-b556-017d17d7d911",
-                    "path": "<Gamepad>/leftTrigger",
+                    "path": "<Gamepad>/leftShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -760,18 +778,7 @@
                 {
                     "name": "",
                     "id": "934f0261-5d67-4c99-babd-a34f558f6b2c",
-                    "path": "<Gamepad>/rightStickPress",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "Zoom",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "8092a7ef-355c-48f6-b000-0d843fc6f278",
-                    "path": "<Gamepad>/buttonNorth",
+                    "path": "<Gamepad>/leftTrigger",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
@@ -798,6 +805,50 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "10d91971-d53d-46b9-a9d7-1cd214a97fa4",
+                    "path": "<Gamepad>/rightStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "ZoomToggle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "769f8717-a4f7-47cc-9ea3-716b5ce90378",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "ZoomToggle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5ac8de42-d1b6-4205-8c51-f43460047250",
+                    "path": "<Gamepad>/leftStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CrouchToggle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "057e28d0-2037-49e8-ade4-d644fc12679d",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "CrouchToggle",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

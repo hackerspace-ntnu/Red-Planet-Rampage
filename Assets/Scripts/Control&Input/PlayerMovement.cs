@@ -279,15 +279,10 @@ public class PlayerMovement : MonoBehaviour
             gunHolder.transform.localPosition = new Vector3(gunHolder.transform.localPosition.x, localGunHolderHeight, gunHolder.transform.localPosition.z);
         }
 
-        if (ctx.performed)
-        {
+        if (inputManager.CrouchActive)
             StartCrouching();
-        }
-
-        if (ctx.canceled)
-        {
+        else
             StopCrouching();
-        }
     }
 
     private void StartCrouching()
