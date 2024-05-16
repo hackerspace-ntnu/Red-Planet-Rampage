@@ -506,6 +506,7 @@ GameObject:
   - component: {fileID: 4211975233605593382}
   - component: {fileID: 8418915769774603709}
   - component: {fileID: 3316381399893442416}
+  - component: {fileID: 5078958741745354244}
   m_Layer: 5
   m_Name: SecretName
   m_TagString: Untagged
@@ -572,7 +573,7 @@ MonoBehaviour:
     serializedVersion: 2
     rgba: 4294967295
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
-  m_enableVertexGradient: 1
+  m_enableVertexGradient: 0
   m_colorMode: 0
   m_fontColorGradient:
     topLeft: {r: 1, g: 1, b: 1, a: 1}
@@ -584,7 +585,7 @@ MonoBehaviour:
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
-  m_overrideHtmlColors: 0
+  m_overrideHtmlColors: 1
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
@@ -630,6 +631,20 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &5078958741745354244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5328186668431144849}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf224422e4b57df4b861b374a0006e4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textMesh: {fileID: 3316381399893442416}
+  AnimateText: 0
 --- !u!1 &6006424913092988723
 GameObject:
   m_ObjectHideFlags: 0
@@ -1120,7 +1135,7 @@ MonoBehaviour:
   barrelSlot: {fileID: 2486123476282149344}
   extensionSlot: {fileID: 6440613788510747136}
   playerStatUI: {fileID: 5425617339122362748}
-  secretName: {fileID: 3316381399893442416}
+  secretName: {fileID: 5078958741745354244}
   readyIndicator: {fileID: 351594924326642278}
   switchAudio: {fileID: 8300000, guid: cacd836afb9e3f643837bd6598f137b1, type: 3}
   scrollAudio: {fileID: 8300000, guid: a5a4cf79a7503d34da12bd3969f9ddfe, type: 3}

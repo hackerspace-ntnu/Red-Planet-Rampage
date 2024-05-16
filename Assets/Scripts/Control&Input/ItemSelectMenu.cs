@@ -35,7 +35,7 @@ public class ItemSelectMenu : MonoBehaviour
     private PlayerStatUI playerStatUI;
 
     [SerializeField]
-    private TMP_Text secretName;
+    private SecretNameTextAnimator secretName;
 
     [SerializeField]
     private RectTransform readyIndicator;
@@ -244,7 +244,9 @@ public class ItemSelectMenu : MonoBehaviour
             barrelSlot.SelectedItem,
             extensionSlot.SelectedItem);
         playerStatUI.UpdateStats();
-        secretName.text = player.GetGunName();
+        secretName.textMesh.text = player.GetGunName(out bool isSecret);
+        bool isInteresting = isSecret && !secretName.textMesh.text.Equals("The Starter");
+        secretName.IsAnimated = isInteresting;
     }
 
     private void SelectPerformed(InputAction.CallbackContext ctx)
