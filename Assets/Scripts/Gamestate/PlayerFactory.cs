@@ -55,7 +55,7 @@ public class PlayerFactory : MonoBehaviour
         if (!overrideMatchManager)
             return;
 
-        playerInputManagerController.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+        playerInputManagerController.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
         InstantiatePlayersFPS();
     }
 
@@ -119,7 +119,7 @@ public class PlayerFactory : MonoBehaviour
 
         // Tell the network synchronization that the player prefab should be synced
         if (inputManager.TryGetComponent<NetworkTransformReliable>(out var networkTransform))
-        { 
+        {
             networkTransform.target = player.transform;
             var animator = inputManager.GetComponent<NetworkAnimator>();
             animator.animator = player.GetComponent<PlayerMovement>().Animator;

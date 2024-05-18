@@ -40,7 +40,7 @@ public class Round
     private readonly List<PlayerManager> players;
     public readonly ReadOnlyCollection<PlayerManager> Players;
 
-    private readonly List<PlayerManager> livingPlayers = new List<PlayerManager>();
+    private readonly List<PlayerManager> livingPlayers = new();
     public readonly ReadOnlyCollection<PlayerManager> LivingPlayers;
 
     public Round(IEnumerable<PlayerManager> roundPlayers)

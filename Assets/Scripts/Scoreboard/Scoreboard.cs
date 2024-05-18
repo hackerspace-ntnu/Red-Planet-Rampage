@@ -12,7 +12,7 @@ public class Scoreboard : MonoBehaviour
 
     private ScoreboardManager scoreboardManager;
 
-    private Player player;
+    private PlayerManager player;
 
     private AudioSource audioSource;
 
@@ -34,7 +34,7 @@ public class Scoreboard : MonoBehaviour
 
     [SerializeField]
     private GameObject progressPoster;
-    
+
     [SerializeField]
     private GameObject[] progressCrosses;
 
@@ -58,13 +58,13 @@ public class Scoreboard : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
     }
 
-    public void SetupPoster(Player player, string subtitle)
+    public void SetupPoster(PlayerManager player, string subtitle)
     {
-        wantedPoster.GetComponent<Image>().color = player.playerIdentity.color;
+        wantedPoster.GetComponent<Image>().color = player.identity.color;
         this.subtitle.text = subtitle;
         this.player = player;
-        progressPoster.GetComponent<Image>().color = player.playerIdentity.color;
-        progressDescription.text = player.playerIdentity.playerName;
+        progressPoster.GetComponent<Image>().color = player.identity.color;
+        progressDescription.text = player.identity.playerName;
 
         scoreboardManager.ShowNextCrime += NextStep;
         scoreboardManager.ShowVictoryProgress += ShowVictoryProgress;
@@ -107,7 +107,7 @@ public class Scoreboard : MonoBehaviour
             if (crime.chip) crime.chip.enabled = true;
         }
     }
-    
+
     private IEnumerator DelayDisplayCrimes(int delay)
     {
         yield return new WaitForSeconds(delay);
@@ -123,7 +123,7 @@ public class Scoreboard : MonoBehaviour
         wantedPoster.SetActive(false);
         progressPoster.SetActive(true);
         var delayTime = 0.5f;
-        for (int i = 0; i < MatchController.Singleton.PlayerWins(player.playerIdentity); i++)
+        for (int i = 0; i < MatchController.Singleton.PlayerWins(player.identity); i++)
         {
             progressCrosses[i].SetActive(true);
             progressCrosses[i].LeanScale(new Vector3(2f, 2f, 2f), 0.5f).setEasePunch();

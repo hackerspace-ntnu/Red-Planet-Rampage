@@ -39,7 +39,7 @@ public class PlayerIdentity : MonoBehaviour
     public ChipEvent onChipChange;
     public ItemEvent onInventoryChange;
 
-    void Start()
+    private void Start()
     {
         if (Bodies.Count == 0)
         {
@@ -54,7 +54,9 @@ public class PlayerIdentity : MonoBehaviour
             Extensions.Add(extension);
         }
 
-        bounty += 5;
+        // TODO check if this breaks anything
+        if (chips == 0)
+            chips = MatchController.Singleton.StartAmount;
     }
 
     public void UpdateChip(int amount)
@@ -100,7 +102,7 @@ public class PlayerIdentity : MonoBehaviour
         onInventoryChange?.Invoke(item);
     }
 
-    public void resetItems()
+    public void ResetItems()
     {
         Bodies = new List<Item>();
         Barrels = new List<Item>();
