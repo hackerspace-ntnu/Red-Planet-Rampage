@@ -343,9 +343,7 @@ public class Peer2PeerTransport : NetworkManager
         //TODO: Properly update MatchManager with async joined clients
         if (MatchController.Singleton)
         {
-            MatchController.Singleton.Players.Add(new Player(playerManager.identity, playerManager,
-                MatchController.Singleton.StartAmount));
-            MatchController.Singleton.PlayerById.Add(playerManager.id, playerManager);
+            MatchController.Singleton.RegisterPlayer(playerManager);
         }
     }
 

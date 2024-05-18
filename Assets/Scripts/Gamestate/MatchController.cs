@@ -9,23 +9,6 @@ using Mirror;
 
 #nullable enable
 
-/// <summary>
-/// Wrapper struct for tying reference to Player class with the in-game player.
-/// </summary>
-[Serializable]
-public struct Player
-{
-    public Player(PlayerIdentity playerIdentity, PlayerManager playerManager, int startAmount)
-    {
-        this.playerIdentity = playerIdentity;
-        this.playerManager = playerManager;
-    }
-    // Reference to player identity class
-    public PlayerIdentity playerIdentity;
-    // Reference to in-match player
-    public PlayerManager playerManager;
-}
-
 [RequireComponent(typeof(PlayerFactory))]
 public class MatchController : MonoBehaviour
 {
@@ -81,10 +64,10 @@ public class MatchController : MonoBehaviour
     private string currentMapName;
 
     public Dictionary<uint, PlayerManager> PlayerById = new();
-    private List<Player> players = new();
-    public List<Player> Players => players;
-    public IEnumerable<Player> AIPlayers => players.Where(p => p.playerManager is AIManager);
-    public IEnumerable<Player> HumanPlayers => players.Where(p => p.playerManager is not AIManager);
+    private List<PlayerManager> players = new();
+    public List<PlayerManager> Players => players;
+    public IEnumerable<PlayerManager> AIPlayers => players.Where(p => p is AIManager);
+    public IEnumerable<PlayerManager> HumanPlayers => players.Where(p => p is not AIManager);
 
     [SerializeField]
     private List<CollectableChip> collectableChips;
@@ -126,7 +109,7 @@ public class MatchController : MonoBehaviour
     {
         if (rounds.Count == 0)
         {
-            PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+            PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
         }
         playerFactory = FindObjectOfType<PlayerFactory>();
 
@@ -166,7 +149,7 @@ public class MatchController : MonoBehaviour
         var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
             Mathf.Max(4 - PlayerInputManagerController.Singleton.PlayerCount, 0) : 0;
         playerFactory.InstantiatePlayersFPS(aiPlayerCount)
-            .ForEach(player => players.Add(new Player(player.identity, player, startAmount)));
+            .ForEach(player => players.Add(player));
 
         UpdateAIPlayers();
 
@@ -174,28 +157,36 @@ public class MatchController : MonoBehaviour
 
         foreach (var player in players)
         {
-            PlayerById.Add(player.playerManager.id, player.playerManager);
+            PlayerById.Add(player.id, player);
         }
     }
 
     private void UpdateAIPlayers()
     {
-        var aiPLayers = players.Where(player => player.playerManager is AIManager)
-            .Select(player => player.playerManager)
+        var aiPLayers = players.Where(player => player is AIManager)
             .Cast<AIManager>()
             .ToList();
 
         aiPLayers.ForEach(ai =>
-                ai.TrackedPlayers = players.Select(player => player.playerManager)
+                ai.TrackedPlayers = players
                     .Where(player => player != ai).ToList());
     }
 
+    public void RegisterPlayer(PlayerManager player)
+    {
+        // TODO check if we've got all players, initialize match if so!
+        players.Add(player);
+        PlayerById.Add(player.id, player);
+    }
+
+    // TODO only do this after all players are initialized!
     private void InitializeRound()
     {
+        UpdateAIPlayers();
         MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
         onRoundStart?.Invoke();
         isAuction = false;
-        rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
+        rounds.Add(new Round(players.ToList()));
         roundTimer.StartTimer(roundLength);
         roundTimer.OnTimerUpdate += AdjustMusic;
         roundTimer.OnTimerUpdate += HUDTimerUpdate;
@@ -282,15 +273,15 @@ public class MatchController : MonoBehaviour
     private void AssignRewards()
     {
         var lastRound = rounds.Last();
-        foreach (Player player in players)
+        foreach (var player in players)
         {
             // Base reward and kill bonus
-            var reward = rewardBase + lastRound.KillCount(player.playerManager) * rewardKill;
+            var reward = rewardBase + lastRound.KillCount(player) * rewardKill;
             // Win bonus
-            if (lastRound.IsWinner(player.playerManager.identity))
+            if (lastRound.IsWinner(player.identity))
                 reward += rewardWin;
 
-            player.playerManager.identity.UpdateChip(reward);
+            player.identity.UpdateChip(reward);
         }
     }
 
@@ -364,7 +355,7 @@ public class MatchController : MonoBehaviour
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         rounds = new List<Round>();
-        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
         if (!SteamManager.Singleton.ChangeScene("Menu"))
             SceneManager.LoadSceneAsync("Menu");
     }
