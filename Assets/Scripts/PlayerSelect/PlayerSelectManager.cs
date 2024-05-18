@@ -56,8 +56,12 @@ public class PlayerSelectManager : MonoBehaviour
 
     public void UpdateLobby()
     {
-        for (int i = 0; i < SteamManager.Singleton.PlayerNames.Count; i++)
-            SetupPlayerSelectModels(SteamManager.Singleton.PlayerNames[i], playerInputManagerController.PlayerColors[i], i);
+        var i = 0;
+        foreach (var player in Peer2PeerTransport.PlayerDetails)
+        {
+            SetupPlayerSelectModels(player.name, player.color, i);
+            i++;
+        }
     }
 
     /// <summary>
@@ -137,7 +141,7 @@ public class PlayerSelectManager : MonoBehaviour
             {
                 randomTrigger = randomAnimator.GetParameter(Random.Range(2, randomAnimator.parameterCount)).name; // Choose a random trigger to set, excluding CardPeek
             }
-            else if(randomAnimatorNumber == 0)
+            else if (randomAnimatorNumber == 0)
             {
                 randomTrigger = excludeCardPeekReaction.RandomElement(); // Choose a random trigger to set, excluding CardPeekReaction
             }
@@ -145,7 +149,7 @@ public class PlayerSelectManager : MonoBehaviour
             {
                 randomTrigger = randomAnimator.GetParameter(Random.Range(0, randomAnimator.parameterCount)).name; // Choose a random trigger
             }
-            
+
 
             if ((randomTrigger == "CardPeek" || randomTrigger == "CardPeekReaction") && (playerInputManagerController.PlayerCount > 1) && (cardPeekCounter == 0))
             {
@@ -157,7 +161,7 @@ public class PlayerSelectManager : MonoBehaviour
             else if (randomTrigger == "CardPeek" || randomTrigger == "CardPeekReaction") // Choose new animation to play if cardpeek or cardpeekreaction is chosen a second time
             {
                 randomTrigger = randomAnimator.GetParameter(Random.Range(2, randomAnimator.parameterCount - 1)).name;
-                
+
                 cardPeekCounter = 0;
                 randomAnimator.SetTrigger(randomTrigger);
             }

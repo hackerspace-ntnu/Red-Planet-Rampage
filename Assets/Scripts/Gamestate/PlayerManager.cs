@@ -200,13 +200,13 @@ public class PlayerManager : NetworkBehaviour
 
     protected void TurnIntoRagdoll(DamageInfo info)
     {
-        GetComponent<Rigidbody>().GetAccumulatedForce();
         // Disable components
         GetComponent<PlayerMovement>().enabled = false;
         healthController.enabled = false;
         playerIK.enabled = false;
         // TODO display guns falling to the floor
-        gunController.gameObject.SetActive(false);
+        if (gunController)
+            gunController.gameObject.SetActive(false);
         GunHolder.gameObject.SetActive(false);
         // Disable all colliders and physics
         // Ragdollify

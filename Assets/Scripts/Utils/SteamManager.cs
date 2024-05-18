@@ -211,15 +211,6 @@ public class SteamManager : MonoBehaviour
             return;
 
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, transportProtocol.maxConnections);
-        // Disable local joining
-        PlayerInputManagerController.Singleton.RemoveJoinListener();
-        // TODO make it possible to have multiple local players in online match, then remove this
-        for (int i = 0; i < PlayerInputManagerController.Singleton.LocalPlayerInputs.Count; i++)
-        {
-            if (i == 0)
-                continue;
-            PlayerInputManagerController.Singleton.LocalPlayerInputs[i].gameObject.SetActive(false);
-        } 
     }
 
     public void LeaveLobby()

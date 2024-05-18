@@ -78,6 +78,7 @@ public class ScoreboardManager : MonoBehaviour
         // Give each scoreboard a random subtitle, while removing unused scoreboards. 
         for (int i = 0; i < scoreboards.Count; i++)
         {
+            Debug.Log($"Scoreboard {i} of {scoreboards.Count} players {players.Count}");
             if (i < players.Count)
             {
                 scoreboards[i].SetupPoster(players[i], wantedSubtitles.RandomElement());
@@ -87,7 +88,7 @@ public class ScoreboardManager : MonoBehaviour
                 Destroy(scoreboards[i].gameObject);
             }
         }
-        scoreboards.RemoveRange(players.Count, scoreboards.Count - players.Count);
+        scoreboards.RemoveRange(players.Count, Mathf.Max(0, scoreboards.Count - players.Count));
         matchController.onRoundEnd += SetPosterValues;
     }
 

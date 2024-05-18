@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Mirror;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,6 +10,7 @@ public struct PlayerDetails
 {
     public uint id;
     public ulong steamID;
+    public int localInputID;
     public PlayerType type;
 
     public string name;
@@ -21,12 +23,12 @@ public struct PlayerDetails
 
 public struct PlayerConnectedMessage : NetworkMessage
 {
-    public PlayerConnectedMessage(PlayerType type)
+    public PlayerConnectedMessage(int inputID)
     {
-        this.type = type;
+        this.inputID = inputID;
     }
 
-    public PlayerType type;
+    public int inputID;
 }
 
 public struct InitialPlayerDetailsMessage : NetworkMessage
@@ -65,23 +67,23 @@ public struct InitializeFPSPlayerMessage : NetworkMessage
 public enum PlayerType
 {
     Local,
+    AI,
     Remote
 }
 
 public class Peer2PeerTransport : NetworkManager
 {
+    private const int FPSPlayerPrefabIndex = 0;
+
     private PlayerFactory playerFactory;
     private static Transform[] spawnPoints;
     private static int playerIndex;
 
-    private SpawnHandlerDelegate onSpawnPlayer;
-    private UnSpawnDelegate onUnSpawnPlayer;
+    private static Dictionary<uint, PlayerDetails> players = new();
+    public static int NumPlayersInMatch => players.Count();
+    public static IEnumerable<PlayerDetails> PlayerDetails => players.Values;
 
-    private const int FPSPlayerPrefabIndex = 0;
-
-    private Dictionary<uint, PlayerDetails> players = new();
-
-    private uint myId; // TODO this is inflexible for multiple local players
+    private static List<uint> localPlayerIds = new();
 
     public delegate void LobbyPlayerEvent(PlayerDetails details);
     public LobbyPlayerEvent OnPlayerRecieved;
@@ -95,14 +97,9 @@ public class Peer2PeerTransport : NetworkManager
         players = new();
 
         // We don't receive a join message for the host, so it should add its own info.
-        var hostDetails = new PlayerDetails
-        {
-            id = 0,
-            type = PlayerType.Local,
-            name = SteamManager.Singleton.UserName,
-            color = PlayerInputManagerController.Singleton.PlayerColors[0],
-        };
-        players.Add(hostDetails.id, hostDetails);
+        PlayerInputManagerController.Singleton.JoinAllInputs();
+
+        playerIndex = 0;
     }
 
     #region Player joining 
@@ -114,29 +111,32 @@ public class Peer2PeerTransport : NetworkManager
         NetworkClient.RegisterHandler<InitialPlayerDetailsMessage>(OnReceivePlayerDetails);
         NetworkClient.RegisterHandler<InitializeFPSPlayerMessage>(InitializeFPSPlayer);
 
-        // TODO: A better check than this so we can have multiple local players again online
-        if (NetworkServer.connections.Count == 1)
-        {
-            NetworkClient.Send(new PlayerConnectedMessage(PlayerType.Local));
-        }
-        else
-        {
-            NetworkClient.Send(new PlayerConnectedMessage(PlayerType.Remote));
-        }
+        // Send message for the input that we assume is registered
+        // TODO doesn't work if players haven't pressed a key yet
+        PlayerInputManagerController.Singleton.JoinAllInputs();
+
+        playerIndex = 0;
     }
 
     private void OnSpawnPlayerInput(NetworkConnectionToClient connection, PlayerConnectedMessage message)
     {
+        // Avoid adding more than the four allowed players
+        if (PlayerInputManagerController.Singleton.NetworkClients.Count >= 4)
+            return;
         PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
-        var index = SteamManager.Singleton.PlayerNames.Count - 1;
-        var steamName = SteamManager.Singleton.PlayerNames[index];
-        var steamID = SteamManager.Singleton.PlayerIDs[index];
+        var steamIndex = SteamManager.Singleton.PlayerNames.Count - 1;
+        var steamName = SteamManager.Singleton.PlayerNames[steamIndex];
+        var steamID = SteamManager.Singleton.PlayerIDs[steamIndex];
 
         var player = Instantiate(playerPrefab);
         var playerInput = player.GetComponent<InputManager>();
         playerInput.PlayerCamera.enabled = false;
-        playerInput.enabled = message.type is PlayerType.Local;
-        NetworkServer.AddPlayerForConnection(connection, player);
+        playerInput.enabled = connection.connectionId == NetworkClient.connection.connectionId;
+        // Without this, the host doesn't function as a client
+        if (message.inputID == 0)
+            NetworkServer.AddPlayerForConnection(connection, player);
+        else
+            NetworkServer.Spawn(player, connection);
 
 
         // Send information about existing players to the new one
@@ -148,14 +148,16 @@ public class Peer2PeerTransport : NetworkManager
         // TODO consider just putting this stuff into the InitialPlayerDetailsMessage
         var details = new PlayerDetails
         {
-            id = (uint)index,
+            id = (uint)playerIndex,
+            localInputID = message.inputID,
             steamID = steamID,
-            type = message.type,
+            type = steamID == SteamManager.Singleton.SteamID.m_SteamID ? PlayerType.Local : PlayerType.Remote,
             name = steamName,
-            color = PlayerInputManagerController.Singleton.PlayerColors[index],
+            color = PlayerInputManagerController.Singleton.PlayerColors[playerIndex],
         };
         // Send information about this player to all
         NetworkServer.SendToAll(new InitialPlayerDetailsMessage(details));
+        playerIndex++;
     }
 
     private void OnReceivePlayerDetails(InitialPlayerDetailsMessage message)
@@ -164,8 +166,11 @@ public class Peer2PeerTransport : NetworkManager
         if (players.ContainsKey(details.id))
             return;
         details.type = SteamManager.Singleton.SteamID.m_SteamID == details.steamID ? PlayerType.Local : PlayerType.Remote;
-        if (details.type is PlayerType.Local) myId = details.id;
-        Debug.Log($"Received info for player {details.id}: name={details.name} type={details.type} color={details.color}");
+        if (details.type is not PlayerType.Remote && !localPlayerIds.Contains(details.id))
+        {
+            localPlayerIds.Add(details.id);
+        }
+        Debug.Log($"Received info for player {details.id}: name=<color={details.color.ToHexString()}>{details.name}</color> type={details.type}");
         players.Add(details.id, details);
         OnPlayerRecieved?.Invoke(details);
     }
@@ -203,31 +208,36 @@ public class Peer2PeerTransport : NetworkManager
         {
             Destroy(networkInput);
         }
-        NetworkClient.Send(new SpawnFPSPlayerMessage(myId));
-    }
-
-    public override void OnServerAddPlayer(NetworkConnectionToClient conn)
-    {
-        base.OnServerAddPlayer(conn);
-        Debug.Log("I HAVE THE POWAH");
+        foreach (var id in localPlayerIds)
+        {
+            NetworkClient.Send(new SpawnFPSPlayerMessage(id));
+        }
     }
 
     private void OnSpawnFPSPlayer(NetworkConnectionToClient connection, SpawnFPSPlayerMessage message)
     {
-        Debug.Log("Spawning player");
+        if (!players.ContainsKey(message.id))
+        {
+            Debug.LogError($"No such player: id={message.id}");
+            return;
+        }
         if (!playerFactory)
         {
             playerFactory = FindAnyObjectByType<PlayerFactory>();
             spawnPoints = playerFactory.GetRandomSpawnpoints();
             playerIndex = 0;
         }
+        Debug.Log($"Spawning player {message.id}");
 
         var spawnPoint = spawnPoints[playerIndex];
         playerIndex++;
 
         var player = Instantiate(spawnPrefabs[FPSPlayerPrefabIndex], spawnPoint.position, spawnPoint.rotation);
         player.GetComponent<PlayerManager>().id = message.id;
-        NetworkServer.AddPlayerForConnection(connection, player);
+        if (players[message.id].localInputID == 0)
+            NetworkServer.AddPlayerForConnection(connection, player);
+        else
+            NetworkServer.Spawn(player, connection);
         NetworkServer.SendToAll(new InitializeFPSPlayerMessage(message.id, spawnPoint.position, spawnPoint.rotation));
     }
 
@@ -240,6 +250,7 @@ public class Peer2PeerTransport : NetworkManager
     {
         // Wait until players must've been spawned
         // TODO find a better way to wait for that
+        // TODO that is, move to OnWhateverAuthority overrid on PlayerManager :)
         yield return null;
         yield return null;
 
@@ -272,7 +283,7 @@ public class Peer2PeerTransport : NetworkManager
         if (playerDetails.type is PlayerType.Local)
         {
             Debug.Log($"Spawning local player {playerDetails.id}");
-            var input = PlayerInputManagerController.Singleton.LocalPlayerInputs[0];
+            var input = PlayerInputManagerController.Singleton.LocalPlayerInputs[playerDetails.localInputID];
             // Make playerInput child of player it's attached to
             input.transform.parent = player.transform;
             // Set received playerInput (and most importantly its camera) at an offset from player's position

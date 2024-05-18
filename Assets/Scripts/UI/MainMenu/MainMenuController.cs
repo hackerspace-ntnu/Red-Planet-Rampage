@@ -44,7 +44,7 @@ public class MainMenuController : MonoBehaviour
     private CreditsMenu creditsMenu;
     [SerializeField]
     private GameObject mapSelectMenu;
-    [SerializeField] 
+    [SerializeField]
     private LevelSelectManager levelSelectManager;
     [SerializeField]
     private PlayerSelectManager playerSelectManager;
@@ -254,7 +254,6 @@ public class MainMenuController : MonoBehaviour
 
     /// <summary>
     /// Subscribes to onplayerjoined and is responsible for adapting menu to new player inputs.
-    /// Function needs to force the panels to have flex-like properties as Unity doesn't support dynamic "stretch" of multiple elements inside a parent container.
     /// </summary>
     /// <param name="inputManager"></param>
     private void AddPlayer(InputManager inputManager)
