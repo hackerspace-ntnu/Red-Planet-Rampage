@@ -189,11 +189,11 @@ public class SteamManager : MonoBehaviour
     private void OnLobbyEnter(LobbyEnter_t callback)
     {
         // All users
-        PlayerInputManagerController.Singleton.RemoveJoinListener();
         UpdateLobbyData(callback.m_ulSteamIDLobby);
         if (NetworkServer.active)
             return;
         // Only clients from here!
+        PlayerInputManagerController.Singleton.RemoveJoinListener();
         SceneManager.LoadScene("ClientLobby");
         transportProtocol.networkAddress = SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey);
         transportProtocol.StartClient();

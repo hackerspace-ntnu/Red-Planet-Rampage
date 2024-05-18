@@ -40,9 +40,9 @@ public struct InitialPlayerDetailsMessage : NetworkMessage
     public PlayerDetails details;
 }
 
-public struct SpawnFPSPlayerMessage : NetworkMessage
+public struct SpawnPlayerMessage : NetworkMessage
 {
-    public SpawnFPSPlayerMessage(uint id)
+    public SpawnPlayerMessage(uint id)
     {
         this.id = id;
     }
@@ -50,9 +50,9 @@ public struct SpawnFPSPlayerMessage : NetworkMessage
     public uint id;
 }
 
-public struct InitializeFPSPlayerMessage : NetworkMessage
+public struct InitializePlayerMessage : NetworkMessage
 {
-    public InitializeFPSPlayerMessage(uint id, Vector3 position, Quaternion rotation)
+    public InitializePlayerMessage(uint id, Vector3 position, Quaternion rotation)
     {
         this.id = id;
         this.position = position;
@@ -74,6 +74,7 @@ public enum PlayerType
 public class Peer2PeerTransport : NetworkManager
 {
     private const int FPSPlayerPrefabIndex = 0;
+    private const int BiddingPlayerPrefabIndex = 1;
 
     private PlayerFactory playerFactory;
     private static Transform[] spawnPoints;
@@ -96,9 +97,6 @@ public class Peer2PeerTransport : NetworkManager
         // Reinitialize player lookups
         players = new();
 
-        // We don't receive a join message for the host, so it should add its own info.
-        PlayerInputManagerController.Singleton.JoinAllInputs();
-
         playerIndex = 0;
     }
 
@@ -109,7 +107,7 @@ public class Peer2PeerTransport : NetworkManager
         base.OnClientConnect();
 
         NetworkClient.RegisterHandler<InitialPlayerDetailsMessage>(OnReceivePlayerDetails);
-        NetworkClient.RegisterHandler<InitializeFPSPlayerMessage>(InitializeFPSPlayer);
+        NetworkClient.RegisterHandler<InitializePlayerMessage>(InitializeFPSPlayer);
 
         // Send message for the input that we assume is registered
         // TODO doesn't work if players haven't pressed a key yet
@@ -187,14 +185,13 @@ public class Peer2PeerTransport : NetworkManager
         switch (newSceneName)
         {
             case "Bidding":
-                // TODO: Handle bidding properly
-                NetworkServer.RegisterHandler<SpawnFPSPlayerMessage>(OnSpawnFPSPlayer);
+                NetworkServer.ReplaceHandler<SpawnPlayerMessage>(OnSpawnBiddingPlayer);
                 break;
             case "Menu":
                 NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
                 break;
             default:
-                NetworkServer.RegisterHandler<SpawnFPSPlayerMessage>(OnSpawnFPSPlayer);
+                NetworkServer.ReplaceHandler<SpawnPlayerMessage>(OnSpawnFPSPlayer);
                 break;
         }
     }
@@ -202,19 +199,37 @@ public class Peer2PeerTransport : NetworkManager
     public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
     {
         base.OnClientChangeScene(newSceneName, sceneOperation, customHandling);
-        // Remove the other playerinputs???
-        foreach (var networkInput in FindObjectsOfType<PlayerInput>().Select(pi => pi.GetComponent<NetworkIdentity>())
-                     .Where(id => id != null))
+        switch (newSceneName)
         {
-            Destroy(networkInput);
+            case "Bidding":
+                NetworkClient.ReplaceHandler<InitializePlayerMessage>(InitializeBiddingPlayer);
+                break;
+            case "Menu":
+                break;
+            default:
+                NetworkClient.ReplaceHandler<InitializePlayerMessage>(InitializeFPSPlayer);
+                break;
+        }
+        // Remove the other playerinputs???
+        if (!MatchController.Singleton || MatchController.Singleton.RoundCount <= 1)
+        {
+            foreach (var networkInput in FindObjectsOfType<PlayerInput>().Select(pi => pi.GetComponent<NetworkIdentity>())
+                        .Where(id => id != null))
+            {
+                Destroy(networkInput);
+            }
         }
         foreach (var id in localPlayerIds)
         {
-            NetworkClient.Send(new SpawnFPSPlayerMessage(id));
+            NetworkClient.Send(new SpawnPlayerMessage(id));
         }
     }
 
-    private void OnSpawnFPSPlayer(NetworkConnectionToClient connection, SpawnFPSPlayerMessage message)
+    #endregion
+
+    #region Spawn FPS players
+
+    private void OnSpawnFPSPlayer(NetworkConnectionToClient connection, SpawnPlayerMessage message)
     {
         if (!players.ContainsKey(message.id))
         {
@@ -224,6 +239,8 @@ public class Peer2PeerTransport : NetworkManager
         if (!playerFactory)
         {
             playerFactory = FindAnyObjectByType<PlayerFactory>();
+            if (!playerFactory) // TODO shouldn't happen, seems to occur when you go back to menu after end of match
+                return;
             spawnPoints = playerFactory.GetRandomSpawnpoints();
             playerIndex = 0;
         }
@@ -238,15 +255,15 @@ public class Peer2PeerTransport : NetworkManager
             NetworkServer.AddPlayerForConnection(connection, player);
         else
             NetworkServer.Spawn(player, connection);
-        NetworkServer.SendToAll(new InitializeFPSPlayerMessage(message.id, spawnPoint.position, spawnPoint.rotation));
+        NetworkServer.SendToAll(new InitializePlayerMessage(message.id, spawnPoint.position, spawnPoint.rotation));
     }
 
-    private void InitializeFPSPlayer(InitializeFPSPlayerMessage message)
+    private void InitializeFPSPlayer(InitializePlayerMessage message)
     {
         StartCoroutine(WaitAndInitializeFPSPlayer(message));
     }
 
-    private IEnumerator WaitAndInitializeFPSPlayer(InitializeFPSPlayerMessage message)
+    private IEnumerator WaitAndInitializeFPSPlayer(InitializePlayerMessage message)
     {
         // Wait until players must've been spawned
         // TODO find a better way to wait for that
@@ -296,7 +313,6 @@ public class Peer2PeerTransport : NetworkManager
 
             playerManager.HUDController.gameObject.SetActive(true);
             var movement = player.GetComponent<PlayerMovement>();
-            movement.enabled = true;
 
             // The identity sits on the input in this case, so edit that
             var identity = input.GetComponent<PlayerIdentity>();
@@ -348,10 +364,126 @@ public class Peer2PeerTransport : NetworkManager
 
 
         // This ensures that behaviours on the gun have identities.
-        // SHOULD be safe to initialize them here as this is before we spawn 'em.
+        // SHOULD be safe to initialize them here as this is at roughly the same point on all clients
         player.GetComponent<NetworkIdentity>().InitializeNetworkBehaviours();
 
-        //TODO: Properly update MatchManager with async joined clients
+        if (MatchController.Singleton)
+        {
+            MatchController.Singleton.RegisterPlayer(playerManager);
+        }
+    }
+
+    #endregion
+
+    #region Bidding spawning
+
+    private void OnSpawnBiddingPlayer(NetworkConnectionToClient connection, SpawnPlayerMessage message)
+    {
+        if (!players.ContainsKey(message.id))
+        {
+            Debug.LogError($"No such player: id={message.id}");
+            return;
+        }
+        if (!playerFactory)
+        {
+            playerFactory = FindAnyObjectByType<PlayerFactory>();
+            spawnPoints = playerFactory.GetRandomSpawnpoints();
+            playerIndex = 0;
+        }
+        Debug.Log($"Spawning player {message.id}");
+
+        var spawnPoint = spawnPoints[playerIndex];
+        playerIndex++;
+
+        var player = Instantiate(spawnPrefabs[BiddingPlayerPrefabIndex], spawnPoint.position, spawnPoint.rotation);
+        player.GetComponent<PlayerManager>().id = message.id;
+        if (players[message.id].localInputID == 0)
+            NetworkServer.AddPlayerForConnection(connection, player);
+        else
+            NetworkServer.Spawn(player, connection);
+        NetworkServer.SendToAll(new InitializePlayerMessage(message.id, spawnPoint.position, spawnPoint.rotation));
+    }
+
+    private void InitializeBiddingPlayer(InitializePlayerMessage message)
+    {
+        StartCoroutine(WaitAndInitializeBiddingPlayer(message));
+    }
+
+    private IEnumerator WaitAndInitializeBiddingPlayer(InitializePlayerMessage message)
+    {
+        // Wait until players must've been spawned
+        // TODO find a better way to wait for that
+        // TODO that is, move to OnWhateverAuthority overrid on PlayerManager :)
+        yield return null;
+        yield return null;
+
+        var player = FindObjectsOfType<PlayerManager>()
+            .FirstOrDefault(p => p.id == message.id);
+
+        if (!player)
+        {
+            Debug.LogError($"Could not find player object for id {message.id}");
+            yield break;
+        }
+
+        if (!players.TryGetValue(message.id, out var playerDetails))
+        {
+            Debug.LogError($"Could not find player details for id {message.id}");
+            yield break;
+        }
+
+        var playerManager = player.GetComponent<PlayerManager>();
+
+        playerManager.identity.playerName = playerDetails.name;
+        playerManager.identity.color = playerDetails.color;
+
+        player.transform.position = message.position;
+        player.transform.rotation = message.rotation;
+
+        var cameraOffset = player.transform.Find("CameraOffset");
+        playerManager.GetComponent<AmmoBoxCollector>().enabled = true;
+
+        if (playerDetails.type is PlayerType.Local)
+        {
+            Debug.Log($"Spawning local player {playerDetails.id}");
+            var input = PlayerInputManagerController.Singleton.LocalPlayerInputs[playerDetails.localInputID];
+
+            // Make playerInput child of player it's attached to
+            input.transform.parent = player.transform;
+            // Set received playerInput (and most importantly its camera) at an offset from player's position
+            input.transform.localPosition = cameraOffset.localPosition;
+            input.transform.rotation = player.transform.rotation;
+
+            // Disable Camera
+            input.PlayerCamera.enabled = false;
+
+            // Update player's movement script with which playerInput it should attach listeners to
+            playerManager.SetPlayerInput(input);
+            player.GetComponent<HealthController>().enabled = false;
+
+            // The identity sits on the input in this case, so edit that
+            var identity = input.GetComponent<PlayerIdentity>();
+            identity.playerName = playerDetails.name;
+            identity.color = playerDetails.color;
+            // TODO set remaining properties like chips and so on :)
+        }
+        else
+        {
+            // TODO: Set up networkPlayers akin to AI players (no control)
+            Debug.Log($"Spawning network player {playerDetails.id}");
+
+            // TODO set based on playerdetails (and edit playerdetails)
+            playerManager.identity.SetLoadout(StaticInfo.Singleton.StartingBody, StaticInfo.Singleton.StartingBarrel,
+                StaticInfo.Singleton.StartingExtension);
+
+            // Disable physics
+            playerManager.GetComponent<Rigidbody>().isKinematic = true;
+        }
+
+        // This ensures that behaviours on the gun have identities.
+        // SHOULD be safe to initialize them here as this is at roughly the same point on all clients
+        player.GetComponent<NetworkIdentity>().InitializeNetworkBehaviours();
+
         if (MatchController.Singleton)
         {
             MatchController.Singleton.RegisterPlayer(playerManager);

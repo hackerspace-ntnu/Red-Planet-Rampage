@@ -231,6 +231,7 @@ public class PlayerManager : NetworkBehaviour
         inputManager = playerInput;
         identity = inputManager.GetComponent<PlayerIdentity>();
         var playerMovement = GetComponent<PlayerMovement>();
+        playerMovement.enabled = true;
         playerMovement.SetPlayerInput(inputManager);
         playerMovement.onMove += UpdateHudOnMove;
         // Subscribe relevant input events
@@ -245,6 +246,11 @@ public class PlayerManager : NetworkBehaviour
             var canvas = hudController.GetComponent<Canvas>();
             canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
             canvas.planeDistance = 0.11f;
+        }
+
+        if (playerIK.TryGetComponent<BiddingPlayer>(out var biddingPlayer))
+        {
+            biddingPlayer.SetPlayerInput();
         }
 
         // Set player color

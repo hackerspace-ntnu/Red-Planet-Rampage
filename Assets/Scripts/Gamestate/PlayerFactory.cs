@@ -70,6 +70,8 @@ public class PlayerFactory : MonoBehaviour
     public void InstantiatePlayersBidding(int aiPLayerCount = 0)
     {
         playerInputManagerController.ChangeInputMaps("Bidding");
+        if (NetworkManager.singleton.isNetworkActive)
+            return;
         InstantiateInputsOnSpawnpoints(InstantiateBiddingPlayer, InstantiateBiddingAI, aiPLayerCount);
     }
     public void InstantiatePlayerSelectItems()
@@ -182,7 +184,6 @@ public class PlayerFactory : MonoBehaviour
 
     private AIManager InstantiateFPSAI(int index, Transform spawnPoint)
     {
-
         PlayerIdentity identity = null;
 
         if (existingAiIdentities.Count == 0)

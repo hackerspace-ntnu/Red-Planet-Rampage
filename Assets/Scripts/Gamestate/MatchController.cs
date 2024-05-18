@@ -131,6 +131,9 @@ public class MatchController : MonoBehaviour
         if (collectableChips.Count == 0)
             collectableChips = FindObjectsOfType<CollectableChip>().ToList();
 
+        players = new();
+        PlayerById = new();
+
         if (NetworkManager.singleton.isNetworkActive)
         {
             StartCoroutine(WaitForClientsAndInitialize());
@@ -145,6 +148,7 @@ public class MatchController : MonoBehaviour
     private void InitializePlayers()
     {
         // Setup of playerInputs
+        // TODO replace this so that we have ai players :)
         var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
             Mathf.Max(4 - PlayerInputManagerController.Singleton.PlayerCount, 0) : 0;
         playerFactory.InstantiatePlayersFPS(aiPlayerCount)
@@ -257,7 +261,8 @@ public class MatchController : MonoBehaviour
         yield return new WaitForSeconds(biddingEndDelay);
         // This needs to be called after inputs are set at start the first time this is needed.
         PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
-        SceneManager.LoadScene(currentMapName);
+        if (!SteamManager.Singleton.ChangeScene(currentMapName))
+            SceneManager.LoadScene(currentMapName);
         StartNextRound();
     }
 

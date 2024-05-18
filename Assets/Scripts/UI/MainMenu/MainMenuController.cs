@@ -258,7 +258,6 @@ public class MainMenuController : MonoBehaviour
     /// <param name="inputManager"></param>
     private void AddPlayer(InputManager inputManager)
     {
-        inputManager.PlayerCamera.enabled = false;
         playerInputs.Add(inputManager);
 
         bool canPlay = playerInputs.Count > 1;
@@ -277,6 +276,7 @@ public class MainMenuController : MonoBehaviour
         creditsMenu.SetPlayerInput(inputManager);
         levelSelectManager.SetPlayerInput(inputManager);
 
+        // TODO Remove this once you're sure that UpdateLobby in PlayerSelectManager is called properly (on local joining as well)
         for (int i = 0; i < playerInputs.Count; i++)
         {
             PlayerIdentity playerIdentity = playerInputs[i].GetComponent<PlayerIdentity>();
