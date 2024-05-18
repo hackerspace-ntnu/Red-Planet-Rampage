@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine;
-using System;
 using CollectionExtensions;
 using Mirror;
 
@@ -180,6 +179,7 @@ public class MatchController : MonoBehaviour
     }
 
     // TODO only do this after all players are initialized!
+    // TODO give players start amount worth of chips (on match start only)
     private void InitializeRound()
     {
         UpdateAIPlayers();
@@ -196,12 +196,10 @@ public class MatchController : MonoBehaviour
     private IEnumerator WaitForClientsAndInitialize()
     {
         PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
-        // TODO This spins forever on clients, actually. Should be done differently.
-        while (NetworkManager.singleton.numPlayers == 0 || NetworkManager.singleton.numPlayers != NetworkServer.connections.Count) yield return null;
-        // Must skip a frame to ensure connection timing for last joined player is ok
-        yield return null;
+        // TODO add a timeout thingy for when one player doesn't join in time
+        // Spin while waiting for players to 
+        while (NetworkManager.singleton.numPlayers == 0 || players.Count != Peer2PeerTransport.NumPlayersInMatch) yield return null;
 
-        // TODO initialize players somehow?
         InitializeRound();
     }
 

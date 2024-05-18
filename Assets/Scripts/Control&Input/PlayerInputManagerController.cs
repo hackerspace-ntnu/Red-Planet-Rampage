@@ -1,5 +1,6 @@
 using Mirror;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,8 +9,10 @@ public class PlayerInputManagerController : MonoBehaviour
     public static PlayerInputManagerController Singleton { get; private set; }
 
     public List<InputManager> LocalPlayerInputs = new List<InputManager>();
+    public Dictionary<uint, InputManager> InputByPlayer = new();
+
     public List<NetworkConnectionToClient> NetworkClients = new List<NetworkConnectionToClient>();
-    public int PlayerCount => NetworkClients.Count > 0 ? NetworkClients.Count : LocalPlayerInputs.Count;
+    public int PlayerCount => NetworkClient.isConnected ? Peer2PeerTransport.NumPlayersInMatch : LocalPlayerInputs.Count;
 
     public PlayerInputManager PlayerInputManager;
 
@@ -66,12 +69,25 @@ public class PlayerInputManagerController : MonoBehaviour
 
     private void OnPlayerJoined(PlayerInput playerInput)
     {
+        // TODO refactor this for online (should not source info from here)
         var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
         playerIdentity.color = playerColors[LocalPlayerInputs.Count];
         playerIdentity.playerName = playerNames[LocalPlayerInputs.Count];
         InputManager inputManager = playerInput.GetComponent<InputManager>();
+        // TODO fix camera hijinks
+        // playerInput.camera.enabled = false;
         LocalPlayerInputs.Add(inputManager);
         onPlayerInputJoined(inputManager);
+        if (NetworkClient.isConnected)
+            NetworkClient.Send(new PlayerConnectedMessage(LocalPlayerInputs.Count - 1));
+    }
+
+    public void JoinAllInputs()
+    {
+        for (int i = 0; i < LocalPlayerInputs.Count; i++)
+        {
+            NetworkClient.Send(new PlayerConnectedMessage(i));
+        }
     }
 
     /// <summary>
