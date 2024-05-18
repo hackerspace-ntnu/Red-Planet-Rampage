@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Mirror;
 using TMPro;
 using UnityEngine;
 
@@ -181,7 +182,6 @@ public class AuctionDriver : MonoBehaviour
         PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = true;
         playerFactory.InstantiatePlayerSelectItems();
         GetComponent<ItemSelectManager>().StartTrackingMenus();
-
     }
 
     public void ChangeScene()

@@ -10,12 +10,13 @@ public class ItemSelectManager : MonoBehaviour
     private List<ItemSelectMenu> itemSelectMenus;
 
     private Coroutine waitRoutine;
-    
+
     [SerializeField]
     private GameObject loadingScreen;
 
     private int delayDuration = 2;
 
+    // TODO network version of this thing
     public void StartTrackingMenus()
     {
         itemSelectMenus = new List<ItemSelectMenu>();
@@ -32,7 +33,8 @@ public class ItemSelectManager : MonoBehaviour
         StartCoroutine(LoadAndChangeScene());
     }
 
-    private IEnumerator LoadAndChangeScene(){
+    private IEnumerator LoadAndChangeScene()
+    {
 
         loadingScreen.SetActive(true);
         yield return new WaitForSeconds(delayDuration);

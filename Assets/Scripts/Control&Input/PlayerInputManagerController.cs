@@ -47,19 +47,19 @@ public class PlayerInputManagerController : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
-        this.PlayerInputManager = PlayerInputManager.instance;
+        PlayerInputManager = PlayerInputManager.instance;
         DontDestroyOnLoad(gameObject);
     }
 
     public void RemoveJoinListener()
     {
-        this.PlayerInputManager.onPlayerJoined -= OnPlayerJoined;
+        PlayerInputManager.onPlayerJoined -= OnPlayerJoined;
     }
 
     public void AddJoinListener()
     {
-        this.PlayerInputManager.EnableJoining();
-        this.PlayerInputManager.onPlayerJoined += OnPlayerJoined;
+        PlayerInputManager.EnableJoining();
+        PlayerInputManager.onPlayerJoined += OnPlayerJoined;
     }
 
     public void RemoveListeners()
@@ -73,12 +73,13 @@ public class PlayerInputManagerController : MonoBehaviour
         var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
         playerIdentity.color = playerColors[LocalPlayerInputs.Count];
         playerIdentity.playerName = playerNames[LocalPlayerInputs.Count];
-        InputManager inputManager = playerInput.GetComponent<InputManager>();
-        // TODO fix camera hijinks
-        // playerInput.camera.enabled = false;
+
+        var inputManager = playerInput.GetComponent<InputManager>();
+        inputManager.PlayerCamera.enabled = false;
         LocalPlayerInputs.Add(inputManager);
-        onPlayerInputJoined(inputManager);
-        if (NetworkClient.isConnected)
+        onPlayerInputJoined?.Invoke(inputManager);
+
+        if (NetworkManager.singleton.isNetworkActive)
             NetworkClient.Send(new PlayerConnectedMessage(LocalPlayerInputs.Count - 1));
     }
 
