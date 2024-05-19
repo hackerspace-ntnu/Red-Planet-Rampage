@@ -5,6 +5,7 @@ using Mirror;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public struct PlayerDetails
 {
@@ -96,7 +97,6 @@ public class Peer2PeerTransport : NetworkManager
 
         // Reinitialize player lookups
         players = new();
-
         playerIndex = 0;
     }
 
@@ -113,7 +113,19 @@ public class Peer2PeerTransport : NetworkManager
         // TODO doesn't work if players haven't pressed a key yet
         PlayerInputManagerController.Singleton.JoinAllInputs();
 
+        players = new();
         playerIndex = 0;
+    }
+
+    public void JoinLobby(string address = "127.0.0.1")
+    {
+        if (NetworkServer.active)
+            return;
+        // Only clients from here!
+        PlayerInputManagerController.Singleton.RemoveJoinListener();
+        SceneManager.LoadScene("ClientLobby");
+        networkAddress = address;
+        StartClient();
     }
 
     private void OnSpawnPlayerInput(NetworkConnectionToClient connection, PlayerConnectedMessage message)
@@ -122,9 +134,17 @@ public class Peer2PeerTransport : NetworkManager
         if (PlayerInputManagerController.Singleton.NetworkClients.Count >= 4)
             return;
         PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
-        var steamIndex = SteamManager.Singleton.PlayerNames.Count - 1;
-        var steamName = SteamManager.Singleton.PlayerNames[steamIndex];
-        var steamID = SteamManager.Singleton.PlayerIDs[steamIndex];
+
+        var playerType = PlayerType.Local;
+        var playerName = "Player";
+        ulong steamID = 0;
+        if (SteamManager.IsSteamActive && SteamManager.Singleton.IsHosting)
+        {
+            var steamIndex = SteamManager.Singleton.PlayerNames.Count - 1;
+            playerName = SteamManager.Singleton.PlayerNames[steamIndex];
+            steamID = SteamManager.Singleton.PlayerIDs[steamIndex];
+            playerType = steamID == SteamManager.Singleton.SteamID.m_SteamID ? PlayerType.Local : PlayerType.Remote;
+        }
 
         var player = Instantiate(playerPrefab);
         var playerInput = player.GetComponent<InputManager>();
@@ -149,8 +169,8 @@ public class Peer2PeerTransport : NetworkManager
             id = (uint)playerIndex,
             localInputID = message.inputID,
             steamID = steamID,
-            type = steamID == SteamManager.Singleton.SteamID.m_SteamID ? PlayerType.Local : PlayerType.Remote,
-            name = steamName,
+            type = playerType,
+            name = playerName,
             color = PlayerInputManagerController.Singleton.PlayerColors[playerIndex],
         };
         // Send information about this player to all
@@ -163,7 +183,7 @@ public class Peer2PeerTransport : NetworkManager
         var details = message.details;
         if (players.ContainsKey(details.id))
             return;
-        details.type = SteamManager.Singleton.SteamID.m_SteamID == details.steamID ? PlayerType.Local : PlayerType.Remote;
+        details.type = details.steamID == 0 || SteamManager.Singleton.SteamID.m_SteamID == details.steamID ? PlayerType.Local : PlayerType.Remote;
         if (details.type is not PlayerType.Remote && !localPlayerIds.Contains(details.id))
         {
             localPlayerIds.Add(details.id);
@@ -288,7 +308,11 @@ public class Peer2PeerTransport : NetworkManager
 
         var playerManager = player.GetComponent<PlayerManager>();
 
-        playerManager.identity.playerName = playerDetails.name;
+        var playerName = playerDetails.name;
+        if (players.Values.Where(p => p.steamID == playerDetails.steamID).Count() > 1)
+            playerName = $"{playerName} {playerDetails.localInputID + 1}";
+
+        playerManager.identity.playerName = playerName;
         playerManager.identity.color = playerDetails.color;
 
         player.transform.position = message.position;
@@ -316,7 +340,7 @@ public class Peer2PeerTransport : NetworkManager
 
             // The identity sits on the input in this case, so edit that
             var identity = input.GetComponent<PlayerIdentity>();
-            identity.playerName = playerDetails.name;
+            identity.playerName = playerName;
             identity.color = playerDetails.color;
 
             // Update player's movement script with which playerInput it should attach listeners to
@@ -434,7 +458,11 @@ public class Peer2PeerTransport : NetworkManager
 
         var playerManager = player.GetComponent<PlayerManager>();
 
-        playerManager.identity.playerName = playerDetails.name;
+        var playerName = playerDetails.name;
+        if (players.Values.Where(p => p.steamID == playerDetails.steamID).Count() > 1)
+            playerName = $"{playerName} {playerDetails.localInputID + 1}";
+
+        playerManager.identity.playerName = playerName;
         playerManager.identity.color = playerDetails.color;
 
         player.transform.position = message.position;
@@ -463,7 +491,7 @@ public class Peer2PeerTransport : NetworkManager
 
             // The identity sits on the input in this case, so edit that
             var identity = input.GetComponent<PlayerIdentity>();
-            identity.playerName = playerDetails.name;
+            identity.playerName = playerName;
             identity.color = playerDetails.color;
             // TODO set remaining properties like chips and so on :)
         }

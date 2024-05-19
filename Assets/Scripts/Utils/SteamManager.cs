@@ -193,10 +193,7 @@ public class SteamManager : MonoBehaviour
         if (NetworkServer.active)
             return;
         // Only clients from here!
-        PlayerInputManagerController.Singleton.RemoveJoinListener();
-        SceneManager.LoadScene("ClientLobby");
-        transportProtocol.networkAddress = SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey);
-        transportProtocol.StartClient();
+        transportProtocol.JoinLobby(SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey));
     }
 
     private void OnLobbyUpdate(LobbyChatUpdate_t callback)
