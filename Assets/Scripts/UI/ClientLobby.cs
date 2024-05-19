@@ -26,6 +26,7 @@ public class ClientLobby : MonoBehaviour
 
     private void AddPlayer(PlayerDetails details)
     {
+        Debug.Log(details.name);
         playerSelect.SetupPlayerSelectModels(details.name, details.color, playerCount);
         playerCount++;
     }
