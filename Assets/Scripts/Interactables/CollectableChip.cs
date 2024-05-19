@@ -26,7 +26,7 @@ public class CollectableChip : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.gameObject.TryGetComponent<PlayerManager>(out PlayerManager player))
+        if (!other.gameObject.TryGetComponent<PlayerManager>(out var player))
             return;
         player.identity.UpdateChip(1);
         soundEffect.Play(audioSource);

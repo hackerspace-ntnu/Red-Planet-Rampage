@@ -20,6 +20,10 @@ public class PlayerInputManagerController : MonoBehaviour
     public Color[] PlayerColors => playerColors;
 
     [SerializeField]
+    private Color[] aiColors;
+    public Color[] AIColors => aiColors;
+
+    [SerializeField]
     private string[] playerNames;
 
     public delegate void JoinEvent(InputManager inputManager);

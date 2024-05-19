@@ -77,6 +77,11 @@ public class GunController : NetworkBehaviour
 
     private void Start()
     {
+        Initialize();
+    }
+
+    public void Initialize()
+    {
         var barrel = GetComponentInChildren<GunBarrel>();
         if (!barrel)
             return;
@@ -109,6 +114,9 @@ public class GunController : NetworkBehaviour
             MatchController.Singleton.onRoundEnd -= CancelZoom;
     }
 
+    private bool ShouldFire() => !isFiring && fireRateController.shouldFire(triggerPressed, triggerHeld);
+
+    [Client]
     private void FixedUpdate()
     {
         if (fireRateController == null)
@@ -116,7 +124,7 @@ public class GunController : NetworkBehaviour
             // No fireratecontroller exists
             return;
         }
-        if (!isFiring && fireRateController.shouldFire(triggerPressed, triggerHeld))
+        if (ShouldFire())
         {
             FireGun();
         }
@@ -145,7 +153,7 @@ public class GunController : NetworkBehaviour
     }
 
     private void CancelZoom()
-    {   
+    {
 
         if (gameObject)
             gameObject.LeanMoveLocalX(localGunXOffset, 0.2f).setEaseInOutCubic();
@@ -154,25 +162,37 @@ public class GunController : NetworkBehaviour
     [Command]
     private void CmdFire(Quaternion rotation)
     {
-        Debug.Log("FIRE COMMAND CALLED");
+        // TODO Only go forth with firing if timing is right!
+        // (requires rewriting some stuff in FireRateController to not mutate unless the check is real)
         RpcFire(rotation);
     }
 
     [ClientRpc]
     private void RpcFire(Quaternion rotation)
     {
-        Debug.Log("FIRE RPC CALLED");
         onFireStart?.Invoke(stats);
         projectile.projectileOutput = outputs[0];
         projectile.projectileRotation = rotation;
         ActuallyFire();
     }
 
+    [Command]
+    private void CmdFireWithNoAmmo()
+    {
+        RpcFireWithNoAmmo();
+    }
+
+    [ClientRpc]
+    private void RpcFireWithNoAmmo()
+    {
+        onFireNoAmmo?.Invoke(stats);
+    }
+
     private void FireGun()
     {
         if (stats.Ammo <= 0)
         {
-            onFireNoAmmo?.Invoke(stats);
+            CmdFireWithNoAmmo();
             return;
         }
 
@@ -180,14 +200,7 @@ public class GunController : NetworkBehaviour
         {
             onFireStart?.Invoke(stats);
             AimAtTarget();
-            if (isNetworked)
-            {
-                CmdFire(projectile.projectileRotation);
-            }
-            else
-            {
-                ActuallyFire();
-            }
+            CmdFire(projectile.projectileRotation);
         }
         catch (System.Exception e)
         {
@@ -250,6 +263,7 @@ public class GunController : NetworkBehaviour
     private void FireEnd()
     {
         stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.MagazineSize);
+        Debug.Log($"After firing we're at {stats.Ammo} ammo");
         isFiring = false;
         onFireEnd?.Invoke(stats);
     }
