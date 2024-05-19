@@ -1,10 +1,8 @@
 using CollectionExtensions;
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using TMPro;
-using Unity.Collections;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -14,7 +12,7 @@ using UnityEngine.Video;
 
 public class MainMenuController : MonoBehaviour
 {
-    [ReadOnly, SerializeField]
+    [Unity.Collections.ReadOnly, SerializeField]
     private GameObject currentMenu;
     [SerializeField]
     private RectTransform characterView;
@@ -302,7 +300,7 @@ public class MainMenuController : MonoBehaviour
 
     public void StartGameButton(Selectable target)
     {
-        bool canPlay = (playerInputManagerController.MatchHasAI || PlayerInputManagerController.Singleton.PlayerCount > 1);
+        bool canPlay = playerInputManagerController.MatchHasAI || PlayerInputManagerController.Singleton.PlayerCount > 1;
         if (canPlay)
         {
             SwitchToMenu(mapSelectMenu);
@@ -331,7 +329,13 @@ public class MainMenuController : MonoBehaviour
 
     // Currently invoked when entering characterselect menu
     // TODO: Make dedicated hosting UI instead.
-    public void HostLobby()
+    public void HostLocalLobby()
+    {
+        NetworkManager.singleton.StartHost();
+        playerSelectManager.UpdateLobby();
+    }
+
+    public void HostSteamLobby()
     {
         if (!SteamManager.IsSteamActive)
             return;
@@ -341,7 +345,10 @@ public class MainMenuController : MonoBehaviour
 
     public void LeaveLobby()
     {
-        SteamManager.Singleton.LeaveLobby();
+        if (SteamManager.Singleton.IsHosting)
+            SteamManager.Singleton.LeaveLobby();
+        else
+            NetworkManager.singleton.StopHost();
     }
 
     public void Quit()

@@ -137,8 +137,8 @@ public class PlayerManager : NetworkBehaviour
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
         movement = GetComponent<PlayerMovement>();
-        if (identity && hudController)
-            identity.onChipChange += hudController.OnChipChange;
+
+        // TODO call other stuff that sets up player object!
     }
 
     private void Update()
@@ -246,6 +246,7 @@ public class PlayerManager : NetworkBehaviour
             var canvas = hudController.GetComponent<Canvas>();
             canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
             canvas.planeDistance = 0.11f;
+            identity.onChipChange += hudController.OnChipChange;
         }
 
         if (playerIK.TryGetComponent<BiddingPlayer>(out var biddingPlayer))
