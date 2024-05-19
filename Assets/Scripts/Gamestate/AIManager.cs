@@ -12,7 +12,17 @@ public class AIManager : PlayerManager
     private NavMeshAgent agent;
     public Transform DestinationTarget;
     public Transform ShootingTarget;
-    public List<PlayerManager> TrackedPlayers;
+
+    private List<PlayerManager> trackedPlayers = new();
+    public List<PlayerManager> TrackedPlayers
+    {
+        get => trackedPlayers;
+        set
+        {
+            trackedPlayers = value;
+            TrackedPlayers.ForEach(player => player.onDeath += RemovePlayer);
+        }
+    }
     private const float autoAwareRadius = 25f;
     private const float ignoreAwareRadius = 1000f;
     [SerializeField]
@@ -57,7 +67,6 @@ public class AIManager : PlayerManager
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
         StartCoroutine(LookForTargets());
-        TrackedPlayers.ForEach(player => player.onDeath += RemovePlayer);
     }
 
     private void OnDestroy()
@@ -101,6 +110,7 @@ public class AIManager : PlayerManager
             hasDisabledExtension ? identity.Extensions.Where(item => !IsDisabledItem(item)).RandomElement() : identity?.Extension,
             this, offset);
         gunController = gun.GetComponent<GunController>();
+        gunController.Initialize();
         gunController.onFireStart += UpdateAimTarget;
         gunController.onFire += UpdateAimTarget;
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
@@ -240,9 +250,9 @@ public class AIManager : PlayerManager
         {
             aiMovement.enabled = true;
         }
-        
+
     }
- 
+
 
     private void AnimateJump()
     {

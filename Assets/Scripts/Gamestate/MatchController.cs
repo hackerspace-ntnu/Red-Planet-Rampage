@@ -199,9 +199,9 @@ public class MatchController : MonoBehaviour
 
     private IEnumerator WaitForClientsAndInitialize()
     {
-        PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
         // TODO add a timeout thingy for when one player doesn't join in time
-        // Spin while waiting for players to 
+        // TODO keep loading screen open while this happens
+        // Spin while waiting for players to spawn
         while (NetworkManager.singleton.numPlayers == 0 || players.Count != Peer2PeerTransport.NumPlayersInMatch) yield return null;
 
         InitializeRound();
@@ -222,7 +222,6 @@ public class MatchController : MonoBehaviour
         loadingScreen.SetActive(true);
         yield return new WaitForSeconds(loadingDuration);
 
-        PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.Bidding);
         onBiddingStart?.Invoke();
         if (!SteamManager.Singleton.ChangeScene("Bidding"))
@@ -259,8 +258,6 @@ public class MatchController : MonoBehaviour
     public IEnumerator WaitAndStartNextRound()
     {
         yield return new WaitForSeconds(biddingEndDelay);
-        // This needs to be called after inputs are set at start the first time this is needed.
-        PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
         if (!SteamManager.Singleton.ChangeScene(currentMapName))
             SceneManager.LoadScene(currentMapName);
         StartNextRound();
@@ -349,8 +346,6 @@ public class MatchController : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
-        // Update playerInputs / identities in preperation for Menu scene
-        PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
         // Remove AI identities
         FindObjectsOfType<PlayerIdentity>()
             .Where(identity => identity.IsAI)

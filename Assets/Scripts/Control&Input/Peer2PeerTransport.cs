@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Mirror;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -43,12 +44,14 @@ public struct InitialPlayerDetailsMessage : NetworkMessage
 
 public struct SpawnPlayerMessage : NetworkMessage
 {
-    public SpawnPlayerMessage(uint id)
+    public SpawnPlayerMessage(uint id, PlayerType type)
     {
         this.id = id;
+        this.type = type;
     }
 
     public uint id;
+    public PlayerType type;
 }
 
 public struct InitializePlayerMessage : NetworkMessage
@@ -76,6 +79,8 @@ public class Peer2PeerTransport : NetworkManager
 {
     private const int FPSPlayerPrefabIndex = 0;
     private const int BiddingPlayerPrefabIndex = 1;
+    private const int AIFPSPlayerPrefabIndex = 2;
+    private const int AIBiddingPlayerPrefabIndex = 3;
 
     private PlayerFactory playerFactory;
     private static Transform[] spawnPoints;
@@ -131,6 +136,7 @@ public class Peer2PeerTransport : NetworkManager
     private void OnSpawnPlayerInput(NetworkConnectionToClient connection, PlayerConnectedMessage message)
     {
         // Avoid adding more than the four allowed players
+        // TODO prevent this in some other more sustainable way :)))))
         if (PlayerInputManagerController.Singleton.NetworkClients.Count >= 4)
             return;
         PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
@@ -188,19 +194,35 @@ public class Peer2PeerTransport : NetworkManager
         {
             localPlayerIds.Add(details.id);
         }
-        Debug.Log($"Received info for player {details.id}: name=<color={details.color.ToHexString()}>{details.name}</color> type={details.type}");
+        Debug.Log($"Received info for player {details.id}: name=<color=#{details.color.ToHexString()}>{details.name}</color> type={details.type}");
         players.Add(details.id, details);
         OnPlayerRecieved?.Invoke(details);
     }
 
     #endregion
 
-    #region Spawn in match
+    #region Scene changes
 
     public override void OnServerChangeScene(string newSceneName)
     {
         base.OnServerChangeScene(newSceneName);
         playerIndex = 0;
+        var needsExtraAiPlayers = PlayerInputManagerController.Singleton.MatchHasAI && !MatchController.Singleton;
+        if (needsExtraAiPlayers)
+        {
+            for (var i = players.Count; i < 4; i++)
+            {
+                players.Add((uint)i, new PlayerDetails
+                {
+                    id = (uint)i,
+                    localInputID = i,
+                    steamID = 0,
+                    name = "HCU",
+                    type = PlayerType.AI,
+                    color = PlayerInputManagerController.Singleton.AIColors[i - players.Count + 1],
+                });
+            }
+        }
 
         switch (newSceneName)
         {
@@ -214,23 +236,33 @@ public class Peer2PeerTransport : NetworkManager
                 NetworkServer.ReplaceHandler<SpawnPlayerMessage>(OnSpawnFPSPlayer);
                 break;
         }
+
+        foreach (var p in players.Values.Where(p => p.type == PlayerType.AI))
+        {
+            NetworkClient.Send(new SpawnPlayerMessage(p.id, PlayerType.AI));
+        }
     }
 
     public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
     {
-        base.OnClientChangeScene(newSceneName, sceneOperation, customHandling);
         switch (newSceneName)
         {
             case "Bidding":
                 NetworkClient.ReplaceHandler<InitializePlayerMessage>(InitializeBiddingPlayer);
+                PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
                 break;
             case "Menu":
+                PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
                 break;
             default:
                 NetworkClient.ReplaceHandler<InitializePlayerMessage>(InitializeFPSPlayer);
+                PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
                 break;
         }
-        // Remove the other playerinputs???
+
+        base.OnClientChangeScene(newSceneName, sceneOperation, customHandling);
+
+        // Remove existing network inputs since they're in DontDestroyOnLoad
         if (!MatchController.Singleton || MatchController.Singleton.RoundCount <= 1)
         {
             foreach (var networkInput in FindObjectsOfType<PlayerInput>().Select(pi => pi.GetComponent<NetworkIdentity>())
@@ -241,7 +273,7 @@ public class Peer2PeerTransport : NetworkManager
         }
         foreach (var id in localPlayerIds)
         {
-            NetworkClient.Send(new SpawnPlayerMessage(id));
+            NetworkClient.Send(new SpawnPlayerMessage(id, PlayerType.Local));
         }
     }
 
@@ -249,9 +281,10 @@ public class Peer2PeerTransport : NetworkManager
 
     #region Spawn FPS players
 
-    private void OnSpawnFPSPlayer(NetworkConnectionToClient connection, SpawnPlayerMessage message)
+
+    private void SpawnPlayer(NetworkConnectionToClient connection, SpawnPlayerMessage message, int prefabIndexOffset = 0)
     {
-        if (!players.ContainsKey(message.id))
+        if (!players.TryGetValue(message.id, out var playerDetails))
         {
             Debug.LogError($"No such player: id={message.id}");
             return;
@@ -269,13 +302,20 @@ public class Peer2PeerTransport : NetworkManager
         var spawnPoint = spawnPoints[playerIndex];
         playerIndex++;
 
-        var player = Instantiate(spawnPrefabs[FPSPlayerPrefabIndex], spawnPoint.position, spawnPoint.rotation);
+        var prefabIndex = playerDetails.type is PlayerType.AI && NetworkServer.active ? AIFPSPlayerPrefabIndex : FPSPlayerPrefabIndex;
+        var prefab = spawnPrefabs[prefabIndex + prefabIndexOffset];
+        var player = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
         player.GetComponent<PlayerManager>().id = message.id;
         if (players[message.id].localInputID == 0)
             NetworkServer.AddPlayerForConnection(connection, player);
         else
             NetworkServer.Spawn(player, connection);
         NetworkServer.SendToAll(new InitializePlayerMessage(message.id, spawnPoint.position, spawnPoint.rotation));
+    }
+
+    private void OnSpawnFPSPlayer(NetworkConnectionToClient connection, SpawnPlayerMessage message)
+    {
+        SpawnPlayer(connection, message, 0);
     }
 
     private void InitializeFPSPlayer(InitializePlayerMessage message)
@@ -357,6 +397,16 @@ public class Peer2PeerTransport : NetworkManager
                     playerManager.identity.Extension, out var achievement))
                 SteamManager.Singleton.UnlockAchievement(achievement);
         }
+        else if (playerDetails.type is PlayerType.AI && NetworkServer.active)
+        {
+            AIManager manager = player.GetComponent<AIManager>();
+            manager.SetLayer(3);
+            // TODO same as for the else clause
+            playerManager.identity.SetLoadout(StaticInfo.Singleton.StartingBody, StaticInfo.Singleton.StartingBarrel,
+                StaticInfo.Singleton.StartingExtension);
+            manager.SetIdentity(playerManager.identity);
+            manager.GetComponent<AIMovement>().SetInitialRotation(message.rotation.eulerAngles.y * Mathf.Deg2Rad);
+        }
         else
         {
             // TODO: Set up networkPlayers akin to AI players (no control)
@@ -403,29 +453,7 @@ public class Peer2PeerTransport : NetworkManager
 
     private void OnSpawnBiddingPlayer(NetworkConnectionToClient connection, SpawnPlayerMessage message)
     {
-        if (!players.ContainsKey(message.id))
-        {
-            Debug.LogError($"No such player: id={message.id}");
-            return;
-        }
-        if (!playerFactory)
-        {
-            playerFactory = FindAnyObjectByType<PlayerFactory>();
-            spawnPoints = playerFactory.GetRandomSpawnpoints();
-            playerIndex = 0;
-        }
-        Debug.Log($"Spawning player {message.id}");
-
-        var spawnPoint = spawnPoints[playerIndex];
-        playerIndex++;
-
-        var player = Instantiate(spawnPrefabs[BiddingPlayerPrefabIndex], spawnPoint.position, spawnPoint.rotation);
-        player.GetComponent<PlayerManager>().id = message.id;
-        if (players[message.id].localInputID == 0)
-            NetworkServer.AddPlayerForConnection(connection, player);
-        else
-            NetworkServer.Spawn(player, connection);
-        NetworkServer.SendToAll(new InitializePlayerMessage(message.id, spawnPoint.position, spawnPoint.rotation));
+        SpawnPlayer(connection, message, 1);
     }
 
     private void InitializeBiddingPlayer(InitializePlayerMessage message)
@@ -494,6 +522,13 @@ public class Peer2PeerTransport : NetworkManager
             identity.playerName = playerName;
             identity.color = playerDetails.color;
             // TODO set remaining properties like chips and so on :)
+        }
+        else if (playerDetails.type is PlayerType.AI && NetworkServer.active)
+        {
+
+            AIManager manager = player.GetComponent<AIManager>();
+            manager.SetLayer(3);
+            manager.SetIdentity(manager.identity);
         }
         else
         {

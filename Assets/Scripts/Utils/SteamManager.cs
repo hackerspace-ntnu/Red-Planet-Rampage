@@ -281,7 +281,8 @@ public class SteamManager : MonoBehaviour
 
     public bool ChangeScene(string sceneName)
     {
-        if (!isSteamInitialized || !transportProtocol.isNetworkActive)
+        // TODO avoid binding this to steam
+        if (!transportProtocol.isNetworkActive)
             return false;
         transportProtocol.ServerChangeScene(sceneName);
         return true;

@@ -78,7 +78,6 @@ public class ScoreboardManager : MonoBehaviour
         // Give each scoreboard a random subtitle, while removing unused scoreboards. 
         for (int i = 0; i < scoreboards.Count; i++)
         {
-            Debug.Log($"Scoreboard {i} of {scoreboards.Count} players {players.Count}");
             if (i < players.Count)
             {
                 scoreboards[i].SetupPoster(players[i], wantedSubtitles.RandomElement());
