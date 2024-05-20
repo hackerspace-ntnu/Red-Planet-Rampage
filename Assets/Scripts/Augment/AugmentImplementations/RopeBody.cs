@@ -67,7 +67,7 @@ public class RopeBody : GunBody
         playerBody.AddForce(-(playerBody.position - rope.CurrentAnchor).normalized * pullForce, ForceMode.Acceleration);
         if (rope.RopeLength > ropeLength + 4f || (movement.StateIsAir && rope.RopeLength > ropeLength + 1f))
             RemoveRope();
-            
+
     }
 
     private void RemoveRope()
@@ -136,13 +136,15 @@ public class RopeBody : GunBody
 
     private void Update()
     {
-        var cutOffIndex = Mathf.FloorToInt((oldLength / ropeLength) * 11);
+        var cutOffIndex = Mathf.FloorToInt(oldLength / ropeLength * 11);
         for (int i = 0; i < coils.Length; i++)
             coils[i].SetActive(i > cutOffIndex);
     }
 
     private void OnDestroy()
     {
+        if (!plugAnchor)
+            return;
         plugAnchor.Health.onDeath -= RemoveRope;
         Destroy(plugAnchor);
     }

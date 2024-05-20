@@ -88,6 +88,7 @@ public class StaticInfo : MonoBehaviour
         barrelAuction.SetItems(barrels);
         extensionAuction.SetItems(extensions);
         ItemsById = new ReadOnlyDictionary<string, Item>(new Dictionary<string, Item>(bodies.Union(barrels)
-            .Union(extensions).Select(item => new KeyValuePair<string, Item>(item.id, item))));
+            .Union(extensions).Union(new Item[] { startingBody, startingBarrel })
+            .Select(item => new KeyValuePair<string, Item>(item.id, item))));
     }
 }

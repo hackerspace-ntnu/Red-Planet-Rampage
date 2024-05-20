@@ -177,12 +177,10 @@ public class MatchController : MonoBehaviour
 
     public void RegisterPlayer(PlayerManager player)
     {
-        // TODO check if we've got all players, initialize match if so!
         players.Add(player);
         PlayerById.Add(player.id, player);
     }
 
-    // TODO only do this after all players are initialized!
     // TODO give players start amount worth of chips (on match start only)
     private void InitializeRound()
     {

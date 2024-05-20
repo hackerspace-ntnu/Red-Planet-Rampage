@@ -18,6 +18,10 @@ public struct PlayerDetails
     public string name;
     public Color color;
 
+    public int chips;
+    public string[] bodies;
+    public string[] barrels;
+    public string[] extensions;
     public string body;
     public string barrel;
     public string extension;
@@ -40,6 +44,30 @@ public struct InitialPlayerDetailsMessage : NetworkMessage
         this.details = details;
     }
     public PlayerDetails details;
+}
+
+public struct UpdatedPlayerDetailsMessage : NetworkMessage
+{
+    public UpdatedPlayerDetailsMessage(PlayerDetails details)
+    {
+        this.details = details;
+    }
+    public PlayerDetails details;
+}
+
+public struct UpdateLoadoutMessage : NetworkMessage
+{
+    public UpdateLoadoutMessage(uint id, string body, string barrel, string extension)
+    {
+        this.id = id;
+        this.body = body;
+        this.barrel = barrel;
+        this.extension = extension;
+    }
+    public uint id;
+    public string body;
+    public string barrel;
+    public string extension;
 }
 
 public struct SpawnPlayerMessage : NetworkMessage
@@ -78,9 +106,8 @@ public enum PlayerType
 public class Peer2PeerTransport : NetworkManager
 {
     private const int FPSPlayerPrefabIndex = 0;
-    private const int BiddingPlayerPrefabIndex = 1;
+    private const int BiddingPlayerPrefabIndexOffset = 1;
     private const int AIFPSPlayerPrefabIndex = 2;
-    private const int AIBiddingPlayerPrefabIndex = 3;
 
     private PlayerFactory playerFactory;
     private static Transform[] spawnPoints;
@@ -99,6 +126,7 @@ public class Peer2PeerTransport : NetworkManager
     {
         base.OnStartServer();
         NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
+        NetworkServer.RegisterHandler<UpdateLoadoutMessage>(OnReceiveUpdateLoadout);
 
         // Reinitialize player lookups
         players = new();
@@ -113,6 +141,7 @@ public class Peer2PeerTransport : NetworkManager
 
         NetworkClient.RegisterHandler<InitialPlayerDetailsMessage>(OnReceivePlayerDetails);
         NetworkClient.RegisterHandler<InitializePlayerMessage>(InitializeFPSPlayer);
+        NetworkClient.RegisterHandler<UpdatedPlayerDetailsMessage>(OnReceiveUpdatedPlayerDetails);
 
         // Send message for the input that we assume is registered
         // TODO doesn't work if players haven't pressed a key yet
@@ -189,40 +218,92 @@ public class Peer2PeerTransport : NetworkManager
         var details = message.details;
         if (players.ContainsKey(details.id))
             return;
-        details.type = details.steamID == 0 || SteamManager.Singleton.SteamID.m_SteamID == details.steamID ? PlayerType.Local : PlayerType.Remote;
-        if (details.type is not PlayerType.Remote && !localPlayerIds.Contains(details.id))
+        details.type =
+            details.type is PlayerType.AI
+                ? PlayerType.AI
+                : details.steamID == 0 || SteamManager.Singleton.SteamID.m_SteamID == details.steamID
+                    ? PlayerType.Local
+                    : PlayerType.Remote;
+        if (details.type is PlayerType.Local && !localPlayerIds.Contains(details.id))
         {
             localPlayerIds.Add(details.id);
         }
+        // TODO move this bit!
+        details.body = StaticInfo.Singleton.StartingBody.id;
+        details.barrel = StaticInfo.Singleton.StartingBarrel.id;
+        details.extension = StaticInfo.Singleton.StartingExtension ? StaticInfo.Singleton.StartingExtension.id : null;
+        details.bodies = new string[] { details.body };
+        details.barrels = new string[] { details.barrel };
+        details.extensions = details.extension != null ? new string[] { details.extension } : new string[] { };
         Debug.Log($"Received info for player {details.id}: name=<color=#{details.color.ToHexString()}>{details.name}</color> type={details.type}");
         players.Add(details.id, details);
         OnPlayerRecieved?.Invoke(details);
+    }
+
+    private void OnReceiveUpdatedPlayerDetails(UpdatedPlayerDetailsMessage message)
+    {
+        var details = message.details;
+        if (!players.ContainsKey(details.id))
+            return;
+        // Use the player type that we've already figured out
+        details.type = players[details.id].type;
+        Debug.Log($"Received updated info for player {details.id}: chips={details.chips}, body={details.body}, barrel={details.barrel}, extension={details.extension}");
+        players[details.id] = details;
     }
 
     #endregion
 
     #region Scene changes
 
+    private void AddAiPlayers()
+    {
+        for (var i = players.Count; i < 4; i++)
+        {
+            var details = new PlayerDetails
+            {
+                id = (uint)i,
+                localInputID = i,
+                steamID = 0,
+                name = "HCU",
+                type = PlayerType.AI,
+                color = PlayerInputManagerController.Singleton.AIColors[i - players.Count + 1],
+            };
+            NetworkServer.SendToAll(new InitialPlayerDetailsMessage(details));
+        }
+    }
+
+    private void UpdatePlayerDetails()
+    {
+        Debug.Log($"Found {FindObjectsByType<PlayerIdentity>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).Count()} identitites!");
+        foreach (var identity in FindObjectsByType<PlayerIdentity>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+        {
+            if (identity.Body == null)
+                continue;
+
+            if (!players.TryGetValue(identity.id, out var playerDetails))
+            {
+                Debug.LogError($"Invalid player to update: id={identity.id}");
+                continue;
+            }
+
+            playerDetails.chips = identity.chips;
+            playerDetails.bodies = identity.Bodies.Select(item => item.id).ToArray();
+            playerDetails.barrels = identity.Barrels.Select(item => item.id).ToArray();
+            playerDetails.extensions = identity.Extensions.Select(item => item.id).ToArray();
+            players[identity.id] = playerDetails;
+            NetworkServer.SendToAll(new UpdatedPlayerDetailsMessage(playerDetails));
+        }
+    }
+
     public override void OnServerChangeScene(string newSceneName)
     {
-        base.OnServerChangeScene(newSceneName);
-        playerIndex = 0;
         var needsExtraAiPlayers = PlayerInputManagerController.Singleton.MatchHasAI && !MatchController.Singleton;
         if (needsExtraAiPlayers)
         {
-            for (var i = players.Count; i < 4; i++)
-            {
-                players.Add((uint)i, new PlayerDetails
-                {
-                    id = (uint)i,
-                    localInputID = i,
-                    steamID = 0,
-                    name = "HCU",
-                    type = PlayerType.AI,
-                    color = PlayerInputManagerController.Singleton.AIColors[i - players.Count + 1],
-                });
-            }
+            AddAiPlayers();
         }
+
+        UpdatePlayerDetails();
 
         switch (newSceneName)
         {
@@ -237,14 +318,47 @@ public class Peer2PeerTransport : NetworkManager
                 break;
         }
 
-        foreach (var p in players.Values.Where(p => p.type == PlayerType.AI))
+        base.OnServerChangeScene(newSceneName);
+    }
+
+    private void UpdateLoadout()
+    {
+        Debug.Log($"Found {FindObjectsByType<PlayerIdentity>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).Count()} identitites!");
+        foreach (var identity in FindObjectsByType<PlayerIdentity>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
         {
-            NetworkClient.Send(new SpawnPlayerMessage(p.id, PlayerType.AI));
+            if (identity.Body == null)
+                continue;
+
+            if (!players.TryGetValue(identity.id, out var playerDetails))
+            {
+                Debug.LogError($"Invalid player to update: id={identity.id}");
+                continue;
+            }
+
+            // Only update local players!
+            if (playerDetails.type is PlayerType.Remote)
+                continue;
+
+            NetworkClient.Send(new UpdateLoadoutMessage(identity.id, identity.Body.id, identity.Barrel.id, identity.Extension ? identity.Extension.id : null));
         }
+    }
+
+    private void OnReceiveUpdateLoadout(NetworkConnectionToClient connection, UpdateLoadoutMessage message)
+    {
+        if (!players.TryGetValue(message.id, out var playerDetails))
+            return;
+        // TODO verify that body, barrel, extension is in the available items for the player!
+        playerDetails.body = message.body;
+        playerDetails.barrel = message.barrel;
+        playerDetails.extension = message.extension;
+        Debug.Log($"Received updated loadout for player {message.id}: body={message.body}, barrel={message.barrel}, extension={message.extension}");
+        players[playerDetails.id] = playerDetails;
+        NetworkServer.SendToAll(new UpdatedPlayerDetailsMessage(playerDetails));
     }
 
     public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
     {
+        UpdateLoadout();
         switch (newSceneName)
         {
             case "Bidding":
@@ -275,6 +389,10 @@ public class Peer2PeerTransport : NetworkManager
         {
             NetworkClient.Send(new SpawnPlayerMessage(id, PlayerType.Local));
         }
+        foreach (var p in players.Values.Where(p => p.type == PlayerType.AI))
+        {
+            NetworkClient.Send(new SpawnPlayerMessage(p.id, PlayerType.AI));
+        }
     }
 
     #endregion
@@ -295,18 +413,16 @@ public class Peer2PeerTransport : NetworkManager
             if (!playerFactory) // TODO shouldn't happen, seems to occur when you go back to menu after end of match
                 return;
             spawnPoints = playerFactory.GetRandomSpawnpoints();
-            playerIndex = 0;
         }
         Debug.Log($"Spawning player {message.id}");
 
-        var spawnPoint = spawnPoints[playerIndex];
-        playerIndex++;
+        var spawnPoint = spawnPoints[message.id];
 
         var prefabIndex = playerDetails.type is PlayerType.AI && NetworkServer.active ? AIFPSPlayerPrefabIndex : FPSPlayerPrefabIndex;
         var prefab = spawnPrefabs[prefabIndex + prefabIndexOffset];
         var player = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
         player.GetComponent<PlayerManager>().id = message.id;
-        if (players[message.id].localInputID == 0)
+        if (playerDetails.type is not PlayerType.AI && playerDetails.localInputID == 0)
             NetworkServer.AddPlayerForConnection(connection, player);
         else
             NetworkServer.Spawn(player, connection);
@@ -321,6 +437,22 @@ public class Peer2PeerTransport : NetworkManager
     private void InitializeFPSPlayer(InitializePlayerMessage message)
     {
         StartCoroutine(WaitAndInitializeFPSPlayer(message));
+    }
+
+    private void UpdateIdentityFromDetails(PlayerIdentity identity, PlayerDetails playerDetails)
+    {
+        identity.id = playerDetails.id;
+        var playerName = playerDetails.name;
+        if (players.Values.Where(p => p.steamID == playerDetails.steamID).Count() > 1)
+            playerName = $"{playerName} {playerDetails.localInputID + 1}";
+
+        identity.playerName = playerName;
+        identity.color = playerDetails.color;
+
+        // TODO avoid update invocation?
+        identity.chips = playerDetails.chips;
+        identity.SetItems(playerDetails.bodies, playerDetails.barrels, playerDetails.extensions);
+        identity.SetLoadout(playerDetails.body, playerDetails.barrel, playerDetails.extension);
     }
 
     private IEnumerator WaitAndInitializeFPSPlayer(InitializePlayerMessage message)
@@ -348,13 +480,6 @@ public class Peer2PeerTransport : NetworkManager
 
         var playerManager = player.GetComponent<PlayerManager>();
 
-        var playerName = playerDetails.name;
-        if (players.Values.Where(p => p.steamID == playerDetails.steamID).Count() > 1)
-            playerName = $"{playerName} {playerDetails.localInputID + 1}";
-
-        playerManager.identity.playerName = playerName;
-        playerManager.identity.color = playerDetails.color;
-
         player.transform.position = message.position;
         player.transform.rotation = message.rotation;
 
@@ -380,8 +505,7 @@ public class Peer2PeerTransport : NetworkManager
 
             // The identity sits on the input in this case, so edit that
             var identity = input.GetComponent<PlayerIdentity>();
-            identity.playerName = playerName;
-            identity.color = playerDetails.color;
+            UpdateIdentityFromDetails(identity, playerDetails);
 
             // Update player's movement script with which playerInput it should attach listeners to
             playerManager.SetPlayerInput(input);
@@ -399,22 +523,18 @@ public class Peer2PeerTransport : NetworkManager
         }
         else if (playerDetails.type is PlayerType.AI && NetworkServer.active)
         {
+            Debug.Log($"Spawning AI player {playerDetails.id}");
             AIManager manager = player.GetComponent<AIManager>();
             manager.SetLayer(3);
-            // TODO same as for the else clause
-            playerManager.identity.SetLoadout(StaticInfo.Singleton.StartingBody, StaticInfo.Singleton.StartingBarrel,
-                StaticInfo.Singleton.StartingExtension);
+            UpdateIdentityFromDetails(playerManager.identity, playerDetails);
             manager.SetIdentity(playerManager.identity);
             manager.GetComponent<AIMovement>().SetInitialRotation(message.rotation.eulerAngles.y * Mathf.Deg2Rad);
         }
         else
         {
-            // TODO: Set up networkPlayers akin to AI players (no control)
             Debug.Log($"Spawning network player {playerDetails.id}");
 
-            // TODO set based on playerdetails (and edit playerdetails)
-            playerManager.identity.SetLoadout(StaticInfo.Singleton.StartingBody, StaticInfo.Singleton.StartingBarrel,
-                StaticInfo.Singleton.StartingExtension);
+            UpdateIdentityFromDetails(playerManager.identity, playerDetails);
 
             // TODO do some other version of disabling HUD completely
             Destroy(playerManager.HUDController);
@@ -453,7 +573,7 @@ public class Peer2PeerTransport : NetworkManager
 
     private void OnSpawnBiddingPlayer(NetworkConnectionToClient connection, SpawnPlayerMessage message)
     {
-        SpawnPlayer(connection, message, 1);
+        SpawnPlayer(connection, message, BiddingPlayerPrefabIndexOffset);
     }
 
     private void InitializeBiddingPlayer(InitializePlayerMessage message)
@@ -486,13 +606,6 @@ public class Peer2PeerTransport : NetworkManager
 
         var playerManager = player.GetComponent<PlayerManager>();
 
-        var playerName = playerDetails.name;
-        if (players.Values.Where(p => p.steamID == playerDetails.steamID).Count() > 1)
-            playerName = $"{playerName} {playerDetails.localInputID + 1}";
-
-        playerManager.identity.playerName = playerName;
-        playerManager.identity.color = playerDetails.color;
-
         player.transform.position = message.position;
         player.transform.rotation = message.rotation;
 
@@ -519,25 +632,22 @@ public class Peer2PeerTransport : NetworkManager
 
             // The identity sits on the input in this case, so edit that
             var identity = input.GetComponent<PlayerIdentity>();
-            identity.playerName = playerName;
-            identity.color = playerDetails.color;
-            // TODO set remaining properties like chips and so on :)
+            UpdateIdentityFromDetails(identity, playerDetails);
         }
         else if (playerDetails.type is PlayerType.AI && NetworkServer.active)
         {
-
+            Debug.Log($"Spawning AI player {playerDetails.id}");
             AIManager manager = player.GetComponent<AIManager>();
             manager.SetLayer(3);
+            // TODO refactor this thing
+            UpdateIdentityFromDetails(playerManager.identity, playerDetails);
             manager.SetIdentity(manager.identity);
         }
         else
         {
-            // TODO: Set up networkPlayers akin to AI players (no control)
             Debug.Log($"Spawning network player {playerDetails.id}");
 
-            // TODO set based on playerdetails (and edit playerdetails)
-            playerManager.identity.SetLoadout(StaticInfo.Singleton.StartingBody, StaticInfo.Singleton.StartingBarrel,
-                StaticInfo.Singleton.StartingExtension);
+            UpdateIdentityFromDetails(playerManager.identity, playerDetails);
 
             // Disable physics
             playerManager.GetComponent<Rigidbody>().isKinematic = true;
