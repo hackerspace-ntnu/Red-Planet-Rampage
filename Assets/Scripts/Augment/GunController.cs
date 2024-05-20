@@ -263,7 +263,6 @@ public class GunController : NetworkBehaviour
     private void FireEnd()
     {
         stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.MagazineSize);
-        Debug.Log($"After firing we're at {stats.Ammo} ammo");
         isFiring = false;
         onFireEnd?.Invoke(stats);
     }

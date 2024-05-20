@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerIdentity : MonoBehaviour
@@ -27,7 +29,9 @@ public class PlayerIdentity : MonoBehaviour
     public List<Item> Barrels { get; private set; } = new List<Item>();
     public List<Item> Extensions { get; private set; } = new List<Item>();
 
-    public int chips { get; private set; } = 0;
+    public int chips = 0;
+
+    public uint id;
 
     public delegate void ChipEvent(int amount);
     public delegate void ItemEvent(Item item);
@@ -105,6 +109,23 @@ public class PlayerIdentity : MonoBehaviour
         barrel = StaticInfo.Singleton.StartingBarrel;
         extension = StaticInfo.Singleton.StartingExtension;
         chips = 0;
+    }
+
+
+    public void SetItems(IEnumerable<string> bodies, IEnumerable<string> barrels, IEnumerable<string> extensions)
+    {
+        // TODO handle errors better
+        Bodies = bodies.Select(id => StaticInfo.Singleton.ItemsById[id]).ToList();
+        Barrels = barrels.Select(id => StaticInfo.Singleton.ItemsById[id]).ToList();
+        Extensions = extensions.Select(id => StaticInfo.Singleton.ItemsById[id]).ToList();
+    }
+
+
+    public void SetLoadout(string body, string barrel, string extension)
+    {
+        this.body = StaticInfo.Singleton.ItemsById[body];
+        this.barrel = StaticInfo.Singleton.ItemsById[barrel];
+        this.extension = extension == null ? null : StaticInfo.Singleton.ItemsById[extension];
     }
 
     public void SetLoadout(Item body, Item barrel, Item extension)
