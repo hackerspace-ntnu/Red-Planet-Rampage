@@ -7,11 +7,11 @@ public class PlayerInputManagerController : MonoBehaviour
 {
     public static PlayerInputManagerController Singleton { get; private set; }
 
-    public List<InputManager> LocalPlayerInputs = new List<InputManager>();
+    public List<InputManager> LocalPlayerInputs = new();
     public Dictionary<uint, InputManager> InputByPlayer = new();
 
     public List<NetworkConnectionToClient> NetworkClients = new List<NetworkConnectionToClient>();
-    public int PlayerCount => NetworkClient.isConnected ? Peer2PeerTransport.NumPlayersInMatch : LocalPlayerInputs.Count;
+    public int PlayerCount => Peer2PeerTransport.NumPlayersInMatch;
 
     public PlayerInputManager PlayerInputManager;
 

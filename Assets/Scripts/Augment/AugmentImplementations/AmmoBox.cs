@@ -9,7 +9,6 @@ public class AmmoBox : MonoBehaviour
     [SerializeField] private float respawnTime = 30;
     [SerializeField] private GameObject boxModel;
     [SerializeField] private VisualEffect effect;
-    [SerializeField] private bool shouldAlwaysSpawn = false;
 
     [SerializeField]
     private AudioGroup soundEffect;
@@ -25,8 +24,6 @@ public class AmmoBox : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         collider = GetComponent<Collider>();
         renderer = boxModel.GetComponent<MeshRenderer>();
-        if (!shouldAlwaysSpawn)
-            StartCoroutine(CheckForCollectors());
 
         // Animate spin and bounce
         LeanTween.sequence()
@@ -53,19 +50,6 @@ public class AmmoBox : MonoBehaviour
         return ammoBoxes.Aggregate(
             (ammoBox, next) =>
             Vector3.Distance(from, next.transform.position) < Vector3.Distance(from, ammoBox.transform.position) ? next : ammoBox);
-    }
-
-    private IEnumerator CheckForCollectors()
-    {
-        // Wait for two frames before checking, since the collectors have to wait one frame first
-        yield return null;
-        yield return null;
-        var collectors = FindObjectsOfType<AmmoBoxCollector>();
-        var noAmmoBoxBodiesArePresent = !collectors.Any(c => c.CanReload);
-        if (noAmmoBoxBodiesArePresent)
-        {
-            Destroy(gameObject);
-        }
     }
 
     private IEnumerator RespawnAfterTimeout()
