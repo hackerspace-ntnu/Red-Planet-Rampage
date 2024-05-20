@@ -37,7 +37,7 @@ public class PlayerManager : NetworkBehaviour
     public bool overrideAimTarget = false;
 
     // TODO add context when shooty system is done
-    public delegate void HitEvent(PlayerManager killer, PlayerManager victim);
+    public delegate void HitEvent(PlayerManager killer, PlayerManager victim, DamageInfo info);
 
     public HitEvent onDeath;
 
@@ -188,7 +188,7 @@ public class PlayerManager : NetworkBehaviour
         {
             killer = lastPlayerThatHitMe;
         }
-        onDeath?.Invoke(killer, this);
+        onDeath?.Invoke(killer, this, info);
         isAlive = false;
         aimAssistCollider.SetActive(false);
         TurnIntoRagdoll(info);

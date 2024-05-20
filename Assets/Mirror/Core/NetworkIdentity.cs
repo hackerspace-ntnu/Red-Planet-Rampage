@@ -338,15 +338,6 @@ namespace Mirror
         // internal so we can call it during unit tests too.
         internal void Awake()
         {
-            // THIS IS A PATCH
-            // Bugger off if we ain't networked
-            //if (!NetworkManager.singleton.isNetworkActive)
-            //{
-            //    // TODO this ain't enough
-            //    Destroy(this);
-            //    return;
-            //}
-
             // initialize NetworkBehaviour components.
             // Awake() is called immediately after initialization.
             // no one can overwrite it because NetworkIdentity is sealed.

@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Mirror;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -109,12 +108,14 @@ public class Peer2PeerTransport : NetworkManager
     private const int BiddingPlayerPrefabIndexOffset = 1;
     private const int AIFPSPlayerPrefabIndex = 2;
 
+    private const int NetworkPlayerLayer = 3;
+
     private PlayerFactory playerFactory;
     private static Transform[] spawnPoints;
     private static int playerIndex;
 
     private static Dictionary<uint, PlayerDetails> players = new();
-    public static int NumPlayersInMatch => players.Count();
+    public static int NumPlayersInMatch => players.Count;
     public static IEnumerable<PlayerDetails> PlayerDetails => players.Values;
 
     private static List<uint> localPlayerIds = new();
@@ -439,17 +440,17 @@ public class Peer2PeerTransport : NetworkManager
         StartCoroutine(WaitAndInitializeFPSPlayer(message));
     }
 
+    // TODO move this down to PlayerIdentity for better encapsulation!
     private void UpdateIdentityFromDetails(PlayerIdentity identity, PlayerDetails playerDetails)
     {
         identity.id = playerDetails.id;
         var playerName = playerDetails.name;
-        if (players.Values.Where(p => p.steamID == playerDetails.steamID).Count() > 1)
+        if (players.Values.Count(p => p.steamID == playerDetails.steamID) > 1)
             playerName = $"{playerName} {playerDetails.localInputID + 1}";
 
         identity.playerName = playerName;
         identity.color = playerDetails.color;
 
-        // TODO avoid update invocation?
         identity.chips = playerDetails.chips;
         identity.SetItems(playerDetails.bodies, playerDetails.barrels, playerDetails.extensions);
         identity.SetLoadout(playerDetails.body, playerDetails.barrel, playerDetails.extension);
@@ -525,7 +526,7 @@ public class Peer2PeerTransport : NetworkManager
         {
             Debug.Log($"Spawning AI player {playerDetails.id}");
             AIManager manager = player.GetComponent<AIManager>();
-            manager.SetLayer(3);
+            manager.SetLayer(NetworkPlayerLayer);
             UpdateIdentityFromDetails(playerManager.identity, playerDetails);
             manager.SetIdentity(playerManager.identity);
             manager.GetComponent<AIMovement>().SetInitialRotation(message.rotation.eulerAngles.y * Mathf.Deg2Rad);
@@ -551,7 +552,7 @@ public class Peer2PeerTransport : NetworkManager
             gunHolder.parent = gunHolderParent.transform;
             gunHolder.localPosition = Vector3.zero;
             gunHolder.localRotation = Quaternion.identity;
-            playerManager.SetLayer(3);
+            playerManager.SetLayer(NetworkPlayerLayer);
             // Can't initialize quite like the AIs because of where the GunController network behaviour is located :(
             playerManager.SetGun(gunHolder);
         }
@@ -638,8 +639,7 @@ public class Peer2PeerTransport : NetworkManager
         {
             Debug.Log($"Spawning AI player {playerDetails.id}");
             AIManager manager = player.GetComponent<AIManager>();
-            manager.SetLayer(3);
-            // TODO refactor this thing
+            manager.SetLayer(NetworkPlayerLayer);
             UpdateIdentityFromDetails(playerManager.identity, playerDetails);
             manager.SetIdentity(manager.identity);
         }

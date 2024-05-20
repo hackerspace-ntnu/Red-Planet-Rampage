@@ -123,7 +123,7 @@ public class Scoreboard : MonoBehaviour
         wantedPoster.SetActive(false);
         progressPoster.SetActive(true);
         var delayTime = 0.5f;
-        for (int i = 0; i < MatchController.Singleton.PlayerWins(player.identity); i++)
+        for (int i = 0; i < MatchController.Singleton.PlayerWins(player); i++)
         {
             progressCrosses[i].SetActive(true);
             progressCrosses[i].LeanScale(new Vector3(2f, 2f, 2f), 0.5f).setEasePunch();

@@ -120,8 +120,8 @@ public class PlayerHUDController : MonoBehaviour
 
         originalChipY = chipBox.anchoredPosition.y;
         // Anchor to top right if there's only one player.
-        // This keeps the chip counter from conflicting with the 
-        if (!MatchController.Singleton || MatchController.Singleton.HumanPlayers.Count() == 1)
+        // This keeps the chip counter from conflicting with the timer
+        if (!MatchController.Singleton || PlayerInputManagerController.Singleton.LocalPlayerInputs.Count() == 1)
         {
             chipBox.anchorMin = Vector2.one;
             chipBox.anchorMax = Vector2.one;
@@ -220,7 +220,7 @@ public class PlayerHUDController : MonoBehaviour
             LeanTween.cancel(healthTextTween);
             healthText.transform.localPosition = healthTextPosition;
         }
-            
+
         healthTextTween = healthText.gameObject.LeanMoveLocal(healthTextPosition * 2f, 0.5f).setEasePunch().id;
         float width = (Mathf.Max(currentHealth, 0) / maxHealth) * healthBarScaleX;
         if (width > 0)

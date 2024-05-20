@@ -134,37 +134,10 @@ public class MatchController : MonoBehaviour
         players = new();
         PlayerById = new();
 
-        if (NetworkManager.singleton.isNetworkActive)
-        {
-            StartCoroutine(WaitForClientsAndInitialize());
-            return;
-        }
-
-        InitializePlayers();
-
-        InitializeRound();
+        StartCoroutine(WaitForClientsAndInitialize());
     }
 
-    private void InitializePlayers()
-    {
-        // Setup of playerInputs
-        // TODO replace this so that we have ai players :)
-        var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
-            Mathf.Max(4 - PlayerInputManagerController.Singleton.PlayerCount, 0) : 0;
-        playerFactory.InstantiatePlayersFPS(aiPlayerCount)
-            .ForEach(player => players.Add(player));
-
-        UpdateAIPlayers();
-
-        PlayerById = new();
-
-        foreach (var player in players)
-        {
-            PlayerById.Add(player.id, player);
-        }
-    }
-
-    private void UpdateAIPlayers()
+    private void InitializeAIPlayers()
     {
         var aiPLayers = players.Where(player => player is AIManager)
             .Cast<AIManager>()
@@ -184,7 +157,7 @@ public class MatchController : MonoBehaviour
     // TODO give players start amount worth of chips (on match start only)
     private void InitializeRound()
     {
-        UpdateAIPlayers();
+        InitializeAIPlayers();
         MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
         onRoundStart?.Invoke();
         isAuction = false;
@@ -198,7 +171,7 @@ public class MatchController : MonoBehaviour
     private IEnumerator WaitForClientsAndInitialize()
     {
         // TODO add a timeout thingy for when one player doesn't join in time
-        // TODO keep loading screen open while this happens
+        // TODO keep loading screen open while this while loop spins
         // Spin while waiting for players to spawn
         while (NetworkManager.singleton.numPlayers == 0 || players.Count != Peer2PeerTransport.NumPlayersInMatch) yield return null;
 
@@ -261,13 +234,6 @@ public class MatchController : MonoBehaviour
         StartNextRound();
     }
 
-    public void EndActiveBidding()
-    {
-        onBiddingEnd?.Invoke();
-
-        StartNextRound();
-    }
-
     private void AssignRewards()
     {
         var lastRound = rounds.Last();
@@ -298,14 +264,14 @@ public class MatchController : MonoBehaviour
 
     private bool IsWin()
     {
-        var winner = rounds.Last().Winner;
-        if (winner == null) { return false; }
+        var winnerId = rounds.Last().Winner;
+        if (!PlayerById.TryGetValue(winnerId, out var winner)) { return false; }
         var wins = PlayerWins(winner);
-        Debug.Log($"Current winner ({winner}) has {wins} wins.");
+        Debug.Log($"Current winner ({winner.identity.playerName}) has {wins} wins.");
         if (wins >= 3)
         {
             // We have a winner!
-            StartCoroutine(DisplayWinScreenAndRestart(winner));
+            StartCoroutine(DisplayWinScreenAndRestart(winner.identity));
             // Remember stats from this match.
             PersistentInfo.SavePersistentData();
             return true;
@@ -316,9 +282,9 @@ public class MatchController : MonoBehaviour
         }
     }
 
-    public int PlayerWins(PlayerIdentity player)
+    public int PlayerWins(PlayerManager player)
     {
-        return rounds.Where(round => round.IsWinner(player)).Count();
+        return rounds.Where(round => round.IsWinner(player.id)).Count();
     }
 
     public void RemoveChip(CollectableChip chip)

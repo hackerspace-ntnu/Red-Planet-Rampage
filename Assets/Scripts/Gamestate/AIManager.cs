@@ -86,7 +86,7 @@ public class AIManager : PlayerManager
             biddingAI.SetIdentity(identity);
     }
 
-    private void RemovePlayer(PlayerManager killer, PlayerManager victim)
+    private void RemovePlayer(PlayerManager killer, PlayerManager victim, DamageInfo info)
     {
         TrackedPlayers.Remove(victim);
         victim.onDeath -= RemovePlayer;
@@ -154,7 +154,7 @@ public class AIManager : PlayerManager
         {
             killer = lastPlayerThatHitMe;
         }
-        onDeath?.Invoke(killer, this);
+        onDeath?.Invoke(killer, this, info);
         aimAssistCollider.SetActive(false);
         aiTargetCollider.gameObject.SetActive(false);
         aiMovement.enabled = false;
