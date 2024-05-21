@@ -37,13 +37,19 @@ public class SteamManager : MonoBehaviour
     public List<ulong> PlayerIDs = new();
     public delegate void LobbyEvent();
     public LobbyEvent LobbyPlayerUpdate;
+    public LobbyEvent LobbyListUpdate;
+    private List<CSteamID> lobbies = new();
 
     private bool shouldStoreStats = false;
 
+    // Lobby events
     private Callback<LobbyCreated_t> lobbyCreated;
     private Callback<LobbyEnter_t> lobbyEnter;
     private Callback<GameLobbyJoinRequested_t> joinRequest;
     private Callback<LobbyChatUpdate_t> lobbyUpdate;
+    // Lobby finding
+    private Callback<LobbyMatchList_t> lobbyListRequest;
+    private Callback<LobbyDataUpdate_t> lobbyDataRequest;
 
     private const string hostkey = "HostAddress";
     [SerializeField]
@@ -88,6 +94,8 @@ public class SteamManager : MonoBehaviour
         lobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEnter);
         joinRequest = Callback<GameLobbyJoinRequested_t>.Create(OnJoinRequest);
         lobbyUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyUpdate);
+        lobbyListRequest = Callback<LobbyMatchList_t>.Create(OnLobbiesFetched);
+        lobbyDataRequest = Callback<LobbyDataUpdate_t>.Create(OnLobbyInfo);
 
         RequestStats();
         UserName = SteamFriends.GetPersonaName();
@@ -199,7 +207,7 @@ public class SteamManager : MonoBehaviour
         if (!isSteamInitialized)
             return;
 
-        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, transportProtocol.maxConnections);
+        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, transportProtocol.maxConnections);
         // Disable local joining
         PlayerInputManagerController.Singleton.RemoveJoinListener();
         // TODO make it possible to have multiple local players in online match, then remove this
@@ -225,6 +233,51 @@ public class SteamManager : MonoBehaviour
             if (transportProtocol.isNetworkActive)
                 transportProtocol.StopClient();
         }
+    }
+
+    public void FetchLobbyInfo()
+    {
+        FetchFriendLobbyInfo();
+        SteamMatchmaking.RequestLobbyList();
+    }
+
+    private void FetchFriendLobbyInfo()
+    {
+        int availableFriends = SteamFriends.GetFriendCount(EFriendFlags.k_EFriendFlagImmediate);
+        for (int i = 0; i < availableFriends; i++)
+        {
+            FriendGameInfo_t friendGameInfo = new FriendGameInfo_t();
+            CSteamID steamIDFriend = SteamFriends.GetFriendByIndex(i, EFriendFlags.k_EFriendFlagImmediate);
+            if (SteamFriends.GetFriendGamePlayed(steamIDFriend, out friendGameInfo) && friendGameInfo.m_steamIDLobby.IsValid())
+            {
+                lobbies.Add(friendGameInfo.m_steamIDLobby);
+                SteamMatchmaking.RequestLobbyData(friendGameInfo.m_steamIDLobby);
+            }
+        }
+    }
+
+    private void OnLobbiesFetched(LobbyMatchList_t lobbyList)
+    {
+        Debug.Log("Found " + lobbyList.m_nLobbiesMatching + " lobbies!");
+        for (int i = 0; i < lobbyList.m_nLobbiesMatching; i++)
+        {
+            CSteamID lobbyID = SteamMatchmaking.GetLobbyByIndex(i);
+            lobbies.Add(lobbyID);
+            SteamMatchmaking.RequestLobbyData(lobbyID);
+        }
+    }
+
+    void OnLobbyInfo(LobbyDataUpdate_t result)
+    {
+        for (int i = 0; i < lobbies.Count; i++)
+        {
+            if (lobbies[i].m_SteamID == result.m_ulSteamIDLobby)
+            {
+                Debug.Log("Lobby " + i + " :: " + SteamMatchmaking.GetLobbyData((CSteamID)lobbies[i].m_SteamID, "name"));
+                return;
+            }
+        }
+        LobbyListUpdate?.Invoke();
     }
 
     #endregion Lobby
