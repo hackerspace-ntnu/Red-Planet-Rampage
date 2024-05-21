@@ -34,7 +34,7 @@ public class HealthController : NetworkBehaviour
 
     public void DealDamage(DamageInfo info)
     {
-        if (!isNetworked || currentHealth <= 0)
+        if (!isNetworked)
         {
             ActuallyDealDamage(info);
         }
@@ -49,7 +49,7 @@ public class HealthController : NetworkBehaviour
     [ClientRpc]
     private void DealDamageRpc(NetworkDamageInfo networkInfo)
     {
-        var source = MatchController.Singleton.PlayerById[networkInfo.sourcePlayer];
+        var source = MatchController.Singleton ? MatchController.Singleton.PlayerById[networkInfo.sourcePlayer] : null;
         var info = new DamageInfo(source, networkInfo);
         ActuallyDealDamage(info);
     }

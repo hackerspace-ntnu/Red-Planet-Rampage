@@ -254,6 +254,11 @@ public class PlayerManager : NetworkBehaviour
             biddingPlayer.SetPlayerInput();
         }
 
+        ApplyColorFromIdentity();
+    }
+
+    public void ApplyColorFromIdentity()
+    {
         // Set player color
         meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
     }
@@ -407,6 +412,7 @@ public class PlayerManager : NetworkBehaviour
 
     public virtual void SetGun(Transform offset)
     {
+        var hadGunBefore = gunController != null;
         overrideAimTarget = false;
         var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity.Extension, this, offset);
         // Set specific local transform
@@ -427,6 +433,9 @@ public class PlayerManager : NetworkBehaviour
         if (gunController.RightHandTarget)
             playerIK.RightHandIKTarget = gunController.RightHandTarget;
         GetComponent<AmmoBoxCollector>().CheckForAmmoBoxBodyAgain();
+        if (hadGunBefore)
+            // This is required for the networkbehaviours on the gun to be given an identity and not break
+            GetComponent<NetworkIdentity>().InitializeNetworkBehaviours();
     }
 
     public void SetGunNetwork(Transform offset)

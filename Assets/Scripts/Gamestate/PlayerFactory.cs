@@ -30,16 +30,15 @@ public class PlayerFactory : MonoBehaviour
     [SerializeField]
     private bool overrideMatchManager = false;
 
-    // TODO synchronize
-    private static readonly System.Random random = new System.Random();
-
     private void Awake()
     {
         if (PlayerInputManagerController.Singleton == null)
         {
             // We most likely started the game in the game scene, reload menu instead
-            if (!SteamManager.Singleton || !SteamManager.Singleton.ChangeScene("Menu"))
-                SceneManager.LoadSceneAsync("Menu");
+            if (NetworkManager.singleton.isNetworkActive)
+                NetworkManager.singleton.ServerChangeScene(Scenes.Menu);
+            else
+                SceneManager.LoadSceneAsync(Scenes.Menu);
             return;
         }
 
@@ -80,9 +79,10 @@ public class PlayerFactory : MonoBehaviour
         InstantiateInputsOnSpawnpoints(InstantiateItemSelectPlayer);
     }
 
+    // TODO remove this from its mortal coil, we don't really use PlayerFactory anymore :)
     private List<PlayerManager> InstantiateInputsOnSpawnpoints(Func<InputManager, Transform, PlayerManager> instantiate, Func<int, Transform, AIManager> instantiateAI = null, int aiPlayerCount = 0)
     {
-        var shuffledSpawnPoints = spawnPoints.ShuffledCopy(random);
+        var shuffledSpawnPoints = spawnPoints.ShuffledCopy();
 
         var playerList = new List<PlayerManager>();
         for (int i = 0; i < playerInputManagerController.LocalPlayerInputs.Count; i++)

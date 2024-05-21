@@ -144,7 +144,8 @@ public class GunController : NetworkBehaviour
 
     public void OnZoom(InputAction.CallbackContext ctx)
     {
-        gameObject.LeanMoveLocalX(0f, 0.2f).setEaseInOutCubic();
+        if (gameObject)
+            gameObject.LeanMoveLocalX(0f, 0.2f).setEaseInOutCubic();
     }
 
     public void OnZoomCanceled(InputAction.CallbackContext ctx)
