@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine;
@@ -62,9 +63,11 @@ public class MatchController : MonoBehaviour
 
     private string currentMapName;
 
-    public Dictionary<uint, PlayerManager> PlayerById = new();
+    private Dictionary<uint, PlayerManager> playerById = new();
+    public ReadOnlyDictionary<uint, PlayerManager> PlayerById;
+
     private List<PlayerManager> players = new();
-    public List<PlayerManager> Players => players;
+    public ReadOnlyCollection<PlayerManager> Players;
     public IEnumerable<PlayerManager> AIPlayers => players.Where(p => p is AIManager);
     public IEnumerable<PlayerManager> HumanPlayers => players.Where(p => p is not AIManager);
 
@@ -102,6 +105,9 @@ public class MatchController : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
+
+        Players = new ReadOnlyCollection<PlayerManager>(players);
+        PlayerById = new ReadOnlyDictionary<uint, PlayerManager>(playerById);
     }
 
     void Start()
@@ -111,6 +117,7 @@ public class MatchController : MonoBehaviour
             PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
         }
         playerFactory = FindObjectOfType<PlayerFactory>();
+        
 
         if (currentMapName == null)
             currentMapName = SceneManager.GetActiveScene().name;
@@ -132,7 +139,9 @@ public class MatchController : MonoBehaviour
             collectableChips = FindObjectsOfType<CollectableChip>().ToList();
 
         players = new();
-        PlayerById = new();
+        playerById = new();
+        Players = new ReadOnlyCollection<PlayerManager>(players);
+        PlayerById = new ReadOnlyDictionary<uint, PlayerManager>(playerById);
 
         StartCoroutine(WaitForClientsAndInitialize());
     }
@@ -151,7 +160,7 @@ public class MatchController : MonoBehaviour
     public void RegisterPlayer(PlayerManager player)
     {
         players.Add(player);
-        PlayerById.Add(player.id, player);
+        playerById.Add(player.id, player);
     }
 
     // TODO give players start amount worth of chips (on match start only)
@@ -195,8 +204,7 @@ public class MatchController : MonoBehaviour
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.Bidding);
         onBiddingStart?.Invoke();
-        if (!SteamManager.Singleton.ChangeScene("Bidding"))
-            SceneManager.LoadSceneAsync("Bidding");
+        NetworkManager.singleton.ServerChangeScene(Scenes.Bidding);
         PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = false;
         isAuction = true;
     }
@@ -229,8 +237,7 @@ public class MatchController : MonoBehaviour
     public IEnumerator WaitAndStartNextRound()
     {
         yield return new WaitForSeconds(biddingEndDelay);
-        if (!SteamManager.Singleton.ChangeScene(currentMapName))
-            SceneManager.LoadScene(currentMapName);
+        NetworkManager.singleton.ServerChangeScene(currentMapName);
         StartNextRound();
     }
 
@@ -318,7 +325,6 @@ public class MatchController : MonoBehaviour
         MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         rounds = new List<Round>();
         PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
-        if (!SteamManager.Singleton.ChangeScene("Menu"))
-            SceneManager.LoadSceneAsync("Menu");
+        NetworkManager.singleton.ServerChangeScene(Scenes.Menu);
     }
 }

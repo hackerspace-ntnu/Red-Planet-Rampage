@@ -4,7 +4,6 @@ using System.Linq;
 using Mirror;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 public struct PlayerDetails
@@ -107,6 +106,7 @@ public class Peer2PeerTransport : NetworkManager
     private const int FPSPlayerPrefabIndex = 0;
     private const int BiddingPlayerPrefabIndexOffset = 1;
     private const int AIFPSPlayerPrefabIndex = 2;
+    private const int TrainingPlayerPrefabIndex = 4;
 
     private const int NetworkPlayerLayer = 3;
 
@@ -158,10 +158,42 @@ public class Peer2PeerTransport : NetworkManager
             return;
         // Only clients from here!
         PlayerInputManagerController.Singleton.RemoveJoinListener();
-        SceneManager.LoadScene("ClientLobby");
+        SceneManager.LoadScene(Scenes.ClientLobby);
         networkAddress = address;
         StartClient();
     }
+
+    public static void StartTrainingMode()
+    {
+        singleton.StartHost();
+        players = new();
+
+        for (var i = 0; i < PlayerInputManagerController.Singleton.LocalPlayerInputs.Count; i++)
+        {
+            var details = new PlayerDetails
+            {
+                id = (uint)i,
+                localInputID = i,
+                steamID = 0,
+                name = "Player",
+                type = PlayerType.Local,
+                color = PlayerInputManagerController.Singleton.PlayerColors[i],
+            };
+            players.Add((uint)i, details);
+            NetworkServer.SendToAll(new InitialPlayerDetailsMessage(details));
+        }
+
+        singleton.StartCoroutine(WaitAndSwitchToTrainingMode());
+    }
+
+    private static IEnumerator WaitAndSwitchToTrainingMode()
+    {
+        while (!NetworkClient.isConnected && !singleton.isNetworkActive && players.Count < PlayerInputManagerController.Singleton.LocalPlayerInputs.Count)
+            yield return new WaitForEndOfFrame();
+        singleton.ServerChangeScene(Scenes.TrainingMode);
+    }
+
+    // TODO custom method for leaving training mode :)
 
     private void OnSpawnPlayerInput(NetworkConnectionToClient connection, PlayerConnectedMessage message)
     {
@@ -181,17 +213,6 @@ public class Peer2PeerTransport : NetworkManager
             steamID = SteamManager.Singleton.PlayerIDs[steamIndex];
             playerType = steamID == SteamManager.Singleton.SteamID.m_SteamID ? PlayerType.Local : PlayerType.Remote;
         }
-
-        var player = Instantiate(playerPrefab);
-        var playerInput = player.GetComponent<InputManager>();
-        playerInput.PlayerCamera.enabled = false;
-        playerInput.enabled = connection.connectionId == NetworkClient.connection.connectionId;
-        // Without this, the host doesn't function as a client
-        if (message.inputID == 0)
-            NetworkServer.AddPlayerForConnection(connection, player);
-        else
-            NetworkServer.Spawn(player, connection);
-
 
         // Send information about existing players to the new one
         foreach (var existingPlayer in players.Values)
@@ -308,10 +329,10 @@ public class Peer2PeerTransport : NetworkManager
 
         switch (newSceneName)
         {
-            case "Bidding":
+            case Scenes.Bidding:
                 NetworkServer.ReplaceHandler<SpawnPlayerMessage>(OnSpawnBiddingPlayer);
                 break;
-            case "Menu":
+            case Scenes.Menu:
                 NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
                 break;
             default:
@@ -360,13 +381,14 @@ public class Peer2PeerTransport : NetworkManager
     public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
     {
         UpdateLoadout();
+        var originalSceneName = SceneManager.GetActiveScene().name;
         switch (newSceneName)
         {
-            case "Bidding":
+            case Scenes.Bidding:
                 NetworkClient.ReplaceHandler<InitializePlayerMessage>(InitializeBiddingPlayer);
                 PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
                 break;
-            case "Menu":
+            case Scenes.Menu:
                 PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
                 break;
             default:
@@ -377,15 +399,15 @@ public class Peer2PeerTransport : NetworkManager
 
         base.OnClientChangeScene(newSceneName, sceneOperation, customHandling);
 
-        // Remove existing network inputs since they're in DontDestroyOnLoad
-        if (!MatchController.Singleton || MatchController.Singleton.RoundCount <= 1)
-        {
-            foreach (var networkInput in FindObjectsOfType<PlayerInput>().Select(pi => pi.GetComponent<NetworkIdentity>())
-                        .Where(id => id != null))
-            {
-                Destroy(networkInput);
-            }
-        }
+        StartCoroutine(SendSpawnRequestsAfterSceneLoad(originalSceneName));
+    }
+
+    private IEnumerator SendSpawnRequestsAfterSceneLoad(string originalSceneName)
+    {
+        while (SceneManager.GetActiveScene().name == originalSceneName)
+            yield return null;
+
+        // Spawn players for our inputs (and bots)
         foreach (var id in localPlayerIds)
         {
             NetworkClient.Send(new SpawnPlayerMessage(id, PlayerType.Local));
@@ -420,6 +442,8 @@ public class Peer2PeerTransport : NetworkManager
         var spawnPoint = spawnPoints[message.id];
 
         var prefabIndex = playerDetails.type is PlayerType.AI && NetworkServer.active ? AIFPSPlayerPrefabIndex : FPSPlayerPrefabIndex;
+        if (SceneManager.GetActiveScene().name == Scenes.TrainingMode)
+            prefabIndex = TrainingPlayerPrefabIndex;
         var prefab = spawnPrefabs[prefabIndex + prefabIndexOffset];
         var player = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
         player.GetComponent<PlayerManager>().id = message.id;
@@ -458,14 +482,14 @@ public class Peer2PeerTransport : NetworkManager
 
     private IEnumerator WaitAndInitializeFPSPlayer(InitializePlayerMessage message)
     {
-        // Wait until players must've been spawned
-        // TODO find a better way to wait for that
-        // TODO that is, move to OnWhateverAuthority overrid on PlayerManager :)
-        yield return null;
-        yield return null;
-
-        var player = FindObjectsOfType<PlayerManager>()
-            .FirstOrDefault(p => p.id == message.id);
+        // Wait until player object is spawned
+        PlayerManager player = null;
+        while (player == null)
+        {
+            player = FindObjectsOfType<PlayerManager>()
+               .FirstOrDefault(p => p.id == message.id);
+            yield return null;
+        }
 
         if (!player)
         {
@@ -557,6 +581,7 @@ public class Peer2PeerTransport : NetworkManager
             playerManager.SetGun(gunHolder);
         }
 
+        playerManager.ApplyColorFromIdentity();
 
         // This ensures that behaviours on the gun have identities.
         // SHOULD be safe to initialize them here as this is at roughly the same point on all clients
@@ -652,6 +677,8 @@ public class Peer2PeerTransport : NetworkManager
             // Disable physics
             playerManager.GetComponent<Rigidbody>().isKinematic = true;
         }
+
+        playerManager.ApplyColorFromIdentity();
 
         // This ensures that behaviours on the gun have identities.
         // SHOULD be safe to initialize them here as this is at roughly the same point on all clients

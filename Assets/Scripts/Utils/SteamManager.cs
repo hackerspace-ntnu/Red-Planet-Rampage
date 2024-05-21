@@ -207,6 +207,7 @@ public class SteamManager : MonoBehaviour
         if (!isSteamInitialized)
             return;
 
+        // TODO support public and friend lobbies
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, transportProtocol.maxConnections);
     }
 
@@ -278,15 +279,6 @@ public class SteamManager : MonoBehaviour
     }
 
     #endregion Lobby
-
-    public bool ChangeScene(string sceneName)
-    {
-        // TODO avoid binding this to steam
-        if (!transportProtocol.isNetworkActive)
-            return false;
-        transportProtocol.ServerChangeScene(sceneName);
-        return true;
-    }
 
     private void Update()
     {

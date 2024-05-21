@@ -246,7 +246,9 @@ public class MainMenuController : MonoBehaviour
 #else
         yield return new WaitForSeconds(loadingDuration);
 #endif      
-        if (!SteamManager.Singleton.ChangeScene(name))
+        if (NetworkManager.singleton.isNetworkActive)
+            NetworkManager.singleton.ServerChangeScene(name);
+        else
             SceneManager.LoadSceneAsync(name);
     }
 
@@ -332,6 +334,12 @@ public class MainMenuController : MonoBehaviour
     public void HostLocalLobby()
     {
         NetworkManager.singleton.StartHost();
+        playerSelectManager.UpdateLobby();
+    }
+
+    public void StartTrainingMode()
+    {
+        Peer2PeerTransport.StartTrainingMode();
         playerSelectManager.UpdateLobby();
     }
 

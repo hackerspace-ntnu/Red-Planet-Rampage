@@ -1,3 +1,4 @@
+using Mirror;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -19,7 +20,8 @@ public class ReturnToMainMenuGate : MonoBehaviour, Interactable
     {
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
         PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
-        if (!SteamManager.Singleton.ChangeScene("Menu"))
-            SceneManager.LoadSceneAsync("Menu");
+        // TODO Is this really correct?
+        NetworkManager.singleton.StopHost();
+        SceneManager.LoadSceneAsync(Scenes.Menu);
     }
 }

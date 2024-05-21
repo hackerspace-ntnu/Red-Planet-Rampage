@@ -1,10 +1,10 @@
 using CollectionExtensions;
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerSelectManager : MonoBehaviour
 {
@@ -50,8 +50,7 @@ public class PlayerSelectManager : MonoBehaviour
         {
             animatorParameters.Add(playerAnimators[0].GetParameter(i).name);
         }
-        if (SteamManager.IsSteamActive)
-            SteamManager.Singleton.LobbyPlayerUpdate += UpdateLobby;
+        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved += UpdateLobby;
     }
 
     public void UpdateLobby()
@@ -62,6 +61,11 @@ public class PlayerSelectManager : MonoBehaviour
             SetupPlayerSelectModels(player.name, player.color, i);
             i++;
         }
+    }
+
+    public void UpdateLobby(PlayerDetails details)
+    {
+        UpdateLobby();
     }
 
     /// <summary>
@@ -176,7 +180,6 @@ public class PlayerSelectManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (SteamManager.IsSteamActive)
-            SteamManager.Singleton.LobbyPlayerUpdate -= UpdateLobby;
+        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved -= UpdateLobby;
     }
 }
