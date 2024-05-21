@@ -83,6 +83,9 @@ public class Peer2PeerTransport : NetworkManager
     
     private uint myId; // TODO this is inflexible for multiple local players
 
+    public delegate void LobbyPlayerEvent(PlayerDetails details);
+    public LobbyPlayerEvent OnPlayerRecieved;
+
     public override void OnStartServer()
     {
         base.OnStartServer();
@@ -162,6 +165,7 @@ public class Peer2PeerTransport : NetworkManager
         if (details.type is PlayerType.Local) myId = details.id;
         Debug.Log($"Received info for player {details.id}: name={details.name} type={details.type} color={details.color}");
         players.Add(details.id, details);
+        OnPlayerRecieved?.Invoke(details);
     }
 
     #endregion

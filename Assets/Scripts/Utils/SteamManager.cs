@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 using Steamworks;
+using UnityEngine.SceneManagement;
 
 public enum AchievementType
 {
@@ -182,6 +183,7 @@ public class SteamManager : MonoBehaviour
         if (NetworkServer.active)
             return;
         // Only clients from here!
+        SceneManager.LoadScene("ClientLobby");
         transportProtocol.networkAddress = SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey);
         transportProtocol.StartClient();
     }
