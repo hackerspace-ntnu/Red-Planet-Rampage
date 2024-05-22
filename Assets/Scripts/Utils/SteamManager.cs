@@ -4,6 +4,7 @@ using UnityEngine;
 using Mirror;
 using Steamworks;
 using UnityEngine.SceneManagement;
+using System.Collections.ObjectModel;
 
 public enum AchievementType
 {
@@ -39,6 +40,7 @@ public class SteamManager : MonoBehaviour
     public LobbyEvent LobbyPlayerUpdate;
     public LobbyEvent LobbyListUpdate;
     private List<CSteamID> lobbies = new();
+    public Dictionary<CSteamID, string> Lobbies = new();
 
     private bool shouldStoreStats = false;
 
@@ -156,6 +158,7 @@ public class SteamManager : MonoBehaviour
         transportProtocol.StartHost();
         IsHosting = true;
         SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey, SteamUser.GetSteamID().ToString());
+        SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), "name", UserName);
     }
 
     private void OnJoinRequest(GameLobbyJoinRequested_t callback)
@@ -258,26 +261,32 @@ public class SteamManager : MonoBehaviour
 
     private void OnLobbiesFetched(LobbyMatchList_t lobbyList)
     {
-        Debug.Log("Found " + lobbyList.m_nLobbiesMatching + " lobbies!");
         for (int i = 0; i < lobbyList.m_nLobbiesMatching; i++)
         {
             CSteamID lobbyID = SteamMatchmaking.GetLobbyByIndex(i);
             lobbies.Add(lobbyID);
+            Lobbies[lobbyID] = SteamMatchmaking.GetLobbyData(lobbyID, "name");
             SteamMatchmaking.RequestLobbyData(lobbyID);
         }
+        LobbyListUpdate?.Invoke();
     }
 
-    void OnLobbyInfo(LobbyDataUpdate_t result)
+    private void OnLobbyInfo(LobbyDataUpdate_t result)
     {
         for (int i = 0; i < lobbies.Count; i++)
         {
             if (lobbies[i].m_SteamID == result.m_ulSteamIDLobby)
             {
-                Debug.Log("Lobby " + i + " :: " + SteamMatchmaking.GetLobbyData((CSteamID)lobbies[i].m_SteamID, "name"));
+                Lobbies[(CSteamID)lobbies[i].m_SteamID] = SteamMatchmaking.GetLobbyData((CSteamID)lobbies[i].m_SteamID, "name");
                 return;
             }
         }
         LobbyListUpdate?.Invoke();
+    }
+
+    public void RequestLobbyJoin(CSteamID lobbyId)
+    {
+        SteamMatchmaking.JoinLobby(lobbyId);
     }
 
     #endregion Lobby
