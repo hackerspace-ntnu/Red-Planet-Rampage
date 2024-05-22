@@ -117,16 +117,9 @@ public class MatchController : MonoBehaviour
             PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
         }
         playerFactory = FindObjectOfType<PlayerFactory>();
-        
 
-        if (currentMapName == null)
-            currentMapName = SceneManager.GetActiveScene().name;
+        currentMapName ??= SceneManager.GetActiveScene().name;
 
-        // Makes shooting end quickly if testing with 1 player
-#if UNITY_EDITOR
-        if (PlayerInputManagerController.Singleton.LocalPlayerInputs.Count == 1)
-            roundLength = 100f;
-#endif
         GameObject mainLight = GameObject.FindGameObjectsWithTag("MainLight")[0];
         RenderSettings.skybox.SetVector("_SunDirection", mainLight.transform.forward);
         RenderSettings.skybox.SetFloat("_MaxGradientTreshold", 0.25f);
@@ -182,7 +175,13 @@ public class MatchController : MonoBehaviour
         // TODO add a timeout thingy for when one player doesn't join in time
         // TODO keep loading screen open while this while loop spins
         // Spin while waiting for players to spawn
-        while (NetworkManager.singleton.numPlayers == 0 || players.Count != Peer2PeerTransport.NumPlayersInMatch) yield return null;
+        while (players.Count < Peer2PeerTransport.NumPlayersInMatch)
+        {
+#if UNITY_EDITOR
+            Debug.Log($"{players.Count} of {Peer2PeerTransport.NumPlayersInMatch} players spawned");
+#endif
+            yield return null;
+        }
 
         InitializeRound();
     }
