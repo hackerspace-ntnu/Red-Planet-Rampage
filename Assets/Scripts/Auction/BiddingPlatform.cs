@@ -1,10 +1,11 @@
+using Mirror;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Timer))]
-public class BiddingPlatform : MonoBehaviour
+public class BiddingPlatform : NetworkBehaviour
 {
     [SerializeField]
     private Item item;

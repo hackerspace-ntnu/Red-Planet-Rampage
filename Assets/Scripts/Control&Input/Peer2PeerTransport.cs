@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Mirror;
 using Unity.VisualScripting;
@@ -115,10 +116,17 @@ public class Peer2PeerTransport : NetworkManager
     private static int playerIndex;
 
     private static Dictionary<uint, PlayerDetails> players = new();
-    public static int NumPlayersInMatch => players.Count;
+    public static int NumPlayers => players.Count;
     public static IEnumerable<PlayerDetails> PlayerDetails => players.Values;
 
     private static List<uint> localPlayerIds = new();
+
+    /// <summary>
+    /// List of client connections. Will be uninitialized on clients.
+    /// </summary>
+    private static List<NetworkConnectionToClient> connections = new();
+    private static Dictionary<int, List<uint>> playersForConnection = new();
+    public static ReadOnlyCollection<NetworkConnectionToClient> Connections;
 
     public delegate void LobbyPlayerEvent(PlayerDetails details);
     public LobbyPlayerEvent OnPlayerRecieved;
@@ -132,6 +140,9 @@ public class Peer2PeerTransport : NetworkManager
         // Reinitialize player lookups
         players = new();
         playerIndex = 0;
+        connections = new();
+        playersForConnection = new();
+        Connections = new(connections);
     }
 
     #region Player joining 
@@ -199,9 +210,15 @@ public class Peer2PeerTransport : NetworkManager
     {
         // Avoid adding more than the four allowed players
         // TODO prevent this in some other more sustainable way :)))))
-        if (PlayerInputManagerController.Singleton.NetworkClients.Count >= 4)
+        if (NumPlayers >= 4)
             return;
+        // Register connection
         PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
+        if (!connections.Contains(connection))
+            connections.Add(connection);
+        if (!playersForConnection.ContainsKey(connection.connectionId))
+            playersForConnection[connection.connectionId] = new();
+        playersForConnection[connection.connectionId].Add((uint)playerIndex);
 
         var playerType = PlayerType.Local;
         var playerName = "Player";
@@ -384,6 +401,7 @@ public class Peer2PeerTransport : NetworkManager
         var originalSceneName = SceneManager.GetActiveScene().name;
         switch (newSceneName)
         {
+            // TODO consider just pushing music change into this switch block
             case Scenes.Bidding:
                 NetworkClient.ReplaceHandler<InitializePlayerMessage>(InitializeBiddingPlayer);
                 PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");

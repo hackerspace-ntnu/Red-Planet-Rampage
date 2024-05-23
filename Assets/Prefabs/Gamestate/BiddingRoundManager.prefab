@@ -956,6 +956,7 @@ GameObject:
   - component: {fileID: 6490865783486692312}
   - component: {fileID: 7844404747135833139}
   - component: {fileID: 6019567151198838881}
+  - component: {fileID: 8561355672590269631}
   m_Layer: 0
   m_Name: BiddingRoundManager
   m_TagString: Untagged
@@ -1034,6 +1035,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d488a44f13f1ff5bab7892dee8efb65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   graceTime: 1
   loadingScreen: {fileID: 0}
 --- !u!114 &7844404747135833139
@@ -1156,6 +1160,23 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &8561355672590269631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4050072464816692167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 2732714805
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &6408112230741397567
 GameObject:
   m_ObjectHideFlags: 0
