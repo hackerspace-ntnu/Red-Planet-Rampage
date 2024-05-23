@@ -20,6 +20,10 @@ public class PlatformMovement : MonoBehaviour
     private int nextRoutepointIndex;
     private float travelDistance;
 
+    // TODO synchronize platform movement somehow
+    //      - probably just slap a networktransform on it, with *server* authority
+    //      - fix whatever it was that caused the player object to disappear last time 🤔
+    //      - this *could* make things a lil' jittery though?
     private void Start()
     {
         nextRoutepointIndex = 0;

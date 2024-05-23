@@ -90,6 +90,7 @@ public class AuctionDriver : MonoBehaviour
         foreach (var stage in availableAuctionStages)
         {
             // Ensure they all use the same seed
+            // TODO actually, the stages could use random from the server exclusively and be networked
             stage.Random = random;
         }
 
@@ -189,6 +190,7 @@ public class AuctionDriver : MonoBehaviour
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
         PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(playerInput => playerInput.RemoveListeners());
     }
+
     private IEnumerator AnimateGunConstruction(PlayerManager playerManager, RectTransform parent)
     {
         yield return new WaitForSeconds(1);

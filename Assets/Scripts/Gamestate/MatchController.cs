@@ -175,10 +175,10 @@ public class MatchController : MonoBehaviour
         // TODO add a timeout thingy for when one player doesn't join in time
         // TODO keep loading screen open while this while loop spins
         // Spin while waiting for players to spawn
-        while (players.Count < Peer2PeerTransport.NumPlayersInMatch)
+        while (players.Count < Peer2PeerTransport.NumPlayers)
         {
 #if UNITY_EDITOR
-            Debug.Log($"{players.Count} of {Peer2PeerTransport.NumPlayersInMatch} players spawned");
+            Debug.Log($"{players.Count} of {Peer2PeerTransport.NumPlayers} players spawned");
 #endif
             yield return null;
         }
@@ -201,6 +201,7 @@ public class MatchController : MonoBehaviour
         loadingScreen.SetActive(true);
         yield return new WaitForSeconds(loadingDuration);
 
+        // TODO only switch to this track after auction has loaded!
         MusicTrackManager.Singleton.SwitchTo(MusicType.Bidding);
         onBiddingStart?.Invoke();
         NetworkManager.singleton.ServerChangeScene(Scenes.Bidding);
@@ -323,7 +324,6 @@ public class MatchController : MonoBehaviour
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         rounds = new List<Round>();
-        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
         NetworkManager.singleton.ServerChangeScene(Scenes.Menu);
     }
 }
