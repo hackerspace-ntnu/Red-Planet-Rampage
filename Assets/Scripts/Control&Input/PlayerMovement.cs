@@ -130,7 +130,8 @@ public class PlayerMovement : MonoBehaviour
     public Vector2 AimAngle => aimAngle;
 
     public delegate void MovementEventBody(Rigidbody body);
-    public MovementEventBody onMove;
+    public MovementEventBody OnMove;
+    public MovementEventBody OnJumpPerformed;
 
     private int gunCrouchPerformedTween;
     private int cameraCrouchPerformedTween;
@@ -407,6 +408,7 @@ public class PlayerMovement : MonoBehaviour
 
         var yDrag = body.velocity.y < 0 ? 0f : body.velocity.y;
         body.AddForce(-dragForce * body.mass * new Vector3(body.velocity.x, yDrag, body.velocity.z), ForceMode.Force);
+        OnJumpPerformed?.Invoke(body);
     }
 
     private void UpdateRotation()
@@ -531,7 +533,7 @@ public class PlayerMovement : MonoBehaviour
     {
         UpdateRotation();
         UpdateAnimatorParameters();
-        onMove?.Invoke(body);
+        OnMove?.Invoke(body);
     }
 
     private void OnDestroy()

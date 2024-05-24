@@ -52,6 +52,7 @@ public class PlayerInputManagerController : MonoBehaviour
         #endregion Singleton boilerplate
         PlayerInputManager = PlayerInputManager.instance;
         DontDestroyOnLoad(gameObject);
+        Cursor.visible = false;
     }
 
     public void RemoveJoinListener()
@@ -81,6 +82,8 @@ public class PlayerInputManagerController : MonoBehaviour
         inputManager.PlayerCamera.enabled = false;
         LocalPlayerInputs.Add(inputManager);
         onPlayerInputJoined?.Invoke(inputManager);
+        if (inputManager.IsMouseAndKeyboard)
+            Cursor.visible = true;
 
         if (NetworkManager.singleton.isNetworkActive)
             NetworkClient.Send(new PlayerConnectedMessage(LocalPlayerInputs.Count - 1));

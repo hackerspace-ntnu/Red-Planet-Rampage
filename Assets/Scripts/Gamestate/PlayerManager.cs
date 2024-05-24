@@ -234,7 +234,7 @@ public class PlayerManager : NetworkBehaviour
         var playerMovement = GetComponent<PlayerMovement>();
         playerMovement.enabled = true;
         playerMovement.SetPlayerInput(inputManager);
-        playerMovement.onMove += UpdateHudOnMove;
+        playerMovement.OnMove += UpdateHudOnMove;
         // Subscribe relevant input events
         inputManager.onFirePerformed += Fire;
         inputManager.onFireCanceled += FireEnd;
@@ -285,7 +285,7 @@ public class PlayerManager : NetworkBehaviour
         }
         if (TryGetComponent(out PlayerMovement playerMovement))
         {
-            playerMovement.onMove -= UpdateHudOnMove;
+            playerMovement.OnMove -= UpdateHudOnMove;
         }
         if (hudController)
             identity.onChipChange -= hudController.OnChipChange;
