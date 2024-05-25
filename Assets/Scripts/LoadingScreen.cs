@@ -30,6 +30,7 @@ public class LoadingScreen : MonoBehaviour
 
     private Vector2 backgroundVelocity;
 
+    // TODO turn into dontdestroyonload singleton actually
     private void Awake()
     {
         backgroundVelocity = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized * Random.Range(.5f, 1.5f);

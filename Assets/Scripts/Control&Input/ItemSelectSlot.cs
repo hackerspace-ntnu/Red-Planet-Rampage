@@ -75,7 +75,7 @@ public class ItemSelectSlot : MonoBehaviour
 
             var scale = itemModelScale;
             // Items are tiiiny when we are at 3-4 splitscreens, so scale them up.
-            if (MatchController.Singleton.HumanPlayers.Count() > 2)
+            if (PlayerInputManagerController.Singleton.LocalPlayerInputs.Count > 2)
                 scale *= 3;
 
             // Item is an augment

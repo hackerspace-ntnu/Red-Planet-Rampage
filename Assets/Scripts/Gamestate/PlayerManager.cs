@@ -106,6 +106,8 @@ public class PlayerManager : NetworkBehaviour
         set
         {
             selectedBiddingPlatform = value;
+            // TODO this is somehow not listened to on network players
+            Debug.Log($"CHNAGED BIDDING PLATFOR FOR PLAYER {id}");
             onSelectedBiddingPlatformChange?.Invoke(value);
         }
     }
@@ -356,7 +358,7 @@ public class PlayerManager : NetworkBehaviour
     private void TryPlaceBid(InputAction.CallbackContext ctx)
     {
         if (!selectedBiddingPlatform) return;
-        selectedBiddingPlatform.TryPlaceBid(identity);
+        selectedBiddingPlatform.PlaceBid(identity);
     }
 
     protected IEnumerator UnpressTrigger()

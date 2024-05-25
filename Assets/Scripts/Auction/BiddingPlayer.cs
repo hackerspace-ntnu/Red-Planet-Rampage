@@ -23,8 +23,11 @@ public class BiddingPlayer : MonoBehaviour
     private void Start()
     {
         GetComponent<PlayerIK>().RightHandIKTarget = signTarget;
-        if (NetworkManager.singleton.isNetworkActive)
-            return;
+
+        playerManager.identity.onChipChange += AnimateChipStatus;
+        playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
+        chipText.text = playerManager.identity.chips.ToString();
+
         SetPlayerInput();
     }
 
@@ -34,8 +37,6 @@ public class BiddingPlayer : MonoBehaviour
         {
             playerManager.inputManager.onFirePerformed += AnimateBid;
             playerManager.inputManager.onSelect += AnimateBid;
-            playerManager.identity.onChipChange += AnimateChipStatus;
-            playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
         }
 
         chipText.text = playerManager.identity.chips.ToString();
@@ -71,7 +72,7 @@ public class BiddingPlayer : MonoBehaviour
 
     protected void AnimateSign(BiddingPlatform platform)
     {
-        bool isLeaderAndCanBid = (platform.LeadingBidder == playerManager.identity) && (playerManager.identity.chips > 0);
+        bool isLeaderAndCanBid = (platform.LeadingBidder == playerManager.id) && (playerManager.identity.chips > 0);
         if (platform.chips < playerManager.identity.chips || isLeaderAndCanBid)
         {
             if (LeanTween.isTweening(signCross.gameObject))

@@ -82,6 +82,19 @@ namespace CollectionExtensions
             T[] newArr = (T[])arr.Clone();
             return newArr.Shuffle();
         }
+
+        public static string ToCommaSeparatedString(this IEnumerable<string> values)
+        {
+            var output = "";
+            foreach (var value in values)
+            {
+                if (output == "")
+                    output = value;
+                else
+                    output = $"{output}, {value}";
+            }
+            return output;
+        }
     }
 
     public static class ArrayExtensions

@@ -12,7 +12,7 @@ using UnityEngine;
 //
 [RequireComponent(typeof(Timer))]
 [RequireComponent(typeof(PlayerFactory))]
-public class AuctionDriver : MonoBehaviour
+public class AuctionDriver : NetworkBehaviour
 {
     [SerializeField]
     private float biddingBeginDelay = 5f;
@@ -95,9 +95,6 @@ public class AuctionDriver : MonoBehaviour
         }
 
         playerFactory = GetComponent<PlayerFactory>();
-        var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
-            Mathf.Max(4 - PlayerInputManagerController.Singleton.LocalPlayerInputs.Count, 0) : 0;
-        playerFactory.InstantiatePlayersBidding(aiPlayerCount);
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
 
         AnimateAuctionStart();
@@ -177,6 +174,22 @@ public class AuctionDriver : MonoBehaviour
 
     private void EndAuction(BiddingPlatform biddingPlatform)
     {
+        if (isServer)
+            StartCoroutine(WaitAndSwitchToItemSelect());
+    }
+
+    private IEnumerator WaitAndSwitchToItemSelect()
+    {
+        // Wait a couple o' frames so gun parts are sent to their respective players
+        yield return null;
+        yield return null;
+        Peer2PeerTransport.UpdatePlayerDetailsAfterAuction();
+        RpcSwitchToItemSelect();
+    }
+
+    [ClientRpc]
+    private void RpcSwitchToItemSelect()
+    {
         lastExtendedAuction.onBiddingEnd = null;
         Camera.GetComponent<Camera>().enabled = false;
         extraCamera.enabled = true;
@@ -188,7 +201,6 @@ public class AuctionDriver : MonoBehaviour
     public void ChangeScene()
     {
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
-        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(playerInput => playerInput.RemoveListeners());
     }
 
     private IEnumerator AnimateGunConstruction(PlayerManager playerManager, RectTransform parent)
