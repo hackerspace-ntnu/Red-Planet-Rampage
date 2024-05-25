@@ -123,6 +123,9 @@ public class Peer2PeerTransport : NetworkManager
 
     private static List<uint> localPlayerIds = new();
 
+    private static Dictionary<uint, PlayerManager> playerInstances = new();
+    public static ReadOnlyDictionary<uint, PlayerManager> PlayerInstanceByID;
+
     /// <summary>
     /// List of client connections. Will be uninitialized on clients.
     /// </summary>
@@ -141,6 +144,8 @@ public class Peer2PeerTransport : NetworkManager
 
         // Reinitialize player lookups
         players = new();
+        playerInstances = new();
+        PlayerInstanceByID = new(playerInstances);
         playerIndex = 0;
         connections = new();
         playersForConnection = new();
@@ -163,6 +168,8 @@ public class Peer2PeerTransport : NetworkManager
         PlayerInputManagerController.Singleton.JoinAllInputs();
 
         players = new();
+        playerInstances = new();
+        PlayerInstanceByID = new(playerInstances);
         playerIndex = 0;
     }
 
@@ -355,7 +362,7 @@ public class Peer2PeerTransport : NetworkManager
     // Separated from loadout update due to inconsistent timing :)))))
     public static void UpdatePlayerDetailsAfterAuction()
     {
-        foreach (var player in MatchController.Singleton.Players)
+        foreach (var player in playerInstances.Values)
         {
             UpdatePlayerInventoryForIdentity(player.identity);
         }
@@ -636,7 +643,7 @@ public class Peer2PeerTransport : NetworkManager
             playerManager.SetGun(gunHolder);
         }
 
-        playerManager.ApplyColorFromIdentity();
+        playerManager.ApplyIdentity();
 
         // This ensures that behaviours on the gun have identities.
         // SHOULD be safe to initialize them here as this is at roughly the same point on all clients
@@ -646,6 +653,8 @@ public class Peer2PeerTransport : NetworkManager
         {
             MatchController.Singleton.RegisterPlayer(playerManager);
         }
+
+        playerInstances[player.id] = player;
     }
 
     #endregion
@@ -665,13 +674,13 @@ public class Peer2PeerTransport : NetworkManager
     private IEnumerator WaitAndInitializeBiddingPlayer(InitializePlayerMessage message)
     {
         // Wait until players must've been spawned
-        // TODO find a better way to wait for that
-        // TODO that is, move to OnWhateverAuthority overrid on PlayerManager :)
-        yield return null;
-        yield return null;
-
-        var player = FindObjectsOfType<PlayerManager>()
-            .FirstOrDefault(p => p.id == message.id);
+        PlayerManager player = null;
+        while (player == null)
+        {
+            player = FindObjectsOfType<PlayerManager>()
+               .FirstOrDefault(p => p.id == message.id);
+            yield return null;
+        }
 
         if (!player)
         {
@@ -733,7 +742,7 @@ public class Peer2PeerTransport : NetworkManager
             playerManager.GetComponent<Rigidbody>().isKinematic = true;
         }
 
-        playerManager.ApplyColorFromIdentity();
+        playerManager.ApplyIdentity();
 
         // This ensures that behaviours on the gun have identities.
         // SHOULD be safe to initialize them here as this is at roughly the same point on all clients
@@ -743,6 +752,8 @@ public class Peer2PeerTransport : NetworkManager
         {
             MatchController.Singleton.RegisterPlayer(playerManager);
         }
+
+        playerInstances[player.id] = player;
     }
 
     #endregion

@@ -107,8 +107,6 @@ public class PlayerManager : NetworkBehaviour
         set
         {
             selectedBiddingPlatform = value;
-            // TODO this is somehow not listened to on network players
-            Debug.Log($"CHNAGED BIDDING PLATFOR FOR PLAYER {id}");
             onSelectedBiddingPlatformChange?.Invoke(value);
         }
     }
@@ -256,14 +254,16 @@ public class PlayerManager : NetworkBehaviour
         {
             biddingPlayer.SetPlayerInput();
         }
-
-        ApplyColorFromIdentity();
     }
 
-    public void ApplyColorFromIdentity()
+    public void ApplyIdentity()
     {
         // Set player color
         meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
+        if (playerIK.TryGetComponent<BiddingPlayer>(out var biddingPlayer))
+        {
+            biddingPlayer.SetIdentity();
+        }
     }
 
     void OnDestroy()

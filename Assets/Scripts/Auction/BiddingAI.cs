@@ -34,7 +34,7 @@ public class BiddingAI : BiddingPlayer
     public void SetIdentity(PlayerIdentity identity)
     {
         chipText.text = identity.chips.ToString();
-        identity.onChipChange += AnimateChipStatus;
+        identity.onChipChange += UpdateChipStatus;
     }
 
     private IEnumerator WaitAndEvaluate()

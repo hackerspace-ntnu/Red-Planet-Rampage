@@ -143,8 +143,6 @@ public class PlayerIdentity : MonoBehaviour
         color = playerDetails.color;
 
         chips = playerDetails.chips;
-        // TODO find some other way of updating bidding sign on load
-        onChipChange?.Invoke(chips);
 
         SetItems(playerDetails.bodies, playerDetails.barrels, playerDetails.extensions);
         SetLoadout(playerDetails.body, playerDetails.barrel, playerDetails.extension);
