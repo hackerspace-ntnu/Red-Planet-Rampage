@@ -65,9 +65,6 @@ public class MainMenuController : MonoBehaviour
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
 
-    [SerializeField]
-    private GameObject loadingScreen;
-
     private int loadingDuration = 6;
 
     private Coroutine introRoutine;
@@ -225,31 +222,23 @@ public class MainMenuController : MonoBehaviour
     }
 
     /// <summary>
-    /// Function to be called as an onclick event from a button
+    /// Starts a match in the specified scene.
+    /// Function to be called as an onclick event from a button.
     /// </summary>
     /// <param name="sceneName"></param>
     public void ChangeScene(string name)
     {
         PlayerInputManagerController.Singleton.RemoveJoinListener();
-        StartCoroutine(LoadAndChangeScene(name));
+        ((Peer2PeerTransport)NetworkManager.singleton).StartMatch(name);
     }
 
-    private IEnumerator LoadAndChangeScene(string name)
+    /// <summary>
+    /// Disable menus we may enter a new scene from.
+    /// </summary>
+    public void DisableSceneSwitching()
     {
-        // Disable menus we may enter a new scene from
         defaultMenu.SetActive(false);
         mapSelectMenu.SetActive(false);
-        // Show loading screen and switch scenes eventually
-        loadingScreen.SetActive(true);
-#if UNITY_EDITOR
-        yield return new WaitForSeconds(.5f);
-#else
-        yield return new WaitForSeconds(loadingDuration);
-#endif      
-        if (NetworkManager.singleton.isNetworkActive)
-            NetworkManager.singleton.ServerChangeScene(name);
-        else
-            SceneManager.LoadSceneAsync(name);
     }
 
     /// <summary>

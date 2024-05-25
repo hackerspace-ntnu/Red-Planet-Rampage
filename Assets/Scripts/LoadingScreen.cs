@@ -7,6 +7,9 @@ using CollectionExtensions;
 
 public class LoadingScreen : MonoBehaviour
 {
+    public static LoadingScreen Singleton { get; private set; }
+
+    [Header("Related objects")]
     [SerializeField] private Image radialTimer;
 
     [SerializeField] private GameObject loadingBar;
@@ -23,8 +26,15 @@ public class LoadingScreen : MonoBehaviour
 
     [SerializeField] private RawImage background;
 
+    [Header("Timing")]
+    [SerializeField] private float mandatoryDuration = 4;
+    public float MandatoryDuration => mandatoryDuration;
+
+    [SerializeField] private float normalRotationSpeed = 60;
+    [SerializeField] private float fastRotationSpeed = 120;
+
     private float incrementTimer = 360f;
-    private float rotateSpeed = 60;
+    private float rotationSpeed = 60;
 
     private static int loadingCounter = 0;
 
@@ -33,32 +43,50 @@ public class LoadingScreen : MonoBehaviour
     // TODO turn into dontdestroyonload singleton actually
     private void Awake()
     {
-        backgroundVelocity = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized * Random.Range(.5f, 1.5f);
-        if (backgroundVelocity.magnitude < .1) backgroundVelocity = new Vector2(.5f, .8f);
+        #region Singleton boilerplate
 
-        PlayerInputManagerController.Singleton.RemoveListeners();
-        loadingCounter += 1;
+        if (Singleton != null)
+        {
+            if (Singleton != this)
+            {
+                Debug.LogWarning($"There's more than one {Singleton.GetType()} in the scene!");
+                Destroy(gameObject);
+            }
+
+            return;
+        }
+
+        Singleton = this;
+
+        #endregion Singleton boilerplate
+
+#if UNITY_EDITOR
+        mandatoryDuration = 1;
+#endif
+
+        DontDestroyOnLoad(gameObject);
     }
 
-    private void OnEnable()
-    {
-        ShowContent();
-        StartCoroutine(UpdateTimer());
-    }
-
-    private IEnumerator UpdateTimer()
+    private void Start()
     {
         radialTimer.material = Instantiate(radialTimer.material);
+        Hide();
+    }
+
+    private IEnumerator UpdateTimer(float duration)
+    {
+        var secondsPerChamber = duration / 6f;
+        rotationSpeed = normalRotationSpeed;
 
         for (int i = 0; i < 6; i++)
         {
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(secondsPerChamber);
             incrementTimer -= 60f;
             radialTimer.material.SetFloat("_Arc2", incrementTimer);
 
             if (i == 4)
             {
-                rotateSpeed *= 2;
+                rotationSpeed = fastRotationSpeed;
             }
         }
     }
@@ -68,13 +96,27 @@ public class LoadingScreen : MonoBehaviour
         loadingCounter = 0;
     }
 
-    private void ShowContent()
+    public void Show()
     {
+        enabled = true;
+        gameObject.transform.GetChild(0).gameObject.SetActive(true);
+
+        // Old stuff, move if necessary
+        backgroundVelocity = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized * Random.Range(.5f, 1.5f);
+        if (backgroundVelocity.magnitude < .1) backgroundVelocity = new Vector2(.5f, .8f);
+        PlayerInputManagerController.Singleton.RemoveListeners();
+        loadingCounter += 1;
+        StartCoroutine(UpdateTimer(mandatoryDuration));
+
         tipsText.text = "";
         staticText.SetActive(false);
 
         var isFirstLoadingScreen = loadingCounter == 1;
         var isBeforeFirstAuction = MatchController.Singleton?.RoundCount == 1 && !MatchController.Singleton.IsAuction;
+
+        keybinds.SetActive(false);
+        auctionInstructions.SetActive(false);
+        staticText.SetActive(false);
 
         if (isFirstLoadingScreen)
         {
@@ -91,9 +133,15 @@ public class LoadingScreen : MonoBehaviour
         }
     }
 
+    public void Hide()
+    {
+        enabled = false;
+        gameObject.transform.GetChild(0).gameObject.SetActive(false);
+    }
+
     private void Update()
     {
-        loadingBar.transform.Rotate(Vector3.forward, Time.deltaTime * rotateSpeed);
+        loadingBar.transform.Rotate(Vector3.forward, Time.deltaTime * rotationSpeed);
 
         var uv = background.uvRect;
         background.uvRect = new Rect(uv.x + backgroundVelocity.x * Time.deltaTime, uv.y + backgroundVelocity.y * Time.deltaTime, uv.width, uv.height);

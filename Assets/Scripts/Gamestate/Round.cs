@@ -98,7 +98,8 @@ public class Round
         MatchController.Singleton.onOutcomeDecided -= OnOutcomeDecided;
     }
 
-    //TODO: Use DamageInfo?
+    // TODO Fix edgecases where one player sets off an explosion that kills both itself and another player.
+    //      Due to nondeterministic execution order differences, we should wait until the next fram to determine a winner.
     private void OnDeath(PlayerManager killer, PlayerManager victim, DamageInfo info)
     {
 #if DEBUG

@@ -69,6 +69,8 @@ public struct UpdateLoadoutMessage : NetworkMessage
     public string extension;
 }
 
+public struct StartMatchMessage : NetworkMessage { }
+
 public struct SpawnPlayerMessage : NetworkMessage
 {
     public SpawnPlayerMessage(uint id, PlayerType type)
@@ -151,6 +153,7 @@ public class Peer2PeerTransport : NetworkManager
     {
         base.OnClientConnect();
 
+        NetworkClient.RegisterHandler<StartMatchMessage>(OnStartMatch);
         NetworkClient.RegisterHandler<InitialPlayerDetailsMessage>(OnReceivePlayerDetails);
         NetworkClient.RegisterHandler<InitializePlayerMessage>(InitializeFPSPlayer);
         NetworkClient.RegisterHandler<UpdatedPlayerDetailsMessage>(OnReceiveUpdatedPlayerDetails);
@@ -205,6 +208,27 @@ public class Peer2PeerTransport : NetworkManager
     }
 
     // TODO custom method for leaving training mode :)
+    // TODO handle leaving of match/lobby better
+
+    public void StartMatch(string mapName)
+    {
+        NetworkServer.SendToAll(new StartMatchMessage());
+        StartCoroutine(WaitAndStartMatch(mapName));
+    }
+
+    private IEnumerator WaitAndStartMatch(string mapName)
+    {
+        yield return new WaitForSeconds(LoadingScreen.Singleton.MandatoryDuration);
+        ServerChangeScene(mapName);
+    }
+
+    private void OnStartMatch(StartMatchMessage message)
+    {
+        var mainMenuController = FindAnyObjectByType<MainMenuController>();
+        if (mainMenuController)
+            mainMenuController.DisableSceneSwitching();
+        LoadingScreen.Singleton.Show();
+    }
 
     private void OnSpawnPlayerInput(NetworkConnectionToClient connection, PlayerConnectedMessage message)
     {

@@ -100,6 +100,7 @@ public class AuctionDriver : NetworkBehaviour
         AnimateAuctionStart();
         StartCoroutine(WaitAndStartCameraAnimation());
         StartCoroutine(PopulatePlatforms());
+        LoadingScreen.Singleton.Hide();
     }
 
     private void OnDestroy()
@@ -196,11 +197,6 @@ public class AuctionDriver : NetworkBehaviour
         PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = true;
         playerFactory.InstantiatePlayerSelectItems();
         GetComponent<ItemSelectManager>().StartTrackingMenus();
-    }
-
-    public void ChangeScene()
-    {
-        StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
     }
 
     private IEnumerator AnimateGunConstruction(PlayerManager playerManager, RectTransform parent)

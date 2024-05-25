@@ -30,8 +30,6 @@ public class ItemSelectManager : NetworkBehaviour
 
     private Coroutine waitRoutine;
 
-    [SerializeField] private GameObject loadingScreen;
-
     private int delayDuration = 2;
 
     // TODO network version of this thing
@@ -68,19 +66,16 @@ public class ItemSelectManager : NetworkBehaviour
             .ToDictionary(c => c.connectionId, c => false);
     }
 
-    // TODO send signal to other players that they also should change scene!
+    [Server]
     private void Finish()
     {
-        StartCoroutine(LoadAndChangeScene());
+        RpcFinish();
     }
 
-    private IEnumerator LoadAndChangeScene()
+    [ClientRpc]
+    private void RpcFinish()
     {
-        // Prevent new inputs from messing with things
-        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(playerInput => playerInput.RemoveListeners());
-        loadingScreen.SetActive(true);
-        yield return new WaitForSeconds(delayDuration);
-        AuctionDriver.Singleton.ChangeScene();
+        StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
     }
 
     private IEnumerator WaitAndFinish()
