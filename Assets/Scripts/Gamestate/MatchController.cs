@@ -82,9 +82,6 @@ public class MatchController : MonoBehaviour
     private bool isAuction = false;
     public bool IsAuction => isAuction;
 
-    [SerializeField]
-    private GameObject loadingScreen;
-
     private int loadingDuration = 6;
 
     private void Awake()
@@ -159,6 +156,7 @@ public class MatchController : MonoBehaviour
     // TODO give players start amount worth of chips (on match start only)
     private void InitializeRound()
     {
+        LoadingScreen.Singleton.Hide();
         InitializeAIPlayers();
         MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
         onRoundStart?.Invoke();
@@ -186,6 +184,13 @@ public class MatchController : MonoBehaviour
         InitializeRound();
     }
 
+    public IEnumerator WaitAndStartNextBidding()
+    {
+        yield return new WaitForSeconds(roundEndDelay);
+
+        StartNextBidding();
+    }
+
     public void StartNextBidding()
     {
         if (IsWin())
@@ -198,15 +203,15 @@ public class MatchController : MonoBehaviour
 
     private IEnumerator ShowLoadingScreenBeforeBidding()
     {
-        loadingScreen.SetActive(true);
-        yield return new WaitForSeconds(loadingDuration);
+        LoadingScreen.Singleton.Show();
+        yield return new WaitForSeconds(LoadingScreen.Singleton.MandatoryDuration);
 
         // TODO only switch to this track after auction has loaded!
         MusicTrackManager.Singleton.SwitchTo(MusicType.Bidding);
         onBiddingStart?.Invoke();
-        NetworkManager.singleton.ServerChangeScene(Scenes.Bidding);
         PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = false;
         isAuction = true;
+        NetworkManager.singleton.ServerChangeScene(Scenes.Bidding);
     }
 
     public void EndActiveRound()
@@ -228,17 +233,10 @@ public class MatchController : MonoBehaviour
         onRoundEnd?.Invoke();
     }
 
-    public IEnumerator WaitAndStartNextBidding()
-    {
-        yield return new WaitForSeconds(roundEndDelay);
-
-        StartNextBidding();
-    }
-
-    // TODO just move this to AuctionDriver, perhaps. it doesn't make a real difference.
     public IEnumerator WaitAndStartNextRound()
     {
-        yield return new WaitForSeconds(biddingEndDelay);
+        LoadingScreen.Singleton.Show();
+        yield return new WaitForSeconds(LoadingScreen.Singleton.MandatoryDuration);
         NetworkManager.singleton.ServerChangeScene(currentMapName);
     }
 

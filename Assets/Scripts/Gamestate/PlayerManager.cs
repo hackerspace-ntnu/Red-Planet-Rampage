@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(AudioSource))]
