@@ -50,9 +50,7 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
         var stuck = Instantiate(stuckObject, hit.collider.ClosestPoint(state.position), state.rotation);
         stuck.transform.ParentUnscaled(hit.collider.transform);
         if (stuck.TryGetComponent<ContinuousDamage>(out var continuousDamage))
-        {
             continuousDamage.source = source;
-        }
         Destroy(stuck, stuckLifeTime);
     }
 }

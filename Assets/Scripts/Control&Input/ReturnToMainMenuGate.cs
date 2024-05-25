@@ -1,3 +1,4 @@
+using Mirror;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -18,7 +19,9 @@ public class ReturnToMainMenuGate : MonoBehaviour, Interactable
     private void ReturnToMainMenu()
     {
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
-        SceneManager.LoadSceneAsync("Menu");
+        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
+        // TODO Is this really correct?
+        NetworkManager.singleton.StopHost();
+        SceneManager.LoadSceneAsync(Scenes.Menu);
     }
 }

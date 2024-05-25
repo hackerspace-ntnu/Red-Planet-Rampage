@@ -20,13 +20,7 @@ public class Telescope : GunExtension
     void Start()
     {
         gunController = transform.parent.GetComponent<GunController>();
-        if (!gunController)
-        {
-            Debug.Log("Telescope not attached to gun parent!");
-            return;
-        }
-
-        if (!gunController.Player)
+        if (!gunController || !gunController.Player || !gunController.Player.HUDController)
             return;
 
         var playerMovement = gunController.Player.GetComponent<PlayerMovement>();
@@ -66,7 +60,7 @@ public class Telescope : GunExtension
 
     private void OnDestroy()
     {
-        if (!gunController || !gunController.Player)
+        if (!gunController || !gunController.Player || !gunController.Player.HUDController)
             return;
         var playerMovement = gunController.Player.GetComponent<PlayerMovement>();
         playerMovement.ZoomFov = originalZoomFov;

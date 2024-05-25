@@ -13,7 +13,7 @@ public class GunExtension : Augment
     /// </summary>
     /// <param name="transforms">The barrel's attachment points</param>
     /// <returns>Combined output transforms from barrel and extension</returns>
-    public Transform[] AttachToTransforms(Transform[] transforms)
+    public virtual Transform[] AttachToTransforms(Transform[] transforms)
     {
         var attachedOutputs = new List<Transform>();
         foreach (var t in transforms[1..])

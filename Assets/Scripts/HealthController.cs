@@ -1,6 +1,7 @@
+using Mirror;
 using UnityEngine;
 
-public class HealthController : MonoBehaviour
+public class HealthController : NetworkBehaviour
 {
     [SerializeField]
     private int maxhHealth = 100;
@@ -19,9 +20,9 @@ public class HealthController : MonoBehaviour
 
     private void Awake()
     {
-        foreach (var box in GetComponentsInChildren<HitboxController>())
+        foreach (var hitbox in GetComponentsInChildren<HitboxController>())
         {
-            box.health = this;
+            hitbox.health = this;
         }
     }
 
@@ -33,7 +34,28 @@ public class HealthController : MonoBehaviour
 
     public void DealDamage(DamageInfo info)
     {
+        if (!isNetworked)
+        {
+            ActuallyDealDamage(info);
+        }
+        else if (isServer)
+        {
+            Debug.Log($"Dealing {info.damage} from {info.sourcePlayer.identity.playerName} on server");
+            var networkInfo = new NetworkDamageInfo(info.sourcePlayer.id, info);
+            DealDamageRpc(networkInfo);
+        }
+    }
 
+    [ClientRpc]
+    private void DealDamageRpc(NetworkDamageInfo networkInfo)
+    {
+        var source = MatchController.Singleton ? MatchController.Singleton.PlayerById[networkInfo.sourcePlayer] : null;
+        var info = new DamageInfo(source, networkInfo);
+        ActuallyDealDamage(info);
+    }
+
+    private void ActuallyDealDamage(DamageInfo info)
+    {
         currentHealth -= info.damage;
         onDamageTaken?.Invoke(this, info.damage, info);
         if (currentHealth <= 0)

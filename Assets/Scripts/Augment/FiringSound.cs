@@ -1,6 +1,3 @@
-using CollectionExtensions;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
@@ -17,10 +14,9 @@ public class FiringSound : MonoBehaviour
         var projectile = GetComponent<ProjectileController>();
         projectile.OnProjectileInit += (ref ProjectileState state, GunStats stats) => PlaySound(firingSound);
     }
+
     private void PlaySound(AudioGroup sound)
     {
         sound.Play(audioSource);
     }
-
-
 }

@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 using TMPro;
 using SecretName;
 
@@ -14,16 +13,8 @@ public class ItemSelectMenu : MonoBehaviour
     [SerializeField]
     private GameObject handleModel;
 
-    [Header("Timer")]
-
     [SerializeField]
     private Timer timer;
-
-    [SerializeField]
-    private TMP_Text timerText;
-
-    [SerializeField]
-    private Image timerRadialProgress;
 
     [SerializeField]
     private Transform cameraPosition;
@@ -44,7 +35,7 @@ public class ItemSelectMenu : MonoBehaviour
     private PlayerStatUI playerStatUI;
 
     [SerializeField]
-    private TMP_Text secretName;
+    private SecretNameTextAnimator secretName;
 
     [SerializeField]
     private RectTransform readyIndicator;
@@ -137,11 +128,7 @@ public class ItemSelectMenu : MonoBehaviour
         inputManager.onSelect += SelectPerformed;
 
         timer.StartTimer(20f);
-        timer.OnTimerUpdate += OnTimerUpdate;
         timer.OnTimerRunCompleted += OnTimerRunCompleted;
-
-        timerRadialProgress.material = Instantiate(timerRadialProgress.material);
-        timerRadialProgress.material.SetFloat("_Arc2", 0);
     }
 
 
@@ -167,12 +154,12 @@ public class ItemSelectMenu : MonoBehaviour
 
         if (moveInput.y > 1 - errorMarginInput && gamepadMoveReady)
         {
-            MoveUpPerformed();
+            MoveDownPerformed();
             DelayIfGamepad();
         }
         else if (moveInput.y < -1 + errorMarginInput && gamepadMoveReady)
         {
-            MoveDownPerformed();
+            MoveUpPerformed();
             DelayIfGamepad();
         }
         else if (moveInput.x < -1 + errorMarginInput && gamepadMoveReady)
@@ -233,7 +220,7 @@ public class ItemSelectMenu : MonoBehaviour
     private void MoveUpPerformed()
     {
         audioSource.clip = scrollAudio;
-        audioSource.Play(); 
+        audioSource.Play();
         selectedSlot.Previous();
         var selectedItem = selectedSlot.SelectedItem;
         playerStatUI.SetDescription(selectedItem == null ? "" : selectedItem.displayDescription);
@@ -257,7 +244,9 @@ public class ItemSelectMenu : MonoBehaviour
             barrelSlot.SelectedItem,
             extensionSlot.SelectedItem);
         playerStatUI.UpdateStats();
-        secretName.text = player.GetGunName();
+        secretName.textMesh.text = player.GetGunName(out bool isSecret);
+        bool isInteresting = isSecret && !secretName.textMesh.text.Equals("The Starter");
+        secretName.IsAnimated = isInteresting;
     }
 
     private void SelectPerformed(InputAction.CallbackContext ctx)
@@ -294,13 +283,6 @@ public class ItemSelectMenu : MonoBehaviour
     {
         isReady = true;
         OnReady?.Invoke(this);
-    }
-
-    // TODO Move timer up to manager?
-    private void OnTimerUpdate()
-    {
-        timerText.text = Mathf.Round(timer.WaitTime - timer.ElapsedTime).ToString();
-        timerRadialProgress.material.SetFloat("_Arc1", 360f - 360f * ((timer.WaitTime - timer.ElapsedTime) / timer.WaitTime));
     }
 }
 

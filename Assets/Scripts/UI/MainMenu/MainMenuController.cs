@@ -1,8 +1,8 @@
 using CollectionExtensions;
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -13,7 +13,7 @@ using UnityEngine.Video;
 [RequireComponent(typeof(AudioSource))]
 public class MainMenuController : MonoBehaviour
 {
-    [ReadOnly, SerializeField]
+    [Unity.Collections.ReadOnly, SerializeField]
     private GameObject currentMenu;
     [SerializeField]
     private RectTransform characterView;
@@ -44,12 +44,14 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private GameObject mapSelectMenu;
     [SerializeField]
+    private LevelSelectManager levelSelectManager;
+    [SerializeField]
     private PlayerSelectManager playerSelectManager;
     [SerializeField]
     private ToggleButton aIButton;
     private Vector3 aiButtonOriginalPosition;
     private int aiButtonTween;
-    [SerializeField] 
+    [SerializeField]
     private Button startButton;
     [SerializeField]
     private GameObject inputManagerPrefab;
@@ -63,14 +65,16 @@ public class MainMenuController : MonoBehaviour
 
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
-    private List<GameObject> playerBackgrounds = new List<GameObject>();
 
     [SerializeField]
     private GameObject loadingScreen;
-    
+
     private int loadingDuration = 6;
 
     private Coroutine introRoutine;
+
+    [SerializeField]
+    private GameObject mainMenuCamera;
 
     private void Awake()
     {
@@ -89,7 +93,7 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.AddJoinListener();
         playerInputManagerController.PlayerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
-        if (playerInputManagerController.playerInputs.Count > 0)
+        if (playerInputManagerController.LocalPlayerInputs.Count > 0)
         {
             // Already played, just show the menu.
             TransferExistingInputs();
@@ -204,7 +208,7 @@ public class MainMenuController : MonoBehaviour
     private void TransferExistingInputs()
     {
         playerInputManagerController.ChangeInputMaps("Menu");
-        foreach (InputManager inputs in playerInputManagerController.playerInputs)
+        foreach (InputManager inputs in playerInputManagerController.LocalPlayerInputs)
         {
             AddPlayer(inputs);
         }
@@ -221,6 +225,12 @@ public class MainMenuController : MonoBehaviour
         ToggleMenu(menu, true);
         currentMenu = menu;
         SelectControl(menu.GetComponentInChildren<Selectable>());
+
+        //Change camera angle to level select. Must be done here to not bypass AI-check in playerselect
+        if (menu == mapSelectMenu)
+        {
+            mainMenuCamera.GetComponentInChildren<MainMenuMoveCamera>().MoveToLevelSelect();
+        }
     }
 
     private void ToggleMenu(GameObject menu, bool state)
@@ -237,28 +247,34 @@ public class MainMenuController : MonoBehaviour
     /// <param name="sceneName"></param>
     public void ChangeScene(string name)
     {
-        playerInputManagerController.RemoveJoinListener();
+        PlayerInputManagerController.Singleton.RemoveJoinListener();
         StartCoroutine(LoadAndChangeScene(name));
     }
 
-    private IEnumerator LoadAndChangeScene(string name){
+    private IEnumerator LoadAndChangeScene(string name)
+    {
         // Disable menus we may enter a new scene from
         defaultMenu.SetActive(false);
         mapSelectMenu.SetActive(false);
         // Show loading screen and switch scenes eventually
         loadingScreen.SetActive(true);
+#if UNITY_EDITOR
+        yield return new WaitForSeconds(.5f);
+#else
         yield return new WaitForSeconds(loadingDuration);
-        SceneManager.LoadSceneAsync(name);
+#endif      
+        if (NetworkManager.singleton.isNetworkActive)
+            NetworkManager.singleton.ServerChangeScene(name);
+        else
+            SceneManager.LoadSceneAsync(name);
     }
 
     /// <summary>
     /// Subscribes to onplayerjoined and is responsible for adapting menu to new player inputs.
-    /// Function needs to force the panels to have flex-like properties as Unity doesn't support dynamic "stretch" of multiple elements inside a parent container.
     /// </summary>
     /// <param name="inputManager"></param>
     private void AddPlayer(InputManager inputManager)
     {
-        inputManager.PlayerCamera.enabled = false;
         playerInputs.Add(inputManager);
 
         bool canPlay = playerInputs.Count > 1;
@@ -275,7 +291,9 @@ public class MainMenuController : MonoBehaviour
 
         galleryMenu.SetPlayerInput(inputManager);
         creditsMenu.SetPlayerInput(inputManager);
+        levelSelectManager.SetPlayerInput(inputManager);
 
+        // TODO Remove this once you're sure that UpdateLobby in PlayerSelectManager is called properly (on local joining as well)
         for (int i = 0; i < playerInputs.Count; i++)
         {
             PlayerIdentity playerIdentity = playerInputs[i].GetComponent<PlayerIdentity>();
@@ -301,7 +319,7 @@ public class MainMenuController : MonoBehaviour
 
     public void StartGameButton(Selectable target)
     {
-        bool canPlay = (playerInputManagerController.MatchHasAI || playerInputs.Count > 1);
+        bool canPlay = playerInputManagerController.MatchHasAI || PlayerInputManagerController.Singleton.PlayerCount > 1;
         if (canPlay)
         {
             SwitchToMenu(mapSelectMenu);
@@ -326,6 +344,36 @@ public class MainMenuController : MonoBehaviour
         var colors = startButton.colors;
         colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
         startButton.colors = colors;
+    }
+
+    // Currently invoked when entering characterselect menu
+    // TODO: Make dedicated hosting UI instead.
+    public void HostLocalLobby()
+    {
+        NetworkManager.singleton.StartHost();
+        playerSelectManager.UpdateLobby();
+    }
+
+    public void StartTrainingMode()
+    {
+        Peer2PeerTransport.StartTrainingMode();
+        playerSelectManager.UpdateLobby();
+    }
+
+    public void HostSteamLobby()
+    {
+        if (!SteamManager.IsSteamActive)
+            return;
+        SteamManager.Singleton.HostLobby();
+        playerSelectManager.UpdateLobby();
+    }
+
+    public void LeaveLobby()
+    {
+        if (SteamManager.Singleton.IsHosting)
+            SteamManager.Singleton.LeaveLobby();
+        else
+            NetworkManager.singleton.StopHost();
     }
 
     public void Quit()

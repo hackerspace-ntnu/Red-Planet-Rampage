@@ -15,7 +15,7 @@ public class ScoreboardManager : MonoBehaviour
     public event Action ShowVictoryProgress;
 
     [Header("Variables")]
-    private List<Player> players = new List<Player>();
+    private List<PlayerManager> players = new();
 
     [SerializeField]
     public List<string> wantedSubtitles = new();
@@ -35,11 +35,7 @@ public class ScoreboardManager : MonoBehaviour
     private int step = 0;
     private int maxSteps = 0;
 
-    [Header("Prefabs")]
-    [SerializeField]
-    private GameObject scoreboard;
-
-    private List<Scoreboard> scoreboards = new List<Scoreboard>();
+    private List<Scoreboard> scoreboards = new();
 
     // Refrences
     private MatchController matchController;
@@ -70,15 +66,12 @@ public class ScoreboardManager : MonoBehaviour
 
         audioSource = GetComponent<AudioSource>();
 
-        // Values in matchcontroller are not set in Start(), thus using a coroutine to wait until values are set.
-        StartCoroutine(SetupPosters());
+        matchController.onRoundStart += SetupPosters;
     }
 
-    private IEnumerator SetupPosters()
+    private void SetupPosters()
     {
-        yield return new WaitForEndOfFrame();
-
-        players = matchController.Players;
+        players = matchController.Players.ToList();
 
         scoreboards = GetComponentsInChildren<Scoreboard>().ToList();
 
@@ -94,7 +87,7 @@ public class ScoreboardManager : MonoBehaviour
                 Destroy(scoreboards[i].gameObject);
             }
         }
-        scoreboards.RemoveRange(players.Count, scoreboards.Count - players.Count);
+        scoreboards.RemoveRange(players.Count, Mathf.Max(0, scoreboards.Count - players.Count));
         matchController.onRoundEnd += SetPosterValues;
     }
 
@@ -107,8 +100,8 @@ public class ScoreboardManager : MonoBehaviour
         for (int i = 0; i < scoreboards.Count; i++)
         {
             // Disable player camera
-            if (players[i].playerManager.inputManager)
-                players[i].playerManager.inputManager.PlayerCamera.enabled = false;
+            if (players[i].inputManager)
+                players[i].inputManager.PlayerCamera.enabled = false;
         }
 
         // Do not start adding crimes before the camera has finished the animation
@@ -161,14 +154,14 @@ public class ScoreboardManager : MonoBehaviour
         // Loop through each player, assign points as commented
         for (int i = 0; i < players.Count; i++)
         {
-            Player player = players[i];
-            Scoreboard scoreboard = scoreboards[i];
+            var player = players[i];
+            var scoreboard = scoreboards[i];
 
             var baseReward = matchController.RewardBase;
-            var killsReward = matchController.RewardKill * lastRound.KillCount(player.playerManager);
-            var winReward = lastRound.IsWinner(player.playerIdentity) ? matchController.RewardWin : 0;
+            var killsReward = matchController.RewardKill * lastRound.KillCount(player);
+            var winReward = lastRound.IsWinner(player.identity) ? matchController.RewardWin : 0;
 
-            var total = player.playerIdentity.chips;
+            var total = player.identity.chips;
             var gain = baseReward + killsReward + winReward;
             var savings = total - gain;
 

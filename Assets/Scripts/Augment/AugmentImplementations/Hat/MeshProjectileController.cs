@@ -38,7 +38,8 @@ public class MeshProjectileController : ProjectileController
     private int currentStateIndex = 0;
 
     // texture used to update the vfx position and alive-state of particles, RGB is used for position A for alive/dead
-    private VFXTextureFormatter positionActiveTexture;
+    [SerializeField]
+    private VFXTextureFormatter positionActiveBuffer;
 
     [Header("VFX")]
 
@@ -61,10 +62,8 @@ public class MeshProjectileController : ProjectileController
         projectiles = new ProjectileState[maxProjectiles];
 
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
-
-        positionActiveTexture = new VFXTextureFormatter(maxProjectiles);
-
-        vfx.SetTexture("Positions", positionActiveTexture.Texture);
+        positionActiveBuffer.Initialize(maxProjectiles);
+        vfx.SetGraphicsBuffer("Positions", positionActiveBuffer.Buffer);
         vfx.SetInt("MaxParticleCount", maxProjectiles);
         vfx.SetFloat("Size", visualSize);
         vfx.SendEvent(VisualEffectAsset.PlayEventID);
@@ -114,11 +113,11 @@ public class MeshProjectileController : ProjectileController
 
                 projectiles[currentStateIndex] = loadedProjectile;
                 // Sets initial position of the projectile
-                positionActiveTexture.setValue(i, loadedProjectile.position);
-                positionActiveTexture.setAlpha(i, 1f);
+                positionActiveBuffer.setValue(i, loadedProjectile.position);
+                positionActiveBuffer.setAlpha(i, 1f);
 
                 // Neccessary to update the actual texture, so the vfx gets the new info
-                positionActiveTexture.ApplyChanges();
+                positionActiveBuffer.ApplyChanges();
 
                 currentStateIndex = (currentStateIndex + 1) % maxProjectiles;
                 loadedProjectile = null;
@@ -132,21 +131,20 @@ public class MeshProjectileController : ProjectileController
     private void FixedUpdate()
     {
         if (!gunController)
-        {
             return;
-        }
+
         for (int i = 0; i < maxProjectiles; i++)
         {
             var state = projectiles[i];
             if (state != null && state.active)
             {
                 UpdateProjectile(state);
-                positionActiveTexture.setValue(i, state.position);
+                positionActiveBuffer.setValue(i, state.position);
 
             }
-            positionActiveTexture.setAlpha(i, state != null && state.active ? 1f : 0f);
+            positionActiveBuffer.setAlpha(i, state != null && state.active ? 1f : 0f);
         }
-        positionActiveTexture.ApplyChanges();
+        positionActiveBuffer.ApplyChanges();
     }
 
     private void UpdateProjectile(ProjectileState state)

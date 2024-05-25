@@ -12,7 +12,17 @@ public class AIManager : PlayerManager
     private NavMeshAgent agent;
     public Transform DestinationTarget;
     public Transform ShootingTarget;
-    public List<PlayerManager> TrackedPlayers;
+
+    private List<PlayerManager> trackedPlayers = new();
+    public List<PlayerManager> TrackedPlayers
+    {
+        get => trackedPlayers;
+        set
+        {
+            trackedPlayers = value;
+            TrackedPlayers.ForEach(player => player.onDeath += RemovePlayer);
+        }
+    }
     private const float autoAwareRadius = 25f;
     private const float ignoreAwareRadius = 1000f;
     [SerializeField]
@@ -57,7 +67,6 @@ public class AIManager : PlayerManager
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
         StartCoroutine(LookForTargets());
-        TrackedPlayers.ForEach(player => player.onDeath += RemovePlayer);
     }
 
     private void OnDestroy()
@@ -77,7 +86,7 @@ public class AIManager : PlayerManager
             biddingAI.SetIdentity(identity);
     }
 
-    private void RemovePlayer(PlayerManager killer, PlayerManager victim)
+    private void RemovePlayer(PlayerManager killer, PlayerManager victim, DamageInfo info)
     {
         TrackedPlayers.Remove(victim);
         victim.onDeath -= RemovePlayer;
@@ -101,6 +110,7 @@ public class AIManager : PlayerManager
             hasDisabledExtension ? identity.Extensions.Where(item => !IsDisabledItem(item)).RandomElement() : identity?.Extension,
             this, offset);
         gunController = gun.GetComponent<GunController>();
+        gunController.Initialize();
         gunController.onFireStart += UpdateAimTarget;
         gunController.onFire += UpdateAimTarget;
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
@@ -144,7 +154,7 @@ public class AIManager : PlayerManager
         {
             killer = lastPlayerThatHitMe;
         }
-        onDeath?.Invoke(killer, this);
+        onDeath?.Invoke(killer, this, info);
         aimAssistCollider.SetActive(false);
         aiTargetCollider.gameObject.SetActive(false);
         aiMovement.enabled = false;
@@ -240,9 +250,9 @@ public class AIManager : PlayerManager
         {
             aiMovement.enabled = true;
         }
-        
+
     }
- 
+
 
     private void AnimateJump()
     {

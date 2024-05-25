@@ -1,3 +1,4 @@
+using Mirror;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -21,13 +22,23 @@ public class BiddingPlayer : MonoBehaviour
 
     private void Start()
     {
-        playerManager.inputManager.onFirePerformed += AnimateBid;
-        playerManager.inputManager.onSelect += AnimateBid;
-        playerManager.identity.onChipChange += AnimateChipStatus;
-        playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
+        GetComponent<PlayerIK>().RightHandIKTarget = signTarget;
+        if (NetworkManager.singleton.isNetworkActive)
+            return;
+        SetPlayerInput();
+    }
+
+    public void SetPlayerInput()
+    {
+        if (playerManager.inputManager)
+        {
+            playerManager.inputManager.onFirePerformed += AnimateBid;
+            playerManager.inputManager.onSelect += AnimateBid;
+            playerManager.identity.onChipChange += AnimateChipStatus;
+            playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
+        }
 
         chipText.text = playerManager.identity.chips.ToString();
-        GetComponent<PlayerIK>().RightHandIKTarget = signTarget;
     }
 
     private void AnimateBid(InputAction.CallbackContext ctx)

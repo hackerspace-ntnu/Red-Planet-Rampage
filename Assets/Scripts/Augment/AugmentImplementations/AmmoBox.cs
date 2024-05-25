@@ -1,4 +1,3 @@
-using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,24 +9,21 @@ public class AmmoBox : MonoBehaviour
     [SerializeField] private float respawnTime = 30;
     [SerializeField] private GameObject boxModel;
     [SerializeField] private VisualEffect effect;
-    [SerializeField] private bool shouldAlwaysSpawn = false;
 
     [SerializeField]
+    private AudioGroup soundEffect;
     private AudioSource audioSource;
-    [SerializeField]
-    private AudioClip[] pickupSounds;
 
     private Collider collider;
     private MeshRenderer renderer;
 
-    private static List<AmmoBox> ammoBoxes = new List<AmmoBox>();
+    private static readonly List<AmmoBox> ammoBoxes = new();
 
     private void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         collider = GetComponent<Collider>();
         renderer = boxModel.GetComponent<MeshRenderer>();
-        if (!shouldAlwaysSpawn)
-            StartCoroutine(CheckForCollectors());
 
         // Animate spin and bounce
         LeanTween.sequence()
@@ -49,24 +45,11 @@ public class AmmoBox : MonoBehaviour
 
     public static AmmoBox GetClosestAmmoBox(Vector3 from)
     {
-        if (ammoBoxes.Count() == 0)
+        if (ammoBoxes.Count == 0)
             return null;
         return ammoBoxes.Aggregate(
             (ammoBox, next) =>
             Vector3.Distance(from, next.transform.position) < Vector3.Distance(from, ammoBox.transform.position) ? next : ammoBox);
-    }
-
-    private IEnumerator CheckForCollectors()
-    {
-        // Wait for two frames before checking, since the collectors have to wait one frame first
-        yield return null;
-        yield return null;
-        var collectors = FindObjectsOfType<AmmoBoxCollector>();
-        var noAmmoBoxBodiesArePresent = !collectors.Any(c => c.CanReload);
-        if (noAmmoBoxBodiesArePresent)
-        {
-            Destroy(gameObject);
-        }
     }
 
     private IEnumerator RespawnAfterTimeout()
@@ -87,8 +70,7 @@ public class AmmoBox : MonoBehaviour
             return;
 
         collector.Reload();
-        audioSource.clip = pickupSounds.RandomElement();
-        audioSource.Play();
+        soundEffect.Play(audioSource);
 
         collider.enabled = false;
         renderer.enabled = false;

@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 7135334762222197563}
   - component: {fileID: 561105504117233489}
   - component: {fileID: 7022526964992712187}
-  m_Layer: 0
+  - component: {fileID: 2727717192966958831}
+  m_Layer: 3
   m_Name: ExplodingBarrel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -68,8 +69,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cab246ee1d4ad25498887ea1df8ef6f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   maxhHealth: 10
   currentHealth: 0
+--- !u!114 &2727717192966958831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1198066077926093598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 1332584905
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1 &5327156042020577182
 GameObject:
   m_ObjectHideFlags: 0
@@ -81,7 +102,7 @@ GameObject:
   - component: {fileID: 1845071784657073821}
   - component: {fileID: 8835666938554153428}
   - component: {fileID: 576093209877343199}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -165,7 +186,7 @@ GameObject:
   - component: {fileID: 8375462263755555822}
   - component: {fileID: 7742784054582737114}
   - component: {fileID: 5935305761549030064}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Explosion
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -248,7 +269,7 @@ MonoBehaviour:
   hitBoxLayers:
     serializedVersion: 2
     m_Bits: 8
-  soundEffect: {fileID: 5935305761549030064}
+  soundEffect: {fileID: 11400000, guid: 28f9f37273016fc44a53dce269db19f7, type: 2}
 --- !u!73398921 &8375462263755555822
 VFXRenderer:
   serializedVersion: 1
@@ -339,7 +360,7 @@ AudioSource:
   m_GameObject: {fileID: 7635192815534540289}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 4898656368289658944, guid: 92cf7610df7967a41806df0e74d33c49, type: 2}
   m_audioClip: {fileID: 8300000, guid: b6284216ae87a2813a7477ff5d4c4c7e, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
@@ -554,6 +575,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 66c6c90f490d5144496874ccdca25343, type: 3}
       propertyPath: m_Name
       value: ExplosiveBarrel
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 66c6c90f490d5144496874ccdca25343, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

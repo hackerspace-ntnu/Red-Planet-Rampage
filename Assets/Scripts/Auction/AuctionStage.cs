@@ -1,15 +1,19 @@
 ﻿using UnityEngine;
-using CollectionExtensions;
-using System.Collections.Generic;
-using System.Linq;
 
 [CreateAssetMenu(menuName = "Auction/Stage/Scripted")]
 public class AuctionStage : ScriptableObject
 {
-    [SerializeField] 
+    [SerializeField]
     protected float stageDuration = 15;
-    [SerializeField] 
+    [SerializeField]
     protected Item[] items;
+
+    protected System.Random random;
+    public System.Random Random
+    {
+        get => random;
+        set => random = value;
+    }
 
     /// <summary>
     /// This method should ONLY be called by staticInfo.

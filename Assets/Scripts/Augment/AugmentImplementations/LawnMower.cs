@@ -53,10 +53,7 @@ public class LawnMower : GunBody
         mowerScreen = meshRenderer.materials[mowerScreenMaterialIndex];
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
-            Debug.Log("MowerBody not attached to gun parent!");
             return;
-        }
         gunController.onFireStart += Fire;
         gunController.onFireEnd += FireEnd;
 

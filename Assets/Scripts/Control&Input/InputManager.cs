@@ -54,6 +54,7 @@ public class InputManager : MonoBehaviour
     public bool IsMouseAndKeyboard => isMouseAndKeyboard;
 
     public bool ZoomActive = false;
+    public bool CrouchActive = false;
 
     void Start()
     {
@@ -88,8 +89,12 @@ public class InputManager : MonoBehaviour
         playerInput.actions["Fire"].canceled += Fire;
         playerInput.actions["Crouch"].performed += Crouch;
         playerInput.actions["Crouch"].canceled += Crouch;
+        playerInput.actions["CrouchToggle"].performed += CrouchToggle;
+        playerInput.actions["CrouchToggle"].canceled += CrouchToggle;
         playerInput.actions["Zoom"].performed += Zoom;
         playerInput.actions["Zoom"].canceled += Zoom;
+        playerInput.actions["ZoomToggle"].performed += ZoomToggle;
+        playerInput.actions["ZoomToggle"].canceled += ZoomToggle;
         playerInput.actions["Look"].performed += Look;
         playerInput.actions["Look"].canceled += Look;
 
@@ -225,19 +230,40 @@ public class InputManager : MonoBehaviour
 
     private void Crouch(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed) { onCrouchPerformed?.Invoke(ctx); return; }
+        if (ctx.performed) {
+            CrouchActive = true;
+            onCrouchPerformed?.Invoke(ctx);
+            return;
+        }
+        CrouchActive = false;
         onCrouchCanceled?.Invoke(ctx);
+    }
+
+    private void CrouchToggle(InputAction.CallbackContext ctx)
+    {
+        if (ctx.performed)
+        {
+            CrouchActive = !CrouchActive;
+            if (!CrouchActive) { onCrouchCanceled?.Invoke(ctx); return; }
+            onCrouchPerformed?.Invoke(ctx);
+        }
     }
 
     private void Zoom(InputAction.CallbackContext ctx)
     {
-        if (isMouseAndKeyboard)
-        {
-            if (ctx.performed) { onZoomPerformed?.Invoke(ctx); return; }
-            onZoomCanceled?.Invoke(ctx);
-            return;
+        if (ctx.performed) 
+        { 
+            ZoomActive = true;
+            onZoomPerformed?.Invoke(ctx);
+            return; 
         }
+        ZoomActive = false;
+        onZoomCanceled?.Invoke(ctx);
+        return;
+    }
 
+    private void ZoomToggle(InputAction.CallbackContext ctx)
+    {
         if (ctx.performed)
         {
             ZoomActive = !ZoomActive;

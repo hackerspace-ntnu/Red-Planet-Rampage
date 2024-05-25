@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class Round
 {
-    private PlayerIdentity winner;
-    public PlayerIdentity Winner => winner;
+    private uint winner;
+    public uint Winner => winner;
 
     /* Readonly Terminology
      * 
@@ -34,32 +34,37 @@ public class Round
 
 
     //Number of players never change after the initialisation of the dictionary, hence ReadOnlyDictionary
-    private readonly ReadOnlyDictionary<PlayerManager, List<PlayerManager>> kills;
-    public readonly ReadOnlyDictionary<PlayerManager, ReadOnlyCollection<PlayerManager>> Kills;
+    private readonly ReadOnlyDictionary<uint, List<uint>> kills;
+    public readonly ReadOnlyDictionary<uint, ReadOnlyCollection<uint>> Kills;
 
-    private readonly List<PlayerManager> players;
-    public readonly ReadOnlyCollection<PlayerManager> Players;
+    private readonly List<uint> players;
+    public readonly ReadOnlyCollection<uint> Players;
 
-    private readonly List<PlayerManager> livingPlayers = new List<PlayerManager>();
-    public readonly ReadOnlyCollection<PlayerManager> LivingPlayers;
+    private readonly List<uint> livingPlayers;
+    public readonly ReadOnlyCollection<uint> LivingPlayers;
+
+    // Note that this list may not contain recognizable data in future rounds
+    private readonly List<PlayerManager> playerManagers;
 
     public Round(IEnumerable<PlayerManager> roundPlayers)
     {
-        players = new List<PlayerManager>(roundPlayers);
-        livingPlayers = new List<PlayerManager>(roundPlayers);
-        kills = new ReadOnlyDictionary<PlayerManager, List<PlayerManager>>(players.ToDictionary(
-            /*key   */ player => player,
-            /*value */ player => new List<PlayerManager>()
+        var ids = roundPlayers.Select(p => p.id);
+        playerManagers = roundPlayers.ToList();
+        players = ids.ToList();
+        livingPlayers = ids.ToList();
+        kills = new ReadOnlyDictionary<uint, List<uint>>(ids.ToDictionary(
+            /*key   */ id => id,
+            /*value */ id => new List<uint>()
         ));
 
-        Players = new ReadOnlyCollection<PlayerManager>(this.players);
-        LivingPlayers = new ReadOnlyCollection<PlayerManager>(livingPlayers);
-        Kills = new ReadOnlyDictionary<PlayerManager, ReadOnlyCollection<PlayerManager>>(players.ToDictionary(
-            /*key   */ player => player,
-            /*value */ player => new ReadOnlyCollection<PlayerManager>(kills[player])
+        Players = new ReadOnlyCollection<uint>(this.players);
+        LivingPlayers = new ReadOnlyCollection<uint>(livingPlayers);
+        Kills = new ReadOnlyDictionary<uint, ReadOnlyCollection<uint>>(ids.ToDictionary(
+            /*key   */ id => id,
+            /*value */ id => new ReadOnlyCollection<uint>(kills[id])
         ));
 
-        foreach (var player in players)
+        foreach (var player in roundPlayers)
         {
             player.onDeath += OnDeath;
         }
@@ -69,33 +74,37 @@ public class Round
     public int KillCount(PlayerManager player)
     {
 #if DEBUG
-        Debug.Assert(kills.ContainsKey(player), "player not registered in start of round!", player);
+        Debug.Assert(kills.ContainsKey(player.id), "Player not registered in round statistics!", player);
 #endif
-        return kills[player].Count;
+        return kills[player.id].Count;
     }
 
     public bool IsWinner(PlayerIdentity player)
     {
-        return player == Winner;
+        return player.id == Winner;
+    }
+
+    public bool IsWinner(uint id)
+    {
+        return id == Winner;
     }
 
     public void OnOutcomeDecided()
     {
-        foreach (var player in players)
+        foreach (var player in playerManagers)
         {
             player.onDeath -= OnDeath;
         }
         MatchController.Singleton.onOutcomeDecided -= OnOutcomeDecided;
     }
 
-    //TODO: Create struct for damagecontext with info about who was killed as parameter instead
-    // (Currently waiting for damage/basic gunplay)
-    private void OnDeath(PlayerManager killer, PlayerManager victim)
+    //TODO: Use DamageInfo?
+    private void OnDeath(PlayerManager killer, PlayerManager victim, DamageInfo info)
     {
 #if DEBUG
-        Debug.Assert(kills.ContainsKey(killer), "killer not registered in start of round!", killer);
+        Debug.Assert(kills.ContainsKey(killer.id), "killer not registered in start of round!", killer);
 #endif
-        livingPlayers.Remove(victim);
+        livingPlayers.Remove(victim.id);
 
         if (livingPlayers.Count == 2)
         {
@@ -105,21 +114,22 @@ public class Round
         // Only register a kill if it wasn't a suicide
         if (killer != victim)
         {
-            kills[killer].Add(victim);
-            CheckWinCondition(killer);
+            kills[killer.id].Add(victim.id);
+            PersistentInfo.RegisterKill(killer.identity);
+            CheckWinCondition();
         }
         // If it was a suicide, we should give the surviving player the win if there's only one
         else if (livingPlayers.Count < 2)
         {
-            CheckWinCondition(livingPlayers.FirstOrDefault());
+            CheckWinCondition();
         }
     }
 
-    private void CheckWinCondition(PlayerManager lastKiller)
+    private void CheckWinCondition()
     {
         if (livingPlayers.Count < 2)
         {
-            winner = lastKiller?.identity;
+            winner = livingPlayers.FirstOrDefault();
             MatchController.Singleton.EndActiveRound();
         }
     }

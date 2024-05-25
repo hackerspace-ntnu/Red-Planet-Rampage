@@ -1,3 +1,4 @@
+using RandomExtensions;
 using UnityEngine;
 
 public class ZigzagPathModifier : MonoBehaviour, ProjectileModifier
@@ -14,17 +15,20 @@ public class ZigzagPathModifier : MonoBehaviour, ProjectileModifier
 
     public Priority GetPriority() => Priority.EXTENSION;
 
+    // TODO synchronize
+    private System.Random random = new System.Random();
+
     private Vector2 RandomOffset(Vector2 lastOffset)
     {
-        var random = Random.insideUnitCircle * radius;
+        var offset = random.UnitVector() * radius;
         // Restrict to +/-[0.3, 1]
-        random = new Vector2(Mathf.Sign(random.x) * (.7f * Mathf.Abs(random.x) + radius * .3f), Mathf.Sign(random.y) * (.7f * Mathf.Abs(random.y) + radius * .3f));
+        offset = new Vector2(Mathf.Sign(offset.x) * (.7f * Mathf.Abs(offset.x) + radius * .3f), Mathf.Sign(offset.y) * (.7f * Mathf.Abs(offset.y) + radius * .3f));
         // Prevent the new offset from being on the same half of the unit circle as the previous one.
-        while (Vector2.Dot(random, lastOffset) > 0)
+        while (Vector2.Dot(offset, lastOffset) > 0)
         {
-            random = Vector2.Perpendicular(random);
+            offset = Vector2.Perpendicular(offset);
         }
-        return random;
+        return offset;
     }
 
     public void AddZigzagDisplacement(float distance, ref ProjectileState state)

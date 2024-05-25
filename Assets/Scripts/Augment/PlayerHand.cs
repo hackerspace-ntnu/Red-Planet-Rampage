@@ -38,7 +38,7 @@ public class PlayerHand : MonoBehaviour
         unsubscribePlayer?.Invoke();
     }
 
-    private void DisableHand(PlayerManager killer, PlayerManager victim)
+    private void DisableHand(PlayerManager killer, PlayerManager victim, DamageInfo info)
     {
         DisableHand();
     }

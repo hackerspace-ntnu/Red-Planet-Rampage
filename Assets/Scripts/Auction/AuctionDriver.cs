@@ -1,7 +1,7 @@
-using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Mirror;
 using TMPro;
 using UnityEngine;
 
@@ -49,6 +49,9 @@ public class AuctionDriver : MonoBehaviour
 
     public static AuctionDriver Singleton;
 
+    // TODO synchronize
+    private System.Random random = new System.Random();
+
     private void Awake()
     {
         #region Singleton boilerplate
@@ -84,10 +87,15 @@ public class AuctionDriver : MonoBehaviour
             3 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction },
             _ => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction }
         };
+        foreach (var stage in availableAuctionStages)
+        {
+            // Ensure they all use the same seed
+            stage.Random = random;
+        }
 
         playerFactory = GetComponent<PlayerFactory>();
         var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
-            Mathf.Max(4 - PlayerInputManagerController.Singleton.playerInputs.Count, 0) : 0;
+            Mathf.Max(4 - PlayerInputManagerController.Singleton.LocalPlayerInputs.Count, 0) : 0;
         playerFactory.InstantiatePlayersBidding(aiPlayerCount);
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
 
@@ -174,13 +182,12 @@ public class AuctionDriver : MonoBehaviour
         PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = true;
         playerFactory.InstantiatePlayerSelectItems();
         GetComponent<ItemSelectManager>().StartTrackingMenus();
-
     }
 
     public void ChangeScene()
     {
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(playerInput => playerInput.RemoveListeners());
+        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(playerInput => playerInput.RemoveListeners());
     }
     private IEnumerator AnimateGunConstruction(PlayerManager playerManager, RectTransform parent)
     {

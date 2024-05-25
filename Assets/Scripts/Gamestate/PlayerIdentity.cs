@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerIdentity : MonoBehaviour
@@ -7,29 +9,29 @@ public class PlayerIdentity : MonoBehaviour
     public Color color;
     public string playerName;
     [SerializeField]
-    private bool isAI = false;
+    protected bool isAI = false;
     public bool IsAI => isAI;
 
     [Header("Augments")]
     [SerializeField]
-    private Item body;
+    protected Item body;
     public Item Body => body;
 
     [SerializeField]
-    private Item barrel;
+    protected Item barrel;
     public Item Barrel => barrel;
 
     [SerializeField]
-    private Item extension;
+    protected Item extension;
     public Item Extension => extension;
 
     public List<Item> Bodies { get; private set; } = new List<Item>();
     public List<Item> Barrels { get; private set; } = new List<Item>();
     public List<Item> Extensions { get; private set; } = new List<Item>();
 
-    public int chips { get; private set; } = 0;
+    public int chips = 0;
 
-    public int bounty = 5;
+    public uint id;
 
     public delegate void ChipEvent(int amount);
     public delegate void ItemEvent(Item item);
@@ -39,7 +41,7 @@ public class PlayerIdentity : MonoBehaviour
     public ChipEvent onChipChange;
     public ItemEvent onInventoryChange;
 
-    void Start()
+    private void Start()
     {
         if (Bodies.Count == 0)
         {
@@ -53,8 +55,6 @@ public class PlayerIdentity : MonoBehaviour
         {
             Extensions.Add(extension);
         }
-
-        bounty += 5;
     }
 
     public void UpdateChip(int amount)
@@ -100,7 +100,7 @@ public class PlayerIdentity : MonoBehaviour
         onInventoryChange?.Invoke(item);
     }
 
-    public void resetItems()
+    public void ResetItems()
     {
         Bodies = new List<Item>();
         Barrels = new List<Item>();
@@ -109,6 +109,23 @@ public class PlayerIdentity : MonoBehaviour
         barrel = StaticInfo.Singleton.StartingBarrel;
         extension = StaticInfo.Singleton.StartingExtension;
         chips = 0;
+    }
+
+
+    public void SetItems(IEnumerable<string> bodies, IEnumerable<string> barrels, IEnumerable<string> extensions)
+    {
+        // TODO handle errors better
+        Bodies = bodies.Select(id => StaticInfo.Singleton.ItemsById[id]).ToList();
+        Barrels = barrels.Select(id => StaticInfo.Singleton.ItemsById[id]).ToList();
+        Extensions = extensions.Select(id => StaticInfo.Singleton.ItemsById[id]).ToList();
+    }
+
+
+    public void SetLoadout(string body, string barrel, string extension)
+    {
+        this.body = StaticInfo.Singleton.ItemsById[body];
+        this.barrel = StaticInfo.Singleton.ItemsById[barrel];
+        this.extension = extension == null ? null : StaticInfo.Singleton.ItemsById[extension];
     }
 
     public void SetLoadout(Item body, Item barrel, Item extension)

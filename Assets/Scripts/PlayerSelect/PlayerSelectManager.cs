@@ -1,10 +1,10 @@
 using CollectionExtensions;
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerSelectManager : MonoBehaviour
 {
@@ -50,6 +50,22 @@ public class PlayerSelectManager : MonoBehaviour
         {
             animatorParameters.Add(playerAnimators[0].GetParameter(i).name);
         }
+        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved += UpdateLobby;
+    }
+
+    public void UpdateLobby()
+    {
+        var i = 0;
+        foreach (var player in Peer2PeerTransport.PlayerDetails)
+        {
+            SetupPlayerSelectModels(player.name, player.color, i);
+            i++;
+        }
+    }
+
+    public void UpdateLobby(PlayerDetails details)
+    {
+        UpdateLobby();
     }
 
     /// <summary>
@@ -119,17 +135,17 @@ public class PlayerSelectManager : MonoBehaviour
         yield return new WaitForSeconds(5f);
         while (true)
         {
-            int randomAnimatorNumber = Random.Range(0, playerInputManagerController.playerInputs.Count); // Choose random playermodel to animate
+            int randomAnimatorNumber = Random.Range(0, playerInputManagerController.PlayerCount); // Choose random playermodel to animate
 
             Animator randomAnimator = playerAnimators[randomAnimatorNumber]; // Get the animator for one of the players that has a connected input
 
             // If randomAnimatorNumber is player all the way to the right, don't include cardpeek trigger
             string randomTrigger = "";
-            if (randomAnimatorNumber == playerInputManagerController.playerInputs.Count - 1)
+            if (randomAnimatorNumber == playerInputManagerController.PlayerCount - 1)
             {
                 randomTrigger = randomAnimator.GetParameter(Random.Range(2, randomAnimator.parameterCount)).name; // Choose a random trigger to set, excluding CardPeek
             }
-            else if(randomAnimatorNumber == 0)
+            else if (randomAnimatorNumber == 0)
             {
                 randomTrigger = excludeCardPeekReaction.RandomElement(); // Choose a random trigger to set, excluding CardPeekReaction
             }
@@ -137,9 +153,9 @@ public class PlayerSelectManager : MonoBehaviour
             {
                 randomTrigger = randomAnimator.GetParameter(Random.Range(0, randomAnimator.parameterCount)).name; // Choose a random trigger
             }
-            
 
-            if ((randomTrigger == "CardPeek" || randomTrigger == "CardPeekReaction") && (playerInputManagerController.playerInputs.Count > 1) && (cardPeekCounter == 0))
+
+            if ((randomTrigger == "CardPeek" || randomTrigger == "CardPeekReaction") && (playerInputManagerController.PlayerCount > 1) && (cardPeekCounter == 0))
             {
                 randomAnimator.SetTrigger("CardPeek");
                 playerAnimators[randomAnimatorNumber + 1].SetTrigger("CardPeekReaction");
@@ -149,7 +165,7 @@ public class PlayerSelectManager : MonoBehaviour
             else if (randomTrigger == "CardPeek" || randomTrigger == "CardPeekReaction") // Choose new animation to play if cardpeek or cardpeekreaction is chosen a second time
             {
                 randomTrigger = randomAnimator.GetParameter(Random.Range(2, randomAnimator.parameterCount - 1)).name;
-                
+
                 cardPeekCounter = 0;
                 randomAnimator.SetTrigger(randomTrigger);
             }
@@ -161,5 +177,9 @@ public class PlayerSelectManager : MonoBehaviour
             yield return new WaitForSeconds(Random.Range(minimumTime, maximumTime));
         }
     }
-    
+
+    private void OnDestroy()
+    {
+        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved -= UpdateLobby;
+    }
 }

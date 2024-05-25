@@ -758,7 +758,7 @@ Light:
     m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
-    m_Strength: 0.6
+    m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
     m_NearPlane: 0.2
@@ -836,7 +836,7 @@ MonoBehaviour:
   m_ShadowRenderingLayers: 1
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
-  m_SoftShadowQuality: 1
+  m_SoftShadowQuality: 0
 --- !u!1001 &247741865
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4484,7 +4484,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -5500058390596650592, guid: 4d0deece7ece00c4895f41aaca16bc26, type: 3}
+  - {fileID: 2100000, guid: f434558a06361e24bb60b196c0c41164, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4884,14 +4884,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21876773}
     - target: {fileID: 320780411405276928, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: cameraStandbyPosition.y
-      value: 18.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 320780411405276928, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: cameraStandbyPosition.z
-      value: 10.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 320780411405276928, guid: ace884b1bf546300a85f4176788f481b, type: 3}
       propertyPath: biddingPlatforms.Array.data[0]
       value: 
       objectReference: {fileID: 6968452648086433089}
@@ -4975,86 +4967,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: BiddingRoundManager
       objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontSize
-      value: 38
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_colorMode
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: aa99fff0688574ba78204625170fa6e0, type: 2}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColor.a
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontSizeBase
-      value: 38
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_sharedMaterial
-      value: 
-      objectReference: {fileID: 7168929159514863053, guid: aa99fff0688574ba78204625170fa6e0, type: 2}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 16777215
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_HorizontalAlignment
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColorGradient.topLeft.b
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColorGradient.topLeft.g
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColorGradient.topLeft.r
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColorGradient.topRight.b
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColorGradient.topRight.g
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColorGradient.topRight.r
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColorGradient.bottomLeft.b
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColorGradient.bottomLeft.g
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColorGradient.bottomLeft.r
-      value: 0.77765065
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColorGradient.bottomRight.b
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColorGradient.bottomRight.g
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4540186552996935731, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: m_fontColorGradient.bottomRight.r
-      value: 0.77765065
-      objectReference: {fileID: 0}
     - target: {fileID: 5502433358279166998, guid: ace884b1bf546300a85f4176788f481b, type: 3}
       propertyPath: m_Camera
       value: 
@@ -5084,10 +4996,6 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6490865783486692312, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: graceTime
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6490865783486692312, guid: ace884b1bf546300a85f4176788f481b, type: 3}
       propertyPath: LoadingScreen
       value: 
       objectReference: {fileID: 1541432248}
@@ -5095,10 +5003,6 @@ PrefabInstance:
       propertyPath: loadingScreen
       value: 
       objectReference: {fileID: 1541432248}
-    - target: {fileID: 7844404747135833139, guid: ace884b1bf546300a85f4176788f481b, type: 3}
-      propertyPath: aiIdentity
-      value: 
-      objectReference: {fileID: 8959912941406370206, guid: e915b82d39eb5ca4ba5977d1c718d4ed, type: 3}
     - target: {fileID: 7844404747135833139, guid: ace884b1bf546300a85f4176788f481b, type: 3}
       propertyPath: spawnPoints.Array.data[0]
       value: 

@@ -71,15 +71,15 @@ public class BiddingAI : BiddingPlayer
         switch (platform.Item.augmentType)
         {
             case AugmentType.Body:
-                priority = PersistentInfo.CombinationStats.Where(stat => stat.Body.Equals(platform.Item.displayName))
+                priority = PersistentInfo.CombinationStats.Where(stat => stat.Body == platform.Item.id)
                     .Sum((augment) => augment.KillCount);
                 break;
             case AugmentType.Barrel:
-                priority = PersistentInfo.CombinationStats.Where(stat => stat.Barrel.Equals(platform.Item.displayName))
+                priority = PersistentInfo.CombinationStats.Where(stat => stat.Barrel == platform.Item.id)
                     .Sum((augment) => augment.KillCount);
                 break;
             case AugmentType.Extension:
-                priority = PersistentInfo.CombinationStats.Where(stat => stat.Extension.Equals(platform.Item.displayName))
+                priority = PersistentInfo.CombinationStats.Where(stat => stat.Extension == platform.Item.id)
                     .Sum((augment) => augment.KillCount);
                 break;
         }

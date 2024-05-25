@@ -11,9 +11,14 @@ public class MainMenuMoveCamera : MonoBehaviour
     [SerializeField]
     private float cameraSpeed;
     [SerializeField]
-    private float rotationAngle;
-    [SerializeField]
     private GameObject directionalLight;
+
+    [SerializeField]
+    private Transform initialPosition;
+    [SerializeField]
+    private Transform secondPosition;
+
+    private bool inLevelSelect;
 
     public void MoveToOptions()
     {
@@ -36,5 +41,21 @@ public class MainMenuMoveCamera : MonoBehaviour
         playerSelectCamera.gameObject.SetActive(true);
         mainMenuCamera.gameObject.SetActive(false);
         directionalLight.SetActive(false);
+        
+        if (inLevelSelect)
+        {
+            inLevelSelect = false;
+            LeanTween.sequence().append(LeanTween.moveLocal(playerSelectCamera.gameObject, initialPosition.localPosition, 1).setEaseInOutExpo());
+            LeanTween.sequence().append(LeanTween.rotateX(playerSelectCamera.gameObject, 9f, 1).setEaseInOutExpo());
+        }
+    }
+
+    public void MoveToLevelSelect()
+    {
+        if (!(PlayerInputManagerController.Singleton.MatchHasAI || PlayerInputManagerController.Singleton.PlayerCount > 1))
+            return;
+        inLevelSelect = true;
+        LeanTween.sequence().append(LeanTween.moveLocal(playerSelectCamera.gameObject, secondPosition.localPosition, 1).setEaseInOutExpo());
+        LeanTween.sequence().append(LeanTween.rotateX(playerSelectCamera.gameObject, 90f, 1).setEaseInOutExpo());
     }
 }

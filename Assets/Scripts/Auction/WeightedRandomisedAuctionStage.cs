@@ -1,6 +1,4 @@
 using CollectionExtensions;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 // TODO: Implement weighted selection with and without replacement
@@ -28,13 +26,13 @@ public class WeightedRandomisedAuctionStage : RandomisedAuctionStage
         Item[] selection = new Item[numItems];
         for (int i = 0; i < numItems; i++)
         {
-            selection[i] = items.RandomElement();
+            selection[i] = items.RandomElement(random);
         }
         return selection;
     }
     private Item[] RandomSelectionWithoutReplacement()
     {
-        int[] idx = items.RandomIndicesOf();
+        int[] idx = items.RandomIndicesOf(random);
         Item[] selection = new Item[numItems];
         for (int i = 0; i < numItems; i++)
         {

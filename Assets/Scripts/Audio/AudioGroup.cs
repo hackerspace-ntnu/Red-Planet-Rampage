@@ -15,21 +15,34 @@ public class AudioGroup : ScriptableObject
     [SerializeField]
     private IntRange semitoneRange;
 
+    [SerializeField]
+    private bool continuousPitchBend;
+
 #if UNITY_EDITOR
     [MinMax(0, 1), ContextMenuItem("Preview/Low Volume", "PreviewLowVolume"), ContextMenuItem("Preview/High Volume", "PreviewHighVolume")]
 #endif
     [SerializeField]
     private FloatRange volumeRange;
-    public void Modulate(AudioSource source)
+
+    private void Modulate(AudioSource source)
     {
-        source.pitch = Mathf.Pow(SEMITONE_PITCH_CONVERSION_UNIT, Random.Range(semitoneRange.Min, semitoneRange.Max));
+        // Range has override for ints, so we need to force the endpoints to be floats in order to achieve a continuous scale.
+        var pitch = continuousPitchBend ? Random.Range((float)semitoneRange.Min, (float)semitoneRange.Max) : Random.Range(semitoneRange.Min, semitoneRange.Max);
+        source.pitch = Mathf.Pow(SEMITONE_PITCH_CONVERSION_UNIT, pitch);
         source.volume = Random.Range(volumeRange.Min, volumeRange.Max);
     }
+
     public void Play(AudioSource source)
     {
-        source.pitch = Mathf.Pow(SEMITONE_PITCH_CONVERSION_UNIT, Random.Range(semitoneRange.Min, semitoneRange.Max));
-        source.volume = Random.Range(volumeRange.Min, volumeRange.Max);
+        Modulate(source);
         source.PlayOneShot(sounds.RandomElement());
+    }
+
+    public void PlayDelayed(AudioSource source, float delay)
+    {
+        Modulate(source);
+        source.clip = sounds.RandomElement();
+        source.PlayDelayed(delay);
     }
 
     #region PREVIEW_IN_EDITOR_FUNCTIONALITY

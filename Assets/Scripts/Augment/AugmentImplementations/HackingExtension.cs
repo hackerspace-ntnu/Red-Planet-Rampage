@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class HackingExtension : GunExtension
@@ -20,10 +18,7 @@ public class HackingExtension : GunExtension
         hackingScreen = meshRenderer.materials[hackingScreenMaterialIndex];
         gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
-        {
-            Debug.Log("HackingExtension not attached to gun parent!");
             return;
-        }
         gunController.onFireStart += Fire;
     }
 

@@ -2,10 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VFXTextureFormatter
+public class VFXTextureFormatter : MonoBehaviour
 {
-    private Texture2D texture;
-
+    private GraphicsBuffer buffer;
     // The float data buffer that is passed to VRAM when apply is performed
     private float[] data;
 
@@ -13,23 +12,29 @@ public class VFXTextureFormatter
     private int size;
 
     // The resulting texture
-    public Texture2D Texture { get => texture; }
+    public GraphicsBuffer Buffer { get => buffer; }
+
+    /// <summary>
+    /// Sets the buffer with current data.
+    /// </summary>
+    /// <param name="size">Size of the texture, typically the maximum number of particles or the number of patricles in each strip</param>
+    public void Initialize(int size)
+    {
+        data = new float[size * 4];
+        buffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, size, sizeof(float) * 4);
+        this.size = size;
+    }
 
     public void ApplyChanges()
     {
-        texture.SetPixelData(data, 0, 0);
-        texture.Apply();
+        buffer.SetData(data);
     }
 
-    public VFXTextureFormatter(int size)
-    {
-        this.size = size;
-        this.data = new float[size*4];
-        this.texture = new Texture2D(size, 1, TextureFormat.RGBAFloat, false);
-    }
-
-
-    // Sets single index RGB, not alpha, as this can be set manually to perform other tasks
+    /// <summary>
+    /// Sets single index RGB, not alpha, as this can be set manually to perform other tasks
+    /// </summary>
+    /// <param name="index">Target index for set data</param>
+    /// <param name="value">Data to set</param>
     public void setValue(int index, Vector3 value)
     {
         data[index * 4] = value.x;
@@ -37,7 +42,10 @@ public class VFXTextureFormatter
         data[index * 4 + 2] = value.z;
     }
 
-    // Same as above, but sets entire array of values at once
+    /// <summary>
+    /// Set all, only set first 3 floats for each index.
+    /// </summary>
+    /// <param name="values"></param>
     public void setValues(Vector3[] values)
     {
         for (int i = 0; i < size; i++)
@@ -48,7 +56,11 @@ public class VFXTextureFormatter
         }
     }
 
-    // Same as other setvalue, but sets RGBA, could for einstance be used with Quaternion xyzw
+    /// <summary>
+    /// Set index RGBA
+    /// </summary>
+    /// <param name="index">Target index for set data</param>
+    /// <param name="value">Data to set</param>
     public void setValue(int index, Vector4 value)
     {
         data[index * 4] = value.x;
@@ -56,7 +68,11 @@ public class VFXTextureFormatter
         data[index * 4 + 2] = value.z;
         data[index * 4 + 3] = value.w;
     }
-    // Sets all RGBAs at once
+
+    /// <summary>
+    /// Set all.
+    /// </summary>
+    /// <param name="values"></param>
     public void setValues(Vector4[] values)
     {
         for (int i = 0; i < size; i++)
@@ -67,18 +83,31 @@ public class VFXTextureFormatter
             data[i * 4 + 3] = values[i].w;
         }
     }
-    // Sets a specific alpha, usefull for alive/dead state of single particles
+
+    /// <summary>
+    /// Sets a specific alpha, useful for alive/dead state of single particles
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="alpha"></param>
     public void setAlpha(int index, float alpha)
     {
         data[index * 4 + 3] = alpha;
     }
 
-    // Sets all alphas
+    /// <summary>
+    /// Sets all alphas
+    /// </summary>
+    /// <param name="alphas"></param>
     public void setAlphas(float[] alphas)
     {
         for (int i = 0; i<size; i++)
         {
             data[i * 4 + 3] = alphas[i];
         }
+    }
+
+    private void OnDestroy()
+    {
+        buffer?.Release();
     }
 }

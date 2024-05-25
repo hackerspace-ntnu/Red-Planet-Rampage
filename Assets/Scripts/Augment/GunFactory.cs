@@ -19,7 +19,8 @@ public class GunFactory : MonoBehaviour
         // Initialize everything
         gun.GetComponent<GunFactory>().InitializeGun(owner);
 
-        var cullingLayer = LayerMask.NameToLayer("Gun " + owner.inputManager.playerInput.playerIndex);
+        var playerIndex = owner.inputManager && owner.inputManager.playerInput ? owner.inputManager.playerInput.playerIndex : 3;
+        var cullingLayer = LayerMask.NameToLayer("Gun " + playerIndex);
 
         GunFactory displayGun = owner.GunOrigin.GetComponent<GunFactory>();
         displayGun.Body = bodyPrefab;
@@ -27,7 +28,7 @@ public class GunFactory : MonoBehaviour
         displayGun.Extension = extensionPrefab;
         displayGun.InitializeGun();
 
-        var cullingLayerDisplay = LayerMask.NameToLayer("Player " + owner.inputManager.playerInput.playerIndex);
+        var cullingLayerDisplay = LayerMask.NameToLayer("Player " + playerIndex);
 
         var firstPersonGunController = gun.GetComponent<GunFactory>().GunController;
         var gunAnimations = displayGun.GetComponentsInChildren<AugmentAnimator>(includeInactive: true);
@@ -53,19 +54,19 @@ public class GunFactory : MonoBehaviour
         if (displayGun.GunController.HasRecoil)
             firstPersonGunController.onFire += displayGun.GunController.PlayRecoil;
 
-        if (displayGun.GunController.projectile.GetType() == typeof(BulletController))
+        if (displayGun.GunController.projectile is BulletController)
             ((BulletController)gun.GetComponent<GunFactory>().GunController.projectile).Trail.layer = 0;
 
-        if (displayGun.GunController.projectile.GetType() == typeof(MeshProjectileController))
+        if (displayGun.GunController.projectile is MeshProjectileController)
             ((MeshProjectileController)gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
 
-        if (displayGun.GunController.projectile.GetType() == typeof(LazurController))
+        if (displayGun.GunController.projectile is LazurController)
             ((LazurController)gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
 
         return gun;
     }
 
-    public static GameObject InstantiateGunAI(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, AIManager owner, Transform parent)
+    public static GameObject InstantiateGunAI(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, Transform parent)
     {
         GunFactory displayGun = owner.GunOrigin.gameObject.AddComponent<GunFactory>();
         displayGun.Body = bodyPrefab;
@@ -114,15 +115,42 @@ public class GunFactory : MonoBehaviour
     public static string GetGunName(Item body, Item barrel, Item extension)
     {
         OverrideName result = StaticInfo.Singleton.SecretNames
-                                        .Where(x => (x.Body == body && x.Barrel == barrel && x.Extension == extension))
-                                        .FirstOrDefault();
-        if (!(result.Name is null))
+                                        .FirstOrDefault(x => x.Body == body && x.Barrel == barrel && x.Extension == extension);
+
+        if (result.Name is not null)
             return result.Name;
 
         if (extension == null)
             return $"The {body.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
 
         return $"The {body.secretName.Capitalized()} {extension.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
+    }
+
+    public static string GetGunName(Item body, Item barrel, Item extension, out bool isSecret)
+    {
+        OverrideName result = StaticInfo.Singleton.SecretNames
+                                        .FirstOrDefault(x => x.Body == body && x.Barrel == barrel && x.Extension == extension);
+        isSecret = result.Name is not null;
+        if (isSecret)
+            return result.Name;
+
+        if (extension == null)
+            return $"The {body.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
+
+        return $"The {body.secretName.Capitalized()} {extension.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
+    }
+
+    public static bool TryGetGunAchievement(Item body, Item barrel, Item extension, out AchievementType achievement)
+    {
+        OverrideName result = StaticInfo.Singleton.SecretNames
+                                        .FirstOrDefault(x => x.Body == body && x.Barrel == barrel && x.Extension == extension);
+
+        achievement = AchievementType.None;
+        if (result.Name is null)
+            return false;
+
+        achievement = result.Achievement;
+        return true;
     }
 
     // Prefabs of the different parts
@@ -248,13 +276,13 @@ public class GunFactory : MonoBehaviour
         // Will be removed anyways when the firemode system is updated to accomodate a wider variety of guns
         switch (gunController.stats.fireMode)
         {
-            case GunStats.FireModes.semiAuto:
+            case GunStats.FireModes.SemiAuto:
                 gunController.fireRateController = new SemiAutoFirerateController(gunController.stats.Firerate);
                 break;
-            case GunStats.FireModes.burst:
+            case GunStats.FireModes.Burst:
                 gunController.fireRateController = new BurstFirerateController(gunController.stats.Firerate, gunController.stats.burstNum);
                 break;
-            case GunStats.FireModes.fullAuto:
+            case GunStats.FireModes.FullAuto:
                 gunController.fireRateController = new FullAutoFirerateController(gunController.stats.Firerate);
                 break;
             default:

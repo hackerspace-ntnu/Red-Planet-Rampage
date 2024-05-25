@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using RandomExtensions;
 using UnityEngine;
 
 /// <summary>
@@ -19,6 +18,8 @@ public class RotationModifier : MonoBehaviour, ProjectileModifier
     [SerializeField]
     private Priority priority = Priority.ARBITRARY;
 
+    private System.Random random = new System.Random();
+
     public Priority GetPriority()
     {
         return priority;
@@ -26,14 +27,14 @@ public class RotationModifier : MonoBehaviour, ProjectileModifier
 
     public void Rotate(float distance, ref ProjectileState state)
     {
-        if (distance > 0) {
+        if (distance > 0)
+        {
             state.rotation *= Quaternion.Euler(rotationPerUpdate * distance);
         }
         else
         {
-            state.rotation = Quaternion.Euler(randomStartAngleX ? Random.Range(0,360) : 0, randomStartAngleY ? Random.Range(0, 360) : 0, randomStartAngleZ ? Random.Range(0, 360) : 0);
+            state.rotation = Quaternion.Euler(randomStartAngleX ? random.Range(0, 360f) : 0, randomStartAngleY ? random.Range(0, 360f) : 0, randomStartAngleZ ? random.Range(0, 360f) : 0);
         }
-
     }
 
     public void Attach(ProjectileController projectile)

@@ -1,27 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine;
-using System;
 using CollectionExtensions;
+using Mirror;
 
-/// <summary>
-/// Wrapper struct for tying refference to Player class with the in-game player.
-/// </summary>
-[Serializable]
-public struct Player
-{
-    public Player(PlayerIdentity playerIdentity, PlayerManager playerManager, int startAmount)
-    {
-        this.playerIdentity = playerIdentity;
-        this.playerManager = playerManager;
-    }
-    // Reference to player identity class
-    public PlayerIdentity playerIdentity;
-    // Reference to in-match player
-    public PlayerManager playerManager;
-}
+#nullable enable
 
 [RequireComponent(typeof(PlayerFactory))]
 public class MatchController : MonoBehaviour
@@ -32,11 +18,11 @@ public class MatchController : MonoBehaviour
 
     public delegate void MatchEvent();
 
-    public MatchEvent onOutcomeDecided;
-    public MatchEvent onRoundEnd;
-    public MatchEvent onRoundStart;
-    public MatchEvent onBiddingStart;
-    public MatchEvent onBiddingEnd;
+    public MatchEvent? onOutcomeDecided;
+    public MatchEvent? onRoundEnd;
+    public MatchEvent? onRoundStart;
+    public MatchEvent? onBiddingStart;
+    public MatchEvent? onBiddingEnd;
 
     [Header("Timing")]
     [SerializeField]
@@ -77,10 +63,13 @@ public class MatchController : MonoBehaviour
 
     private string currentMapName;
 
-    private List<Player> players = new List<Player>();
-    public List<Player> Players => players;
-    public IEnumerable<Player> AIPlayers => players.Where(p => p.playerManager is AIManager);
-    public IEnumerable<Player> HumanPlayers => players.Where(p => p.playerManager is not AIManager);
+    private Dictionary<uint, PlayerManager> playerById = new();
+    public ReadOnlyDictionary<uint, PlayerManager> PlayerById;
+
+    private List<PlayerManager> players = new();
+    public ReadOnlyCollection<PlayerManager> Players;
+    public IEnumerable<PlayerManager> AIPlayers => players.Where(p => p is AIManager);
+    public IEnumerable<PlayerManager> HumanPlayers => players.Where(p => p is not AIManager);
 
     [SerializeField]
     private List<CollectableChip> collectableChips;
@@ -116,24 +105,21 @@ public class MatchController : MonoBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
+
+        Players = new ReadOnlyCollection<PlayerManager>(players);
+        PlayerById = new ReadOnlyDictionary<uint, PlayerManager>(playerById);
     }
 
     void Start()
     {
         if (rounds.Count == 0)
         {
-            PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
+            PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
         }
         playerFactory = FindObjectOfType<PlayerFactory>();
 
-        if (currentMapName == null)
-            currentMapName = SceneManager.GetActiveScene().name;
+        currentMapName ??= SceneManager.GetActiveScene().name;
 
-        // Makes shooting end quickly if testing with 1 player
-#if UNITY_EDITOR
-        if (PlayerInputManagerController.Singleton.playerInputs.Count == 1)
-            roundLength = 100f;
-#endif
         GameObject mainLight = GameObject.FindGameObjectsWithTag("MainLight")[0];
         RenderSettings.skybox.SetVector("_SunDirection", mainLight.transform.forward);
         RenderSettings.skybox.SetFloat("_MaxGradientTreshold", 0.25f);
@@ -144,29 +130,60 @@ public class MatchController : MonoBehaviour
     {
         if (collectableChips.Count == 0)
             collectableChips = FindObjectsOfType<CollectableChip>().ToList();
-        // Setup of playerInputs
-        var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
-            Mathf.Max(4 - PlayerInputManagerController.Singleton.playerInputs.Count, 0) : 0;
-        playerFactory.InstantiatePlayersFPS(aiPlayerCount)
-            .ForEach(player => players.Add(new Player(player.identity, player, startAmount)));
 
-        var aiPLayers = players.Where(player => player.playerManager is AIManager)
-            .Select(player => player.playerManager)
+        players = new();
+        playerById = new();
+        Players = new ReadOnlyCollection<PlayerManager>(players);
+        PlayerById = new ReadOnlyDictionary<uint, PlayerManager>(playerById);
+
+        StartCoroutine(WaitForClientsAndInitialize());
+    }
+
+    private void InitializeAIPlayers()
+    {
+        var aiPLayers = players.Where(player => player is AIManager)
             .Cast<AIManager>()
             .ToList();
 
         aiPLayers.ForEach(ai =>
-                ai.TrackedPlayers = players.Select(player => player.playerManager)
+                ai.TrackedPlayers = players
                     .Where(player => player != ai).ToList());
+    }
 
+    public void RegisterPlayer(PlayerManager player)
+    {
+        players.Add(player);
+        playerById.Add(player.id, player);
+    }
+
+    // TODO give players start amount worth of chips (on match start only)
+    private void InitializeRound()
+    {
+        InitializeAIPlayers();
         MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
         onRoundStart?.Invoke();
         isAuction = false;
-        rounds.Add(new Round(players.Select(player => player.playerManager).ToList()));
+        rounds.Add(new Round(players.ToList()));
         roundTimer.StartTimer(roundLength);
         roundTimer.OnTimerUpdate += AdjustMusic;
         roundTimer.OnTimerUpdate += HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted += EndActiveRound;
+    }
+
+    private IEnumerator WaitForClientsAndInitialize()
+    {
+        // TODO add a timeout thingy for when one player doesn't join in time
+        // TODO keep loading screen open while this while loop spins
+        // Spin while waiting for players to spawn
+        while (players.Count < Peer2PeerTransport.NumPlayersInMatch)
+        {
+#if UNITY_EDITOR
+            Debug.Log($"{players.Count} of {Peer2PeerTransport.NumPlayersInMatch} players spawned");
+#endif
+            yield return null;
+        }
+
+        InitializeRound();
     }
 
     public void StartNextBidding()
@@ -176,16 +193,17 @@ public class MatchController : MonoBehaviour
         collectableChips = new List<CollectableChip>();
 
         StartCoroutine(ShowLoadingScreenBeforeBidding());
-        // TODO: Add Destroy on match win   
-    }   
-    private IEnumerator ShowLoadingScreenBeforeBidding(){
+        // TODO: Add Destroy on match win
+    }
+
+    private IEnumerator ShowLoadingScreenBeforeBidding()
+    {
         loadingScreen.SetActive(true);
         yield return new WaitForSeconds(loadingDuration);
 
-        PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
         MusicTrackManager.Singleton.SwitchTo(MusicType.Bidding);
         onBiddingStart?.Invoke();
-        SceneManager.LoadSceneAsync("Bidding");
+        NetworkManager.singleton.ServerChangeScene(Scenes.Bidding);
         PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = false;
         isAuction = true;
     }
@@ -218,31 +236,22 @@ public class MatchController : MonoBehaviour
     public IEnumerator WaitAndStartNextRound()
     {
         yield return new WaitForSeconds(biddingEndDelay);
-        // This needs to be called after inputs are set at start the first time this is needed.
-        PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
-        SceneManager.LoadScene(currentMapName);
-        StartNextRound();
-    }
-
-    public void EndActiveBidding()
-    {
-        onBiddingEnd?.Invoke();
-
+        NetworkManager.singleton.ServerChangeScene(currentMapName);
         StartNextRound();
     }
 
     private void AssignRewards()
     {
         var lastRound = rounds.Last();
-        foreach (Player player in players)
+        foreach (var player in players)
         {
             // Base reward and kill bonus
-            var reward = rewardBase + lastRound.KillCount(player.playerManager) * rewardKill;
+            var reward = rewardBase + lastRound.KillCount(player) * rewardKill;
             // Win bonus
-            if (lastRound.IsWinner(player.playerManager.identity))
+            if (lastRound.IsWinner(player.identity))
                 reward += rewardWin;
 
-            player.playerManager.identity.UpdateChip(reward);
+            player.identity.UpdateChip(reward);
         }
     }
 
@@ -261,14 +270,16 @@ public class MatchController : MonoBehaviour
 
     private bool IsWin()
     {
-        var winner = rounds.Last().Winner;
-        if (winner == null) { return false; }
+        var winnerId = rounds.Last().Winner;
+        if (!PlayerById.TryGetValue(winnerId, out var winner)) { return false; }
         var wins = PlayerWins(winner);
-        Debug.Log($"Current winner ({winner}) has {wins} wins.");
+        Debug.Log($"Current winner ({winner.identity.playerName}) has {wins} wins.");
         if (wins >= 3)
         {
             // We have a winner!
-            StartCoroutine(DisplayWinScreenAndRestart(winner));
+            StartCoroutine(DisplayWinScreenAndRestart(winner.identity));
+            // Remember stats from this match.
+            PersistentInfo.SavePersistentData();
             return true;
         }
         else
@@ -277,9 +288,9 @@ public class MatchController : MonoBehaviour
         }
     }
 
-    public int PlayerWins(PlayerIdentity player)
+    public int PlayerWins(PlayerManager player)
     {
-        return rounds.Where(round => round.IsWinner(player)).Count();
+        return rounds.Where(round => round.IsWinner(player.id)).Count();
     }
 
     public void RemoveChip(CollectableChip chip)
@@ -305,8 +316,6 @@ public class MatchController : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
-        // Update playerInputs / identities in preperation for Menu scene
-        PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
         // Remove AI identities
         FindObjectsOfType<PlayerIdentity>()
             .Where(identity => identity.IsAI)
@@ -314,7 +323,7 @@ public class MatchController : MonoBehaviour
 
         MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         rounds = new List<Round>();
-        PlayerInputManagerController.Singleton.playerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().resetItems());
-        SceneManager.LoadSceneAsync("Menu");
+        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
+        NetworkManager.singleton.ServerChangeScene(Scenes.Menu);
     }
 }

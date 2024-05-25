@@ -8,6 +8,9 @@ public class ContinuousDamage : MonoBehaviour
     [SerializeField]
     private float damageRate;
 
+    [SerializeField]
+    private float durationSeconds = -1;
+
     private float lastDamageTime = -100;
 
     [HideInInspector]
@@ -19,8 +22,10 @@ public class ContinuousDamage : MonoBehaviour
     {
         hitbox = transform.parent.GetComponent<HitboxController>();
         if (hitbox && hitbox.health)
-        {
             hitbox.health.onDeath += OnDeath;
+        if (durationSeconds > 0) 
+        {
+            Destroy(gameObject, durationSeconds);
         }
     }
 

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -10,6 +8,7 @@ public struct OverrideName
     public Item Barrel;
     public Item Extension;
     public string Name;
+    public AchievementType Achievement;
 }
 
 /// <summary>

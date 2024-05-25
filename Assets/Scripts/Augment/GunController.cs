@@ -1,7 +1,8 @@
+using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class GunController : MonoBehaviour
+public class GunController : NetworkBehaviour
 {
     private const float outputTransitionDistance = 2;
     public float OutputTransitionDistance => outputTransitionDistance;
@@ -34,14 +35,25 @@ public class GunController : MonoBehaviour
     public bool triggerHeld, triggerPressed;
     public Vector3 target;
     public bool TargetIsTooClose;
+    public bool AimCorrectionEnabled = true;
 
     public delegate void GunEvent(GunStats gunStats);
 
     public GunEvent onReload;
     public GunEvent onFireStart;
+    /// <summary>
+    /// Invoked on each shot
+    /// </summary>
     public GunEvent onFire;
     public GunEvent onFireEnd;
+    /// <summary>
+    /// Invoked when trying to fire a shot while the magazine is empty
+    /// </summary>
+    public GunEvent onFireNoAmmo;
     public GunEvent onInitializeGun;
+    /// <summary>
+    /// Invoked when a projectile is initialized
+    /// </summary>
     public GunEvent onInitializeBullet;
 
     public void SetPlayer(PlayerManager player)
@@ -64,6 +76,11 @@ public class GunController : MonoBehaviour
     private int zoomTween;
 
     private void Start()
+    {
+        Initialize();
+    }
+
+    public void Initialize()
     {
         var barrel = GetComponentInChildren<GunBarrel>();
         if (!barrel)
@@ -97,6 +114,9 @@ public class GunController : MonoBehaviour
             MatchController.Singleton.onRoundEnd -= CancelZoom;
     }
 
+    private bool ShouldFire() => !isFiring && fireRateController.shouldFire(triggerPressed, triggerHeld);
+
+    [Client]
     private void FixedUpdate()
     {
         if (fireRateController == null)
@@ -104,11 +124,12 @@ public class GunController : MonoBehaviour
             // No fireratecontroller exists
             return;
         }
-        if (!isFiring && fireRateController.shouldFire(triggerPressed, triggerHeld))
+        if (ShouldFire())
         {
             FireGun();
         }
     }
+
     /// <summary>
     /// Expects a fraction of ammunition to be reloaded.
     /// This fraction is normalized eg. min = 0, max = 1.
@@ -123,7 +144,8 @@ public class GunController : MonoBehaviour
 
     public void OnZoom(InputAction.CallbackContext ctx)
     {
-        gameObject.LeanMoveLocalX(0f, 0.2f).setEaseInOutCubic();
+        if (gameObject)
+            gameObject.LeanMoveLocalX(0f, 0.2f).setEaseInOutCubic();
     }
 
     public void OnZoomCanceled(InputAction.CallbackContext ctx)
@@ -133,26 +155,76 @@ public class GunController : MonoBehaviour
 
     private void CancelZoom()
     {
+
         if (gameObject)
             gameObject.LeanMoveLocalX(localGunXOffset, 0.2f).setEaseInOutCubic();
+    }
+
+    [Command]
+    private void CmdFire(Quaternion rotation)
+    {
+        // TODO Only go forth with firing if timing is right!
+        // (requires rewriting some stuff in FireRateController to not mutate unless the check is real)
+        RpcFire(rotation);
+    }
+
+    [ClientRpc]
+    private void RpcFire(Quaternion rotation)
+    {
+        onFireStart?.Invoke(stats);
+        projectile.projectileOutput = outputs[0];
+        projectile.projectileRotation = rotation;
+        ActuallyFire();
+    }
+
+    [Command]
+    private void CmdFireWithNoAmmo()
+    {
+        RpcFireWithNoAmmo();
+    }
+
+    [ClientRpc]
+    private void RpcFireWithNoAmmo()
+    {
+        onFireNoAmmo?.Invoke(stats);
     }
 
     private void FireGun()
     {
         if (stats.Ammo <= 0)
         {
+            CmdFireWithNoAmmo();
             return;
         }
 
-        isFiring = true;
-        onFireStart?.Invoke(stats);
-        AimAtTarget();
+        try
+        {
+            onFireStart?.Invoke(stats);
+            AimAtTarget();
+            CmdFire(projectile.projectileRotation);
+        }
+        catch (System.Exception e)
+        {
+            // Hopefully recoverable error. Firing has had lots of bugs before,
+            // hopefully we avoid displaying them in their gruesome nature to the user this way.
+            Debug.LogError(e);
+        }
+    }
+
+    private void ActuallyFire()
+    {
         projectile.InitializeProjectile(stats);
         onInitializeBullet?.Invoke(stats);
     }
 
     private void AimAtTarget()
     {
+        if (!AimCorrectionEnabled)
+        {
+            projectile.projectileOutput = outputs[0];
+            projectile.projectileRotation = Quaternion.identity;
+            return;
+        }
         // Output become camera when distance hit is closer than weaponOutput
         if (Player)
             projectile.projectileOutput = TargetIsTooClose ? Player.inputManager.transform : outputs[0];

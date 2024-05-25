@@ -1,14 +1,16 @@
+using Mirror;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Animations;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(AudioSource))]
-public class PlayerManager : MonoBehaviour
+public class PlayerManager : NetworkBehaviour
 {
+    [SyncVar]
+    public uint id;
+
     // Layers 12 through 15 are gun layers.
     protected static int allGunsMask = (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
@@ -35,7 +37,7 @@ public class PlayerManager : MonoBehaviour
     public bool overrideAimTarget = false;
 
     // TODO add context when shooty system is done
-    public delegate void HitEvent(PlayerManager killer, PlayerManager victim);
+    public delegate void HitEvent(PlayerManager killer, PlayerManager victim, DamageInfo info);
 
     public HitEvent onDeath;
 
@@ -123,6 +125,8 @@ public class PlayerManager : MonoBehaviour
     [SerializeField]
     private AudioGroup extraHitSounds;
 
+    private PlayerMovement movement;
+
     private void Start()
     {
         healthController = GetComponent<HealthController>();
@@ -132,13 +136,38 @@ public class PlayerManager : MonoBehaviour
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
-        identity.onChipChange += hudController.OnChipChange;
+        movement = GetComponent<PlayerMovement>();
+
+        // TODO call other stuff that sets up player object!
     }
 
     private void Update()
     {
+        // TODO Do aiming in a different component please
         if (GunHolder && inputManager)
+        {
             GunHolder.transform.forward = inputManager.transform.forward;
+            UpdateAimAngleCmd(movement.AimAngle.y);
+        }
+    }
+
+    // Hijinks for syncing aim from server to players
+    [Command]
+    private void UpdateAimAngleCmd(float yAngle)
+    {
+        UpdateAimAngleRpc(yAngle);
+    }
+
+    [ClientRpc]
+    private void UpdateAimAngleRpc(float yAngle)
+    {
+        // Avoid updating if this is a local player
+        if (inputManager)
+            return;
+        GunHolder.transform.localRotation = Quaternion.AngleAxis(yAngle * Mathf.Rad2Deg, Vector3.left);
+        // Same-ish location as GunHolder for the real gun
+        if (gunController)
+            gunController.transform.parent.localRotation = Quaternion.AngleAxis(yAngle * Mathf.Rad2Deg, Vector3.left);
     }
 
     void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
@@ -159,24 +188,25 @@ public class PlayerManager : MonoBehaviour
         {
             killer = lastPlayerThatHitMe;
         }
-        onDeath?.Invoke(killer, this);
+        onDeath?.Invoke(killer, this, info);
         isAlive = false;
         aimAssistCollider.SetActive(false);
         TurnIntoRagdoll(info);
         aiTargetCollider.gameObject.SetActive(false);
-        hudController.DisplayDeathScreen(killer.identity);
+        if (hudController)
+            hudController.DisplayDeathScreen(killer.identity);
         playerShadow.gameObject.SetActive(false);
     }
 
     protected void TurnIntoRagdoll(DamageInfo info)
     {
-        GetComponent<Rigidbody>().GetAccumulatedForce();
         // Disable components
         GetComponent<PlayerMovement>().enabled = false;
         healthController.enabled = false;
         playerIK.enabled = false;
         // TODO display guns falling to the floor
-        gunController.gameObject.SetActive(false);
+        if (gunController)
+            gunController.gameObject.SetActive(false);
         GunHolder.gameObject.SetActive(false);
         // Disable all colliders and physics
         // Ragdollify
@@ -201,6 +231,7 @@ public class PlayerManager : MonoBehaviour
         inputManager = playerInput;
         identity = inputManager.GetComponent<PlayerIdentity>();
         var playerMovement = GetComponent<PlayerMovement>();
+        playerMovement.enabled = true;
         playerMovement.SetPlayerInput(inputManager);
         playerMovement.onMove += UpdateHudOnMove;
         // Subscribe relevant input events
@@ -210,12 +241,26 @@ public class PlayerManager : MonoBehaviour
         inputManager.onFirePerformed += TryPlaceBid;
         inputManager.onInteract += Interact;
         // Set camera on canvas
-        var canvas = hudController.GetComponent<Canvas>();
-        canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
-        canvas.planeDistance = 0.11f;
+        if (hudController)
+        {
+            var canvas = hudController.GetComponent<Canvas>();
+            canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
+            canvas.planeDistance = 0.11f;
+            identity.onChipChange += hudController.OnChipChange;
+        }
 
+        if (playerIK.TryGetComponent<BiddingPlayer>(out var biddingPlayer))
+        {
+            biddingPlayer.SetPlayerInput();
+        }
+
+        ApplyColorFromIdentity();
+    }
+
+    public void ApplyColorFromIdentity()
+    {
         // Set player color
-        var meshRenderer = meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
+        meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
     }
 
     void OnDestroy()
@@ -238,7 +283,8 @@ public class PlayerManager : MonoBehaviour
         {
             playerMovement.onMove -= UpdateHudOnMove;
         }
-        identity.onChipChange -= hudController.OnChipChange;
+        if (hudController)
+            identity.onChipChange -= hudController.OnChipChange;
     }
 
     private void UpdateAimTarget(GunStats stats)
@@ -288,13 +334,14 @@ public class PlayerManager : MonoBehaviour
 
     private void UpdateHudOnMove(Rigidbody body)
     {
-        hudController.SetSpeedLines(body.velocity);
+        if (hudController)
+            hudController.SetSpeedLines(body.velocity);
     }
 
     private void UpdateHudFire(GunStats stats)
     {
         // stats variables must be dereferenced
-        float ammo = stats.Ammo;
+        float ammo = stats.Ammo < 1 ? 0 : stats.Ammo;
         float magazine = stats.MagazineSize;
         hudController.UpdateOnFire(ammo / magazine);
     }
@@ -353,29 +400,53 @@ public class PlayerManager : MonoBehaviour
 
         var negatedMask = ((1 << 16) - 1) ^ (playerMask | gunMask | ammoMask);
 
-        inputManager.PlayerCamera.cullingMask = negatedMask;
+        if (inputManager)
+            inputManager.PlayerCamera.cullingMask = negatedMask;
 
         // Set correct layer on self, mesh and gun (TODO)
         gameObject.layer = playerLayer;
         SetLayerOnSubtree(meshBase, playerLayer);
-        SetLayerOnSubtree(hudController.gameObject, LayerMask.NameToLayer("Gun " + playerIndex));
+        if (hudController)
+            SetLayerOnSubtree(hudController.gameObject, LayerMask.NameToLayer("Gun " + playerIndex));
     }
 
     public virtual void SetGun(Transform offset)
     {
+        var hadGunBefore = gunController != null;
         overrideAimTarget = false;
-        var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity?.Extension, this, offset);
+        var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity.Extension, this, offset);
         // Set specific local transform
         gun.transform.localPosition = new Vector3(0.39f, -0.34f, 0.5f);
         gun.transform.localRotation = Quaternion.AngleAxis(0.5f, Vector3.up);
         // Remember gun controller
         gunController = gun.GetComponent<GunController>();
-        gunController.onFireStart += UpdateAimTarget;
-        gunController.onFire += UpdateAimTarget;
-        gunController.onFireEnd += ScreenShake;
-        gunController.onFireEnd += UpdateHudFire;
-        gunController.onReload += UpdateHudReload;
-        gunController.projectile.OnHitboxCollision += hudController.HitmarkAnimation;
+        if (inputManager)
+        {
+            gunController.onFireStart += UpdateAimTarget;
+            gunController.onFire += UpdateAimTarget;
+            gunController.onFireEnd += ScreenShake;
+            gunController.onFireEnd += UpdateHudFire;
+            gunController.onReload += UpdateHudReload;
+            gunController.projectile.OnHitboxCollision += hudController.HitmarkAnimation;
+        }
+        playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
+        if (gunController.RightHandTarget)
+            playerIK.RightHandIKTarget = gunController.RightHandTarget;
+        GetComponent<AmmoBoxCollector>().CheckForAmmoBoxBodyAgain();
+        if (hadGunBefore)
+            // This is required for the networkbehaviours on the gun to be given an identity and not break
+            GetComponent<NetworkIdentity>().InitializeNetworkBehaviours();
+    }
+
+    public void SetGunNetwork(Transform offset)
+    {
+        overrideAimTarget = false;
+        var gun = GunFactory.InstantiateGunAI(
+             identity.Body,
+             identity.Barrel,
+             identity.Extension,
+            this, offset);
+        gunController = gun.GetComponent<GunController>();
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
         if (gunController.RightHandTarget)
             playerIK.RightHandIKTarget = gunController.RightHandTarget;

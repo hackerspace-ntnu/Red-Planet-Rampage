@@ -9,9 +9,11 @@ public class CollectableChip : MonoBehaviour
     [SerializeField]
     private VisualEffect effect;
 
+    [SerializeField]
+    private AudioGroup soundEffect;
     private AudioSource audioSource;
 
-    void Start()
+    private void Start()
     {
         audioSource = GetComponent<AudioSource>();
         // Animate spin and bounce
@@ -24,10 +26,10 @@ public class CollectableChip : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.gameObject.TryGetComponent<PlayerManager>(out PlayerManager player))
+        if (!other.gameObject.TryGetComponent<PlayerManager>(out var player))
             return;
         player.identity.UpdateChip(1);
-        audioSource.Play();
+        soundEffect.Play(audioSource);
         GetComponent<Collider>().enabled = false;
         chipModel.GetComponent<Renderer>().enabled = false;
         effect.enabled = false;
