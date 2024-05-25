@@ -68,6 +68,7 @@ public class ItemSelectManager : NetworkBehaviour
             .ToDictionary(c => c.connectionId, c => false);
     }
 
+    // TODO send signal to other players that they also should change scene!
     private void Finish()
     {
         StartCoroutine(LoadAndChangeScene());
@@ -75,6 +76,8 @@ public class ItemSelectManager : NetworkBehaviour
 
     private IEnumerator LoadAndChangeScene()
     {
+        // Prevent new inputs from messing with things
+        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(playerInput => playerInput.RemoveListeners());
         loadingScreen.SetActive(true);
         yield return new WaitForSeconds(delayDuration);
         AuctionDriver.Singleton.ChangeScene();

@@ -71,7 +71,7 @@ public class ScoreboardManager : MonoBehaviour
 
     private void SetupPosters()
     {
-        players = matchController.Players.ToList();
+        players = matchController.Players.OrderBy(p => p.id).ToList();
 
         scoreboards = GetComponentsInChildren<Scoreboard>().ToList();
 

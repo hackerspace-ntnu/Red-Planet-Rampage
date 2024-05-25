@@ -35,11 +35,7 @@ public class PlayerFactory : MonoBehaviour
         if (PlayerInputManagerController.Singleton == null)
         {
             // We most likely started the game in the game scene, reload menu instead
-            if (NetworkManager.singleton.isNetworkActive)
-                NetworkManager.singleton.ServerChangeScene(Scenes.Menu);
-            else
-                SceneManager.LoadSceneAsync(Scenes.Menu);
-            return;
+            SceneManager.LoadSceneAsync(Scenes.Menu);
         }
 
         playerInputManagerController = PlayerInputManagerController.Singleton;

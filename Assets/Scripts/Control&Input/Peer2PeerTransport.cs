@@ -283,10 +283,13 @@ public class Peer2PeerTransport : NetworkManager
     {
         var details = message.details;
         if (!players.ContainsKey(details.id))
+        {
+            Debug.LogError($"Received updated info for invalid player {details.id}");
             return;
+        }
         // Use the player type that we've already figured out
         details.type = players[details.id].type;
-        Debug.Log($"Received updated info for player {details.id}: chips={details.chips}, body={details.body}, barrel={details.barrel}, extension={details.extension}");
+        Debug.Log($"Received updated info for player {details.id}: chips={details.chips}, bodies={details.bodies?.ToCommaSeparatedString()}, barrels={details.barrels?.ToCommaSeparatedString()}, extensions={details.extensions?.ToCommaSeparatedString()}");
         players[details.id] = details;
     }
 
@@ -311,7 +314,8 @@ public class Peer2PeerTransport : NetworkManager
         }
     }
 
-    private void UpdatePlayerDetails()
+    // Called after shooting rounds (TODO just use the same matchcontroller stuff???)
+    private static void UpdatePlayerDetailsAfterShootingRound()
     {
         Debug.Log($"Found {FindObjectsByType<PlayerIdentity>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).Count()} identitites!");
         foreach (var identity in FindObjectsByType<PlayerIdentity>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
@@ -319,19 +323,34 @@ public class Peer2PeerTransport : NetworkManager
             if (identity.Body == null)
                 continue;
 
-            if (!players.TryGetValue(identity.id, out var playerDetails))
-            {
-                Debug.LogError($"Invalid player to update: id={identity.id}");
-                continue;
-            }
-
-            playerDetails.chips = identity.chips;
-            playerDetails.bodies = identity.Bodies.Select(item => item.id).ToArray();
-            playerDetails.barrels = identity.Barrels.Select(item => item.id).ToArray();
-            playerDetails.extensions = identity.Extensions.Select(item => item.id).ToArray();
-            players[identity.id] = playerDetails;
-            NetworkServer.SendToAll(new UpdatedPlayerDetailsMessage(playerDetails));
+            UpdatePlayerInventoryForIdentity(identity);
         }
+    }
+
+    // Called from auction driver after players have received their new items
+    // Separated from loadout update due to inconsistent timing :)))))
+    public static void UpdatePlayerDetailsAfterAuction()
+    {
+        foreach (var player in MatchController.Singleton.Players)
+        {
+            UpdatePlayerInventoryForIdentity(player.identity);
+        }
+    }
+
+    private static void UpdatePlayerInventoryForIdentity(PlayerIdentity identity)
+    {
+        if (!players.TryGetValue(identity.id, out var playerDetails))
+        {
+            Debug.LogError($"Invalid player to update: id={identity.id}");
+            return;
+        }
+
+        playerDetails.chips = identity.chips;
+        playerDetails.bodies = identity.Bodies.Select(item => item.id).ToArray();
+        playerDetails.barrels = identity.Barrels.Select(item => item.id).ToArray();
+        playerDetails.extensions = identity.Extensions.Select(item => item.id).ToArray();
+        players[identity.id] = playerDetails;
+        NetworkServer.SendToAll(new UpdatedPlayerDetailsMessage(playerDetails));
     }
 
     public override void OnServerChangeScene(string newSceneName)
@@ -342,17 +361,18 @@ public class Peer2PeerTransport : NetworkManager
             AddAiPlayers();
         }
 
-        UpdatePlayerDetails();
 
         switch (newSceneName)
         {
             case Scenes.Bidding:
+                UpdatePlayerDetailsAfterShootingRound();
                 NetworkServer.ReplaceHandler<SpawnPlayerMessage>(OnSpawnBiddingPlayer);
                 break;
             case Scenes.Menu:
                 NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
                 break;
             default:
+                // From auction, so no need to update *here*
                 NetworkServer.ReplaceHandler<SpawnPlayerMessage>(OnSpawnFPSPlayer);
                 break;
         }
@@ -360,6 +380,7 @@ public class Peer2PeerTransport : NetworkManager
         base.OnServerChangeScene(newSceneName);
     }
 
+    // TODO move to ItemSelectManager (?)
     private void UpdateLoadout()
     {
         Debug.Log($"Found {FindObjectsByType<PlayerIdentity>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).Count()} identitites!");
@@ -482,20 +503,12 @@ public class Peer2PeerTransport : NetworkManager
         StartCoroutine(WaitAndInitializeFPSPlayer(message));
     }
 
-    // TODO move this down to PlayerIdentity for better encapsulation!
     private void UpdateIdentityFromDetails(PlayerIdentity identity, PlayerDetails playerDetails)
     {
-        identity.id = playerDetails.id;
         var playerName = playerDetails.name;
         if (players.Values.Count(p => p.steamID == playerDetails.steamID) > 1)
             playerName = $"{playerName} {playerDetails.localInputID + 1}";
-
-        identity.playerName = playerName;
-        identity.color = playerDetails.color;
-
-        identity.chips = playerDetails.chips;
-        identity.SetItems(playerDetails.bodies, playerDetails.barrels, playerDetails.extensions);
-        identity.SetLoadout(playerDetails.body, playerDetails.barrel, playerDetails.extension);
+        identity.UpdateFromDetails(playerDetails, playerName);
     }
 
     private IEnumerator WaitAndInitializeFPSPlayer(InitializePlayerMessage message)

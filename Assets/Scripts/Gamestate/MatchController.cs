@@ -208,6 +208,7 @@ public class MatchController : MonoBehaviour
         PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = false;
         isAuction = true;
     }
+
     public void EndActiveRound()
     {
         onOutcomeDecided?.Invoke();
@@ -234,11 +235,11 @@ public class MatchController : MonoBehaviour
         StartNextBidding();
     }
 
+    // TODO just move this to AuctionDriver, perhaps. it doesn't make a real difference.
     public IEnumerator WaitAndStartNextRound()
     {
         yield return new WaitForSeconds(biddingEndDelay);
         NetworkManager.singleton.ServerChangeScene(currentMapName);
-        StartNextRound();
     }
 
     private void AssignRewards()
