@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.VFX;
+using Mirror;
 
 public class PortalExtensionController : GunExtension
 {
@@ -15,7 +12,7 @@ public class PortalExtensionController : GunExtension
 
     private Transform portalMover;
 
-    private GunController controller;
+    private GunController gunGontroller;
 
     private Transform playerView;
     private InputManager inputManager;
@@ -25,75 +22,108 @@ public class PortalExtensionController : GunExtension
 
     private void Start()
     {
-        if (!controller)
-            controller = GetComponentInParent<GunController>();
-    
-        if(controller != null)
+        if (!gunGontroller)
+            gunGontroller = GetComponentInParent<GunController>();
+
+        if (gunGontroller != null)
         {
-            controller.AimCorrectionEnabled = false;
+            gunGontroller.AimCorrectionEnabled = false;
             inputManager = GetComponentInParent<PlayerManager>().inputManager;
-            playerView = inputManager.transform;
+            if (inputManager)
+                playerView = inputManager.transform;
         }
     }
 
-
     private void OnDestroy()
     {
-        if(controller)
-            controller.AimCorrectionEnabled = true;
+        if (gunGontroller)
+            gunGontroller.AimCorrectionEnabled = true;
         if (portalMover)
             Destroy(portalMover.gameObject);
     }
 
 
-    private void MoveToAim()
+    private void MovePortal()
     {
         RaycastHit hit;
         if (Physics.Raycast(playerView.position, playerView.forward, out hit, 200, this.validPortalSurfaceColliders))
         {
             portalMover.rotation = Quaternion.LookRotation(-hit.normal, Vector3.up);
             portalMover.position = hit.point + 0.9f * hit.normal;
+            CmdMovePortal(portalMover.position, portalMover.rotation);
         }
     }
-    private void AimAt()
+
+    [Command]
+    private void CmdMovePortal(Vector3 position, Quaternion rotation)
+    {
+        RpcMovePortal(position, rotation);
+    }
+
+    [ClientRpc]
+    private void RpcMovePortal(Vector3 position, Quaternion rotation)
+    {
+        if (inputManager)
+            return;
+
+        portalMover.rotation = rotation;
+        portalMover.position = position;
+    }
+
+    private void AimPortal()
     {
         RaycastHit hit;
         if (Physics.Raycast(playerView.position + 1f * playerView.forward, playerView.forward, out hit, 200, this.validAimColliders))
         {
             portalMover.rotation = Quaternion.LookRotation(portalMover.position - hit.point, Vector3.up);
+            CmdAimPortal(portalMover.rotation);
         }
     }
+
+    [Command]
+    private void CmdAimPortal(Quaternion rotation)
+    {
+        RpcAimPortal(rotation);
+    }
+
+    [ClientRpc]
+    private void RpcAimPortal(Quaternion rotation)
+    {
+        if (inputManager)
+            return;
+
+        portalMover.rotation = rotation;
+    }
+
     private void Update()
     {
         if (!playerView)
             return;
         if (inputManager.ZoomActive)
         {
-            MoveToAim();
+            MovePortal();
         }
         else
         {
-            AimAt();
+            AimPortal();
         }
-       
     }
+
     public override Transform[] AttachToTransforms(Transform[] transforms)
     {
-        controller = GetComponentInParent<GunController>();
+        gunGontroller = GetComponentInParent<GunController>();
         var portalMoverObject = Instantiate(portalMoverPrefab);
         output = portalMoverObject.GetComponent<PortalExtensionOutput>().Output;
         portalMoverObject.transform.rotation = transform.rotation;
         portalMoverObject.transform.position = transform.position - output.localPosition;
         portalMover = portalMoverObject.transform;
         outputs = new Transform[] { output };
-        var barrel = controller.GetComponentInChildren<GunBarrel>();
+        var barrel = gunGontroller.GetComponentInChildren<GunBarrel>();
         if (barrel && barrel.MuzzleFlash)
             barrel.MuzzleFlash.enabled = false;
-        if (!controller || !controller.Player)
+        if (!gunGontroller || !gunGontroller.Player)
             foreach (Transform child in portalMoverObject.transform)
                 child.gameObject.SetActive(false);
         return new Transform[] { output };
     }
-
-
 }
