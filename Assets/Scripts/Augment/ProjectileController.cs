@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Mirror;
 
 [System.Serializable]
 public class ProjectileState
@@ -75,7 +76,7 @@ public class ProjectileState
     public ProjectileState() { }
 }
 
-public abstract class ProjectileController : MonoBehaviour
+public abstract class ProjectileController : NetworkBehaviour
 {
     [HideInInspector]
     public Transform projectileOutput;

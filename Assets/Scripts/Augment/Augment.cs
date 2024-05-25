@@ -3,6 +3,7 @@ using UnityEngine.Serialization;
 using UnityEngine.VFX;
 using System.Linq;
 using System.Collections.Generic;
+using Mirror;
 
 [System.Serializable]
 public class Modifier
@@ -12,7 +13,7 @@ public class Modifier
     public float multiplier = 0;
     public float exponential = 1;
 }
-public abstract class Augment : MonoBehaviour
+public abstract class Augment : NetworkBehaviour
 {
     // Adds simple stat modifications
     public Modifier[] statModifiers;

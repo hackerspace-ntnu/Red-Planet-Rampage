@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.VFX;
 using Random = System.Random;
 using RandomExtensions;
+using Mirror;
 
 public class BulletController : ProjectileController
 {
@@ -34,8 +35,7 @@ public class BulletController : ProjectileController
 
     private ProjectileState projectile = new ProjectileState();
 
-    // TODO synchronize
-    private Random random = new Random();
+    private Random random = new();
 
     protected override void Awake()
     {
@@ -44,13 +44,6 @@ public class BulletController : ProjectileController
             return;
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
         animator.OnShotFiredAnimation += FireProjectile;
-    }
-
-    public void SetTrail(VisualEffect newTrail)
-    {
-        if (trailPositionBuffer.Buffer != null)
-            trailPositionBuffer.Buffer.Release();
-        trail = newTrail;
     }
 
     private void Start()
@@ -62,6 +55,25 @@ public class BulletController : ProjectileController
         trail.SetInt("StripLength", vfxPositionsPerSample * collisionSamples);
         trail.SetInt("TextureSize", vfxPositionsPerSample * collisionSamples * bulletsPerShot);
         trail.SetInt("TrailsPerEvent", bulletsPerShot);
+
+        if (isServer)
+            RpcSeedRandom(random.Next());
+    }
+
+
+    [ClientRpc]
+    private void RpcSeedRandom(int seed)
+    {
+        Debug.Log($"Seed {seed}");
+        random = new Random(seed);
+    }
+
+
+    public void SetTrail(VisualEffect newTrail)
+    {
+        if (trailPositionBuffer.Buffer != null)
+            trailPositionBuffer.Buffer.Release();
+        trail = newTrail;
     }
 
     protected override void OnInitialize(GunStats gunstats)

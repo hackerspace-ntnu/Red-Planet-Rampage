@@ -26,13 +26,13 @@ public class WeightedRandomisedAuctionStage : RandomisedAuctionStage
         Item[] selection = new Item[numItems];
         for (int i = 0; i < numItems; i++)
         {
-            selection[i] = items.RandomElement(random);
+            selection[i] = items.RandomElement();
         }
         return selection;
     }
     private Item[] RandomSelectionWithoutReplacement()
     {
-        int[] idx = items.RandomIndicesOf(random);
+        int[] idx = items.RandomIndicesOf();
         Item[] selection = new Item[numItems];
         for (int i = 0; i < numItems; i++)
         {

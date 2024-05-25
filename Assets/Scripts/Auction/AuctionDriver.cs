@@ -49,9 +49,6 @@ public class AuctionDriver : NetworkBehaviour
 
     public static AuctionDriver Singleton;
 
-    // TODO synchronize
-    private System.Random random = new System.Random();
-
     private void Awake()
     {
         #region Singleton boilerplate
@@ -87,12 +84,6 @@ public class AuctionDriver : NetworkBehaviour
             3 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction },
             _ => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction }
         };
-        foreach (var stage in availableAuctionStages)
-        {
-            // Ensure they all use the same seed
-            // TODO actually, the stages could use random from the server exclusively and be networked
-            stage.Random = random;
-        }
 
         playerFactory = GetComponent<PlayerFactory>();
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
