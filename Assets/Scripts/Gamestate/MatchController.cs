@@ -64,7 +64,6 @@ public class MatchController : MonoBehaviour
     private string currentMapName;
 
     private Dictionary<uint, PlayerManager> playerById = new();
-    public ReadOnlyDictionary<uint, PlayerManager> PlayerById;
 
     private List<PlayerManager> players = new();
     public ReadOnlyCollection<PlayerManager> Players;
@@ -104,7 +103,6 @@ public class MatchController : MonoBehaviour
         #endregion Singleton boilerplate
 
         Players = new ReadOnlyCollection<PlayerManager>(players);
-        PlayerById = new ReadOnlyDictionary<uint, PlayerManager>(playerById);
     }
 
     void Start()
@@ -131,7 +129,6 @@ public class MatchController : MonoBehaviour
         players = new();
         playerById = new();
         Players = new ReadOnlyCollection<PlayerManager>(players);
-        PlayerById = new ReadOnlyDictionary<uint, PlayerManager>(playerById);
 
         StartCoroutine(WaitForClientsAndInitialize());
     }
@@ -271,7 +268,7 @@ public class MatchController : MonoBehaviour
     private bool IsWin()
     {
         var winnerId = rounds.Last().Winner;
-        if (!PlayerById.TryGetValue(winnerId, out var winner)) { return false; }
+        if (!playerById.TryGetValue(winnerId, out var winner)) { return false; }
         var wins = PlayerWins(winner);
         Debug.Log($"Current winner ({winner.identity.playerName}) has {wins} wins.");
         if (wins >= 3)
