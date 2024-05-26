@@ -235,6 +235,7 @@ public class PlayerManager : NetworkBehaviour
         playerMovement.enabled = true;
         playerMovement.SetPlayerInput(inputManager);
         playerMovement.OnMove += UpdateHudOnMove;
+        playerMovement.OnJumpPerformed += UpdateHudOnJump;
         // Subscribe relevant input events
         inputManager.onFirePerformed += Fire;
         inputManager.onFireCanceled += FireEnd;
@@ -340,6 +341,12 @@ public class PlayerManager : NetworkBehaviour
     {
         if (hudController)
             hudController.SetSpeedLines(body.velocity);
+    }
+
+    private void UpdateHudOnJump(Rigidbody body)
+    {
+        if (hudController)
+            hudController.AnimateHudJump();
     }
 
     private void UpdateHudFire(GunStats stats)

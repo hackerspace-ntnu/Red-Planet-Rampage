@@ -237,6 +237,7 @@ public class PlayerMovement : MonoBehaviour
                     break;
                 }
         }
+        OnJumpPerformed?.Invoke(body);
     }
 
     private void OnZoom(InputAction.CallbackContext ctx)
@@ -408,7 +409,6 @@ public class PlayerMovement : MonoBehaviour
 
         var yDrag = body.velocity.y < 0 ? 0f : body.velocity.y;
         body.AddForce(-dragForce * body.mass * new Vector3(body.velocity.x, yDrag, body.velocity.z), ForceMode.Force);
-        OnJumpPerformed?.Invoke(body);
     }
 
     private void UpdateRotation()
