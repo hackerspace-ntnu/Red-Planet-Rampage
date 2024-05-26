@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 
-public class PlatformMovement : MonoBehaviour
+public class PlatformMovement : NetworkBehaviour
 {
     public List<Transform> routepoints;
 
@@ -20,10 +21,6 @@ public class PlatformMovement : MonoBehaviour
     private int nextRoutepointIndex;
     private float travelDistance;
 
-    // TODO synchronize platform movement somehow
-    //      - probably just slap a networktransform on it, with *server* authority
-    //      - fix whatever it was that caused the player object to disappear last time 🤔
-    //      - this *could* make things a lil' jittery though?
     private void Start()
     {
         nextRoutepointIndex = 0;
@@ -42,7 +39,8 @@ public class PlatformMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        MovePlatform();
+        if (isServer)
+            MovePlatform();
     }
 
     private void MovePlatform()
@@ -69,16 +67,18 @@ public class PlatformMovement : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.TryGetComponent<PlayerManager>(out PlayerManager playerManager))
-        {
+        if (!other.gameObject.TryGetComponent(out PlayerManager playerManager))
+            return;
+
+        // Only set transform locally
+        if (playerManager.inputManager)
             other.transform.SetParent(transform);
-        }
     }
+
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.TryGetComponent<PlayerManager>(out PlayerManager playerManager))
-        {
-            other.transform.SetParent(null);
-        }
+        if (!other.gameObject.TryGetComponent(out PlayerManager playerManager))
+            return;
+        other.transform.SetParent(null);
     }
 }
