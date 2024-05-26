@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -172,6 +173,25 @@ public class Peer2PeerTransport : NetworkManager
         PlayerInstanceByID = new(playerInstances);
         playerIndex = 0;
     }
+    // TODO OnClientDisconnect and the like must be implemented!!!
+    //      - OnServerDisconnect seems to be the one that runs on the server when a client disconnects
+
+    //public override void OnServerDisconnect(NetworkConnectionToClient conn)
+    //{
+    //    base.OnServerDisconnect(conn);
+    //    throw new NotImplementedException();
+    //}
+    //public override void OnClientDisconnect()
+    //{
+    //    base.OnClientDisconnect();
+    //    throw new NotImplementedException();
+    //}
+    //// TODO should this be different?
+    //public override void OnStopClient()
+    //{
+    //    base.OnStopClient();
+    //    throw new NotImplementedException();
+    //}
 
     public void JoinLobby(string address = "127.0.0.1")
     {
