@@ -84,6 +84,7 @@ public class Fire : GunExtension
         switch (projectileType)
         {
             case ProjectileType.Mesh:
+                fireTrailInstances.gameObject.layer = 0;
                 var count = 0;
                 trackedProjectiles.RemoveWhere(projectile => projectile.active == false);
                 foreach (var projectile in trackedProjectiles)
