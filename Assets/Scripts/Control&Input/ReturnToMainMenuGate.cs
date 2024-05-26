@@ -9,10 +9,9 @@ public class ReturnToMainMenuGate : MonoBehaviour, Interactable
         ReturnToMainMenu();
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-        var contact = collision.GetContact(0);
-        if (contact.otherCollider.TryGetComponent<PlayerManager>(out var _))
+        if (other.TryGetComponent<PlayerManager>(out var _))
             ReturnToMainMenu();
     }
 

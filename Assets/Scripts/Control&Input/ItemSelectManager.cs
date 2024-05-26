@@ -1,17 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Mirror;
 using UnityEngine;
-
-// TODO remove first two structs if unused
-internal struct StartTrackingMessage : NetworkMessage
-{
-}
-
-internal struct ReadyToTrackMessage : NetworkMessage
-{
-}
 
 internal struct ClientReadyMessage : NetworkMessage
 {
@@ -45,25 +37,27 @@ public class ItemSelectManager : NetworkBehaviour
 
         if (isServer)
         {
-            InitializeServerData();
-            NetworkServer.RegisterHandler<ClientReadyMessage>(OnClientReady);
-            NetworkServer.RegisterHandler<ClientNotReadyMessage>(OnClientNotReady);
+            InitializeServerState();
         }
+    }
+
+    private void InitializeServerState()
+    {
+        clientReadyByID = Peer2PeerTransport.Connections
+            .ToDictionary(c => c.connectionId, c => false);
+        ((Peer2PeerTransport)NetworkManager.singleton).OnDisconnect += OnDisconnect;
+        NetworkServer.RegisterHandler<ClientReadyMessage>(OnClientReady);
+        NetworkServer.RegisterHandler<ClientNotReadyMessage>(OnClientNotReady);
     }
 
     private void OnDestroy()
     {
         if (isServer)
         {
+            ((Peer2PeerTransport)Peer2PeerTransport.singleton).OnDisconnect -= OnDisconnect;
             NetworkServer.UnregisterHandler<ClientReadyMessage>();
             NetworkServer.UnregisterHandler<ClientNotReadyMessage>();
         }
-    }
-
-    private void InitializeServerData()
-    {
-        clientReadyByID = Peer2PeerTransport.Connections
-            .ToDictionary(c => c.connectionId, c => false);
     }
 
     [Server]
@@ -75,6 +69,7 @@ public class ItemSelectManager : NetworkBehaviour
     [ClientRpc]
     private void RpcFinish()
     {
+        ((Peer2PeerTransport)Peer2PeerTransport.singleton).UpdateLoadout();
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
     }
 
@@ -107,9 +102,20 @@ public class ItemSelectManager : NetworkBehaviour
         }
     }
 
+    private void OnDisconnect(int connectionID)
+    {
+        clientReadyByID.Remove(connectionID);
+        CheckIfAllAreReady();
+    }
+
     private void OnClientReady(NetworkConnectionToClient connection, ClientReadyMessage message)
     {
         clientReadyByID[connection.connectionId] = true;
+        CheckIfAllAreReady();
+    }
+
+    private void CheckIfAllAreReady()
+    {
         var allClientsAreReady = clientReadyByID.Values.All(m => m);
         if (allClientsAreReady)
         {

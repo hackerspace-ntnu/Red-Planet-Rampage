@@ -262,6 +262,7 @@ public class PlayerManager : NetworkBehaviour
         meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
         if (playerIK.TryGetComponent<BiddingPlayer>(out var biddingPlayer))
         {
+            // TODO refactor identity subscriptions
             biddingPlayer.SetIdentity();
         }
     }
