@@ -12,6 +12,9 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
     private FallingHazard[] spaceGarbage;
 
     [SerializeField]
+    private ExplosionController impactExplosion;
+
+    [SerializeField]
     private TargetingReticle targetingReticle;
 
     [SerializeField]
@@ -172,12 +175,25 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
         // TODO synchronize explosions (get a callback and spawn explosions through rpc)
         var garbageInstance = garbagePool.Get();
         garbageInstance.transform.parent = garbageParent;
-        garbageInstance.Player = gunController.Player;
-        garbageInstance.Launch(launchPoint);
+        garbageInstance.Launch(launchPoint, TriggerImpactExplosion);
 
         var targetInstance = targetingReticlePool.GetAndReturnLater(2);
         garbageInstance.transform.parent = garbageParent;
         targetInstance.transform.position = target;
+    }
+
+    private void TriggerImpactExplosion(Vector3 position)
+    {
+        if (isServer)
+            RpcTriggerImpactExplosion(position);
+    }
+
+    [ClientRpc]
+    private void RpcTriggerImpactExplosion(Vector3 position)
+    {
+        var instance = Instantiate(impactExplosion, position, Quaternion.identity);
+        instance.Init();
+        instance.Explode(gunController.Player);
     }
 
     private void OnDestroy()
