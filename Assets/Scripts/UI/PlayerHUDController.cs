@@ -9,6 +9,10 @@ public class PlayerHUDController : MonoBehaviour
     private RectTransform hud;
 
     [Header("Health and ammo")]
+    [SerializeField]
+    private RectTransform hudParent;
+    private float hudParentLocalY;
+    private int hudParentJumpTween;
 
     [SerializeField]
     private SpriteRenderer healthBar;
@@ -109,6 +113,8 @@ public class PlayerHUDController : MonoBehaviour
         image.material = damageBorder;
         damageBorder.SetFloat("_Intensity", 0);
 
+        hudParentLocalY = hudParent.localPosition.y;
+
         ammoCapacityMaterial = Instantiate(ammoBar.material);
         ammoBar.material = ammoCapacityMaterial;
         ammoCapacityMaterial.SetFloat("_Arc2", 0);
@@ -163,6 +169,18 @@ public class PlayerHUDController : MonoBehaviour
         oldLargeVelocity = magnitude;
     }
 
+    public void AnimateHudJump()
+    {
+        if (LeanTween.isTweening(hudParentJumpTween))
+        {
+            LeanTween.cancel(hudParentJumpTween);
+            hudParent.localPosition = new Vector3 (hudParent.localPosition.x, hudParentLocalY, hudParent.localPosition.z);
+        }
+        hudParentJumpTween = hudParent.LeanMoveLocalY(hudParent.localPosition.y - 10f, 1.3f)
+            .setEasePunch()
+            .id;
+    }
+
     public void OnDamageTaken(float damage, float currentHealth, float maxHealth)
     {
         UpdateHealthBar(currentHealth, maxHealth);
@@ -214,7 +232,7 @@ public class PlayerHUDController : MonoBehaviour
 
     private void UpdateHealthBar(float currentHealth, float maxHealth)
     {
-        healthText.text = $"{Mathf.Clamp(Mathf.RoundToInt(currentHealth), 0, 100)}%";
+        healthText.text = $"{Mathf.Clamp(Mathf.CeilToInt(currentHealth), 0, 100)}%";
         if (LeanTween.isTweening(healthTextTween))
         {
             LeanTween.cancel(healthTextTween);
