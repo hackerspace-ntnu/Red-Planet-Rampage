@@ -14,10 +14,7 @@ public class MatchController : MonoBehaviour
 {
     public static MatchController Singleton { get; private set; }
 
-    private PlayerFactory playerFactory;
-
     public delegate void MatchEvent();
-
     public MatchEvent? onOutcomeDecided;
     public MatchEvent? onRoundEnd;
     public MatchEvent? onRoundStart;
@@ -33,9 +30,6 @@ public class MatchController : MonoBehaviour
 
     [SerializeField]
     private float roundEndDelay;
-
-    [SerializeField]
-    private float biddingEndDelay = 10;
 
     [SerializeField]
     private float matchEndDelay = 5;
@@ -102,6 +96,7 @@ public class MatchController : MonoBehaviour
 
         #endregion Singleton boilerplate
 
+        players = new();
         Players = new ReadOnlyCollection<PlayerManager>(players);
     }
 
@@ -111,7 +106,6 @@ public class MatchController : MonoBehaviour
         {
             PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
         }
-        playerFactory = FindObjectOfType<PlayerFactory>();
 
         currentMapName ??= SceneManager.GetActiveScene().name;
 
@@ -318,8 +312,14 @@ public class MatchController : MonoBehaviour
             .Where(identity => identity.IsAI)
             .ToList().ForEach(aiIdentity => Destroy(aiIdentity));
 
-        MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         rounds = new List<Round>();
-        NetworkManager.singleton.ServerChangeScene(Scenes.Menu);
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
+        PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
+        SceneManager.LoadSceneAsync(Scenes.Menu);
+
+        if (NetworkServer.active)
+            NetworkManager.singleton.StopHost();
+        else
+            NetworkManager.singleton.StopClient();
     }
 }

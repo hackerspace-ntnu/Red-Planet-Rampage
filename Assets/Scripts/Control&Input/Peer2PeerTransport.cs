@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -132,25 +131,36 @@ public class Peer2PeerTransport : NetworkManager
     /// </summary>
     private static List<NetworkConnectionToClient> connections = new();
     private static Dictionary<int, List<uint>> playersForConnection = new();
+    private static List<uint> connectedPlayers = new();
     public static ReadOnlyCollection<NetworkConnectionToClient> Connections;
 
     public delegate void LobbyPlayerEvent(PlayerDetails details);
     public LobbyPlayerEvent OnPlayerRecieved;
 
-    public override void OnStartServer()
-    {
-        base.OnStartServer();
-        NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
-        NetworkServer.RegisterHandler<UpdateLoadoutMessage>(OnReceiveUpdateLoadout);
+    public delegate void ConnectionEvent(int connectionID);
+    public ConnectionEvent OnDisconnect;
 
-        // Reinitialize player lookups
+    private void ResetState()
+    {
+        Debug.Log("Reset state");
+        playerIndex = 0;
         players = new();
         playerInstances = new();
         PlayerInstanceByID = new(playerInstances);
-        playerIndex = 0;
+        localPlayerIds = new();
+
         connections = new();
+        connectedPlayers = new();
         playersForConnection = new();
         Connections = new(connections);
+    }
+
+    public override void OnStartServer()
+    {
+        NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
+        NetworkServer.RegisterHandler<UpdateLoadoutMessage>(OnReceiveUpdateLoadout);
+
+        ResetState();
     }
 
     #region Player joining 
@@ -158,7 +168,6 @@ public class Peer2PeerTransport : NetworkManager
     public override void OnClientConnect()
     {
         base.OnClientConnect();
-
         NetworkClient.RegisterHandler<StartMatchMessage>(OnStartMatch);
         NetworkClient.RegisterHandler<InitialPlayerDetailsMessage>(OnReceivePlayerDetails);
         NetworkClient.RegisterHandler<InitializePlayerMessage>(InitializeFPSPlayer);
@@ -168,30 +177,45 @@ public class Peer2PeerTransport : NetworkManager
         // TODO doesn't work if players haven't pressed a key yet
         PlayerInputManagerController.Singleton.JoinAllInputs();
 
-        players = new();
-        playerInstances = new();
-        PlayerInstanceByID = new(playerInstances);
-        playerIndex = 0;
+        ResetState();
     }
-    // TODO OnClientDisconnect and the like must be implemented!!!
-    //      - OnServerDisconnect seems to be the one that runs on the server when a client disconnects
 
-    //public override void OnServerDisconnect(NetworkConnectionToClient conn)
-    //{
-    //    base.OnServerDisconnect(conn);
-    //    throw new NotImplementedException();
-    //}
-    //public override void OnClientDisconnect()
-    //{
-    //    base.OnClientDisconnect();
-    //    throw new NotImplementedException();
-    //}
-    //// TODO should this be different?
-    //public override void OnStopClient()
-    //{
-    //    base.OnStopClient();
-    //    throw new NotImplementedException();
-    //}
+    public override void OnServerDisconnect(NetworkConnectionToClient connection)
+    {
+        if (!playersForConnection.ContainsKey(connection.connectionId))
+            return;
+        Debug.Log($"Removed connection {connections.IndexOf(connection)} which has players {playersForConnection[connection.connectionId].ToCommaSeparatedString()}");
+        connections.Remove(connection);
+        connectedPlayers.RemoveAll(id => playersForConnection[connection.connectionId].Contains(id));
+        playersForConnection.Remove(connection.connectionId);
+        // TODO send msg to ItemSelectManager that this connection is invalid
+        OnDisconnect?.Invoke(connection.connectionId);
+    }
+
+    public override void OnStopServer()
+    {
+        Debug.Log("Stopped server");
+        ResetState();
+    }
+
+    public override void OnStopClient()
+    {
+        Debug.Log("Stopped client");
+        ResetState();
+    }
+
+    public override void OnClientDisconnect()
+    {
+        Debug.Log("Disconnected as client");
+        LoadingScreen.Singleton.Hide();
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
+        PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
+        SceneManager.LoadSceneAsync(Scenes.Menu);
+        if (NetworkClient.active)
+            StopClient();
+        else
+            ResetState();
+    }
 
     public void JoinLobby(string address = "127.0.0.1")
     {
@@ -221,6 +245,7 @@ public class Peer2PeerTransport : NetworkManager
                 color = PlayerInputManagerController.Singleton.PlayerColors[i],
             };
             players.Add((uint)i, details);
+            connectedPlayers.Add((uint)i);
             NetworkServer.SendToAll(new InitialPlayerDetailsMessage(details));
         }
 
@@ -229,9 +254,12 @@ public class Peer2PeerTransport : NetworkManager
 
     private static IEnumerator WaitAndSwitchToTrainingMode()
     {
+        LoadingScreen.Singleton.Show();
         while (!NetworkClient.isConnected && !singleton.isNetworkActive && players.Count < PlayerInputManagerController.Singleton.LocalPlayerInputs.Count)
             yield return new WaitForEndOfFrame();
         singleton.ServerChangeScene(Scenes.TrainingMode);
+        // TODO until after spawned
+        LoadingScreen.Singleton.Hide();
     }
 
     // TODO custom method for leaving training mode :)
@@ -266,7 +294,10 @@ public class Peer2PeerTransport : NetworkManager
         // Register connection
         PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
         if (!connections.Contains(connection))
+        {
             connections.Add(connection);
+            connectedPlayers.Add((uint)playerIndex);
+        }
         if (!playersForConnection.ContainsKey(connection.connectionId))
             playersForConnection[connection.connectionId] = new();
         playersForConnection[connection.connectionId].Add((uint)playerIndex);
@@ -412,7 +443,6 @@ public class Peer2PeerTransport : NetworkManager
             AddAiPlayers();
         }
 
-
         switch (newSceneName)
         {
             case Scenes.Bidding:
@@ -427,12 +457,9 @@ public class Peer2PeerTransport : NetworkManager
                 NetworkServer.ReplaceHandler<SpawnPlayerMessage>(OnSpawnFPSPlayer);
                 break;
         }
-
-        base.OnServerChangeScene(newSceneName);
     }
 
-    // TODO move to ItemSelectManager (?)
-    private void UpdateLoadout()
+    public void UpdateLoadout()
     {
         Debug.Log($"Found {FindObjectsByType<PlayerIdentity>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).Count()} identitites!");
         foreach (var identity in FindObjectsByType<PlayerIdentity>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
@@ -469,7 +496,6 @@ public class Peer2PeerTransport : NetworkManager
 
     public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
     {
-        UpdateLoadout();
         var originalSceneName = SceneManager.GetActiveScene().name;
         switch (newSceneName)
         {
@@ -502,9 +528,21 @@ public class Peer2PeerTransport : NetworkManager
         {
             NetworkClient.Send(new SpawnPlayerMessage(id, PlayerType.Local));
         }
+
+        if (!NetworkServer.active)
+            yield break;
+
+        // TODO rework this for dedicated server stuff
+        //      (where it needs to do this on server change scene, and without a network client)
+        //      (perhaps you could call the spawn methods directly?)
         foreach (var p in players.Values.Where(p => p.type == PlayerType.AI))
         {
             NetworkClient.Send(new SpawnPlayerMessage(p.id, PlayerType.AI));
+        }
+
+        foreach (var p in players.Values.Where(p => p.type is PlayerType.Remote && !connectedPlayers.Contains(p.id)))
+        {
+            NetworkClient.Send(new SpawnPlayerMessage(p.id, PlayerType.Local));
         }
     }
 

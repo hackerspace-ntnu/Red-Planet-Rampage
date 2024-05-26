@@ -27,7 +27,6 @@ public class ZigzagPathModifier : NetworkBehaviour, ProjectileModifier
     [ClientRpc]
     private void RpcSeedRandom(int seed)
     {
-        Debug.Log($"Seed {seed}");
         random = new System.Random(seed);
     }
 

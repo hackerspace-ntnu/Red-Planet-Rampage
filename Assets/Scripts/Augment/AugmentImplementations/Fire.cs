@@ -176,7 +176,7 @@ public class Fire : GunExtension
 
     private void PlayShotAudio(GunStats stats)
     {
-        if (!gunController)
+        if (!gunController || !audioSource)
             return;
         audioSource.clip = lighterSounds.RandomElement();
         audioSource.Play();
