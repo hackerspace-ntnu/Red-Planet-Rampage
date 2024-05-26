@@ -25,7 +25,7 @@ public class FloppyExtensionJiggleMesh : JiggleMesh
 
     public void AnimatePushback()
     {
-        previousDiff += Vector3.up*3;
+        previousDiff += Vector3.up * 3;
     }
 
     private void UpdatePointer(Vector3 target)
@@ -40,7 +40,7 @@ public class FloppyExtensionJiggleMesh : JiggleMesh
         var distance = target;
         jiggleMaterial.SetVector("_Distance", target);
         var sensitivity = movementSensitivity;
-        if (player)
+        if (player && player.inputManager)
             sensitivity = player.inputManager.moveInput.magnitude < 0.2f ? movementSensitivity : movementSensitivityWalking;
         previousTarget = target + Quaternion.Inverse(transform.rotation) * -(oldPosition - transform.position) * sensitivity;
         previousDiff -= distance * jiggleFalloff;

@@ -49,6 +49,8 @@ public class RubberSniper : GunExtension
 
     public void UpdateAimTarget(GunStats stats)
     {
+        if (!gunController.Player.inputManager)
+            return;
         Vector3 cameraCenter = gunController.Player.inputManager.transform.position;
         Vector3 cameraDirection = gunController.Player.inputManager.transform.rotation * jigglePhysics.Direction;
         Vector3 startPoint = cameraCenter + cameraDirection * gunController.Player.TargetStartOffset;
@@ -64,7 +66,7 @@ public class RubberSniper : GunExtension
 
     private void FixedUpdate()
     {
-        if (!gunController || !gunController.Player)
+        if (!gunController || !gunController.Player || !gunController.Player.inputManager)
             return;
         var correctedDirection = gunController.Player.inputManager.transform.rotation * jigglePhysics.NormalizedPointer;
         gunController.Player.HUDController.MoveCrosshair(correctedDirection.x, correctedDirection.y);
