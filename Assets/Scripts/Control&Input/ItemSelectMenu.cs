@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using TMPro;
 using SecretName;
 
 public class ItemSelectMenu : MonoBehaviour
@@ -60,7 +59,7 @@ public class ItemSelectMenu : MonoBehaviour
 
     private AugmentType selectedType = AugmentType.Body;
 
-    private ItemSelectSlot selectedSlot => (selectedType) switch
+    private ItemSelectSlot selectedSlot => selectedType switch
     {
         AugmentType.Body => bodySlot,
         AugmentType.Barrel => barrelSlot,

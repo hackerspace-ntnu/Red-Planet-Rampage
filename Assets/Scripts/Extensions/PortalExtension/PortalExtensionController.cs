@@ -12,7 +12,7 @@ public class PortalExtensionController : GunExtension
 
     private Transform portalMover;
 
-    private GunController gunGontroller;
+    private GunController gunController;
 
     private Transform playerView;
     private InputManager inputManager;
@@ -22,12 +22,12 @@ public class PortalExtensionController : GunExtension
 
     private void Start()
     {
-        if (!gunGontroller)
-            gunGontroller = GetComponentInParent<GunController>();
+        if (!gunController)
+            gunController = GetComponentInParent<GunController>();
 
-        if (gunGontroller != null)
+        if (gunController != null)
         {
-            gunGontroller.AimCorrectionEnabled = false;
+            gunController.AimCorrectionEnabled = false;
             inputManager = GetComponentInParent<PlayerManager>().inputManager;
             if (inputManager)
                 playerView = inputManager.transform;
@@ -36,8 +36,8 @@ public class PortalExtensionController : GunExtension
 
     private void OnDestroy()
     {
-        if (gunGontroller)
-            gunGontroller.AimCorrectionEnabled = true;
+        if (gunController)
+            gunController.AimCorrectionEnabled = true;
         if (portalMover)
             Destroy(portalMover.gameObject);
     }
@@ -111,17 +111,17 @@ public class PortalExtensionController : GunExtension
 
     public override Transform[] AttachToTransforms(Transform[] transforms)
     {
-        gunGontroller = GetComponentInParent<GunController>();
+        gunController = GetComponentInParent<GunController>();
         var portalMoverObject = Instantiate(portalMoverPrefab);
         output = portalMoverObject.GetComponent<PortalExtensionOutput>().Output;
         portalMoverObject.transform.rotation = transform.rotation;
         portalMoverObject.transform.position = transform.position - output.localPosition;
         portalMover = portalMoverObject.transform;
         outputs = new Transform[] { output };
-        var barrel = gunGontroller.GetComponentInChildren<GunBarrel>();
+        var barrel = gunController.GetComponentInChildren<GunBarrel>();
         if (barrel && barrel.MuzzleFlash)
             barrel.MuzzleFlash.enabled = false;
-        if (!gunGontroller || !gunGontroller.Player)
+        if (!gunController || !gunController.Player)
             foreach (Transform child in portalMoverObject.transform)
                 child.gameObject.SetActive(false);
         return new Transform[] { output };

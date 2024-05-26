@@ -28,7 +28,7 @@ public class SteamManager : MonoBehaviour
 {
     private const int steamAppID = 2717710;
     public static SteamManager Singleton;
-    public int ConnectedPlayers => transportProtocol.numPlayers;
+    public int ConnectedPlayers => NetworkManager.singleton.numPlayers;
     private static bool isSteamInitialized;
     public static bool IsSteamActive => isSteamInitialized;
     public bool IsHosting = false;
@@ -54,8 +54,6 @@ public class SteamManager : MonoBehaviour
     private Callback<LobbyDataUpdate_t> lobbyDataRequest;
 
     private const string hostkey = "HostAddress";
-    [SerializeField]
-    private Peer2PeerTransport transportProtocol;
 
     private void Awake()
     {
@@ -155,7 +153,7 @@ public class SteamManager : MonoBehaviour
     {
         if (callback.m_eResult != EResult.k_EResultOK)
             return;
-        transportProtocol.StartHost();
+        NetworkManager.singleton.StartHost();
         IsHosting = true;
         SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey, SteamUser.GetSteamID().ToString());
         SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), "name", UserName);
@@ -193,7 +191,7 @@ public class SteamManager : MonoBehaviour
         if (NetworkServer.active)
             return;
         // Only clients from here!
-        transportProtocol.JoinLobby(SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey));
+        ((Peer2PeerTransport)NetworkManager.singleton).JoinLobby(SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey));
     }
 
     private void OnLobbyUpdate(LobbyChatUpdate_t callback)
@@ -208,7 +206,7 @@ public class SteamManager : MonoBehaviour
             return;
 
         // TODO support public and friend lobbies
-        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, transportProtocol.maxConnections);
+        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, NetworkManager.singleton.maxConnections);
     }
 
     public void LeaveLobby()
@@ -217,13 +215,13 @@ public class SteamManager : MonoBehaviour
             return;
         if (IsHosting)
         {
-            transportProtocol.StopHost();
+            NetworkManager.singleton.StopHost();
             IsHosting = false;
         }
         else
         {
-            if (transportProtocol.isNetworkActive)
-                transportProtocol.StopClient();
+            if (NetworkManager.singleton.isNetworkActive)
+                NetworkManager.singleton.StopClient();
         }
     }
 

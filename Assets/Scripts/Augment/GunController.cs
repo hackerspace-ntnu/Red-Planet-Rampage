@@ -172,10 +172,6 @@ public class GunController : NetworkBehaviour
     private void RpcFire(Quaternion rotation)
     {
         onFireStart?.Invoke(stats);
-        // TODO does this work? if so, remove output
-        //if (authority)
-        //projectile.projectileOutput = outputs[0];
-        //projectile.projectileOutput = outputs[0];
         projectile.projectileOutput = outputs[0];
         projectile.projectileRotation = rotation;
         ActuallyFire();

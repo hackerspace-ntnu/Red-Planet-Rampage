@@ -64,7 +64,6 @@ public class BulletController : ProjectileController
     [ClientRpc]
     private void RpcSeedRandom(int seed)
     {
-        Debug.Log($"Seed {seed}");
         random = new Random(seed);
     }
 
