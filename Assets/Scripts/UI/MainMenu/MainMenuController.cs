@@ -89,7 +89,7 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.AddJoinListener();
         playerInputManagerController.PlayerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
-        if (SceneManager.GetActiveScene().name == "Menu") { }
+        if (SceneManager.GetActiveScene().name == "Menu")
             ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved += UpdateStartButton;
         if (playerInputManagerController.LocalPlayerInputs.Count > 0)
         {
