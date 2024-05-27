@@ -89,6 +89,7 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.AddJoinListener();
         playerInputManagerController.PlayerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
+        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved += UpdateStartButton;
         if (playerInputManagerController.LocalPlayerInputs.Count > 0)
         {
             // Already played, just show the menu.
@@ -312,7 +313,15 @@ public class MainMenuController : MonoBehaviour
         aIButton.Toggle();
         SelectControl(aIButton.Button);
         playerInputManagerController.MatchHasAI = !playerInputManagerController.MatchHasAI;
-        bool canPlay = (playerInputManagerController.MatchHasAI || playerInputs.Count > 1);
+        bool canPlay = (playerInputManagerController.MatchHasAI || Peer2PeerTransport.NumPlayers > 1);
+        var colors = startButton.colors;
+        colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
+        startButton.colors = colors;
+    }
+
+    public void UpdateStartButton(PlayerDetails details)
+    {
+        bool canPlay = (playerInputManagerController.MatchHasAI || Peer2PeerTransport.NumPlayers > 1);
         var colors = startButton.colors;
         colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
         startButton.colors = colors;
