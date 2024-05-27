@@ -89,7 +89,8 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.AddJoinListener();
         playerInputManagerController.PlayerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
-        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved += UpdateStartButton;
+        if (SceneManager.GetActiveScene().name == "Menu") { }
+            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved += UpdateStartButton;
         if (playerInputManagerController.LocalPlayerInputs.Count > 0)
         {
             // Already played, just show the menu.
