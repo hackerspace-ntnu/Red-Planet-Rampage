@@ -1,10 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 using Steamworks;
-using UnityEngine.SceneManagement;
-using System.Collections.ObjectModel;
 
 public enum AchievementType
 {
@@ -29,16 +26,22 @@ public class SteamManager : MonoBehaviour
     private const int steamAppID = 2717710;
     public static SteamManager Singleton;
     public int ConnectedPlayers => NetworkManager.singleton.numPlayers;
+
     private static bool isSteamInitialized;
     public static bool IsSteamActive => isSteamInitialized;
-    public bool IsHosting = false;
+    public bool IsHosting { get; private set; } = false;
+    public bool IsInLobby { get; private set; } = false;
+
     public string UserName;
     public CSteamID SteamID;
     public List<string> PlayerNames = new();
     public List<ulong> PlayerIDs = new();
+
     public delegate void LobbyEvent();
     public LobbyEvent LobbyPlayerUpdate;
     public LobbyEvent LobbyListUpdate;
+
+    private CSteamID lobbyID;
     private List<CSteamID> lobbies = new();
     public Dictionary<CSteamID, string> Lobbies = new();
 
@@ -161,16 +164,20 @@ public class SteamManager : MonoBehaviour
 
     private void OnJoinRequest(GameLobbyJoinRequested_t callback)
     {
+        // TODO verify that the lobby *should* be joined by more players!
+        //      and verify that this is run on the server!
+        if (Peer2PeerTransport.NumPlayers >= 4 || Peer2PeerTransport.IsInMatch)
+            return;
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
     }
 
-    private void UpdateLobbyData(ulong lobbyID)
+    private void UpdateLobbyData(ulong rawLobbyID)
     {
-        var lobbyId = new CSteamID(lobbyID);
         Debug.Log("Lobby entered");
-        for (int i = 0; i < SteamMatchmaking.GetNumLobbyMembers(lobbyId); i++)
+        lobbyID = new CSteamID(rawLobbyID);
+        for (int i = 0; i < SteamMatchmaking.GetNumLobbyMembers(lobbyID); i++)
         {
-            var id = SteamMatchmaking.GetLobbyMemberByIndex(lobbyId, i);
+            var id = SteamMatchmaking.GetLobbyMemberByIndex(lobbyID, i);
             var name = SteamFriends.GetFriendPersonaName(id);
 
             if (PlayerIDs.Contains(id.m_SteamID))
@@ -187,6 +194,7 @@ public class SteamManager : MonoBehaviour
     private void OnLobbyEnter(LobbyEnter_t callback)
     {
         // All users
+        IsInLobby = true;
         UpdateLobbyData(callback.m_ulSteamIDLobby);
         if (NetworkServer.active)
             return;
@@ -213,9 +221,15 @@ public class SteamManager : MonoBehaviour
     {
         if (!isSteamInitialized)
             return;
+
+        PlayerNames = new();
+        PlayerIDs = new();
+
+        // TODO we should be calling this from inside our NetworkManager, probably, and thus not need to stop host/client here!
         if (IsHosting)
         {
             NetworkManager.singleton.StopHost();
+
             IsHosting = false;
         }
         else
@@ -223,6 +237,8 @@ public class SteamManager : MonoBehaviour
             if (NetworkManager.singleton.isNetworkActive)
                 NetworkManager.singleton.StopClient();
         }
+        SteamMatchmaking.LeaveLobby(lobbyID);
+        IsInLobby = false;
     }
 
     public void FetchLobbyInfo()
