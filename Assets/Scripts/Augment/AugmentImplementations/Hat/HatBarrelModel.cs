@@ -54,9 +54,9 @@ public class HatBarrelModel : AugmentAnimator
             isLastShot = false;
             return;
         }
-            
+
         isLastShot = stats.Ammo - 2 == 0;
-        for (int i = stats.Ammo - 2; i < magazineSize; i++)
+        for (int i = Mathf.Max(0, stats.Ammo - 2); i < magazineSize; i++)
         {
             ammunition[i].SetActive(false);
         }
