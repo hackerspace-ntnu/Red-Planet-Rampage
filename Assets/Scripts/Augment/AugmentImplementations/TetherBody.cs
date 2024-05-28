@@ -1,9 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 using UnityEngine.VFX;
 
-public class RopeBody : GunBody
+public class TetherBody : GunBody
 {
     [SerializeField]
     private Rope rope;
@@ -37,6 +36,9 @@ public class RopeBody : GunBody
     private bool isWired = true;
     private float oldLength = 0f;
 
+    private SpawnDelegate onSpawnPlug;
+    private UnSpawnDelegate onUnSpawnPlug;
+
     public override void Start()
     {
         base.Start();
@@ -48,11 +50,22 @@ public class RopeBody : GunBody
         }
         rope.Line.gameObject.layer = 0;
         rope.Target = ropeTarget;
-        plugAnchor = Instantiate(plugAnchorPrefab);
-        plugAnchor.transform.position = gunController.Player.transform.position;
-        rope.Anchor = plugAnchor.transform;
-        rope.ResetRope(plugAnchor.WireOrigin);
-        plugAnchor.Health.onDeath += RemoveRope;
+
+        var assetId = NetworkManager.singleton.spawnPrefabs[0].GetComponent<NetworkIdentity>().assetId;
+        if (isServer)
+        {
+
+            plugAnchor = Instantiate(plugAnchorPrefab);
+            NetworkServer.Spawn(plugAnchor.gameObject);
+            SpawnPlug();
+        }
+        else
+        {
+            NetworkClient.RegisterSpawnHandler(assetId, onSpawnPlug, onUnSpawnPlug);
+            onSpawnPlug += SpawnPlug;
+            onUnSpawnPlug += UnSpawnPlug;
+        }
+
         playerBody = gunController.Player.GetComponent<Rigidbody>();
         playerHandRight.SetPlayer(gunController.Player);
         playerHandRight.gameObject.SetActive(true);
@@ -60,6 +73,34 @@ public class RopeBody : GunBody
         playerHandLeft.gameObject.SetActive(true);
         gunController.onFireNoAmmo += CheckForWirePlanting;
         movement = gunController.Player.GetComponent<PlayerMovement>();
+    }
+
+    private GameObject SpawnPlug(Vector3 position, uint assetId)
+    {
+        return SpawnPlug();
+    }
+
+    private GameObject SpawnPlug()
+    {
+        plugAnchor = Instantiate(plugAnchorPrefab);
+        plugAnchor.Health.onDeath += RemoveRope;
+        plugAnchor.transform.position = gunController.Player.transform.position;
+        rope.Anchor = plugAnchor.transform;
+        rope.ResetRope(plugAnchor.WireOrigin);
+        return plugAnchor.gameObject;
+    }
+
+    private void UnSpawnPlug(GameObject spawned)
+    {
+        plugAnchor.Health.onDeath -= RemoveRope;
+        Destroy(plugAnchor);
+    }
+
+
+    private void OnDestroy()
+    {
+        onSpawnPlug -= SpawnPlug;
+        onUnSpawnPlug -= UnSpawnPlug;
     }
 
     private void PullingWire()
@@ -92,6 +133,7 @@ public class RopeBody : GunBody
     {
         if (isWired || movement.StateIsAir)
             return;
+        // TODO network this!
         plugAnchor.transform.position = gunController.Player.transform.position;
         movement.CanMove = false;
         movement.CanLook = false;
@@ -139,14 +181,6 @@ public class RopeBody : GunBody
         var cutOffIndex = Mathf.FloorToInt(oldLength / ropeLength * 11);
         for (int i = 0; i < coils.Length; i++)
             coils[i].SetActive(i > cutOffIndex);
-    }
-
-    private void OnDestroy()
-    {
-        if (!plugAnchor)
-            return;
-        plugAnchor.Health.onDeath -= RemoveRope;
-        Destroy(plugAnchor);
     }
 
 }

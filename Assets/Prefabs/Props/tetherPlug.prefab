@@ -46,8 +46,9 @@ GameObject:
   - component: {fileID: 8669054684614710486}
   - component: {fileID: 4874961312557591926}
   - component: {fileID: 8650420277899103521}
+  - component: {fileID: 3387120375313000816}
   m_Layer: 3
-  m_Name: tetherPlug
+  m_Name: TetherPlug
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -166,6 +167,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cab246ee1d4ad25498887ea1df8ef6f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   maxhHealth: 1
   currentHealth: 1
 --- !u!114 &8650420277899103521
@@ -182,3 +186,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isCritical: 0
   health: {fileID: 4874961312557591926}
+--- !u!114 &3387120375313000816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8566753368686727188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 2020660086
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0

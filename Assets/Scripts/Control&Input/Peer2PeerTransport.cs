@@ -110,6 +110,7 @@ public class Peer2PeerTransport : NetworkManager
     private const int BiddingPlayerPrefabIndexOffset = 1;
     private const int AIFPSPlayerPrefabIndex = 2;
     private const int TrainingPlayerPrefabIndex = 4;
+    public const int TetherBodyPrefabIndex = 5;
 
     private const int NetworkPlayerLayer = 3;
 
