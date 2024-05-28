@@ -317,7 +317,9 @@ public class MatchController : MonoBehaviour
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
         SceneManager.LoadSceneAsync(Scenes.Menu);
 
-        if (NetworkServer.active)
+        if (SteamManager.IsSteamActive && SteamManager.Singleton.IsInLobby)
+            SteamManager.Singleton.LeaveLobby();
+        else if (NetworkServer.active)
             NetworkManager.singleton.StopHost();
         else
             NetworkManager.singleton.StopClient();

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Mirror;
+using OperatorExtensions;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -34,6 +35,16 @@ public struct PlayerConnectedMessage : NetworkMessage
     }
 
     public int inputID;
+}
+
+public struct PlayerLeftMessage : NetworkMessage
+{
+    public PlayerLeftMessage(uint id)
+    {
+        this.id = id;
+    }
+
+    public uint id;
 }
 
 public struct InitialPlayerDetailsMessage : NetworkMessage
@@ -116,6 +127,10 @@ public class Peer2PeerTransport : NetworkManager
     private PlayerFactory playerFactory;
     private static Transform[] spawnPoints;
     private static int playerIndex;
+    private static Stack<Color> availableColors = new();
+
+    private static bool isInMatch;
+    public static bool IsInMatch => isInMatch;
 
     private static Dictionary<uint, PlayerDetails> players = new();
     public static int NumPlayers => players.Count;
@@ -136,17 +151,20 @@ public class Peer2PeerTransport : NetworkManager
 
     public delegate void LobbyPlayerEvent(PlayerDetails details);
     public LobbyPlayerEvent OnPlayerRecieved;
+    public LobbyPlayerEvent OnPlayerRemoved;
 
     public delegate void ConnectionEvent(int connectionID);
     public ConnectionEvent OnDisconnect;
 
     private void ResetState()
     {
+        isInMatch = false;
         playerIndex = 0;
         players = new();
         playerInstances = new();
         PlayerInstanceByID = new(playerInstances);
         localPlayerIds = new();
+        availableColors = new(PlayerInputManagerController.Singleton.PlayerColors.Reverse());
 
         connections = new();
         connectedPlayers = new();
@@ -168,6 +186,7 @@ public class Peer2PeerTransport : NetworkManager
     {
         base.OnClientConnect();
         NetworkClient.RegisterHandler<StartMatchMessage>(OnStartMatch);
+        NetworkClient.RegisterHandler<PlayerLeftMessage>(OnPlayerLeft);
         NetworkClient.RegisterHandler<InitialPlayerDetailsMessage>(OnReceivePlayerDetails);
         NetworkClient.RegisterHandler<InitializePlayerMessage>(InitializeFPSPlayer);
         NetworkClient.RegisterHandler<UpdatedPlayerDetailsMessage>(OnReceiveUpdatedPlayerDetails);
@@ -185,9 +204,19 @@ public class Peer2PeerTransport : NetworkManager
             return;
         Debug.Log($"Removed connection {connections.IndexOf(connection)} which has players {playersForConnection[connection.connectionId].ToCommaSeparatedString()}");
         connections.Remove(connection);
-        connectedPlayers.RemoveAll(id => playersForConnection[connection.connectionId].Contains(id));
+        var playerIDs = playersForConnection[connection.connectionId];
+        connectedPlayers.RemoveAll(id => playerIDs.Contains(id));
         playersForConnection.Remove(connection.connectionId);
-        // TODO send msg to ItemSelectManager that this connection is invalid
+        if (!isInMatch)
+        {
+            foreach (var id in playerIDs)
+            {
+                if (!players.TryGetValue(id, out var details))
+                    continue;
+                availableColors.Push(details.color);
+                NetworkServer.SendToAll(new PlayerLeftMessage(id));
+            }
+        }
         OnDisconnect?.Invoke(connection.connectionId);
     }
 
@@ -200,6 +229,8 @@ public class Peer2PeerTransport : NetworkManager
     public override void OnStopClient()
     {
         Debug.Log("Stopped client");
+        if (SteamManager.IsSteamActive && SteamManager.Singleton.IsInLobby)
+            SteamManager.Singleton.LeaveLobby();
         ResetState();
     }
 
@@ -214,6 +245,23 @@ public class Peer2PeerTransport : NetworkManager
             StopClient();
         else
             ResetState();
+    }
+
+    private void OnPlayerLeft(PlayerLeftMessage message)
+    {
+        if (!players.TryGetValue(message.id, out var playerDetails))
+        {
+            Debug.LogError($"Received leave message for invalid player {message.id}");
+            return;
+        }
+
+        Debug.Log($"Player {message.id} {playerDetails.name} left");
+
+        players.Remove(message.id);
+        if (playerInstances.ContainsKey(message.id))
+            playerInstances.Remove(message.id);
+
+        OnPlayerRemoved?.Invoke(playerDetails);
     }
 
     public void JoinLobby(string address = "127.0.0.1")
@@ -290,6 +338,7 @@ public class Peer2PeerTransport : NetworkManager
         // TODO prevent this in some other more sustainable way :)))))
         if (NumPlayers >= 4)
             return;
+
         // Register connection
         PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
         if (!connections.Contains(connection))
@@ -301,6 +350,7 @@ public class Peer2PeerTransport : NetworkManager
             playersForConnection[connection.connectionId] = new();
         playersForConnection[connection.connectionId].Add((uint)playerIndex);
 
+        // Determine metadata
         var playerType = PlayerType.Local;
         var playerName = "Player";
         ulong steamID = 0;
@@ -318,6 +368,10 @@ public class Peer2PeerTransport : NetworkManager
             connection.Send(new InitialPlayerDetailsMessage(existingPlayer));
         }
 
+        // Pick among the available colors
+        if (!availableColors.TryPop(out var color))
+            color = Color.white;
+
         // TODO consider just putting this stuff into the InitialPlayerDetailsMessage
         var details = new PlayerDetails
         {
@@ -326,8 +380,9 @@ public class Peer2PeerTransport : NetworkManager
             steamID = steamID,
             type = playerType,
             name = playerName,
-            color = PlayerInputManagerController.Singleton.PlayerColors[playerIndex],
+            color = color,
         };
+
         // Send information about this player to all
         NetworkServer.SendToAll(new InitialPlayerDetailsMessage(details));
         playerIndex++;
@@ -445,14 +500,16 @@ public class Peer2PeerTransport : NetworkManager
         switch (newSceneName)
         {
             case Scenes.Bidding:
+                isInMatch = true;
                 UpdatePlayerDetailsAfterShootingRound();
                 NetworkServer.ReplaceHandler<SpawnPlayerMessage>(OnSpawnBiddingPlayer);
                 break;
             case Scenes.Menu:
+                isInMatch = false;
                 NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
                 break;
             default:
-                // From auction, so no need to update *here*
+                isInMatch = true;
                 NetworkServer.ReplaceHandler<SpawnPlayerMessage>(OnSpawnFPSPlayer);
                 break;
         }
@@ -500,13 +557,16 @@ public class Peer2PeerTransport : NetworkManager
         {
             // TODO consider just pushing music change into this switch block
             case Scenes.Bidding:
+                isInMatch = true;
                 NetworkClient.ReplaceHandler<InitializePlayerMessage>(InitializeBiddingPlayer);
                 PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
                 break;
             case Scenes.Menu:
+                isInMatch = false;
                 PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
                 break;
             default:
+                isInMatch = true;
                 NetworkClient.ReplaceHandler<InitializePlayerMessage>(InitializeFPSPlayer);
                 PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
                 break;

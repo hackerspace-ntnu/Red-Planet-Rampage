@@ -9,10 +9,17 @@ public class LobbyListMenu : MonoBehaviour
 {
     [SerializeField]
     private Button[] lobbies;
+
     private const string defaultMessage = "No lobby found...";
+
     void Start()
     {
         SteamManager.Singleton.LobbyListUpdate += LobbyListUpdate;
+    }
+
+    private void OnDestroy()
+    {
+        SteamManager.Singleton.LobbyListUpdate -= LobbyListUpdate;
     }
 
     private void LobbyListUpdate()
