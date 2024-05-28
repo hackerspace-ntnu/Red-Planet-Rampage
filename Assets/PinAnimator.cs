@@ -1,4 +1,4 @@
-using CollectionExtensions;
+using System.Linq.Expressions;
 using UnityEngine;
 
 public class PinAnimator : AugmentAnimator
@@ -31,6 +31,8 @@ public class PinAnimator : AugmentAnimator
 
     public override void OnFire(GunStats stats)
     {
+        if (DoWeNeedToEscape())
+            return;
         if (playAudio)
             PlayCockingSound();
         transform.localPosition = Vector3.zero;

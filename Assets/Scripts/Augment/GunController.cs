@@ -114,6 +114,22 @@ public class GunController : NetworkBehaviour
             MatchController.Singleton.onRoundEnd -= CancelZoom;
     }
 
+    // TODO check if this works and possibly remove
+    public void RemoveListeners()
+    {
+        onFireStart = null;
+        onFire = null;
+        onFireEnd = null;
+        onFireNoAmmo = null;
+        if (!barrelAnimator)
+            return;
+
+        if (HasRecoil)
+            barrelAnimator.OnShotFiredAnimation -= PlayRecoil;
+        barrelAnimator.OnShotFiredAnimation -= ShotFired;
+        barrelAnimator.OnAnimationEnd -= FireEnd;
+    }
+
     private bool ShouldFire() => !isFiring && fireRateController.shouldFire(triggerPressed, triggerHeld);
 
     [Client]
