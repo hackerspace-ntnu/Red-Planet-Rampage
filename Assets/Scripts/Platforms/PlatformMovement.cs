@@ -39,7 +39,7 @@ public class PlatformMovement : NetworkBehaviour
 
     private void FixedUpdate()
     {
-        if (isServer)
+        if (!isNetworked || isServer)
             MovePlatform();
     }
 
