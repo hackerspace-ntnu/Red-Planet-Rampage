@@ -172,7 +172,7 @@ public class SteamManager : MonoBehaviour
     {
         // TODO verify that the lobby *should* be joined by more players!
         //      and verify that this is run on the server!
-        if (Peer2PeerTransport.NumPlayers >= 4 || Peer2PeerTransport.IsInMatch)
+        if (Peer2PeerTransport.NumPlayers >= Peer2PeerTransport.MaxPlayers || Peer2PeerTransport.IsInMatch)
             return;
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
     }

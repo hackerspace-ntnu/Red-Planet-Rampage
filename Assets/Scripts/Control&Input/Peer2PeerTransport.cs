@@ -133,6 +133,7 @@ public class Peer2PeerTransport : NetworkManager
 
     private static Dictionary<uint, PlayerDetails> players = new();
     public static int NumPlayers => players.Count;
+    public const int MaxPlayers = 4;
     public static IEnumerable<PlayerDetails> PlayerDetails => players.Values;
 
     private static List<uint> localPlayerIds = new();
@@ -337,7 +338,7 @@ public class Peer2PeerTransport : NetworkManager
     {
         // Avoid adding more than the four allowed players
         // TODO prevent this in some other more sustainable way :)))))
-        if (NumPlayers >= 4)
+        if (NumPlayers >= MaxPlayers)
             return;
 
         // Register connection
@@ -436,7 +437,7 @@ public class Peer2PeerTransport : NetworkManager
 
     private void AddAiPlayers()
     {
-        for (var i = players.Count; i < 4; i++)
+        for (var i = players.Count; i < MaxPlayers; i++)
         {
             var details = new PlayerDetails
             {
