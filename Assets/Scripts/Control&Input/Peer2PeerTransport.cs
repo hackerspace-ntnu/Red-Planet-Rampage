@@ -222,6 +222,8 @@ public class Peer2PeerTransport : NetworkManager
     public override void OnStopServer()
     {
         Debug.Log("Stopped server");
+        if (SteamManager.IsSteamActive && SteamManager.Singleton.IsInLobby)
+            SteamManager.Singleton.LeaveLobby();
         ResetState();
     }
 
