@@ -304,10 +304,17 @@ public class Peer2PeerTransport : NetworkManager
     private static IEnumerator WaitAndSwitchToTrainingMode()
     {
         LoadingScreen.Singleton.Show();
+
+        // Wait for player details to be populated
         while (!NetworkClient.isConnected && !singleton.isNetworkActive && players.Count < PlayerInputManagerController.Singleton.LocalPlayerInputs.Count)
             yield return new WaitForEndOfFrame();
         singleton.ServerChangeScene(Scenes.TrainingMode);
-        // TODO until after spawned
+
+        yield return new WaitForSeconds(LoadingScreen.Singleton.MandatoryDuration);
+
+        // Wait for player(s) to have spawned
+        while (FindObjectsByType<PlayerManager>(FindObjectsSortMode.None).Count() < players.Count)
+            yield return new WaitForEndOfFrame();
         LoadingScreen.Singleton.Hide();
     }
 

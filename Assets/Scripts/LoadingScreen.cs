@@ -33,7 +33,6 @@ public class LoadingScreen : MonoBehaviour
     [SerializeField] private float normalRotationSpeed = 60;
     [SerializeField] private float fastRotationSpeed = 120;
 
-    private float incrementTimer = 360f;
     private float rotationSpeed = 60;
 
     private static int loadingCounter = 0;
@@ -76,13 +75,16 @@ public class LoadingScreen : MonoBehaviour
     private IEnumerator UpdateTimer(float duration)
     {
         var secondsPerChamber = duration / 6f;
+        var chamberCoverageAngle = 360f;
         rotationSpeed = normalRotationSpeed;
+
+        radialTimer.material.SetFloat("_Arc2", chamberCoverageAngle);
 
         for (int i = 0; i < 6; i++)
         {
             yield return new WaitForSeconds(secondsPerChamber);
-            incrementTimer -= 60f;
-            radialTimer.material.SetFloat("_Arc2", incrementTimer);
+            chamberCoverageAngle -= 60f;
+            radialTimer.material.SetFloat("_Arc2", chamberCoverageAngle);
 
             if (i == 4)
             {
