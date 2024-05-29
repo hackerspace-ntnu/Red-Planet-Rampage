@@ -228,23 +228,15 @@ public class SteamManager : MonoBehaviour
         if (!isSteamInitialized)
             return;
 
+        Debug.Log("Left steam lobby");
+
         PlayerNames = new();
         PlayerIDs = new();
 
-        // TODO we should be calling this from inside our NetworkManager, probably, and thus not need to stop host/client here!
-        if (IsHosting)
-        {
-            NetworkManager.singleton.StopHost();
-
-            IsHosting = false;
-        }
-        else
-        {
-            if (NetworkManager.singleton.isNetworkActive)
-                NetworkManager.singleton.StopClient();
-        }
-        SteamMatchmaking.LeaveLobby(lobbyID);
+        IsHosting = false;
         IsInLobby = false;
+
+        SteamMatchmaking.LeaveLobby(lobbyID);
     }
 
     public void FetchLobbyInfo()

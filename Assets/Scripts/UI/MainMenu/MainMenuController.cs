@@ -335,10 +335,7 @@ public class MainMenuController : MonoBehaviour
 
     public void LeaveLobby()
     {
-        if (SteamManager.Singleton.IsHosting)
-            SteamManager.Singleton.LeaveLobby();
-        else
-            NetworkManager.singleton.StopHost();
+        NetworkManager.singleton.StopHost();
     }
 
     public void Quit()
