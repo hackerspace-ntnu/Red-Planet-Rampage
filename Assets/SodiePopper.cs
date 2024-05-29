@@ -50,6 +50,7 @@ public class SodiePopper : GunBody
     private float lastPlayerDiff = 0f;
 
     private AudioSource audioSource;
+
     [SerializeField]
     private AudioGroup slosh;
     public override void Start()
@@ -99,9 +100,9 @@ public class SodiePopper : GunBody
             if (accelerationDiff - playerDiff * playermovementRelativeAdjustment >= shakeCorrectionReloadThreshold && Time.fixedTime - lastReload > reload_delay)
             {
                 lastReload = Time.fixedTime;
-                if (gunController && gunController.stats.Magazine != gunController.stats.Ammo)
+                if (gunController && gunController.stats.Magazine != gunController.stats.Ammo && audioSource)
                     slosh.Play(audioSource);
-                    
+
                 gunController?.Reload(reload_ammount);
             }
             lastPos = meassurementPoint.position + diff.normalized * offsetMagnitude;
