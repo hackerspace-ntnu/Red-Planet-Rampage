@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using CollectionExtensions;
 using Mirror;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+// TODO consider splitting this into match-specific state and general player metadata
 public struct PlayerDetails
 {
     public uint id;
@@ -125,6 +127,7 @@ public class Peer2PeerTransport : NetworkManager
 
     private PlayerFactory playerFactory;
     private static Transform[] spawnPoints;
+    private static Stack<Transform> spawnPointStack;
     private static int playerIndex;
     private static Stack<Color> availableColors = new();
 
@@ -313,6 +316,7 @@ public class Peer2PeerTransport : NetworkManager
         yield return new WaitForSeconds(LoadingScreen.Singleton.MandatoryDuration);
 
         // Wait for player(s) to have spawned
+        // TODO add a timeout for these wait-for-spawn spins
         while (FindObjectsByType<PlayerManager>(FindObjectsSortMode.None).Count() < players.Count)
             yield return new WaitForEndOfFrame();
         LoadingScreen.Singleton.Hide();
@@ -379,9 +383,12 @@ public class Peer2PeerTransport : NetworkManager
 
         // Pick among the available colors
         if (!availableColors.TryPop(out var color))
-            color = Color.white;
+        {
+            // Recycle colors if necessary
+            availableColors = new(PlayerInputManagerController.Singleton.PlayerColors.Reverse());
+            color = availableColors.Pop();
+        }
 
-        // TODO consider just putting this stuff into the InitialPlayerDetailsMessage
         var details = new PlayerDetails
         {
             id = (uint)playerIndex,
@@ -626,17 +633,23 @@ public class Peer2PeerTransport : NetworkManager
             Debug.LogError($"No such player: id={message.id}");
             return;
         }
+        Debug.Log($"Spawning player {message.id}");
+
         if (!playerFactory)
         {
             playerFactory = FindAnyObjectByType<PlayerFactory>();
             if (!playerFactory) // TODO shouldn't happen, seems to occur when you go back to menu after end of match
                 return;
             spawnPoints = playerFactory.GetRandomSpawnpoints();
+            spawnPointStack = new(spawnPoints);
         }
-        Debug.Log($"Spawning player {message.id}");
 
-        var spawnPoint = spawnPoints[message.id];
+        // Ensure we aren't providing invalid spawnpoints.
+        // We should never run out of spawnpoints in normal circumstances, but you never know 💀
+        if (!spawnPointStack.TryPop(out var spawnPoint))
+            spawnPoint = spawnPoints.RandomElement();
 
+        // Instantiate correct prefab for player and mode.
         var prefabIndex = playerDetails.type is PlayerType.AI && NetworkServer.active ? AIFPSPlayerPrefabIndex : FPSPlayerPrefabIndex;
         if (SceneManager.GetActiveScene().name == Scenes.TrainingMode)
             prefabIndex = TrainingPlayerPrefabIndex;
@@ -644,7 +657,7 @@ public class Peer2PeerTransport : NetworkManager
         var player = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
         player.GetComponent<PlayerManager>().id = message.id;
 
-        // Spawn player, setting it as the player for a connection only for the first local player for each connection
+        // Spawn player, setting it as the player for a connection only for the first local player for each connection.
         var isNotAI = playerDetails.type is not PlayerType.AI;
         var isFirstLocalPlayer = playerDetails.localInputID == 0;
         var isNotDisconnected = playerDetails.type is not PlayerType.Remote || connectedPlayers.Contains(playerDetails.id);

@@ -321,6 +321,7 @@ public class MainMenuController : MonoBehaviour
 
     public void StartTrainingMode()
     {
+        PlayerInputManagerController.Singleton.RemoveJoinListener();
         Peer2PeerTransport.StartTrainingMode();
         playerSelectManager.UpdateLobby();
     }
