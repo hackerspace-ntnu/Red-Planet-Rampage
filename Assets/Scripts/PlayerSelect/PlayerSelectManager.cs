@@ -69,7 +69,7 @@ public class PlayerSelectManager : MonoBehaviour
         var i = 0;
         foreach (var player in Peer2PeerTransport.PlayerDetails)
         {
-            SetupPlayerSelectModels(player.name, player.color, i);
+            SetupPlayerModel(player, i);
             i++;
         }
         for (; i < playerModels.Count; i++)
@@ -86,17 +86,16 @@ public class PlayerSelectManager : MonoBehaviour
     /// <summary>
     /// Called when player is added. Sets the corresponding playermodel to active and fills in the playername in the nametag.
     /// </summary>
-    /// <param name="playerName"></param>
-    /// <param name="color"></param>
-    /// <param name="playerID"></param>
-    public void SetupPlayerSelectModels(string playerName, Color color, int playerID)
+    /// <param name="player"></param>
+    /// <param name="index"></param>
+    public void SetupPlayerModel(PlayerDetails player, int index)
     {
-        playerModels[playerID].GetComponentInChildren<SkinnedMeshRenderer>().material.color = color; // Set player model color
-        playerModels[playerID].SetActive(true); // Show corresponding player model
-        playerModels[playerID].transform.LookAt(new Vector3(playerSelectCam.transform.position.x, playerModels[playerID].transform.position.y, playerSelectCam.transform.position.z)); // Orient player model to look at camera
-        nameTags[playerID].text = playerName;
-        nameTags[playerID].enabled = true;
-        joinText[playerID].enabled = false;
+        playerModels[index].GetComponentInChildren<SkinnedMeshRenderer>().material.color = player.color; // Set player model color
+        playerModels[index].SetActive(true); // Show corresponding player model
+        playerModels[index].transform.LookAt(new Vector3(playerSelectCam.transform.position.x, playerModels[index].transform.position.y, playerSelectCam.transform.position.z)); // Orient player model to look at camera
+        nameTags[index].text = Peer2PeerTransport.PlayerNameWithIndex(player);
+        nameTags[index].enabled = true;
+        joinText[index].enabled = false;
     }
 
     /// <summary>

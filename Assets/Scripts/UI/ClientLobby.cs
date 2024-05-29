@@ -9,7 +9,6 @@ public class ClientLobby : MonoBehaviour
     private Transform environmentCamera;
     [SerializeField]
     private Transform lobbyPosition;
-    private int playerCount = 0;
 
     void Start()
     {
@@ -19,12 +18,11 @@ public class ClientLobby : MonoBehaviour
 
     public void QuitLobby()
     {
-        Peer2PeerTransport.singleton.StopClient();
+        NetworkManager.singleton.StopClient();
     }
 
     private void AddPlayer(PlayerDetails details)
     {
-        playerSelect.SetupPlayerSelectModels(details.name, details.color, playerCount);
-        playerCount++;
+        playerSelect.UpdateLobby();
     }
 }
