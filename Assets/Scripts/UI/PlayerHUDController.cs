@@ -11,7 +11,7 @@ public class PlayerHUDController : MonoBehaviour
     [Header("Health and ammo")]
     [SerializeField]
     private RectTransform hudParent;
-    private float hudParentLocalY;
+    private float? hudParentLocalY;
     private int hudParentJumpTween;
 
     [SerializeField]
@@ -113,8 +113,6 @@ public class PlayerHUDController : MonoBehaviour
         image.material = damageBorder;
         damageBorder.SetFloat("_Intensity", 0);
 
-        hudParentLocalY = hudParent.localPosition.y;
-
         ammoCapacityMaterial = Instantiate(ammoBar.material);
         ammoBar.material = ammoCapacityMaterial;
         ammoCapacityMaterial.SetFloat("_Arc2", 0);
@@ -171,10 +169,12 @@ public class PlayerHUDController : MonoBehaviour
 
     public void AnimateHudJump()
     {
+        if (!hudParentLocalY.HasValue)
+            hudParentLocalY = hudParent.localPosition.y;
         if (LeanTween.isTweening(hudParentJumpTween))
         {
             LeanTween.cancel(hudParentJumpTween);
-            hudParent.localPosition = new Vector3 (hudParent.localPosition.x, hudParentLocalY, hudParent.localPosition.z);
+            hudParent.localPosition = new Vector3 (hudParent.localPosition.x, hudParentLocalY.Value, hudParent.localPosition.z);
         }
         hudParentJumpTween = hudParent.LeanMoveLocalY(hudParent.localPosition.y - 10f, 1.3f)
             .setEasePunch()
