@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Mirror;
-using OperatorExtensions;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -651,12 +650,18 @@ public class Peer2PeerTransport : NetworkManager
         StartCoroutine(WaitAndInitializeFPSPlayer(message));
     }
 
-    private void UpdateIdentityFromDetails(PlayerIdentity identity, PlayerDetails playerDetails)
+    // TODO move this somewhere else?
+    public static string PlayerNameWithIndex(PlayerDetails playerDetails)
     {
         var playerName = playerDetails.name;
         if (players.Values.Count(p => p.steamID == playerDetails.steamID) > 1)
             playerName = $"{playerName} {playerDetails.localInputID + 1}";
-        identity.UpdateFromDetails(playerDetails, playerName);
+        return playerName;
+    }
+
+    private void UpdateIdentityFromDetails(PlayerIdentity identity, PlayerDetails playerDetails)
+    {
+        identity.UpdateFromDetails(playerDetails, PlayerNameWithIndex(playerDetails));
     }
 
     private IEnumerator WaitAndInitializeFPSPlayer(InitializePlayerMessage message)

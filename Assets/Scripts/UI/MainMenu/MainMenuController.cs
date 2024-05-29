@@ -264,13 +264,6 @@ public class MainMenuController : MonoBehaviour
         galleryMenu.SetPlayerInput(inputManager);
         creditsMenu.SetPlayerInput(inputManager);
         levelSelectManager.SetPlayerInput(inputManager);
-
-        // TODO Remove this once you're sure that UpdateLobby in PlayerSelectManager is called properly (on local joining as well)
-        for (int i = 0; i < playerInputs.Count; i++)
-        {
-            PlayerIdentity playerIdentity = playerInputs[i].GetComponent<PlayerIdentity>();
-            playerSelectManager.SetupPlayerSelectModels(playerIdentity.playerName, playerIdentity.color, i);
-        }
     }
 
     private void PlayUISelectAudio(InputAction.CallbackContext ctx)
