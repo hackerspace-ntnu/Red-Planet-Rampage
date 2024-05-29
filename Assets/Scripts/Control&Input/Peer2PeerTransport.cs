@@ -633,10 +633,16 @@ public class Peer2PeerTransport : NetworkManager
         var prefab = spawnPrefabs[prefabIndex + prefabIndexOffset];
         var player = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
         player.GetComponent<PlayerManager>().id = message.id;
-        if (playerDetails.type is not PlayerType.AI && playerDetails.localInputID == 0)
+
+        // Spawn player, setting it as the player for a connection only for the first local player for each connection
+        var isNotAI = playerDetails.type is not PlayerType.AI;
+        var isFirstLocalPlayer = playerDetails.localInputID == 0;
+        var isNotDisconnected = playerDetails.type is not PlayerType.Remote || connectedPlayers.Contains(playerDetails.id);
+        if (isNotAI && isFirstLocalPlayer && isNotDisconnected)
             NetworkServer.AddPlayerForConnection(connection, player);
         else
             NetworkServer.Spawn(player, connection);
+
         NetworkServer.SendToAll(new InitializePlayerMessage(message.id, spawnPoint.position, spawnPoint.rotation));
     }
 
