@@ -333,6 +333,14 @@ public class MainMenuController : MonoBehaviour
         playerSelectManager.UpdateLobby();
     }
 
+    public void FetchLobbyInfo()
+    {
+        if (!SteamManager.IsSteamActive)
+            return;
+        SteamManager.Singleton.FetchLobbyInfo();
+    }
+
+
     public void LeaveLobby()
     {
         NetworkManager.singleton.StopHost();
