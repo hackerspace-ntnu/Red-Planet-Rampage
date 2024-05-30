@@ -21,7 +21,10 @@ public enum AchievementType
     PingPonginator,
     Flamethrower,
     OrbitalTrashCannon,
-    ItalianPlumber
+    ItalianPlumber,
+    HatTrick,
+    LongShot,
+    RemoteWorker
 }
 
 public class SteamManager : MonoBehaviour
@@ -126,7 +129,10 @@ public class SteamManager : MonoBehaviour
         { AchievementType.PingPonginator, "WEAPON_PING_PONG" },
         { AchievementType.Flamethrower, "WEAPON_FLAMETHROWER" },
         { AchievementType.OrbitalTrashCannon, "WEAPON_ORBITAL_TRASH_CANNON" },
-        { AchievementType.ItalianPlumber, "WEAPON_ITALIAN_PLUMBER" }
+        { AchievementType.ItalianPlumber, "WEAPON_ITALIAN_PLUMBER" },
+        { AchievementType.HatTrick, "WEAPON_HAT_TRICK" },
+        { AchievementType.LongShot, "WEAPON_LONG_SHOT" },
+        { AchievementType.RemoteWorker, "WEAPON_REMOTE_WORKER" }
     };
 
     public void UnlockAchievement(AchievementType type)
