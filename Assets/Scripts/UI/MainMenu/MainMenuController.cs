@@ -316,13 +316,15 @@ public class MainMenuController : MonoBehaviour
         aIButton.Toggle();
         SelectControl(aIButton.Button);
         playerInputManagerController.MatchHasAI = !playerInputManagerController.MatchHasAI;
-        bool canPlay = (playerInputManagerController.MatchHasAI || Peer2PeerTransport.NumPlayers > 1);
-        var colors = startButton.colors;
-        colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
-        startButton.colors = colors;
+        SetStartButtonState();
     }
 
     public void UpdateStartButton(PlayerDetails details)
+    {
+        SetStartButtonState();
+    }
+
+    private void SetStartButtonState()
     {
         bool canPlay = (playerInputManagerController.MatchHasAI || Peer2PeerTransport.NumPlayers > 1);
         var colors = startButton.colors;
