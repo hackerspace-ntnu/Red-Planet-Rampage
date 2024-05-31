@@ -1,6 +1,7 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.VFX;
+
 public class LazurController : ProjectileController
 {
     public VisualEffect Vfx;
@@ -17,11 +18,12 @@ public class LazurController : ProjectileController
     private ProjectileState projectile = new ProjectileState();
 
     [SerializeField]
-    private AugmentAnimator animator;
+    private LazurFiringAnimator animator;
 
     private AudioSource audioSource;
+
     [SerializeField]
-    private AudioClip chargeUpAudio;
+    private AudioGroup chargeUpAudio;
 
     protected override void Awake()
     {
@@ -30,14 +32,23 @@ public class LazurController : ProjectileController
             return;
         audioSource = GetComponent<AudioSource>();
         animator.OnShotFiredAnimation += FireLazur;
+        animator.OnChargeStart += PlayChargeUpSound;
     }
 
-    void Start()
+    private void OnDestroy()
+    {
+        if (!gunController || !gunController.Player || !animator)
+            return;
+        animator.OnShotFiredAnimation -= FireLazur;
+        animator.OnChargeStart -= PlayChargeUpSound;
+    }
+
+    private void Start()
     {
         Vfx.SetGraphicsBuffer("StartEndPositions", encoder.StartEndPositionsBuffer);
     }
 
-    public void FireLazur()
+    private void FireLazur()
     {
         projectile = new()
         {
@@ -112,7 +123,12 @@ public class LazurController : ProjectileController
     public override void InitializeProjectile(GunStats stats)
     {
         animator.OnFire(stats);
-        audioSource.clip = chargeUpAudio;
-        audioSource.Play();
+    }
+
+    private void PlayChargeUpSound()
+    {
+        if (!gunController)
+            return;
+        chargeUpAudio.Play(audioSource);
     }
 }

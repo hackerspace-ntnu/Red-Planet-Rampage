@@ -12,11 +12,11 @@ public class Revolver : GunBody
     private PlayerHand playerHandRight;
     private AudioSource audioSource;
     [SerializeField]
-    private AudioClip bonkWeak;
+    private AudioGroup bonkWeak;
     [SerializeField]
-    private AudioClip bonkStrong;
+    private AudioGroup bonkStrong;
     [SerializeField]
-    private AudioClip bulletDrop;
+    private AudioGroup bulletDrop;
 
     private GunBarrel barrel;
     private GunExtension extension;
@@ -63,22 +63,19 @@ public class Revolver : GunBody
     {
         if (!gunController)
             return;
-        audioSource.clip = bonkWeak;
-        audioSource.Play();
+        bonkWeak.Play(audioSource);
     }
     public void PlayStrongBonk()
     {
         if (!gunController)
             return;
-        audioSource.clip = bonkStrong;
-        audioSource.Play();
+        bonkStrong.Play(audioSource);
     }
     public void PlayBulletDrop()
     {
         if (!gunController)
             return;
-        audioSource.clip = bulletDrop;
-        audioSource.Play();
+        bulletDrop.Play(audioSource);
     }
 
     public void ToggleArm()

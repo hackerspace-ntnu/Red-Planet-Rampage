@@ -311,9 +311,9 @@ public class Peer2PeerTransport : NetworkManager
         // Wait for player details to be populated
         while (!NetworkClient.isConnected && !singleton.isNetworkActive && players.Count < PlayerInputManagerController.Singleton.LocalPlayerInputs.Count)
             yield return new WaitForEndOfFrame();
-        singleton.ServerChangeScene(Scenes.TrainingMode);
 
         yield return new WaitForSeconds(LoadingScreen.Singleton.MandatoryDuration);
+        singleton.ServerChangeScene(Scenes.TrainingMode);
 
         // Wait for player(s) to have spawned
         // TODO add a timeout for these wait-for-spawn spins

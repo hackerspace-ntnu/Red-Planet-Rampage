@@ -1,7 +1,7 @@
-using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.VFX;
 
 public enum ProjectileType
@@ -22,7 +22,7 @@ public class Fire : GunExtension
     private GunController gunController;
     private AudioSource audioSource;
     [SerializeField]
-    private AudioClip[] lighterSounds;
+    private AudioGroup lighterSound;
     private ProjectileType projectileType = ProjectileType.Hitscan;
     [Header("HitscanProjectiles")]
     [SerializeField]
@@ -178,8 +178,7 @@ public class Fire : GunExtension
     {
         if (!gunController || !audioSource)
             return;
-        audioSource.clip = lighterSounds.RandomElement();
-        audioSource.Play();
+        lighterSound.Play(audioSource);
     }
 
 #if UNITY_EDITOR

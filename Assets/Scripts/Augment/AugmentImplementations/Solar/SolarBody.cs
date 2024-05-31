@@ -35,9 +35,9 @@ public class SolarBody : GunBody
 
     private AudioSource audioSource;
     [SerializeField]
-    private AudioClip chargeUp;
+    private AudioGroup chargeUp;
     [SerializeField]
-    private AudioClip chargeDown;
+    private AudioGroup chargeDown;
 
     public override void Start()
     {
@@ -69,8 +69,7 @@ public class SolarBody : GunBody
             LeanTween.value(gameObject, SetEmissionStrength, 0, 1, chargeUpSeconds);
             if (audioSource)
             {
-                audioSource.clip = chargeUp;
-                audioSource.Play();
+                chargeUp.Play(audioSource);
             }
         }
         solarPanelMaterial.SetFloat("_On", 1);
@@ -103,8 +102,7 @@ public class SolarBody : GunBody
         {
             if (audioSource && solarPanelMaterial.GetFloat("_On") == 1)
             {
-                audioSource.clip = chargeDown;
-                audioSource.Play();
+                chargeDown.Play(audioSource);
             }
             SetEmissionStrength(0);
             solarPanelMaterial.SetFloat("_On", 0);

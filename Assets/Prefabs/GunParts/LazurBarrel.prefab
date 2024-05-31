@@ -557,6 +557,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0798da53ce119cf4cba859cb8e9ca69a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   statModifiers:
   - name: ProjectileDamage
     addition: 35
@@ -613,7 +616,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7836167e4b7873a4283f3dd70e4e68a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   projectileOutput: {fileID: 0}
+  actualPosition: {x: 0, y: 0, z: 0}
+  actualDirection: {x: 0, y: 0, z: 0}
   projectileRotation: {x: 0, y: 0, z: 0, w: 1}
   stats: {fileID: 0}
   player: {fileID: 0}
@@ -623,7 +631,7 @@ MonoBehaviour:
   MaxDistance: 180
   maxCollisions: 10
   animator: {fileID: 6370805171588257480}
-  chargeUpAudio: {fileID: 8300000, guid: 940cc35a43734eb4db7f712e55968558, type: 3}
+  chargeUpAudio: {fileID: 11400000, guid: 2d1e0be7e0af4344e9a3bbdc27606cdf, type: 2}
 --- !u!114 &4536155953706137537
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -678,7 +686,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 4898656368289658944, guid: 92cf7610df7967a41806df0e74d33c49, type: 2}
-  m_audioClip: {fileID: 8300000, guid: ec7ffe33b221e3b4995342c65045f49d, type: 3}
+  m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -688,8 +696,8 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
+  MinDistance: 30
+  MaxDistance: 1000
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
