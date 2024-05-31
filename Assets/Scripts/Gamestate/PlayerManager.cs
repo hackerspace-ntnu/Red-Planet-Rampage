@@ -247,7 +247,7 @@ public class PlayerManager : NetworkBehaviour
         {
             var canvas = hudController.GetComponent<Canvas>();
             canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
-            canvas.planeDistance = 0.11f;
+            canvas.planeDistance = 0.21f;
             identity.onChipChange += hudController.OnChipChange;
         }
 
