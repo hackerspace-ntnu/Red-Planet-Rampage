@@ -5,6 +5,8 @@ public class LazurFiringAnimator : AugmentAnimator
     [SerializeField]
     private Animator animator;
 
+    public AnimationEvent OnChargeStart;
+
     public override void OnInitialize(GunStats stats)
     {
         return;
@@ -13,6 +15,11 @@ public class LazurFiringAnimator : AugmentAnimator
     public override void OnReload(GunStats stats)
     {
         return;
+    }
+
+    public void PlayChargeUpSound()
+    {
+        OnChargeStart?.Invoke();
     }
 
     public void ShootLazer()

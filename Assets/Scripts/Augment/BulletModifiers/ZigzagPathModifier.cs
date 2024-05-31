@@ -20,7 +20,7 @@ public class ZigzagPathModifier : NetworkBehaviour, ProjectileModifier
 
     private void Start()
     {
-        if (isServer)
+        if (isNetworked && isServer)
             RpcSeedRandom(random.Next());
     }
 

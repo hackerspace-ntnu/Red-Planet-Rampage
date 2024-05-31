@@ -235,6 +235,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0798da53ce119cf4cba859cb8e9ca69a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   statModifiers:
   - name: ProjectileDamage
     addition: 40
@@ -266,7 +269,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de5ab80858d9d8a40b4f1524fac3b820, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   projectileOutput: {fileID: 0}
+  actualPosition: {x: 0, y: 0, z: 0}
+  actualDirection: {x: 0, y: 0, z: 0}
   projectileRotation: {x: 0, y: 0, z: 0, w: 1}
   stats: {fileID: 0}
   player: {fileID: 0}
@@ -340,8 +348,8 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
+  MinDistance: 30
+  MaxDistance: 1000
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0

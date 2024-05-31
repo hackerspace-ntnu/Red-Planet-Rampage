@@ -2,6 +2,7 @@
 using CollectionExtensions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "AudioGroup", menuName = "Audio/New Audio Group")]
 public class AudioGroup : ScriptableObject
@@ -26,6 +27,9 @@ public class AudioGroup : ScriptableObject
     [SerializeField]
     private FloatRange volumeRange;
 
+    [SerializeField]
+    private bool is3D = true;
+
     private void Modulate(AudioSource source)
     {
         // Range has override for ints, so we need to force the endpoints to be floats in order to achieve a continuous scale.
@@ -36,15 +40,24 @@ public class AudioGroup : ScriptableObject
         // Use 3D sound if there's only one local player,
         // otherwise we're in splitscreen and should not spatialize sounds.
         var isOnlyOneLocalPlayer = PlayerInputManagerController.Singleton.LocalPlayerInputs.Count == 1;
-        // TODO replace this check!
-        var isInArena = Scenes.NotArenaScenes.Contains(SceneManager.GetActiveScene().name);
-        source.spatialBlend = isOnlyOneLocalPlayer && isInArena ? 0 : 1;
+        // TODO replace this check?
+        var isInArena = !Scenes.NotArenaScenes.Contains(SceneManager.GetActiveScene().name);
+        source.spatialBlend = is3D && isOnlyOneLocalPlayer && isInArena ? 1 : 0;
+        // Disable doppler effect as it sounds *very* weird
+        source.dopplerLevel = 0;
     }
 
     public void Play(AudioSource source)
     {
         Modulate(source);
         source.PlayOneShot(sounds.RandomElement());
+    }
+    
+    public void PlayExclusively(AudioSource source)
+    {
+        Modulate(source);
+        source.clip = sounds.RandomElement();
+        source.Play();
     }
 
     public void PlayDelayed(AudioSource source, float delay)

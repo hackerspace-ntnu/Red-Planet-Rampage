@@ -83,6 +83,7 @@ MonoBehaviour:
   gamepadLookScale: 1.2
   playerCamera: {fileID: 3159361938328573030}
   ZoomActive: 0
+  CrouchActive: 0
 --- !u!114 &8900440296297243362
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101,7 +102,7 @@ MonoBehaviour:
   body: {fileID: 0}
   barrel: {fileID: 0}
   extension: {fileID: 0}
-  bounty: 5
+  id: 0
 --- !u!1 &4578288573561392664
 GameObject:
   m_ObjectHideFlags: 0
@@ -163,6 +164,7 @@ GameObject:
   - component: {fileID: 5385955070489759476}
   - component: {fileID: 3159361938328573030}
   - component: {fileID: 2195640781203763389}
+  - component: {fileID: 2532746679402765580}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -279,3 +281,11 @@ MonoBehaviour:
     mipBias: 0
     varianceClampScale: 0.9
     contrastAdaptiveSharpening: 0
+--- !u!81 &2532746679402765580
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8602880480366401748}
+  m_Enabled: 1

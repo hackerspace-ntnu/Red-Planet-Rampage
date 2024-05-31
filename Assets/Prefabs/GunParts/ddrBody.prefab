@@ -75,7 +75,7 @@ GameObject:
   - component: {fileID: 8408495752136392818}
   - component: {fileID: 8367018402671598818}
   m_Layer: 0
-  m_Name: ddrBody
+  m_Name: DDRBody
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -125,17 +125,17 @@ MonoBehaviour:
     text: Excellent
     color: {r: 0.88235295, g: 0, b: 1, a: 1}
     awardFactor: 1
-    audio: {fileID: 8300000, guid: 33dba0147eb1738459b866ba836efc57, type: 3}
+    audio: {fileID: 11400000, guid: fa45fcf92439b684da520c9682e59d2a, type: 2}
   - range: 0.1
     text: Great
     color: {r: 1, g: 0.9490196, b: 0, a: 1}
     awardFactor: 0.75
-    audio: {fileID: 8300000, guid: 9f81417eff9ee344f8cc9c8dc9173b9d, type: 3}
+    audio: {fileID: 11400000, guid: d2bbe3e6cdbd0d24b80b200989fbbb1a, type: 2}
   - range: 0.25
     text: Good
     color: {r: 0, g: 1, b: 0.8509804, a: 1}
     awardFactor: 0.5
-    audio: {fileID: 8300000, guid: 51b872a091093b54f8243e64e01dbe31, type: 3}
+    audio: {fileID: 11400000, guid: 0f82dfee99461854abed4f8f809b8dfa, type: 2}
   - range: 0.5
     text: Meh
     color: {r: 0, g: 0.5137255, b: 1, a: 1}
@@ -153,7 +153,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 4898656368289658944, guid: 92cf7610df7967a41806df0e74d33c49, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.16
+  m_Volume: 1
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -161,7 +161,7 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
+  MinDistance: 5
   MaxDistance: 500
   Pan2D: 0
   rolloffMode: 0

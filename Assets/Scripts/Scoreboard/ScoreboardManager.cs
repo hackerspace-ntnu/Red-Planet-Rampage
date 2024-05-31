@@ -21,7 +21,7 @@ public class ScoreboardManager : MonoBehaviour
     public List<string> wantedSubtitles = new();
 
     [SerializeField]
-    private AudioClip nextCrimeSound;
+    private AudioGroup nextCrimeSound;
 
     private AudioSource audioSource;
 
@@ -129,7 +129,7 @@ public class ScoreboardManager : MonoBehaviour
     {
         if (step < maxSteps)
         {
-            audioSource.PlayOneShot(nextCrimeSound);
+            nextCrimeSound.Play(audioSource);
             ShowNextCrime?.Invoke();
             step++;
             yield return new WaitForSeconds(newCrimeDelay);

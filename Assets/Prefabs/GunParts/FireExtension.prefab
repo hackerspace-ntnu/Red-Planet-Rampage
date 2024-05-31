@@ -199,6 +199,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1c61eeba9689d747a445c9db14b8225, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   statModifiers: []
   outputs:
   - {fileID: 1706792187696433307}
@@ -209,10 +212,7 @@ MonoBehaviour:
   trailLayers:
     serializedVersion: 2
     m_Bits: 8
-  lighterSounds:
-  - {fileID: 8300000, guid: f9821d3790f5b9a459dccf3bbd826d79, type: 3}
-  - {fileID: 8300000, guid: 1db501fe17a07584aa6a11c3849936c5, type: 3}
-  - {fileID: 8300000, guid: 5652b5238ed02ec4bbf23700bafc59a1, type: 3}
+  lighterSound: {fileID: 11400000, guid: e00fd20c5a85e8d46be08afe2e4fe016, type: 2}
   fireTrail: {fileID: 1119212264029477965}
   fireTrailInstances: {fileID: 1382308675925352878}
   positionActiveBuffer: {fileID: 1141831215458723034}
@@ -256,7 +256,7 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
+  MinDistance: 5
   MaxDistance: 500
   Pan2D: 0
   rolloffMode: 0

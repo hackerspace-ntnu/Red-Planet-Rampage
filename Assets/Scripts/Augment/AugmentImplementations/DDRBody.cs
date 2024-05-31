@@ -9,7 +9,7 @@ public struct Precision
     public string text;
     public Color color;
     public float awardFactor;
-    public AudioClip audio;
+    public AudioGroup audio;
 }
 public enum ArrowDirection
 {
@@ -140,8 +140,7 @@ public class DDRBody : GunBody
 
         if (precision.Value.audio)
         {
-            audioSource.clip = precision.Value.audio;
-            audioSource.Play();
+            precision.Value.audio.Play(audioSource);
         }
     }
 
