@@ -4,11 +4,15 @@ using System.Collections.Generic;
 using RandomExtensions;
 using TMPro;
 using UnityEngine;
+using Mirror;
 
-public class SateliteUplink : MonoBehaviour, ProjectileModifier
+public class SateliteUplink : NetworkBehaviour, ProjectileModifier
 {
     [SerializeField]
     private FallingHazard[] spaceGarbage;
+
+    [SerializeField]
+    private ExplosionController impactExplosion;
 
     [SerializeField]
     private TargetingReticle targetingReticle;
@@ -47,7 +51,6 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
     private bool isTrackingCurrentShot = false;
     private bool isReady = false;
 
-    // TODO synchronize and perhaps put in ProjectileModifier superclass
     private System.Random random = new System.Random();
 
     private void Start()
@@ -62,12 +65,24 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
         garbagePool = new ObjectPool<FallingHazard>(PickTemplate, maxGarbagePresent);
         targetingReticlePool = new ObjectPool<TargetingReticle>(targetingReticle, maxLaunchesPerShot);
 
-        garbageParent = (new GameObject()).transform;
+        garbageParent = new GameObject().transform;
         garbageParent.gameObject.name = "TrashUplinkGarbageHolder";
 
         timer = GetComponent<Timer>();
         timer.OnTimerRunCompleted += OnCooldownEnd;
         timer.StartTimer(cooldown);
+
+        if (isServer)
+        {
+            SeedRandom(random.Next());
+        }
+    }
+
+    [ClientRpc]
+    private void SeedRandom(int seed)
+    {
+        random = new System.Random(seed);
+
     }
 
     private FallingHazard PickTemplate()
@@ -157,14 +172,28 @@ public class SateliteUplink : MonoBehaviour, ProjectileModifier
         var randomAdjustment = random.Range(launchPointVariance, -launchPointVariance) * Vector3.forward + random.Range(launchPointVariance, -launchPointVariance) * Vector3.right;
         var launchPoint = target + (launchHeight + offset) * Vector3.up + randomAdjustment;
 
+        // TODO synchronize explosions (get a callback and spawn explosions through rpc)
         var garbageInstance = garbagePool.Get();
         garbageInstance.transform.parent = garbageParent;
-        garbageInstance.Player = gunController.Player;
-        garbageInstance.Launch(launchPoint);
+        garbageInstance.Launch(launchPoint, TriggerImpactExplosion);
 
         var targetInstance = targetingReticlePool.GetAndReturnLater(2);
         garbageInstance.transform.parent = garbageParent;
         targetInstance.transform.position = target;
+    }
+
+    private void TriggerImpactExplosion(Vector3 position)
+    {
+        if (isServer)
+            RpcTriggerImpactExplosion(position);
+    }
+
+    [ClientRpc]
+    private void RpcTriggerImpactExplosion(Vector3 position)
+    {
+        var instance = Instantiate(impactExplosion, position, Quaternion.identity);
+        instance.Init();
+        instance.Explode(gunController.Player);
     }
 
     private void OnDestroy()

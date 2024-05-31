@@ -12,7 +12,7 @@ using UnityEngine;
 //
 [RequireComponent(typeof(Timer))]
 [RequireComponent(typeof(PlayerFactory))]
-public class AuctionDriver : MonoBehaviour
+public class AuctionDriver : NetworkBehaviour
 {
     [SerializeField]
     private float biddingBeginDelay = 5f;
@@ -49,9 +49,6 @@ public class AuctionDriver : MonoBehaviour
 
     public static AuctionDriver Singleton;
 
-    // TODO synchronize
-    private System.Random random = new System.Random();
-
     private void Awake()
     {
         #region Singleton boilerplate
@@ -87,21 +84,14 @@ public class AuctionDriver : MonoBehaviour
             3 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction },
             _ => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction }
         };
-        foreach (var stage in availableAuctionStages)
-        {
-            // Ensure they all use the same seed
-            stage.Random = random;
-        }
 
         playerFactory = GetComponent<PlayerFactory>();
-        var aiPlayerCount = PlayerInputManagerController.Singleton.MatchHasAI ?
-            Mathf.Max(4 - PlayerInputManagerController.Singleton.LocalPlayerInputs.Count, 0) : 0;
-        playerFactory.InstantiatePlayersBidding(aiPlayerCount);
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
 
         AnimateAuctionStart();
         StartCoroutine(WaitAndStartCameraAnimation());
         StartCoroutine(PopulatePlatforms());
+        LoadingScreen.Singleton.Hide();
     }
 
     private void OnDestroy()
@@ -176,6 +166,22 @@ public class AuctionDriver : MonoBehaviour
 
     private void EndAuction(BiddingPlatform biddingPlatform)
     {
+        if (isServer)
+            StartCoroutine(WaitAndSwitchToItemSelect());
+    }
+
+    private IEnumerator WaitAndSwitchToItemSelect()
+    {
+        // Wait a couple o' frames so gun parts are sent to their respective players
+        yield return null;
+        yield return null;
+        Peer2PeerTransport.UpdatePlayerDetailsAfterAuction();
+        RpcSwitchToItemSelect();
+    }
+
+    [ClientRpc]
+    private void RpcSwitchToItemSelect()
+    {
         lastExtendedAuction.onBiddingEnd = null;
         Camera.GetComponent<Camera>().enabled = false;
         extraCamera.enabled = true;
@@ -184,11 +190,6 @@ public class AuctionDriver : MonoBehaviour
         GetComponent<ItemSelectManager>().StartTrackingMenus();
     }
 
-    public void ChangeScene()
-    {
-        StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
-        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(playerInput => playerInput.RemoveListeners());
-    }
     private IEnumerator AnimateGunConstruction(PlayerManager playerManager, RectTransform parent)
     {
         yield return new WaitForSeconds(1);

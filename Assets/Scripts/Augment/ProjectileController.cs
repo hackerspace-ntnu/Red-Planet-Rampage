@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using Mirror;
 
 [System.Serializable]
 public class ProjectileState
@@ -75,10 +76,14 @@ public class ProjectileState
     public ProjectileState() { }
 }
 
-public abstract class ProjectileController : MonoBehaviour
+public abstract class ProjectileController : NetworkBehaviour
 {
     [HideInInspector]
     public Transform projectileOutput;
+
+    public Vector3 actualPosition;
+    public Vector3 actualDirection;
+
     public Quaternion projectileRotation = Quaternion.identity;
 
     // Used for muzzle-flashes and other effects, is not where the projectile path actually starts

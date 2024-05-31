@@ -66,9 +66,6 @@ public class MainMenuController : MonoBehaviour
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
 
-    [SerializeField]
-    private GameObject loadingScreen;
-
     private int loadingDuration = 6;
 
     private Coroutine introRoutine;
@@ -242,31 +239,23 @@ public class MainMenuController : MonoBehaviour
     }
 
     /// <summary>
-    /// Function to be called as an onclick event from a button
+    /// Starts a match in the specified scene.
+    /// Function to be called as an onclick event from a button.
     /// </summary>
     /// <param name="sceneName"></param>
     public void ChangeScene(string name)
     {
         PlayerInputManagerController.Singleton.RemoveJoinListener();
-        StartCoroutine(LoadAndChangeScene(name));
+        ((Peer2PeerTransport)NetworkManager.singleton).StartMatch(name);
     }
 
-    private IEnumerator LoadAndChangeScene(string name)
+    /// <summary>
+    /// Disable menus we may enter a new scene from.
+    /// </summary>
+    public void DisableSceneSwitching()
     {
-        // Disable menus we may enter a new scene from
         defaultMenu.SetActive(false);
         mapSelectMenu.SetActive(false);
-        // Show loading screen and switch scenes eventually
-        loadingScreen.SetActive(true);
-#if UNITY_EDITOR
-        yield return new WaitForSeconds(.5f);
-#else
-        yield return new WaitForSeconds(loadingDuration);
-#endif      
-        if (NetworkManager.singleton.isNetworkActive)
-            NetworkManager.singleton.ServerChangeScene(name);
-        else
-            SceneManager.LoadSceneAsync(name);
     }
 
     /// <summary>
@@ -292,13 +281,6 @@ public class MainMenuController : MonoBehaviour
         galleryMenu.SetPlayerInput(inputManager);
         creditsMenu.SetPlayerInput(inputManager);
         levelSelectManager.SetPlayerInput(inputManager);
-
-        // TODO Remove this once you're sure that UpdateLobby in PlayerSelectManager is called properly (on local joining as well)
-        for (int i = 0; i < playerInputs.Count; i++)
-        {
-            PlayerIdentity playerIdentity = playerInputs[i].GetComponent<PlayerIdentity>();
-            playerSelectManager.SetupPlayerSelectModels(playerIdentity.playerName, playerIdentity.color, i);
-        }
     }
 
     private void PlayUISelectAudio(InputAction.CallbackContext ctx)
@@ -356,6 +338,7 @@ public class MainMenuController : MonoBehaviour
 
     public void StartTrainingMode()
     {
+        PlayerInputManagerController.Singleton.RemoveJoinListener();
         Peer2PeerTransport.StartTrainingMode();
         playerSelectManager.UpdateLobby();
     }
@@ -368,12 +351,17 @@ public class MainMenuController : MonoBehaviour
         playerSelectManager.UpdateLobby();
     }
 
+    public void FetchLobbyInfo()
+    {
+        if (!SteamManager.IsSteamActive)
+            return;
+        SteamManager.Singleton.FetchLobbyInfo();
+    }
+
+
     public void LeaveLobby()
     {
-        if (SteamManager.Singleton.IsHosting)
-            SteamManager.Singleton.LeaveLobby();
-        else
-            NetworkManager.singleton.StopHost();
+        NetworkManager.singleton.StopHost();
     }
 
     public void Quit()

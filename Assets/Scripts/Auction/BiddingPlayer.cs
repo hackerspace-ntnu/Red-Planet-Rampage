@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class BiddingPlayer : MonoBehaviour
+public class BiddingPlayer : NetworkBehaviour
 {
     [SerializeField]
     protected PlayerManager playerManager;
@@ -23,9 +23,13 @@ public class BiddingPlayer : MonoBehaviour
     private void Start()
     {
         GetComponent<PlayerIK>().RightHandIKTarget = signTarget;
-        if (NetworkManager.singleton.isNetworkActive)
-            return;
-        SetPlayerInput();
+        playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
+    }
+
+    public void SetIdentity()
+    {
+        playerManager.identity.onChipChange += UpdateChipStatus;
+        chipText.text = playerManager.identity.chips.ToString();
     }
 
     public void SetPlayerInput()
@@ -34,14 +38,22 @@ public class BiddingPlayer : MonoBehaviour
         {
             playerManager.inputManager.onFirePerformed += AnimateBid;
             playerManager.inputManager.onSelect += AnimateBid;
-            playerManager.identity.onChipChange += AnimateChipStatus;
-            playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
         }
-
-        chipText.text = playerManager.identity.chips.ToString();
     }
 
     private void AnimateBid(InputAction.CallbackContext ctx)
+    {
+        CmdAnimateBid();
+    }
+
+    [Command]
+    private void CmdAnimateBid()
+    {
+        RpcAnimateBid();
+    }
+
+    [ClientRpc]
+    private void RpcAnimateBid()
     {
         if (LeanTween.isTweening(signMesh.gameObject) || !currentPlatform)
             return;
@@ -54,7 +66,7 @@ public class BiddingPlayer : MonoBehaviour
     protected void AnimateChipStatus(BiddingPlatform platform)
     {
         if (currentPlatform)
-            currentPlatform.onBidPlaced -= AnimateSign;
+            currentPlatform.onBidPlaced -= AnimateSignContent;
 
         currentPlatform = platform;
         if (!currentPlatform)
@@ -65,13 +77,14 @@ public class BiddingPlayer : MonoBehaviour
             return;
         }
 
-        currentPlatform.onBidPlaced += AnimateSign;
-        AnimateSign(platform);
+        currentPlatform.onBidPlaced += AnimateSignContent;
+        AnimateSignContent(platform);
     }
 
-    protected void AnimateSign(BiddingPlatform platform)
+    // TODO this stuff plays on the wrong player for network players
+    protected void AnimateSignContent(BiddingPlatform platform)
     {
-        bool isLeaderAndCanBid = (platform.LeadingBidder == playerManager.identity) && (playerManager.identity.chips > 0);
+        bool isLeaderAndCanBid = (platform.LeadingBidder == playerManager.id) && (playerManager.identity.chips > 0);
         if (platform.chips < playerManager.identity.chips || isLeaderAndCanBid)
         {
             if (LeanTween.isTweening(signCross.gameObject))
@@ -83,7 +96,7 @@ public class BiddingPlayer : MonoBehaviour
         LeanTween.value(signCross.gameObject, (alpha) => signCross.alpha = alpha, 0f, 1f, 0.5f).setLoopPingPong();
     }
 
-    protected void AnimateChipStatus(int chips)
+    protected void UpdateChipStatus(int chips)
     {
         chipText.text = chips.ToString();
     }
@@ -107,7 +120,7 @@ public class BiddingPlayer : MonoBehaviour
         }
         if (playerManager.identity)
         {
-            playerManager.identity.onChipChange -= AnimateChipStatus;
+            playerManager.identity.onChipChange -= UpdateChipStatus;
         }
         playerManager.onSelectedBiddingPlatformChange -= AnimateChipStatus;
     }

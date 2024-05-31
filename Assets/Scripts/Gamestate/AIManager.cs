@@ -101,9 +101,9 @@ public class AIManager : PlayerManager
     public override void SetGun(Transform offset)
     {
         overrideAimTarget = false;
-        bool hasDisabledBody = IsDisabledItem(identity.Body);
-        bool hasDisabledBarrel = IsDisabledItem(identity.Barrel);
-        bool hasDisabledExtension = IsDisabledItem(identity.Extension);
+        bool hasDisabledBody = identity.Bodies.Count > 1 && IsDisabledItem(identity.Body);
+        bool hasDisabledBarrel = identity.Barrels.Count > 1 && IsDisabledItem(identity.Barrel);
+        bool hasDisabledExtension = identity.Extensions.Count > 1 && IsDisabledItem(identity.Extension);
         var gun = GunFactory.InstantiateGunAI(
             hasDisabledBody ? identity.Bodies.Where(item => !IsDisabledItem(item)).RandomElement() : identity.Body,
             hasDisabledBarrel ? identity.Barrels.Where(item => !IsDisabledItem(item)).RandomElement() : identity.Barrel,

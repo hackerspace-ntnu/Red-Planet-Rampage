@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(AudioSource))]
@@ -253,14 +254,17 @@ public class PlayerManager : NetworkBehaviour
         {
             biddingPlayer.SetPlayerInput();
         }
-
-        ApplyColorFromIdentity();
     }
 
-    public void ApplyColorFromIdentity()
+    public void ApplyIdentity()
     {
         // Set player color
         meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
+        if (playerIK.TryGetComponent<BiddingPlayer>(out var biddingPlayer))
+        {
+            // TODO refactor identity subscriptions
+            biddingPlayer.SetIdentity();
+        }
     }
 
     void OnDestroy()
@@ -356,7 +360,7 @@ public class PlayerManager : NetworkBehaviour
     private void TryPlaceBid(InputAction.CallbackContext ctx)
     {
         if (!selectedBiddingPlatform) return;
-        selectedBiddingPlatform.TryPlaceBid(identity);
+        selectedBiddingPlatform.PlaceBid(identity);
     }
 
     protected IEnumerator UnpressTrigger()

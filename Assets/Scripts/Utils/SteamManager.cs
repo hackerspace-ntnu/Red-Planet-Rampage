@@ -1,10 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 using Steamworks;
-using UnityEngine.SceneManagement;
-using System.Collections.ObjectModel;
 
 public enum AchievementType
 {
@@ -21,24 +18,33 @@ public enum AchievementType
     PingPonginator,
     Flamethrower,
     OrbitalTrashCannon,
-    ItalianPlumber
+    ItalianPlumber,
+    HatTrick,
+    LongShot,
+    RemoteWorker
 }
 
 public class SteamManager : MonoBehaviour
 {
     private const int steamAppID = 2717710;
     public static SteamManager Singleton;
-    public int ConnectedPlayers => transportProtocol.numPlayers;
+    public int ConnectedPlayers => NetworkManager.singleton.numPlayers;
+
     private static bool isSteamInitialized;
     public static bool IsSteamActive => isSteamInitialized;
-    public bool IsHosting = false;
+    public bool IsHosting { get; private set; } = false;
+    public bool IsInLobby { get; private set; } = false;
+
     public string UserName;
     public CSteamID SteamID;
     public List<string> PlayerNames = new();
     public List<ulong> PlayerIDs = new();
+
     public delegate void LobbyEvent();
     public LobbyEvent LobbyPlayerUpdate;
     public LobbyEvent LobbyListUpdate;
+
+    private CSteamID lobbyID;
     private List<CSteamID> lobbies = new();
     public Dictionary<CSteamID, string> Lobbies = new();
 
@@ -54,8 +60,6 @@ public class SteamManager : MonoBehaviour
     private Callback<LobbyDataUpdate_t> lobbyDataRequest;
 
     private const string hostkey = "HostAddress";
-    [SerializeField]
-    private Peer2PeerTransport transportProtocol;
 
     private void Awake()
     {
@@ -128,7 +132,10 @@ public class SteamManager : MonoBehaviour
         { AchievementType.PingPonginator, "WEAPON_PING_PONG" },
         { AchievementType.Flamethrower, "WEAPON_FLAMETHROWER" },
         { AchievementType.OrbitalTrashCannon, "WEAPON_ORBITAL_TRASH_CANNON" },
-        { AchievementType.ItalianPlumber, "WEAPON_ITALIAN_PLUMBER" }
+        { AchievementType.ItalianPlumber, "WEAPON_ITALIAN_PLUMBER" },
+        { AchievementType.HatTrick, "WEAPON_HAT_TRICK" },
+        { AchievementType.LongShot, "WEAPON_LONG_SHOT" },
+        { AchievementType.RemoteWorker, "WEAPON_REMOTE_WORKER" }
     };
 
     public void UnlockAchievement(AchievementType type)
@@ -155,7 +162,7 @@ public class SteamManager : MonoBehaviour
     {
         if (callback.m_eResult != EResult.k_EResultOK)
             return;
-        transportProtocol.StartHost();
+        NetworkManager.singleton.StartHost();
         IsHosting = true;
         SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey, SteamUser.GetSteamID().ToString());
         SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), "name", UserName);
@@ -163,16 +170,20 @@ public class SteamManager : MonoBehaviour
 
     private void OnJoinRequest(GameLobbyJoinRequested_t callback)
     {
+        // TODO verify that the lobby *should* be joined by more players!
+        //      and verify that this is run on the server!
+        if (Peer2PeerTransport.NumPlayers >= Peer2PeerTransport.MaxPlayers || Peer2PeerTransport.IsInMatch)
+            return;
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
     }
 
-    private void UpdateLobbyData(ulong lobbyID)
+    private void UpdateLobbyData(ulong rawLobbyID)
     {
-        var lobbyId = new CSteamID(lobbyID);
         Debug.Log("Lobby entered");
-        for (int i = 0; i < SteamMatchmaking.GetNumLobbyMembers(lobbyId); i++)
+        lobbyID = new CSteamID(rawLobbyID);
+        for (int i = 0; i < SteamMatchmaking.GetNumLobbyMembers(lobbyID); i++)
         {
-            var id = SteamMatchmaking.GetLobbyMemberByIndex(lobbyId, i);
+            var id = SteamMatchmaking.GetLobbyMemberByIndex(lobbyID, i);
             var name = SteamFriends.GetFriendPersonaName(id);
 
             if (PlayerIDs.Contains(id.m_SteamID))
@@ -189,11 +200,12 @@ public class SteamManager : MonoBehaviour
     private void OnLobbyEnter(LobbyEnter_t callback)
     {
         // All users
+        IsInLobby = true;
         UpdateLobbyData(callback.m_ulSteamIDLobby);
         if (NetworkServer.active)
             return;
         // Only clients from here!
-        transportProtocol.JoinLobby(SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey));
+        ((Peer2PeerTransport)NetworkManager.singleton).JoinLobby(SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey));
     }
 
     private void OnLobbyUpdate(LobbyChatUpdate_t callback)
@@ -208,23 +220,23 @@ public class SteamManager : MonoBehaviour
             return;
 
         // TODO support public and friend lobbies
-        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, transportProtocol.maxConnections);
+        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, NetworkManager.singleton.maxConnections);
     }
 
     public void LeaveLobby()
     {
         if (!isSteamInitialized)
             return;
-        if (IsHosting)
-        {
-            transportProtocol.StopHost();
-            IsHosting = false;
-        }
-        else
-        {
-            if (transportProtocol.isNetworkActive)
-                transportProtocol.StopClient();
-        }
+
+        Debug.Log("Left steam lobby");
+
+        PlayerNames = new();
+        PlayerIDs = new();
+
+        IsHosting = false;
+        IsInLobby = false;
+
+        SteamMatchmaking.LeaveLobby(lobbyID);
     }
 
     public void FetchLobbyInfo()

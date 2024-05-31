@@ -34,7 +34,7 @@ public class BiddingAI : BiddingPlayer
     public void SetIdentity(PlayerIdentity identity)
     {
         chipText.text = identity.chips.ToString();
-        identity.onChipChange += AnimateChipStatus;
+        identity.onChipChange += UpdateChipStatus;
     }
 
     private IEnumerator WaitAndEvaluate()
@@ -48,7 +48,7 @@ public class BiddingAI : BiddingPlayer
 
     private void EvaluatePlatformStates(BiddingPlatform platform)
     {
-        if (platform.LeadingBidder == playerManager.identity)
+        if (platform.LeadingBidder == playerManager.id)
             return;
 
         if (platform.chips >= playerManager.identity.chips)
@@ -105,11 +105,11 @@ public class BiddingAI : BiddingPlayer
 
     private void OnBiddingPlatformChange(BiddingPlatform platform)
     {
-        if (!platform || !currentDestination || platform != currentDestination || platform.LeadingBidder == playerManager.identity)
+        if (!platform || !currentDestination || platform != currentDestination || platform.LeadingBidder == playerManager.id)
             return;
 
         AnimateBid();
-        currentDestination.TryPlaceBid(playerManager.identity);
+        currentDestination.PlaceBid(playerManager.identity);
         currentDestination = null;
     }
 

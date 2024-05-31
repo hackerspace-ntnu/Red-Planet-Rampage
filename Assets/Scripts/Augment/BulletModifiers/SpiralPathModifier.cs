@@ -1,7 +1,8 @@
+using Mirror;
 using RandomExtensions;
 using UnityEngine;
 
-public class SpiralPathModifier : MonoBehaviour, ProjectileModifier
+public class SpiralPathModifier : NetworkBehaviour, ProjectileModifier
 {
 
     //Modifier for adding a spiral movement to any projectile
@@ -15,7 +16,7 @@ public class SpiralPathModifier : MonoBehaviour, ProjectileModifier
     // TODO synchronize
     private System.Random random = new System.Random();
 
-    public void addSpiralDisplacement(float distance, ref ProjectileState state)
+    public void AddSpiralDisplacement(float distance, ref ProjectileState state)
     {
         float oldRadius = radialLerp.Evaluate(state.distanceTraveled / spiralLerpDist) * spiralRadius;
         float newRadius = radialLerp.Evaluate((state.distanceTraveled + distance) / spiralLerpDist) * spiralRadius;
@@ -36,20 +37,20 @@ public class SpiralPathModifier : MonoBehaviour, ProjectileModifier
         return Priority.EXTENSION;
     }
 
-    public void setProjectileAngle(ref ProjectileState state, GunStats stats)
+    public void SetProjectileAngle(ref ProjectileState state, GunStats stats)
     {
         state.additionalProperties["spiralOffset"] = randomAngle ? random.Range(0, 2 * Mathf.PI) : 0f;
     }
 
     public void Attach(ProjectileController projectile)
     {
-        projectile.UpdateProjectileMovement += addSpiralDisplacement;
-        projectile.OnProjectileInit += setProjectileAngle;
+        projectile.UpdateProjectileMovement += AddSpiralDisplacement;
+        projectile.OnProjectileInit += SetProjectileAngle;
     }
 
     public void Detach(ProjectileController projectile)
     {
-        projectile.UpdateProjectileMovement -= addSpiralDisplacement;
-        projectile.OnProjectileInit -= setProjectileAngle;
+        projectile.UpdateProjectileMovement -= AddSpiralDisplacement;
+        projectile.OnProjectileInit -= SetProjectileAngle;
     }
 }

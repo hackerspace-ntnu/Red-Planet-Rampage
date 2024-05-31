@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
+using Unity.VisualScripting;
 
 public class PlayerIdentity : MonoBehaviour
 {
@@ -29,7 +29,7 @@ public class PlayerIdentity : MonoBehaviour
     public List<Item> Barrels { get; private set; } = new List<Item>();
     public List<Item> Extensions { get; private set; } = new List<Item>();
 
-    public int chips = 0;
+    public int chips { get; private set; } = 0;
 
     public uint id;
 
@@ -135,8 +135,20 @@ public class PlayerIdentity : MonoBehaviour
         this.extension = extension;
     }
 
-    public override string ToString()
+    public void UpdateFromDetails(PlayerDetails playerDetails, string name)
     {
-        return name;
+        id = playerDetails.id;
+
+        playerName = name;
+        color = playerDetails.color;
+
+        chips = playerDetails.chips;
+
+        SetItems(playerDetails.bodies, playerDetails.barrels, playerDetails.extensions);
+        SetLoadout(playerDetails.body, playerDetails.barrel, playerDetails.extension);
     }
+
+    public override string ToString() => playerName;
+
+    public string ToColorString() => $"<color=#{color.ToHexString()}>{playerName}</color>";
 }

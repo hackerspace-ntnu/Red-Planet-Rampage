@@ -1,7 +1,8 @@
+using Mirror;
 using RandomExtensions;
 using UnityEngine;
 
-public class ZigzagPathModifier : MonoBehaviour, ProjectileModifier
+public class ZigzagPathModifier : NetworkBehaviour, ProjectileModifier
 {
     [SerializeField]
     private float interval = .3f;
@@ -15,8 +16,19 @@ public class ZigzagPathModifier : MonoBehaviour, ProjectileModifier
 
     public Priority GetPriority() => Priority.EXTENSION;
 
-    // TODO synchronize
     private System.Random random = new System.Random();
+
+    private void Start()
+    {
+        if (isServer)
+            RpcSeedRandom(random.Next());
+    }
+
+    [ClientRpc]
+    private void RpcSeedRandom(int seed)
+    {
+        random = new System.Random(seed);
+    }
 
     private Vector2 RandomOffset(Vector2 lastOffset)
     {

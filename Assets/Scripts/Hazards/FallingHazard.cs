@@ -1,5 +1,7 @@
+using System;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class FallingHazard : MonoBehaviour
 {
@@ -14,13 +16,6 @@ public class FallingHazard : MonoBehaviour
 
     private const float gravity = 9.81f; // >:)
 
-    private PlayerManager player;
-    public PlayerManager Player
-    {
-        get => player;
-        set => player = value;
-    }
-
     private Rigidbody body;
     private AudioSource audioSource;
 
@@ -28,13 +23,15 @@ public class FallingHazard : MonoBehaviour
     private float lastVelocity;
     private float fallVelocity;
 
+    private Action<Vector3> onHit = (Vector3 p) => { };
+
     private void Start()
     {
         if (!body) body = GetComponent<Rigidbody>();
         if (!audioSource) audioSource = GetComponent<AudioSource>();
     }
 
-    public void Launch(Vector3 position)
+    public void Launch(Vector3 position, Action<Vector3> onHit)
     {
         if (!body) body = GetComponent<Rigidbody>();
         if (!audioSource) audioSource = GetComponent<AudioSource>();
@@ -51,15 +48,12 @@ public class FallingHazard : MonoBehaviour
 
         fallVelocity = initialFallVelocity;
         isFalling = true;
+        this.onHit = onHit;
     }
 
     private void OnGround(Vector3 point)
     {
         soundEffect.Play(audioSource);
-
-        var instance = Instantiate(impactExplosion, point, Quaternion.identity);
-        instance.Init();
-        instance.Explode(player);
 
         // Reset and enable physics
         body.velocity = Vector3.zero;
@@ -74,6 +68,7 @@ public class FallingHazard : MonoBehaviour
         body.AddForce(10f * (Random.rotation * Vector3.up), ForceMode.VelocityChange);
 
         isFalling = false;
+        onHit(point);
     }
 
     private void FixedUpdate()

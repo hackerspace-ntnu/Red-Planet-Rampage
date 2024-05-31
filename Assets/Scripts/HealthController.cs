@@ -49,7 +49,7 @@ public class HealthController : NetworkBehaviour
     [ClientRpc]
     private void DealDamageRpc(NetworkDamageInfo networkInfo)
     {
-        var source = MatchController.Singleton ? MatchController.Singleton.PlayerById[networkInfo.sourcePlayer] : null;
+        var source = Peer2PeerTransport.PlayerInstanceByID[networkInfo.sourcePlayer];
         var info = new DamageInfo(source, networkInfo);
         ActuallyDealDamage(info);
     }

@@ -565,15 +565,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b18a938eb13d13540b14e958b874d1b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 2770875744502568649, guid: 1ccbc17fde8c55a21ac6331f0517f402, type: 3}
   spawnPoints:
   - {fileID: 1104924655}
   playerSelectItemPrefab: {fileID: 0}
-  aIOpponent: {fileID: 0}
-  aIBidder: {fileID: 0}
-  aiIdentity: {fileID: 0}
-  globalHUDController: {fileID: 0}
-  overrideMatchManager: 1
 --- !u!4 &168459266
 Transform:
   m_ObjectHideFlags: 0
@@ -4278,6 +4272,10 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 508678544827238946, guid: e795d78bc3458864bad12d1dc75182fb, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1245620792704334073, guid: e795d78bc3458864bad12d1dc75182fb, type: 3}
       propertyPath: m_Materials.Array.size
       value: 1
@@ -4294,7 +4292,13 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 962209921104072034, guid: 96e02cb082c4f82d495b4b45861a50f6, type: 3}
-    m_RemovedComponents: []
+    - target: {fileID: 5543259695900803521, guid: e795d78bc3458864bad12d1dc75182fb, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 508678544827238946, guid: e795d78bc3458864bad12d1dc75182fb, type: 3}
+    - {fileID: 3873721530690488933, guid: e795d78bc3458864bad12d1dc75182fb, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:

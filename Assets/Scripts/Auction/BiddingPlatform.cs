@@ -1,10 +1,11 @@
+using Mirror;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Timer))]
-public class BiddingPlatform : MonoBehaviour
+public class BiddingPlatform : NetworkBehaviour
 {
     [SerializeField]
     private Item item;
@@ -14,8 +15,10 @@ public class BiddingPlatform : MonoBehaviour
     public int chips = 0;
 
     [SerializeField]
-    private PlayerIdentity leadingBidder;
-    public PlayerIdentity LeadingBidder => leadingBidder;
+    private uint leadingBidder = InvalidID;
+    public uint LeadingBidder => leadingBidder;
+    private const uint InvalidID = 255;
+    private PlayerIdentity leadingBidderIdentity;
 
     [SerializeField]
     private AudioSource audioSource;
@@ -120,49 +123,102 @@ public class BiddingPlatform : MonoBehaviour
         auctionTimer.OnTimerRunCompleted -= EndAuction;
     }
 
-    public bool TryPlaceBid(PlayerIdentity playerIdentity)
+    public void PlaceBid(PlayerIdentity playerIdentity)
     {
         if (ActiveBiddingRound == null || item == null || Mathf.Round(auctionTimer.ElapsedTime) <= 0)
         {
-            Debug.Log("No active biddingRound on biddingPlatform!");
-            return false;
+            Debug.LogWarning("No active biddingRound on biddingPlatform!");
+            return;
         }
-        bool leadingPlayerCanIncrement = playerIdentity == leadingBidder && playerIdentity.chips > 0;
+
+        CmdPlaceBid(playerIdentity.id);
+    }
+
+    // All players should be able to place bids, thus we ignore authority (for the time being).
+    // TODO verify that the player is on the platform and is from the connection that calls this cmd.
+    [Command(requiresAuthority = false)]
+    private void CmdPlaceBid(uint playerID)
+    {
+        if (ActiveBiddingRound == null || item == null || Mathf.Round(auctionTimer.ElapsedTime) <= 0)
+        {
+            Debug.LogWarning("No active biddingRound on biddingPlatform!");
+            return;
+        }
+
+        // TODO verify that this player belongs to the source connection
+        if (!Peer2PeerTransport.PlayerInstanceByID.TryGetValue(playerID, out var player))
+        {
+            Debug.LogError($"Bidding platform received invalid player {playerID} from client!");
+            return;
+        }
+        var playerIdentity = player.identity;
+
+        Debug.Log($"Got bidding request from {playerIdentity.ToColorString()} (chips={playerIdentity.chips}) on {item.displayName} (chips={chips}, leader={leadingBidderIdentity?.ToColorString()})");
+
+        bool leadingPlayerCanIncrement = playerIdentity.id == leadingBidder && playerIdentity.chips > 0;
         if (playerIdentity.chips > chips || leadingPlayerCanIncrement)
         {
-            // Refund
-            if (leadingBidder)
-            {
-                leadingBidder.UpdateChip(chips);
-                if (playerIdentity != leadingBidder)
-                {
-                    audioSource.Play();
-                    AuctionDriver.Singleton.ScreenShake();
-                }
-
-            }
-            chips++;
-            playerIdentity.UpdateChip(-chips);
-            itemCostText.text = chips.ToString();
-            LeanTween.value(
-                gameObject,
-                (color) => material.SetColor("_BidderColor", color),
-                leadingBidder ? leadingBidder.color : Color.black,
-                playerIdentity.color, 0.2f)
-                .setEaseInOutBounce();
-            leadingBidder = playerIdentity;
-            LeanTween.value(gameObject, UpdateBorder, 0f, 1f, borderTweenDuration);
-            onBidPlaced(this);
-
-            if ((auctionTimer.WaitTime - auctionTimer.ElapsedTime) < bumpTime)
-            {
-                auctionTimer.AddTime(bumpTime);
-                onBiddingExtended(this);
-            }
-            return true;
+            Debug.Log($"Accepted request from {playerIdentity.ToColorString()} on {item.displayName}");
+            RpcAcceptBid(playerIdentity.id);
         }
-        onBidDenied(this);
-        return false;
+        else
+        {
+            Debug.Log($"Denied request from {playerIdentity.ToColorString()} on {item.displayName}");
+            RpcDenyBid();
+        }
+    }
+
+    [ClientRpc]
+    private void RpcAcceptBid(uint playerID)
+    {
+        if (!Peer2PeerTransport.PlayerInstanceByID.TryGetValue(playerID, out var player))
+        {
+            Debug.LogError($"Bidding platform received invalid player {playerID} from server!");
+            return;
+        }
+        var playerIdentity = player.identity;
+
+        // TODO consider rewriting some of the following
+
+        // Refund
+        if (leadingBidderIdentity)
+        {
+            leadingBidderIdentity.UpdateChip(chips);
+            if (playerIdentity.id != leadingBidder)
+            {
+                audioSource.Play();
+                AuctionDriver.Singleton.ScreenShake();
+            }
+        }
+
+        chips++;
+        playerIdentity.UpdateChip(-chips);
+        itemCostText.text = chips.ToString();
+        LeanTween.value(
+            gameObject,
+            (color) => material.SetColor("_BidderColor", color),
+            leadingBidderIdentity ? leadingBidderIdentity.color : Color.black,
+            playerIdentity.color, 0.2f)
+            .setEaseInOutBounce();
+        leadingBidder = playerIdentity.id;
+        leadingBidderIdentity = playerIdentity;
+        LeanTween.value(gameObject, UpdateBorder, 0f, 1f, borderTweenDuration);
+        onBidPlaced?.Invoke(this);
+
+        if ((auctionTimer.WaitTime - auctionTimer.ElapsedTime) < bumpTime)
+        {
+            auctionTimer.AddTime(bumpTime);
+            onBiddingExtended?.Invoke(this);
+        }
+
+        Debug.Log($"Accepted bid on {item.displayName} (chips={chips}, leader={leadingBidderIdentity?.ToColorString()})");
+    }
+
+    [ClientRpc]
+    private void RpcDenyBid()
+    {
+        onBidDenied?.Invoke(this);
+        Debug.Log($"Denied bid on {item.displayName}");
     }
 
     private void UpdateBorder(float scale)
@@ -172,8 +228,11 @@ public class BiddingPlatform : MonoBehaviour
 
     private void EndAuction()
     {
-        if (leadingBidder)
-            leadingBidder.PerformTransaction(item);
+        Debug.Log($"Ending auction for {item.displayName} with {leadingBidder} = {(leadingBidderIdentity ? leadingBidderIdentity.ToColorString() : "nobody")} as the winner");
+        if (leadingBidder != InvalidID && isServer)
+        {
+            RpcPerformTransaction(leadingBidder, item.id);
+        }
 
         Destroy(augmentModel, 0.5f);
         isActive = false;
@@ -181,8 +240,38 @@ public class BiddingPlatform : MonoBehaviour
         gameObject.LeanScale(Vector3.zero, 0.5f).setEaseInOutExpo();
     }
 
+    [ClientRpc]
+    private void RpcPerformTransaction(uint playerID, string itemID)
+    {
+        if (!Peer2PeerTransport.PlayerInstanceByID.TryGetValue(playerID, out var player))
+        {
+            Debug.LogError($"Bidding platform received invalid player {playerID} from server!");
+            return;
+        }
+        if (!StaticInfo.Singleton.ItemsById.TryGetValue(itemID, out var item))
+        {
+            Debug.LogError($"Bidding platform received invalid item {itemID} from server!");
+            return;
+        }
+        Debug.Log($"Rewarding {item.displayName} to {player.identity.ToColorString()}");
+        player.identity.PerformTransaction(item);
+    }
+
     public void SetItem(Item item)
     {
+        if (isServer)
+            RpcSetItem(item.id);
+    }
+
+    [ClientRpc]
+    private void RpcSetItem(string itemID)
+    {
+        if (!StaticInfo.Singleton.ItemsById.TryGetValue(itemID, out var item))
+        {
+            Debug.LogError($"Bidding platform received invalid item {itemID} from server!");
+            return;
+        }
+
         this.item = item;
         itemNameText.text = item.displayName;
         itemDescriptionText.text = item.displayDescription;

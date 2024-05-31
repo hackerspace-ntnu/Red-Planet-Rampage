@@ -2,7 +2,6 @@ using CollectionExtensions;
 using Mirror;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -24,7 +23,6 @@ public class PlayerSelectManager : MonoBehaviour
     private float maximumTime = 30f;
 
     private PlayerInputManagerController playerInputManagerController;
-    private List<TMP_Text> playerNames = new List<TMP_Text>();
     private List<Animator> playerAnimators = new List<Animator>();
     private List<string> animatorParameters = new List<string>();
     private int cardPeekCounter = 0;
@@ -34,23 +32,36 @@ public class PlayerSelectManager : MonoBehaviour
         for (int i = 0; i < playerModels.Count; i++)
         {
             Vector3 playerPosition = new Vector3(playerModels[i].transform.position.x, 2, playerModels[i].transform.position.z);
-            joinText[i].transform.position = playerPosition;
+            joinText[i].transform.localPosition = Vector3.zero;
+            nameTags[i].transform.position = playerPosition;
         }
     }
 
     private void Start()
     {
         playerInputManagerController = PlayerInputManagerController.Singleton;
-        for (int i = 0; i < playerModels.Count; i++)
+
+        // Find animators and their parameters
+        foreach (var t in playerModels)
         {
-            playerAnimators.Add(playerModels[i].GetComponentInChildren<Animator>()); // Add all animators to list
+            playerAnimators.Add(t.GetComponentInChildren<Animator>());
+        }
+        foreach (var parameter in playerAnimators[0].parameters)
+        {
+            animatorParameters.Add(parameter.name);
         }
 
-        for (int i = 0; i < playerAnimators[0].parameterCount; i++)
-        {
-            animatorParameters.Add(playerAnimators[0].GetParameter(i).name);
-        }
         ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved += UpdateLobby;
+        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRemoved += UpdateLobby;
+    }
+
+    private void OnDestroy()
+    {
+        if (NetworkManager.singleton)
+        {
+            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved -= UpdateLobby;
+            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRemoved -= UpdateLobby;
+        }
     }
 
     public void UpdateLobby()
@@ -58,12 +69,16 @@ public class PlayerSelectManager : MonoBehaviour
         var i = 0;
         foreach (var player in Peer2PeerTransport.PlayerDetails)
         {
-            SetupPlayerSelectModels(player.name, player.color, i);
+            SetupPlayerModel(player, i);
             i++;
+        }
+        for (; i < playerModels.Count; i++)
+        {
+            DisablePlayerModel(i);
         }
     }
 
-    public void UpdateLobby(PlayerDetails details)
+    private void UpdateLobby(PlayerDetails details)
     {
         UpdateLobby();
     }
@@ -71,40 +86,29 @@ public class PlayerSelectManager : MonoBehaviour
     /// <summary>
     /// Called when player is added. Sets the corresponding playermodel to active and fills in the playername in the nametag.
     /// </summary>
-    /// <param name="playerName"></param>
-    /// <param name="color"></param>
-    /// <param name="playerID"></param>
-    public void SetupPlayerSelectModels(string playerName, Color color, int playerID)
+    /// <param name="player"></param>
+    /// <param name="index"></param>
+    public void SetupPlayerModel(PlayerDetails player, int index)
     {
-        playerModels[playerID].GetComponentInChildren<SkinnedMeshRenderer>().material.color = color; // Set player model color
-        playerModels[playerID].SetActive(true); // Show corresponding player model
-        playerModels[playerID].transform.LookAt(new Vector3(playerSelectCam.transform.position.x, playerModels[playerID].transform.position.y, playerSelectCam.transform.position.z)); // Orient player model to look at camera
-        SetPlayerNameTag(playerModels[playerID], playerName, playerID); // Create and display player nametag
-        joinText[playerID].enabled = false;
+        playerModels[index].GetComponentInChildren<SkinnedMeshRenderer>().material.color = player.color; // Set player model color
+        playerModels[index].SetActive(true); // Show corresponding player model
+        playerModels[index].transform.LookAt(new Vector3(playerSelectCam.transform.position.x, playerModels[index].transform.position.y, playerSelectCam.transform.position.z)); // Orient player model to look at camera
+        nameTags[index].text = Peer2PeerTransport.PlayerNameWithIndex(player);
+        nameTags[index].enabled = true;
+        joinText[index].enabled = false;
     }
 
     /// <summary>
-    /// Fills in the playername and positions it.
+    /// Called when player is removed. Stops displaying the affected player.
     /// </summary>
-    /// <param name="player"></param>
-    /// <param name="playerName"></param>
     /// <param name="playerID"></param>
-    public void SetPlayerNameTag(GameObject player, string playerName, int playerID)
+    public void DisablePlayerModel(int playerID)
     {
-        // Check if nameTag exists already
-        bool nameExists = playerNames.Any(x => x.name == playerName);
-
-        // If it doesn't, create new nametag based on player name
-        if (!nameExists)
-        {
-            Vector3 playerPosition = new Vector3(player.transform.position.x, 2, player.transform.position.z);
-
-            TMP_Text name = nameTags[playerID];
-            name.transform.position = playerPosition; // Sets the nametag position over the head of the player model
-            name.text = playerName; // Sets the text of the nametag
-            playerNames.Add(name); // Adds TMP_text object to list for monitoring
-        }
+        playerModels[playerID].SetActive(false);
+        nameTags[playerID].enabled = false;
+        joinText[playerID].enabled = true;
     }
+
 
     /// <summary>
     /// Stops the coroutine responsible for animating players in playerSelectMenu. To be called by "Start" in main menu.
@@ -176,10 +180,5 @@ public class PlayerSelectManager : MonoBehaviour
             }
             yield return new WaitForSeconds(Random.Range(minimumTime, maximumTime));
         }
-    }
-
-    private void OnDestroy()
-    {
-        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved -= UpdateLobby;
     }
 }

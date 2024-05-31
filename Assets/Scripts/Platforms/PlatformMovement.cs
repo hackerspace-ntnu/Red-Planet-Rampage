@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 
-public class PlatformMovement : MonoBehaviour
+public class PlatformMovement : NetworkBehaviour
 {
     public List<Transform> routepoints;
 
@@ -38,7 +39,8 @@ public class PlatformMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        MovePlatform();
+        if (!isNetworked || isServer)
+            MovePlatform();
     }
 
     private void MovePlatform()
@@ -65,16 +67,18 @@ public class PlatformMovement : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.TryGetComponent<PlayerManager>(out PlayerManager playerManager))
-        {
+        if (!other.gameObject.TryGetComponent(out PlayerManager playerManager))
+            return;
+
+        // Only set transform locally
+        if (playerManager.inputManager)
             other.transform.SetParent(transform);
-        }
     }
+
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.TryGetComponent<PlayerManager>(out PlayerManager playerManager))
-        {
-            other.transform.SetParent(null);
-        }
+        if (!other.gameObject.TryGetComponent(out PlayerManager playerManager))
+            return;
+        other.transform.SetParent(null);
     }
 }

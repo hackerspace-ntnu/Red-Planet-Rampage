@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using CollectionExtensions;
 using Mirror;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+// TODO consider splitting this into match-specific state and general player metadata
 public struct PlayerDetails
 {
     public uint id;
@@ -33,6 +36,16 @@ public struct PlayerConnectedMessage : NetworkMessage
     }
 
     public int inputID;
+}
+
+public struct PlayerLeftMessage : NetworkMessage
+{
+    public PlayerLeftMessage(uint id)
+    {
+        this.id = id;
+    }
+
+    public uint id;
 }
 
 public struct InitialPlayerDetailsMessage : NetworkMessage
@@ -67,6 +80,8 @@ public struct UpdateLoadoutMessage : NetworkMessage
     public string barrel;
     public string extension;
 }
+
+public struct StartMatchMessage : NetworkMessage { }
 
 public struct SpawnPlayerMessage : NetworkMessage
 {
@@ -112,26 +127,60 @@ public class Peer2PeerTransport : NetworkManager
 
     private PlayerFactory playerFactory;
     private static Transform[] spawnPoints;
+    private static Stack<Transform> spawnPointStack;
     private static int playerIndex;
+    private static Stack<Color> availableColors = new();
+
+    private static bool isInMatch;
+    public static bool IsInMatch => isInMatch;
 
     private static Dictionary<uint, PlayerDetails> players = new();
-    public static int NumPlayersInMatch => players.Count;
+    public static int NumPlayers => players.Count;
+    public const int MaxPlayers = 4;
     public static IEnumerable<PlayerDetails> PlayerDetails => players.Values;
 
     private static List<uint> localPlayerIds = new();
 
+    private static Dictionary<uint, PlayerManager> playerInstances = new();
+    public static ReadOnlyDictionary<uint, PlayerManager> PlayerInstanceByID;
+
+    /// <summary>
+    /// List of client connections. Will be uninitialized on clients.
+    /// </summary>
+    private static List<NetworkConnectionToClient> connections = new();
+    private static Dictionary<int, List<uint>> playersForConnection = new();
+    private static List<uint> connectedPlayers = new();
+    public static ReadOnlyCollection<NetworkConnectionToClient> Connections;
+
     public delegate void LobbyPlayerEvent(PlayerDetails details);
     public LobbyPlayerEvent OnPlayerRecieved;
+    public LobbyPlayerEvent OnPlayerRemoved;
+
+    public delegate void ConnectionEvent(int connectionID);
+    public ConnectionEvent OnDisconnect;
+
+    private void ResetState()
+    {
+        isInMatch = false;
+        playerIndex = 0;
+        players = new();
+        playerInstances = new();
+        PlayerInstanceByID = new(playerInstances);
+        localPlayerIds = new();
+        availableColors = new(PlayerInputManagerController.Singleton.PlayerColors.Reverse());
+
+        connections = new();
+        connectedPlayers = new();
+        playersForConnection = new();
+        Connections = new(connections);
+    }
 
     public override void OnStartServer()
     {
-        base.OnStartServer();
         NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
         NetworkServer.RegisterHandler<UpdateLoadoutMessage>(OnReceiveUpdateLoadout);
 
-        // Reinitialize player lookups
-        players = new();
-        playerIndex = 0;
+        ResetState();
     }
 
     #region Player joining 
@@ -139,7 +188,8 @@ public class Peer2PeerTransport : NetworkManager
     public override void OnClientConnect()
     {
         base.OnClientConnect();
-
+        NetworkClient.RegisterHandler<StartMatchMessage>(OnStartMatch);
+        NetworkClient.RegisterHandler<PlayerLeftMessage>(OnPlayerLeft);
         NetworkClient.RegisterHandler<InitialPlayerDetailsMessage>(OnReceivePlayerDetails);
         NetworkClient.RegisterHandler<InitializePlayerMessage>(InitializeFPSPlayer);
         NetworkClient.RegisterHandler<UpdatedPlayerDetailsMessage>(OnReceiveUpdatedPlayerDetails);
@@ -148,8 +198,75 @@ public class Peer2PeerTransport : NetworkManager
         // TODO doesn't work if players haven't pressed a key yet
         PlayerInputManagerController.Singleton.JoinAllInputs();
 
-        players = new();
-        playerIndex = 0;
+        ResetState();
+    }
+
+    public override void OnServerDisconnect(NetworkConnectionToClient connection)
+    {
+        if (!playersForConnection.ContainsKey(connection.connectionId))
+            return;
+        Debug.Log($"Removed connection {connections.IndexOf(connection)} which has players {playersForConnection[connection.connectionId].ToCommaSeparatedString()}");
+        connections.Remove(connection);
+        var playerIDs = playersForConnection[connection.connectionId];
+        connectedPlayers.RemoveAll(id => playerIDs.Contains(id));
+        playersForConnection.Remove(connection.connectionId);
+        if (!isInMatch)
+        {
+            foreach (var id in playerIDs)
+            {
+                if (!players.TryGetValue(id, out var details))
+                    continue;
+                availableColors.Push(details.color);
+                NetworkServer.SendToAll(new PlayerLeftMessage(id));
+            }
+        }
+        OnDisconnect?.Invoke(connection.connectionId);
+    }
+
+    public override void OnStopServer()
+    {
+        Debug.Log("Stopped server");
+        if (SteamManager.IsSteamActive && SteamManager.Singleton.IsInLobby)
+            SteamManager.Singleton.LeaveLobby();
+        ResetState();
+    }
+
+    public override void OnStopClient()
+    {
+        Debug.Log("Stopped client");
+        if (SteamManager.IsSteamActive && SteamManager.Singleton.IsInLobby)
+            SteamManager.Singleton.LeaveLobby();
+        ResetState();
+    }
+
+    public override void OnClientDisconnect()
+    {
+        Debug.Log("Disconnected as client");
+        LoadingScreen.Singleton.Hide();
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
+        PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
+        SceneManager.LoadSceneAsync(Scenes.Menu);
+        if (NetworkClient.active)
+            StopClient();
+        else
+            ResetState();
+    }
+
+    private void OnPlayerLeft(PlayerLeftMessage message)
+    {
+        if (!players.TryGetValue(message.id, out var playerDetails))
+        {
+            Debug.LogError($"Received leave message for invalid player {message.id}");
+            return;
+        }
+
+        Debug.Log($"Player {message.id} {playerDetails.name} left");
+
+        players.Remove(message.id);
+        if (playerInstances.ContainsKey(message.id))
+            playerInstances.Remove(message.id);
+
+        OnPlayerRemoved?.Invoke(playerDetails);
     }
 
     public void JoinLobby(string address = "127.0.0.1")
@@ -180,6 +297,7 @@ public class Peer2PeerTransport : NetworkManager
                 color = PlayerInputManagerController.Singleton.PlayerColors[i],
             };
             players.Add((uint)i, details);
+            connectedPlayers.Add((uint)i);
             NetworkServer.SendToAll(new InitialPlayerDetailsMessage(details));
         }
 
@@ -188,21 +306,64 @@ public class Peer2PeerTransport : NetworkManager
 
     private static IEnumerator WaitAndSwitchToTrainingMode()
     {
+        LoadingScreen.Singleton.Show();
+
+        // Wait for player details to be populated
         while (!NetworkClient.isConnected && !singleton.isNetworkActive && players.Count < PlayerInputManagerController.Singleton.LocalPlayerInputs.Count)
             yield return new WaitForEndOfFrame();
         singleton.ServerChangeScene(Scenes.TrainingMode);
+
+        yield return new WaitForSeconds(LoadingScreen.Singleton.MandatoryDuration);
+
+        // Wait for player(s) to have spawned
+        // TODO add a timeout for these wait-for-spawn spins
+        while (FindObjectsByType<PlayerManager>(FindObjectsSortMode.None).Count() < players.Count)
+            yield return new WaitForEndOfFrame();
+        LoadingScreen.Singleton.Hide();
     }
 
     // TODO custom method for leaving training mode :)
+    // TODO handle leaving of match/lobby better
+
+    public void StartMatch(string mapName)
+    {
+        NetworkServer.SendToAll(new StartMatchMessage());
+        StartCoroutine(WaitAndStartMatch(mapName));
+    }
+
+    private IEnumerator WaitAndStartMatch(string mapName)
+    {
+        yield return new WaitForSeconds(LoadingScreen.Singleton.MandatoryDuration);
+        ServerChangeScene(mapName);
+    }
+
+    private void OnStartMatch(StartMatchMessage message)
+    {
+        var mainMenuController = FindAnyObjectByType<MainMenuController>();
+        if (mainMenuController)
+            mainMenuController.DisableSceneSwitching();
+        LoadingScreen.Singleton.Show();
+    }
 
     private void OnSpawnPlayerInput(NetworkConnectionToClient connection, PlayerConnectedMessage message)
     {
         // Avoid adding more than the four allowed players
         // TODO prevent this in some other more sustainable way :)))))
-        if (PlayerInputManagerController.Singleton.NetworkClients.Count >= 4)
+        if (NumPlayers >= MaxPlayers)
             return;
-        PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
 
+        // Register connection
+        PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
+        if (!connections.Contains(connection))
+        {
+            connections.Add(connection);
+            connectedPlayers.Add((uint)playerIndex);
+        }
+        if (!playersForConnection.ContainsKey(connection.connectionId))
+            playersForConnection[connection.connectionId] = new();
+        playersForConnection[connection.connectionId].Add((uint)playerIndex);
+
+        // Determine metadata
         var playerType = PlayerType.Local;
         var playerName = "Player";
         ulong steamID = 0;
@@ -220,7 +381,14 @@ public class Peer2PeerTransport : NetworkManager
             connection.Send(new InitialPlayerDetailsMessage(existingPlayer));
         }
 
-        // TODO consider just putting this stuff into the InitialPlayerDetailsMessage
+        // Pick among the available colors
+        if (!availableColors.TryPop(out var color))
+        {
+            // Recycle colors if necessary
+            availableColors = new(PlayerInputManagerController.Singleton.PlayerColors.Reverse());
+            color = availableColors.Pop();
+        }
+
         var details = new PlayerDetails
         {
             id = (uint)playerIndex,
@@ -228,8 +396,9 @@ public class Peer2PeerTransport : NetworkManager
             steamID = steamID,
             type = playerType,
             name = playerName,
-            color = PlayerInputManagerController.Singleton.PlayerColors[playerIndex],
+            color = color,
         };
+
         // Send information about this player to all
         NetworkServer.SendToAll(new InitialPlayerDetailsMessage(details));
         playerIndex++;
@@ -266,10 +435,13 @@ public class Peer2PeerTransport : NetworkManager
     {
         var details = message.details;
         if (!players.ContainsKey(details.id))
+        {
+            Debug.LogError($"Received updated info for invalid player {details.id}");
             return;
+        }
         // Use the player type that we've already figured out
         details.type = players[details.id].type;
-        Debug.Log($"Received updated info for player {details.id}: chips={details.chips}, body={details.body}, barrel={details.barrel}, extension={details.extension}");
+        Debug.Log($"Received updated info for player {details.id}: chips={details.chips}, bodies={details.bodies?.ToCommaSeparatedString()}, barrels={details.barrels?.ToCommaSeparatedString()}, extensions={details.extensions?.ToCommaSeparatedString()}");
         players[details.id] = details;
     }
 
@@ -279,7 +451,7 @@ public class Peer2PeerTransport : NetworkManager
 
     private void AddAiPlayers()
     {
-        for (var i = players.Count; i < 4; i++)
+        for (var i = players.Count; i < MaxPlayers; i++)
         {
             var details = new PlayerDetails
             {
@@ -294,7 +466,8 @@ public class Peer2PeerTransport : NetworkManager
         }
     }
 
-    private void UpdatePlayerDetails()
+    // Called after shooting rounds (TODO just use the same matchcontroller stuff???)
+    private static void UpdatePlayerDetailsAfterShootingRound()
     {
         Debug.Log($"Found {FindObjectsByType<PlayerIdentity>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).Count()} identitites!");
         foreach (var identity in FindObjectsByType<PlayerIdentity>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
@@ -302,19 +475,34 @@ public class Peer2PeerTransport : NetworkManager
             if (identity.Body == null)
                 continue;
 
-            if (!players.TryGetValue(identity.id, out var playerDetails))
-            {
-                Debug.LogError($"Invalid player to update: id={identity.id}");
-                continue;
-            }
-
-            playerDetails.chips = identity.chips;
-            playerDetails.bodies = identity.Bodies.Select(item => item.id).ToArray();
-            playerDetails.barrels = identity.Barrels.Select(item => item.id).ToArray();
-            playerDetails.extensions = identity.Extensions.Select(item => item.id).ToArray();
-            players[identity.id] = playerDetails;
-            NetworkServer.SendToAll(new UpdatedPlayerDetailsMessage(playerDetails));
+            UpdatePlayerInventoryForIdentity(identity);
         }
+    }
+
+    // Called from auction driver after players have received their new items
+    // Separated from loadout update due to inconsistent timing :)))))
+    public static void UpdatePlayerDetailsAfterAuction()
+    {
+        foreach (var player in playerInstances.Values)
+        {
+            UpdatePlayerInventoryForIdentity(player.identity);
+        }
+    }
+
+    private static void UpdatePlayerInventoryForIdentity(PlayerIdentity identity)
+    {
+        if (!players.TryGetValue(identity.id, out var playerDetails))
+        {
+            Debug.LogError($"Invalid player to update: id={identity.id}");
+            return;
+        }
+
+        playerDetails.chips = identity.chips;
+        playerDetails.bodies = identity.Bodies.Select(item => item.id).ToArray();
+        playerDetails.barrels = identity.Barrels.Select(item => item.id).ToArray();
+        playerDetails.extensions = identity.Extensions.Select(item => item.id).ToArray();
+        players[identity.id] = playerDetails;
+        NetworkServer.SendToAll(new UpdatedPlayerDetailsMessage(playerDetails));
     }
 
     public override void OnServerChangeScene(string newSceneName)
@@ -325,25 +513,25 @@ public class Peer2PeerTransport : NetworkManager
             AddAiPlayers();
         }
 
-        UpdatePlayerDetails();
-
         switch (newSceneName)
         {
             case Scenes.Bidding:
+                isInMatch = true;
+                UpdatePlayerDetailsAfterShootingRound();
                 NetworkServer.ReplaceHandler<SpawnPlayerMessage>(OnSpawnBiddingPlayer);
                 break;
             case Scenes.Menu:
+                isInMatch = false;
                 NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
                 break;
             default:
+                isInMatch = true;
                 NetworkServer.ReplaceHandler<SpawnPlayerMessage>(OnSpawnFPSPlayer);
                 break;
         }
-
-        base.OnServerChangeScene(newSceneName);
     }
 
-    private void UpdateLoadout()
+    public void UpdateLoadout()
     {
         Debug.Log($"Found {FindObjectsByType<PlayerIdentity>(FindObjectsInactive.Exclude, FindObjectsSortMode.None).Count()} identitites!");
         foreach (var identity in FindObjectsByType<PlayerIdentity>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
@@ -380,18 +568,21 @@ public class Peer2PeerTransport : NetworkManager
 
     public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
     {
-        UpdateLoadout();
         var originalSceneName = SceneManager.GetActiveScene().name;
         switch (newSceneName)
         {
+            // TODO consider just pushing music change into this switch block
             case Scenes.Bidding:
+                isInMatch = true;
                 NetworkClient.ReplaceHandler<InitializePlayerMessage>(InitializeBiddingPlayer);
                 PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
                 break;
             case Scenes.Menu:
+                isInMatch = false;
                 PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
                 break;
             default:
+                isInMatch = true;
                 NetworkClient.ReplaceHandler<InitializePlayerMessage>(InitializeFPSPlayer);
                 PlayerInputManagerController.Singleton.ChangeInputMaps("FPS");
                 break;
@@ -412,9 +603,21 @@ public class Peer2PeerTransport : NetworkManager
         {
             NetworkClient.Send(new SpawnPlayerMessage(id, PlayerType.Local));
         }
+
+        if (!NetworkServer.active)
+            yield break;
+
+        // TODO rework this for dedicated server stuff
+        //      (where it needs to do this on server change scene, and without a network client)
+        //      (perhaps you could call the spawn methods directly?)
         foreach (var p in players.Values.Where(p => p.type == PlayerType.AI))
         {
             NetworkClient.Send(new SpawnPlayerMessage(p.id, PlayerType.AI));
+        }
+
+        foreach (var p in players.Values.Where(p => p.type is PlayerType.Remote && !connectedPlayers.Contains(p.id)))
+        {
+            NetworkClient.Send(new SpawnPlayerMessage(p.id, PlayerType.Local));
         }
     }
 
@@ -430,27 +633,39 @@ public class Peer2PeerTransport : NetworkManager
             Debug.LogError($"No such player: id={message.id}");
             return;
         }
+        Debug.Log($"Spawning player {message.id}");
+
         if (!playerFactory)
         {
             playerFactory = FindAnyObjectByType<PlayerFactory>();
             if (!playerFactory) // TODO shouldn't happen, seems to occur when you go back to menu after end of match
                 return;
             spawnPoints = playerFactory.GetRandomSpawnpoints();
+            spawnPointStack = new(spawnPoints);
         }
-        Debug.Log($"Spawning player {message.id}");
 
-        var spawnPoint = spawnPoints[message.id];
+        // Ensure we aren't providing invalid spawnpoints.
+        // We should never run out of spawnpoints in normal circumstances, but you never know 💀
+        if (!spawnPointStack.TryPop(out var spawnPoint))
+            spawnPoint = spawnPoints.RandomElement();
 
+        // Instantiate correct prefab for player and mode.
         var prefabIndex = playerDetails.type is PlayerType.AI && NetworkServer.active ? AIFPSPlayerPrefabIndex : FPSPlayerPrefabIndex;
         if (SceneManager.GetActiveScene().name == Scenes.TrainingMode)
             prefabIndex = TrainingPlayerPrefabIndex;
         var prefab = spawnPrefabs[prefabIndex + prefabIndexOffset];
         var player = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
         player.GetComponent<PlayerManager>().id = message.id;
-        if (playerDetails.type is not PlayerType.AI && playerDetails.localInputID == 0)
+
+        // Spawn player, setting it as the player for a connection only for the first local player for each connection.
+        var isNotAI = playerDetails.type is not PlayerType.AI;
+        var isFirstLocalPlayer = playerDetails.localInputID == 0;
+        var isNotDisconnected = playerDetails.type is not PlayerType.Remote || connectedPlayers.Contains(playerDetails.id);
+        if (isNotAI && isFirstLocalPlayer && isNotDisconnected)
             NetworkServer.AddPlayerForConnection(connection, player);
         else
             NetworkServer.Spawn(player, connection);
+
         NetworkServer.SendToAll(new InitializePlayerMessage(message.id, spawnPoint.position, spawnPoint.rotation));
     }
 
@@ -464,20 +679,18 @@ public class Peer2PeerTransport : NetworkManager
         StartCoroutine(WaitAndInitializeFPSPlayer(message));
     }
 
-    // TODO move this down to PlayerIdentity for better encapsulation!
-    private void UpdateIdentityFromDetails(PlayerIdentity identity, PlayerDetails playerDetails)
+    // TODO move this somewhere else?
+    public static string PlayerNameWithIndex(PlayerDetails playerDetails)
     {
-        identity.id = playerDetails.id;
         var playerName = playerDetails.name;
         if (players.Values.Count(p => p.steamID == playerDetails.steamID) > 1)
             playerName = $"{playerName} {playerDetails.localInputID + 1}";
+        return playerName;
+    }
 
-        identity.playerName = playerName;
-        identity.color = playerDetails.color;
-
-        identity.chips = playerDetails.chips;
-        identity.SetItems(playerDetails.bodies, playerDetails.barrels, playerDetails.extensions);
-        identity.SetLoadout(playerDetails.body, playerDetails.barrel, playerDetails.extension);
+    private void UpdateIdentityFromDetails(PlayerIdentity identity, PlayerDetails playerDetails)
+    {
+        identity.UpdateFromDetails(playerDetails, PlayerNameWithIndex(playerDetails));
     }
 
     private IEnumerator WaitAndInitializeFPSPlayer(InitializePlayerMessage message)
@@ -581,7 +794,7 @@ public class Peer2PeerTransport : NetworkManager
             playerManager.SetGun(gunHolder);
         }
 
-        playerManager.ApplyColorFromIdentity();
+        playerManager.ApplyIdentity();
 
         // This ensures that behaviours on the gun have identities.
         // SHOULD be safe to initialize them here as this is at roughly the same point on all clients
@@ -591,6 +804,8 @@ public class Peer2PeerTransport : NetworkManager
         {
             MatchController.Singleton.RegisterPlayer(playerManager);
         }
+
+        playerInstances[player.id] = player;
     }
 
     #endregion
@@ -610,13 +825,13 @@ public class Peer2PeerTransport : NetworkManager
     private IEnumerator WaitAndInitializeBiddingPlayer(InitializePlayerMessage message)
     {
         // Wait until players must've been spawned
-        // TODO find a better way to wait for that
-        // TODO that is, move to OnWhateverAuthority overrid on PlayerManager :)
-        yield return null;
-        yield return null;
-
-        var player = FindObjectsOfType<PlayerManager>()
-            .FirstOrDefault(p => p.id == message.id);
+        PlayerManager player = null;
+        while (player == null)
+        {
+            player = FindObjectsOfType<PlayerManager>()
+               .FirstOrDefault(p => p.id == message.id);
+            yield return null;
+        }
 
         if (!player)
         {
@@ -678,7 +893,7 @@ public class Peer2PeerTransport : NetworkManager
             playerManager.GetComponent<Rigidbody>().isKinematic = true;
         }
 
-        playerManager.ApplyColorFromIdentity();
+        playerManager.ApplyIdentity();
 
         // This ensures that behaviours on the gun have identities.
         // SHOULD be safe to initialize them here as this is at roughly the same point on all clients
@@ -688,6 +903,8 @@ public class Peer2PeerTransport : NetworkManager
         {
             MatchController.Singleton.RegisterPlayer(playerManager);
         }
+
+        playerInstances[player.id] = player;
     }
 
     #endregion
