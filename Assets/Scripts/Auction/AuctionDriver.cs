@@ -15,7 +15,7 @@ using UnityEngine;
 public class AuctionDriver : NetworkBehaviour
 {
     [SerializeField]
-    private float biddingBeginDelay = 5f;
+    private float biddingBeginDelay = 2f;
 
     [SerializeField]
     private BiddingPlatform[] biddingPlatforms;
@@ -73,10 +73,15 @@ public class AuctionDriver : NetworkBehaviour
     // BiddingStage contains a list of items (scriptableobjects)
     private void Start()
     {
-        Cursor.visible = true;
-#if UNITY_EDITOR
-        biddingBeginDelay = 2f;
-#endif
+        StartCoroutine(WaitAndStartAuction());
+    }
+
+    private IEnumerator WaitAndStartAuction()
+    {
+        // TODO add a timeout to this kinda thing
+        while (FindObjectsOfType<PlayerManager>().Count() < Peer2PeerTransport.NumPlayers)
+            yield return null;
+
         availableAuctionStages = MatchController.Singleton.RoundCount switch
         {
             1 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction },
