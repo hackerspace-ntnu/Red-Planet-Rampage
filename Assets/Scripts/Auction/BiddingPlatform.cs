@@ -24,6 +24,9 @@ public class BiddingPlatform : NetworkBehaviour
     private AudioSource audioSource;
 
     [SerializeField]
+    private TMP_Text leadingBidText;
+
+    [SerializeField]
     private TMP_Text itemNameText;
 
     [SerializeField]
@@ -193,7 +196,8 @@ public class BiddingPlatform : NetworkBehaviour
 
         chips++;
         playerIdentity.UpdateChip(-chips);
-        itemCostText.text = chips.ToString();
+        itemCostText.text = chips.ToString() + "<sprite name=\"chip\">";
+        leadingBidText.text = playerIdentity.playerName.ToUpper()+":";
         LeanTween.value(
             gameObject,
             (color) => material.SetColor("_BidderColor", color),
@@ -275,7 +279,7 @@ public class BiddingPlatform : NetworkBehaviour
         this.item = item;
         itemNameText.text = item.displayName;
         itemDescriptionText.text = item.displayDescription;
-        itemCostText.text = chips.ToString();
+        itemCostText.text = chips.ToString() + "<sprite name=\"chip\">";
         switch (item.augmentType)
         {
             case AugmentType.Body:

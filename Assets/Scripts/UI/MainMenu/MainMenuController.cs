@@ -89,6 +89,8 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.AddJoinListener();
         playerInputManagerController.PlayerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
+        if (SceneManager.GetActiveScene().name == "Menu")
+            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved += UpdateStartButton;
         if (playerInputManagerController.LocalPlayerInputs.Count > 0)
         {
             // Already played, just show the menu.
@@ -171,6 +173,8 @@ public class MainMenuController : MonoBehaviour
     {
         playerInputManagerController.onPlayerInputJoined -= AddPlayer;
         playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
+        if (SceneManager.GetActiveScene().name == "Menu")
+            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved -= UpdateStartButton;
     }
 
     /// <summary>
@@ -305,7 +309,17 @@ public class MainMenuController : MonoBehaviour
         aIButton.Toggle();
         SelectControl(aIButton.Button);
         playerInputManagerController.MatchHasAI = !playerInputManagerController.MatchHasAI;
-        bool canPlay = (playerInputManagerController.MatchHasAI || playerInputs.Count > 1);
+        SetStartButtonState();
+    }
+
+    public void UpdateStartButton(PlayerDetails details)
+    {
+        SetStartButtonState();
+    }
+
+    private void SetStartButtonState()
+    {
+        bool canPlay = (playerInputManagerController.MatchHasAI || Peer2PeerTransport.NumPlayers > 1);
         var colors = startButton.colors;
         colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
         startButton.colors = colors;

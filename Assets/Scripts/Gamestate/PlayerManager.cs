@@ -234,7 +234,8 @@ public class PlayerManager : NetworkBehaviour
         var playerMovement = GetComponent<PlayerMovement>();
         playerMovement.enabled = true;
         playerMovement.SetPlayerInput(inputManager);
-        playerMovement.onMove += UpdateHudOnMove;
+        playerMovement.OnMove += UpdateHudOnMove;
+        playerMovement.OnJumpPerformed += UpdateHudOnJump;
         // Subscribe relevant input events
         inputManager.onFirePerformed += Fire;
         inputManager.onFireCanceled += FireEnd;
@@ -246,7 +247,7 @@ public class PlayerManager : NetworkBehaviour
         {
             var canvas = hudController.GetComponent<Canvas>();
             canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
-            canvas.planeDistance = 0.11f;
+            canvas.planeDistance = 0.21f;
             identity.onChipChange += hudController.OnChipChange;
         }
 
@@ -285,7 +286,8 @@ public class PlayerManager : NetworkBehaviour
         }
         if (TryGetComponent(out PlayerMovement playerMovement))
         {
-            playerMovement.onMove -= UpdateHudOnMove;
+            playerMovement.OnMove -= UpdateHudOnMove;
+            playerMovement.OnJumpPerformed -= UpdateHudOnJump;
         }
         if (hudController)
             identity.onChipChange -= hudController.OnChipChange;
@@ -340,6 +342,12 @@ public class PlayerManager : NetworkBehaviour
     {
         if (hudController)
             hudController.SetSpeedLines(body.velocity);
+    }
+
+    private void UpdateHudOnJump(Rigidbody body)
+    {
+        if (hudController)
+            hudController.AnimateHudJump();
     }
 
     private void UpdateHudFire(GunStats stats)

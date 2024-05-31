@@ -25,4 +25,9 @@ public class ClientLobby : MonoBehaviour
     {
         playerSelect.UpdateLobby();
     }
+
+    private void OnDestroy()
+    {
+        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved -= AddPlayer;
+    }
 }

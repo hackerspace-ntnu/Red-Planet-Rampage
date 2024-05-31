@@ -52,6 +52,7 @@ public class PlayerInputManagerController : MonoBehaviour
         #endregion Singleton boilerplate
         PlayerInputManager = PlayerInputManager.instance;
         DontDestroyOnLoad(gameObject);
+        Cursor.visible = false;
     }
 
     public void RemoveJoinListener()
@@ -81,6 +82,7 @@ public class PlayerInputManagerController : MonoBehaviour
         inputManager.PlayerCamera.enabled = false;
         LocalPlayerInputs.Add(inputManager);
         onPlayerInputJoined?.Invoke(inputManager);
+        // TODO: Make cursor visible if mouseandkeyboard input joims when our buttons can be clicked by a mouse..
 
         if (NetworkManager.singleton.isNetworkActive)
             NetworkClient.Send(new PlayerConnectedMessage(LocalPlayerInputs.Count - 1));

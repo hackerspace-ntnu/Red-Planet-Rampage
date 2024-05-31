@@ -130,7 +130,8 @@ public class PlayerMovement : MonoBehaviour
     public Vector2 AimAngle => aimAngle;
 
     public delegate void MovementEventBody(Rigidbody body);
-    public MovementEventBody onMove;
+    public MovementEventBody OnMove;
+    public MovementEventBody OnJumpPerformed;
 
     private int gunCrouchPerformedTween;
     private int cameraCrouchPerformedTween;
@@ -236,6 +237,7 @@ public class PlayerMovement : MonoBehaviour
                     break;
                 }
         }
+        OnJumpPerformed?.Invoke(body);
     }
 
     private void OnZoom(InputAction.CallbackContext ctx)
@@ -531,7 +533,7 @@ public class PlayerMovement : MonoBehaviour
     {
         UpdateRotation();
         UpdateAnimatorParameters();
-        onMove?.Invoke(body);
+        OnMove?.Invoke(body);
     }
 
     private void OnDestroy()
