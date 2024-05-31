@@ -1,57 +1,25 @@
 using UnityEngine;
-using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
-using Unity.VisualScripting;
 
 /// <summary>
-/// Allows for our controllers to freely act in dropdown menus
+/// Reselects unity dropdown elements when you enter a dropdown unity pls y u do dis. Add to every dropdown.
 /// </summary>
 public class DropdownController : MonoBehaviour, ISelectHandler
 {
-    [SerializeField]
-    private Selectable[] selectables;
-    [SerializeField]
-    private TMP_Dropdown scrollbar;
-    [SerializeField]
-    private Selectable CurrentSelected;
-
-    void Start()
-    {
-        scrollbar = GetComponent<TMP_Dropdown>();
-    }
+    private Selectable firstItem;
 
     public void OnSelect(BaseEventData eventData)
     {
-        try
-        {
-            if (scrollbar.IsExpanded) {
-                selectables = GetComponentsInChildren<Selectable>();
-                print(selectables.Length);
-            }
-        }
-        catch 
-        {
-            selectables = GetComponentsInChildren<Selectable>();
-            print(selectables[0].name);
-            print("selected gameobject: " + EventSystem.current.currentSelectedGameObject.name);
-            CurrentSelected = EventSystem.current.currentSelectedGameObject.GetComponent<Selectable>();
-            print(CurrentSelected.navigation.selectOnDown.name);
-
-            selectables[0].Select();
-            //StartCoroutine("UIDelay");
-            //scrollbar.FindSelectableOnDown().Select();
-        }
+        firstItem = GetComponentInChildren<Selectable>();
+        StartCoroutine(WaitAndSelectFirstDropdownItem());
     }
 
-    private IEnumerator UIDelay()
+    private IEnumerator WaitAndSelectFirstDropdownItem()
     {
         yield return new WaitForEndOfFrame();
-        selectables = GetComponentsInChildren<Selectable>();
-        print(selectables.Length);
-        if (selectables.Length > 1)
-            yield return null;
-        StartCoroutine("UIDelay");
+        firstItem.Select();
     }
+
 }
