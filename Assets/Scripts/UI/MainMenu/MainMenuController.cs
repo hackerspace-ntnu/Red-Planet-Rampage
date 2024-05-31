@@ -10,6 +10,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
+[RequireComponent(typeof(AudioSource))]
 public class MainMenuController : MonoBehaviour
 {
     [Unity.Collections.ReadOnly, SerializeField]
@@ -53,7 +54,7 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private Button startButton;
     [SerializeField]
-    private GameObject innputManagerPrefab;
+    private GameObject inputManagerPrefab;
     [SerializeField]
     private string[] mapNames;
     private AudioSource audioSource;
@@ -75,7 +76,7 @@ public class MainMenuController : MonoBehaviour
     private void Awake()
     {
         if (!FindAnyObjectByType<PlayerInputManagerController>())
-            Instantiate(innputManagerPrefab);
+            Instantiate(inputManagerPrefab);
         introVideo.Prepare();
     }
 
@@ -111,7 +112,14 @@ public class MainMenuController : MonoBehaviour
             defaultMenu.SetActive(false);
             introRoutine = StartCoroutine(WaitForIntroVideoToEnd());
         }
-    }
+        /*
+        // Reset all menu elements
+        foreach (Selectable s in GetComponentsInChildren<Selectable>())
+        {
+            s.interactable = false;
+        }
+        ToggleMenu(currentMenu, true);
+    */}
 
     private void StopFirstFrame(VideoPlayer source)
     {
@@ -131,6 +139,7 @@ public class MainMenuController : MonoBehaviour
         {
             yield return null;
         }
+        Debug.Log("Waitin");
         EndIntro();
     }
 
@@ -215,6 +224,8 @@ public class MainMenuController : MonoBehaviour
     {
         currentMenu.SetActive(false);
         menu.SetActive(true);
+        //ToggleMenu(currentMenu, false);
+        //ToggleMenu(menu, true);
         currentMenu = menu;
         SelectControl(menu.GetComponentInChildren<Selectable>());
 
@@ -222,6 +233,14 @@ public class MainMenuController : MonoBehaviour
         if (menu == mapSelectMenu)
         {
             mainMenuCamera.GetComponentInChildren<MainMenuMoveCamera>().MoveToLevelSelect();
+        }
+    }
+
+    private void ToggleMenu(GameObject menu, bool state)
+    {
+        foreach(Selectable s in menu.GetComponentsInChildren<Selectable>())
+        {
+            s.interactable = state;
         }
     }
 
