@@ -286,6 +286,7 @@ public class PlayerManager : NetworkBehaviour
         if (TryGetComponent(out PlayerMovement playerMovement))
         {
             playerMovement.OnMove -= UpdateHudOnMove;
+            playerMovement.OnJumpPerformed -= UpdateHudOnJump;
         }
         if (hudController)
             identity.onChipChange -= hudController.OnChipChange;

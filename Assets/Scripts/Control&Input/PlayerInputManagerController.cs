@@ -82,8 +82,7 @@ public class PlayerInputManagerController : MonoBehaviour
         inputManager.PlayerCamera.enabled = false;
         LocalPlayerInputs.Add(inputManager);
         onPlayerInputJoined?.Invoke(inputManager);
-        if (inputManager.IsMouseAndKeyboard)
-            Cursor.visible = true;
+        // TODO: Make cursor visible if mouseandkeyboard input joims when our buttons can be clicked by a mouse..
 
         if (NetworkManager.singleton.isNetworkActive)
             NetworkClient.Send(new PlayerConnectedMessage(LocalPlayerInputs.Count - 1));
