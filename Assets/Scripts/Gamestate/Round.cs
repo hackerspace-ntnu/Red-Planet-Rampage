@@ -3,6 +3,19 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
 
+public struct PlayerStats
+{
+    public uint player;
+    public uint[] kills;
+}
+
+public struct NetworkRound
+{
+    public uint? winner;
+    public PlayerStats[] stats;
+}
+
+
 public class Round
 {
     private uint? winner;
@@ -150,5 +163,27 @@ public class Round
 
         // We have a survivor
         return livingPlayers.First();
+    }
+
+    public NetworkRound SummarizeRound() =>
+        new()
+        {
+            winner = winner,
+            stats = kills.Select(pair => new PlayerStats
+                {
+                    player = pair.Key,
+                    kills = pair.Value.ToArray()
+                }
+            ).ToArray()
+        };
+
+    public void UpdateFromSummary(NetworkRound summary)
+    {
+        winner = summary.winner;
+        foreach (var stats in summary.stats)
+        {
+            kills[stats.player].Clear();
+            kills[stats.player].AddRange(stats.kills);
+        }
     }
 }

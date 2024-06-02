@@ -10,7 +10,7 @@ using Mirror;
 #nullable enable
 
 [RequireComponent(typeof(PlayerFactory))]
-public class MatchController : MonoBehaviour
+public class MatchController : NetworkBehaviour
 {
     public static MatchController Singleton { get; private set; }
 
@@ -109,13 +109,15 @@ public class MatchController : MonoBehaviour
 
         currentMapName ??= SceneManager.GetActiveScene().name;
 
-        GameObject mainLight = GameObject.FindGameObjectsWithTag("MainLight")[0];
+        var mainLight = GameObject.FindGameObjectsWithTag("MainLight")[0];
         RenderSettings.skybox.SetVector("_SunDirection", mainLight.transform.forward);
         RenderSettings.skybox.SetFloat("_MaxGradientTreshold", 0.25f);
+
+        GlobalHUD.RoundTimer.enabled = false;
         StartNextRound();
     }
 
-    public void StartNextRound()
+    private void StartNextRound()
     {
         if (collectableChips.Count == 0)
             collectableChips = FindObjectsOfType<CollectableChip>().ToList();
@@ -147,12 +149,12 @@ public class MatchController : MonoBehaviour
     // TODO give players start amount worth of chips (on match start only)
     private void InitializeRound()
     {
-        Debug.Log("INITIALIZEING ROUNDEING");
         LoadingScreen.Singleton.Hide();
         InitializeAIPlayers();
         MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
         onRoundStart?.Invoke();
         isAuction = false;
+        GlobalHUD.RoundTimer.enabled = true;
         rounds.Add(new Round(players.ToList()));
         roundTimer.StartTimer(roundLength);
         roundTimer.OnTimerUpdate += AdjustMusic;
@@ -202,22 +204,27 @@ public class MatchController : MonoBehaviour
 
     private void LateUpdate()
     {
-        // TODO only on server!
-        if (isRoundInProgress && LastRound.CheckWinCondition())
+        if (isServer && isRoundInProgress && LastRound.CheckWinCondition())
             EndActiveRound();
     }
 
+    [Server]
     private void EndActiveRound()
     {
-        // TODO the server should be the one to determine the winner and trigger this method!
-        // TODO and wait a frame before determining the win, based on registered damageinfo
-        Debug.Log("ENDING ROUND!");
+        roundTimer.OnTimerRunCompleted -= EndActiveRound;
+        EndActiveRoundRpc(LastRound.SummarizeRound());
+    }
+
+    [ClientRpc]
+    private void EndActiveRoundRpc(NetworkRound serverRound)
+    {
+        rounds[^1].UpdateFromSummary(serverRound);
+
         isRoundInProgress = false;
         onOutcomeDecided?.Invoke();
         roundTimer.StopTimer();
         roundTimer.OnTimerUpdate -= AdjustMusic;
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
-        roundTimer.OnTimerRunCompleted -= EndActiveRound;
         GlobalHUD.RoundTimer.enabled = false;
         AssignRewards();
         StartCoroutine(WaitAndShowResults());
@@ -249,7 +256,9 @@ public class MatchController : MonoBehaviour
             if (lastRound.IsWinner(player.identity))
                 reward += rewardWin;
 
-            player.identity.UpdateChip(reward);
+            // TODO alternatively, instead of avoiding to show chip count here,
+            //      could we show chip count going up for each kill?
+            player.identity.UpdateChipSilently(reward);
         }
     }
 
