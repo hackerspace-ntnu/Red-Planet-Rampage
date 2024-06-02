@@ -19,7 +19,8 @@ public class LobbyListMenu : MonoBehaviour
 
     private void OnDestroy()
     {
-        SteamManager.Singleton.LobbyListUpdate -= LobbyListUpdate;
+        if (SteamManager.Singleton)
+            SteamManager.Singleton.LobbyListUpdate -= LobbyListUpdate;
     }
 
     private void LobbyListUpdate()
