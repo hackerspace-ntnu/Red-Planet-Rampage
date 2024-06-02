@@ -43,9 +43,9 @@ public class ItemSelectManager : NetworkBehaviour
 
     private void InitializeServerState()
     {
-        clientReadyByID = Peer2PeerTransport.Connections
+        clientReadyByID = RPRNetworkManager.Connections
             .ToDictionary(c => c.connectionId, c => false);
-        ((Peer2PeerTransport)NetworkManager.singleton).OnDisconnect += OnDisconnect;
+        ((RPRNetworkManager)NetworkManager.singleton).OnDisconnect += OnDisconnect;
         NetworkServer.RegisterHandler<ClientReadyMessage>(OnClientReady);
         NetworkServer.RegisterHandler<ClientNotReadyMessage>(OnClientNotReady);
     }
@@ -54,7 +54,7 @@ public class ItemSelectManager : NetworkBehaviour
     {
         if (isServer)
         {
-            ((Peer2PeerTransport)Peer2PeerTransport.singleton).OnDisconnect -= OnDisconnect;
+            ((RPRNetworkManager)RPRNetworkManager.singleton).OnDisconnect -= OnDisconnect;
             NetworkServer.UnregisterHandler<ClientReadyMessage>();
             NetworkServer.UnregisterHandler<ClientNotReadyMessage>();
         }
@@ -69,7 +69,7 @@ public class ItemSelectManager : NetworkBehaviour
     [ClientRpc]
     private void RpcFinish()
     {
-        ((Peer2PeerTransport)Peer2PeerTransport.singleton).UpdateLoadout();
+        ((RPRNetworkManager)RPRNetworkManager.singleton).UpdateLoadout();
         StartCoroutine(MatchController.Singleton.WaitAndStartNextRound());
     }
 

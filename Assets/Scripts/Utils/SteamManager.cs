@@ -172,7 +172,7 @@ public class SteamManager : MonoBehaviour
     {
         // TODO verify that the lobby *should* be joined by more players!
         //      and verify that this is run on the server!
-        if (Peer2PeerTransport.NumPlayers >= Peer2PeerTransport.MaxPlayers || Peer2PeerTransport.IsInMatch)
+        if (RPRNetworkManager.NumPlayers >= RPRNetworkManager.MaxPlayers || RPRNetworkManager.IsInMatch)
             return;
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
     }
@@ -205,7 +205,7 @@ public class SteamManager : MonoBehaviour
         if (NetworkServer.active)
             return;
         // Only clients from here!
-        ((Peer2PeerTransport)NetworkManager.singleton).JoinLobby(SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey));
+        ((RPRNetworkManager)NetworkManager.singleton).JoinLobby(SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey));
     }
 
     private void OnLobbyUpdate(LobbyChatUpdate_t callback)

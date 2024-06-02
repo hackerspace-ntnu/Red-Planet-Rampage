@@ -52,7 +52,7 @@ public class MainMenuMoveCamera : MonoBehaviour
 
     public void MoveToLevelSelect()
     {
-        if (!(PlayerInputManagerController.Singleton.MatchHasAI || PlayerInputManagerController.Singleton.PlayerCount > 1))
+        if (!(PlayerInputManagerController.Singleton.MatchHasAI || RPRNetworkManager.NumPlayers > 1))
             return;
         inLevelSelect = true;
         LeanTween.sequence().append(LeanTween.moveLocal(playerSelectCamera.gameObject, secondPosition.localPosition, 1).setEaseInOutExpo());

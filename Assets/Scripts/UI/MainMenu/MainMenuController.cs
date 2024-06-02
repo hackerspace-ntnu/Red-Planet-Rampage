@@ -88,9 +88,9 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController = PlayerInputManagerController.Singleton;
         playerInputManagerController.AddJoinListener();
         playerInputManagerController.PlayerInputManager.splitScreen = false;
-        playerInputManagerController.onPlayerInputJoined += AddPlayer;
+        playerInputManagerController.OnPlayerInputJoined += AddPlayer;
         if (SceneManager.GetActiveScene().name == "Menu")
-            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved += UpdateStartButton;
+            ((RPRNetworkManager)NetworkManager.singleton).OnPlayerRecieved += UpdateStartButton;
         if (playerInputManagerController.LocalPlayerInputs.Count > 0)
         {
             // Already played, just show the menu.
@@ -107,7 +107,7 @@ public class MainMenuController : MonoBehaviour
             // First time in menu, play intro video.
             introVideo.started += StopFirstFrame;
             DontDestroyOnLoad(EventSystem.current);
-            playerInputManagerController.onPlayerInputJoined += ShowSkipText;
+            playerInputManagerController.OnPlayerInputJoined += ShowSkipText;
             defaultMenu.SetActive(false);
             introRoutine = StartCoroutine(WaitForIntroVideoToEnd());
         }
@@ -137,7 +137,7 @@ public class MainMenuController : MonoBehaviour
     private void ShowSkipText(InputManager inputManager)
     {
         skipIntroText.gameObject.SetActive(true);
-        playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
+        playerInputManagerController.OnPlayerInputJoined -= ShowSkipText;
         inputManager.onAnyKey += SkipIntro;
     }
 
@@ -162,7 +162,7 @@ public class MainMenuController : MonoBehaviour
     private void EndIntro()
     {
         sun.Restart();
-        playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
+        playerInputManagerController.OnPlayerInputJoined -= ShowSkipText;
         skipIntroText.gameObject.SetActive(false);
         introVideo.gameObject.SetActive(false);
         defaultMenu.SetActive(true);
@@ -171,10 +171,10 @@ public class MainMenuController : MonoBehaviour
 
     private void OnDestroy()
     {
-        playerInputManagerController.onPlayerInputJoined -= AddPlayer;
-        playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
+        playerInputManagerController.OnPlayerInputJoined -= AddPlayer;
+        playerInputManagerController.OnPlayerInputJoined -= ShowSkipText;
         if (SceneManager.GetActiveScene().name == "Menu")
-            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved -= UpdateStartButton;
+            ((RPRNetworkManager)NetworkManager.singleton).OnPlayerRecieved -= UpdateStartButton;
     }
 
     /// <summary>
@@ -233,7 +233,7 @@ public class MainMenuController : MonoBehaviour
     public void ChangeScene(string name)
     {
         PlayerInputManagerController.Singleton.RemoveJoinListener();
-        ((Peer2PeerTransport)NetworkManager.singleton).StartMatch(name);
+        ((RPRNetworkManager)NetworkManager.singleton).StartMatch(name);
     }
 
     /// <summary>
@@ -288,7 +288,7 @@ public class MainMenuController : MonoBehaviour
 
     public void StartGameButton(Selectable target)
     {
-        bool canPlay = playerInputManagerController.MatchHasAI || PlayerInputManagerController.Singleton.PlayerCount > 1;
+        var canPlay = playerInputManagerController.MatchHasAI || RPRNetworkManager.NumPlayers > 1;
         if (canPlay)
         {
             SwitchToMenu(mapSelectMenu);
@@ -319,7 +319,7 @@ public class MainMenuController : MonoBehaviour
 
     private void SetStartButtonState()
     {
-        bool canPlay = (playerInputManagerController.MatchHasAI || Peer2PeerTransport.NumPlayers > 1);
+        bool canPlay = (playerInputManagerController.MatchHasAI || RPRNetworkManager.NumPlayers > 1);
         var colors = startButton.colors;
         colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
         startButton.colors = colors;
@@ -336,7 +336,7 @@ public class MainMenuController : MonoBehaviour
     public void StartTrainingMode()
     {
         PlayerInputManagerController.Singleton.RemoveJoinListener();
-        Peer2PeerTransport.StartTrainingMode();
+        RPRNetworkManager.StartTrainingMode();
         playerSelectManager.UpdateLobby();
     }
 

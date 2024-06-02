@@ -13,7 +13,7 @@ public class ClientLobby : MonoBehaviour
     void Start()
     {
         environmentCamera.position = lobbyPosition.position;
-        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved += AddPlayer;
+        ((RPRNetworkManager)NetworkManager.singleton).OnPlayerRecieved += AddPlayer;
     }
 
     public void QuitLobby()
@@ -28,6 +28,6 @@ public class ClientLobby : MonoBehaviour
 
     private void OnDestroy()
     {
-        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved -= AddPlayer;
+        ((RPRNetworkManager)NetworkManager.singleton).OnPlayerRecieved -= AddPlayer;
     }
 }

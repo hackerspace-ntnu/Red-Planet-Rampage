@@ -51,23 +51,23 @@ public class PlayerSelectManager : MonoBehaviour
             animatorParameters.Add(parameter.name);
         }
 
-        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved += UpdateLobby;
-        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRemoved += UpdateLobby;
+        ((RPRNetworkManager)NetworkManager.singleton).OnPlayerRecieved += UpdateLobby;
+        ((RPRNetworkManager)NetworkManager.singleton).OnPlayerRemoved += UpdateLobby;
     }
 
     private void OnDestroy()
     {
         if (NetworkManager.singleton)
         {
-            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved -= UpdateLobby;
-            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRemoved -= UpdateLobby;
+            ((RPRNetworkManager)NetworkManager.singleton).OnPlayerRecieved -= UpdateLobby;
+            ((RPRNetworkManager)NetworkManager.singleton).OnPlayerRemoved -= UpdateLobby;
         }
     }
 
     public void UpdateLobby()
     {
         var i = 0;
-        foreach (var player in Peer2PeerTransport.PlayerDetails)
+        foreach (var player in RPRNetworkManager.PlayerDetails)
         {
             SetupPlayerModel(player, i);
             i++;
@@ -93,7 +93,7 @@ public class PlayerSelectManager : MonoBehaviour
         playerModels[index].GetComponentInChildren<SkinnedMeshRenderer>().material.color = player.color; // Set player model color
         playerModels[index].SetActive(true); // Show corresponding player model
         playerModels[index].transform.LookAt(new Vector3(playerSelectCam.transform.position.x, playerModels[index].transform.position.y, playerSelectCam.transform.position.z)); // Orient player model to look at camera
-        nameTags[index].text = Peer2PeerTransport.PlayerNameWithIndex(player);
+        nameTags[index].text = RPRNetworkManager.PlayerNameWithIndex(player);
         nameTags[index].enabled = true;
         joinText[index].enabled = false;
     }
@@ -139,13 +139,13 @@ public class PlayerSelectManager : MonoBehaviour
         yield return new WaitForSeconds(5f);
         while (true)
         {
-            int randomAnimatorNumber = Random.Range(0, playerInputManagerController.PlayerCount); // Choose random playermodel to animate
+            int randomAnimatorNumber = Random.Range(0, RPRNetworkManager.NumPlayers); // Choose random playermodel to animate
 
             Animator randomAnimator = playerAnimators[randomAnimatorNumber]; // Get the animator for one of the players that has a connected input
 
             // If randomAnimatorNumber is player all the way to the right, don't include cardpeek trigger
             string randomTrigger = "";
-            if (randomAnimatorNumber == playerInputManagerController.PlayerCount - 1)
+            if (randomAnimatorNumber == RPRNetworkManager.NumPlayers - 1)
             {
                 randomTrigger = randomAnimator.GetParameter(Random.Range(2, randomAnimator.parameterCount)).name; // Choose a random trigger to set, excluding CardPeek
             }
@@ -159,7 +159,7 @@ public class PlayerSelectManager : MonoBehaviour
             }
 
 
-            if ((randomTrigger == "CardPeek" || randomTrigger == "CardPeekReaction") && (playerInputManagerController.PlayerCount > 1) && (cardPeekCounter == 0))
+            if ((randomTrigger == "CardPeek" || randomTrigger == "CardPeekReaction") && RPRNetworkManager.NumPlayers > 1 && cardPeekCounter == 0)
             {
                 randomAnimator.SetTrigger("CardPeek");
                 playerAnimators[randomAnimatorNumber + 1].SetTrigger("CardPeekReaction");

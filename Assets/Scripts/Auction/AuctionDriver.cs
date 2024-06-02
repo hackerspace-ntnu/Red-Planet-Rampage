@@ -79,7 +79,7 @@ public class AuctionDriver : NetworkBehaviour
     private IEnumerator WaitAndStartAuction()
     {
         // TODO add a timeout to this kinda thing
-        while (FindObjectsOfType<PlayerManager>().Count() < Peer2PeerTransport.NumPlayers)
+        while (FindObjectsOfType<PlayerManager>().Count() < RPRNetworkManager.NumPlayers)
             yield return null;
 
         availableAuctionStages = MatchController.Singleton.RoundCount switch
@@ -180,7 +180,7 @@ public class AuctionDriver : NetworkBehaviour
         // Wait a couple o' frames so gun parts are sent to their respective players
         yield return null;
         yield return null;
-        Peer2PeerTransport.UpdatePlayerDetailsAfterAuction();
+        RPRNetworkManager.UpdatePlayerDetailsAfterAuction();
         RpcSwitchToItemSelect();
     }
 
