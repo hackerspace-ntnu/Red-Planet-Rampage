@@ -137,6 +137,8 @@ public class LoadingScreen : MonoBehaviour
 
     public void Hide()
     {
+        if (!enabled)
+            return;
         enabled = false;
         gameObject.transform.GetChild(0).gameObject.SetActive(false);
     }

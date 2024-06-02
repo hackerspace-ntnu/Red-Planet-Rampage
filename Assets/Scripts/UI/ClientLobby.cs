@@ -10,7 +10,8 @@ public class ClientLobby : MonoBehaviour
     [SerializeField]
     private Transform lobbyPosition;
 
-    void Start()
+    private int joinedPlayers = 0;
+    private void Start()
     {
         environmentCamera.position = lobbyPosition.position;
         ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved += AddPlayer;
@@ -24,6 +25,11 @@ public class ClientLobby : MonoBehaviour
     private void AddPlayer(PlayerDetails details)
     {
         playerSelect.UpdateLobby();
+
+        joinedPlayers++;
+        if (joinedPlayers > PlayerInputManagerController.Singleton.LocalPlayerInputs.Count)
+            // More than just the local players present, so the loading screen is no longer needed
+            LoadingScreen.Singleton.Hide();
     }
 
     private void OnDestroy()

@@ -273,6 +273,7 @@ public class Peer2PeerTransport : NetworkManager
     {
         if (NetworkServer.active)
             return;
+        LoadingScreen.Singleton.Show();
         // Only clients from here!
         PlayerInputManagerController.Singleton.RemoveJoinListener();
         SceneManager.LoadScene(Scenes.ClientLobby);
@@ -354,8 +355,10 @@ public class Peer2PeerTransport : NetworkManager
 
         // Register connection
         PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
+        var isConnectionAlreadyPresent = true;
         if (!connections.Contains(connection))
         {
+            isConnectionAlreadyPresent = false;
             connections.Add(connection);
             connectedPlayers.Add((uint)playerIndex);
         }
@@ -376,9 +379,12 @@ public class Peer2PeerTransport : NetworkManager
         }
 
         // Send information about existing players to the new one
-        foreach (var existingPlayer in players.Values)
+        if (!isConnectionAlreadyPresent)
         {
-            connection.Send(new InitialPlayerDetailsMessage(existingPlayer));
+            foreach (var existingPlayer in players.Values)
+            {
+                connection.Send(new InitialPlayerDetailsMessage(existingPlayer));
+            }
         }
 
         // Pick among the available colors
