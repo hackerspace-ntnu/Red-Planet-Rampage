@@ -28,9 +28,12 @@ public class RagdollController : MonoBehaviour
     [SerializeField]
     private LayerMask ragdollMask;
 
-    private Transform camera;
+    private OrbitCamera orbitCamera;
 
-    private Transform inputTransform;
+    private void Start()
+    {
+        orbitCamera = GetComponent<OrbitCamera>();
+    }
 
     public void EnableRagdoll(Vector3 knockbackForce)
     {
@@ -63,32 +66,19 @@ public class RagdollController : MonoBehaviour
 
     public void AnimateCamera(Camera camera, Transform input)
     {
+        // TODO push this stuff inside
         camera.cullingMask = ragdollMask;
-        this.camera = camera.transform;
-        inputTransform = input;
+        orbitCamera.Camera = camera.transform;
+        orbitCamera.InputManager = input.GetComponent<InputManager>();
+        orbitCamera.StartTracking(cameraParent);
         StartCoroutine(WaitAndDisableCamera(camera));
     }
 
     private IEnumerator WaitAndDisableCamera(Camera camera)
     {
         yield return new WaitForSeconds(7f);
+        orbitCamera.StopTracking();
+        // TODO put this inside orbit?
         camera.enabled = false;
-    }
-
-    private void Update()
-    {
-        if (!camera)
-            return;
-        camera.position = cameraParent.position + new Vector3(0, 2, -5f);
-        camera.LookAt(cameraParent);
-    }
-
-    private void OnDestroy()
-    {
-        if (!camera)
-            return;
-        camera.position = Vector3.zero;
-        camera.localPosition = Vector3.zero;
-        camera.rotation = inputTransform.rotation;
     }
 }
