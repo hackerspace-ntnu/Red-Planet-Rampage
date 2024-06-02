@@ -75,7 +75,7 @@ public class MatchController : MonoBehaviour
     private bool isAuction = false;
     public bool IsAuction => isAuction;
 
-    private int loadingDuration = 6;
+    private bool isRoundInProgress = false;
 
     private void Awake()
     {
@@ -147,6 +147,7 @@ public class MatchController : MonoBehaviour
     // TODO give players start amount worth of chips (on match start only)
     private void InitializeRound()
     {
+        Debug.Log("INITIALIZEING ROUNDEING");
         LoadingScreen.Singleton.Hide();
         InitializeAIPlayers();
         MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
@@ -154,10 +155,10 @@ public class MatchController : MonoBehaviour
         isAuction = false;
         rounds.Add(new Round(players.ToList()));
         roundTimer.StartTimer(roundLength);
-        roundTimer.StartTimer(10);
         roundTimer.OnTimerUpdate += AdjustMusic;
         roundTimer.OnTimerUpdate += HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted += EndActiveRound;
+        isRoundInProgress = true;
     }
 
     private IEnumerator WaitForClientsAndInitialize()
@@ -199,11 +200,21 @@ public class MatchController : MonoBehaviour
         NetworkManager.singleton.ServerChangeScene(Scenes.Bidding);
     }
 
-    public void EndActiveRound()
+    private void LateUpdate()
+    {
+        // TODO only on server!
+        if (isRoundInProgress && LastRound.CheckWinCondition())
+            EndActiveRound();
+    }
+
+    private void EndActiveRound()
     {
         // TODO the server should be the one to determine the winner and trigger this method!
         // TODO and wait a frame before determining the win, based on registered damageinfo
+        Debug.Log("ENDING ROUND!");
+        isRoundInProgress = false;
         onOutcomeDecided?.Invoke();
+        roundTimer.StopTimer();
         roundTimer.OnTimerUpdate -= AdjustMusic;
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
