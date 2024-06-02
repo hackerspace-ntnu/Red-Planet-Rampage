@@ -182,7 +182,7 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
-    void OnDeath(HealthController healthController, float damage, DamageInfo info)
+    private void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
         var killer = info.sourcePlayer;
         if (info.sourcePlayer == this && lastPlayerThatHitMe)

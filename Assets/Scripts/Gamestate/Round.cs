@@ -9,26 +9,26 @@ public class Round
     public uint? Winner => winner;
 
     /* Readonly Terminology
-     * 
-     * readonly 
+     *
+     * readonly
      * attribute makes the member field only assignable during constructor call.
-     * 
-     * ReadOnlyDictionary 
+     *
+     * ReadOnlyDictionary
      * is a "view" (i.e. looking at same underlying values and space in memory as the dictionary it's wrapping)
      *      Using it ensures that we cannot add new entries to the dictionary. (i.e. adding new keys)
      *      It does not however restrict us changing the values pointed to by keys.
-     *      
-     *      Simply put: 
+     *
+     *      Simply put:
      *          a ReadOnlyDictionary<int, List<int>> allows for changing the lists the existing integer keys point to
-     *      
-     * ReadOnlyCollection 
+     *
+     * ReadOnlyCollection
      * is a "view" (i.e. looking at same underlying values and space in memory as the collection it's wrapping)
      *      Using it ensures we cannot add new entries to the collection.
      *      It does not however restrict us changing the values pointed to by the references held by the collection.
-     *      
-     *      Simply put: 
+     *
+     *      Simply put:
      *          a ReadOnlyCollection<int> cannot have its entries changed, as they are value types.
-     *          a ReadOnlyCollection<PlayerManager> cannot have new or different entries, 
+     *          a ReadOnlyCollection<PlayerManager> cannot have new or different entries,
      *              but the fields of each PlayerManager in the collection can change!
      */
 
@@ -45,6 +45,8 @@ public class Round
 
     // Note that this list may not contain recognizable data in future rounds
     private readonly List<PlayerManager> playerManagers;
+
+    private readonly List<DamageInfo> damageThisFrame = new();
 
     public Round(IEnumerable<PlayerManager> roundPlayers)
     {
@@ -68,6 +70,7 @@ public class Round
         {
             player.onDeath += OnDeath;
         }
+
         MatchController.Singleton.onOutcomeDecided += OnOutcomeDecided;
     }
 
@@ -95,11 +98,10 @@ public class Round
         {
             player.onDeath -= OnDeath;
         }
+
         MatchController.Singleton.onOutcomeDecided -= OnOutcomeDecided;
     }
 
-    // TODO Fix edgecases where one player sets off an explosion that kills both itself and another player.
-    //      Due to nondeterministic execution order differences, we should wait until the next fram to determine a winner.
     private void OnDeath(PlayerManager killer, PlayerManager victim, DamageInfo info)
     {
 #if DEBUG
@@ -118,16 +120,35 @@ public class Round
             kills[killer.id].Add(victim.id);
             PersistentInfo.RegisterKill(killer.identity);
         }
-        // If it was a suicide, we should give the surviving player the win if there's only one
-        CheckWinCondition();
+
+        damageThisFrame.Add(info);
     }
 
-    private void CheckWinCondition()
+    /// <summary>
+    /// Only called in LateUpdate in MatchController
+    /// </summary>
+    public bool CheckWinCondition()
     {
-        if (livingPlayers.Count < 2)
+        var lessThanTwoPlayersLeft = livingPlayers.Count < 2;
+        if (lessThanTwoPlayersLeft)
         {
-            winner = livingPlayers.FirstOrDefault(null);
-            MatchController.Singleton.EndActiveRound();
+            winner = DetermineWinner();
         }
+
+        damageThisFrame.Clear();
+        return lessThanTwoPlayersLeft;
+    }
+
+    private uint? DetermineWinner()
+    {
+        if (livingPlayers.Count == 0 && damageThisFrame.Count > 0)
+        {
+            // Determine who fired the shot that killed 'em all
+            return damageThisFrame.Where(d => d.sourcePlayer is not null).Select(d => d.sourcePlayer.id)
+                .First();
+        }
+
+        // We have a survivor
+        return livingPlayers.First();
     }
 }
