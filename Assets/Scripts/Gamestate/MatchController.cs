@@ -55,7 +55,7 @@ public class MatchController : MonoBehaviour
     private GlobalHUDController globalHUDController;
     public GlobalHUDController GlobalHUD => globalHUDController;
 
-    private string currentMapName;
+    private string? currentMapName;
 
     private Dictionary<uint, PlayerManager> playerById = new();
 
@@ -67,8 +67,8 @@ public class MatchController : MonoBehaviour
     [SerializeField]
     private List<CollectableChip> collectableChips;
 
-    private static List<Round> rounds = new List<Round>();
-    public Round GetLastRound { get { return rounds[rounds.Count - 1]; } }
+    private static List<Round> rounds = new();
+    public Round LastRound => rounds.LastOrDefault();
 
     public int RoundCount { get => rounds.Count(); }
 
@@ -96,11 +96,11 @@ public class MatchController : MonoBehaviour
 
         #endregion Singleton boilerplate
 
-        players = new();
+        players = new List<PlayerManager>();
         Players = new ReadOnlyCollection<PlayerManager>(players);
     }
 
-    void Start()
+    private void Start()
     {
         if (rounds.Count == 0)
         {
@@ -154,6 +154,7 @@ public class MatchController : MonoBehaviour
         isAuction = false;
         rounds.Add(new Round(players.ToList()));
         roundTimer.StartTimer(roundLength);
+        roundTimer.StartTimer(10);
         roundTimer.OnTimerUpdate += AdjustMusic;
         roundTimer.OnTimerUpdate += HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted += EndActiveRound;
@@ -173,13 +174,6 @@ public class MatchController : MonoBehaviour
         }
 
         InitializeRound();
-    }
-
-    public IEnumerator WaitAndStartNextBidding()
-    {
-        yield return new WaitForSeconds(roundEndDelay);
-
-        StartNextBidding();
     }
 
     public void StartNextBidding()
@@ -207,11 +201,14 @@ public class MatchController : MonoBehaviour
 
     public void EndActiveRound()
     {
+        // TODO the server should be the one to determine the winner and trigger this method!
+        // TODO and wait a frame before determining the win, based on registered damageinfo
         onOutcomeDecided?.Invoke();
         roundTimer.OnTimerUpdate -= AdjustMusic;
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
         GlobalHUD.RoundTimer.enabled = false;
+        AssignRewards();
         StartCoroutine(WaitAndShowResults());
     }
 
@@ -219,7 +216,6 @@ public class MatchController : MonoBehaviour
     {
         // Delay first so we can see who killed who
         yield return new WaitForSeconds(delayBeforeRoundResults);
-        AssignRewards();
         // Scoreboard subscribes here
         onRoundEnd?.Invoke();
     }
@@ -262,7 +258,7 @@ public class MatchController : MonoBehaviour
     private bool IsWin()
     {
         var winnerId = rounds.Last().Winner;
-        if (!playerById.TryGetValue(winnerId, out var winner)) { return false; }
+        if (winnerId is null || !playerById.TryGetValue((uint)winnerId, out var winner)) { return false; }
         var wins = PlayerWins(winner);
         Debug.Log($"Current winner ({winner.identity.playerName}) has {wins} wins.");
         if (wins >= 3)
@@ -273,15 +269,12 @@ public class MatchController : MonoBehaviour
             PersistentInfo.SavePersistentData();
             return true;
         }
-        else
-        {
-            return false;
-        }
+        return false;
     }
 
     public int PlayerWins(PlayerManager player)
     {
-        return rounds.Where(round => round.IsWinner(player.id)).Count();
+        return rounds.Count(round => round.IsWinner(player.id));
     }
 
     public void RemoveChip(CollectableChip chip)

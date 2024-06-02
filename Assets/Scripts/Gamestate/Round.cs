@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class Round
 {
-    private uint winner;
-    public uint Winner => winner;
+    private uint? winner;
+    public uint? Winner => winner;
 
     /* Readonly Terminology
      * 
@@ -81,15 +81,15 @@ public class Round
 
     public bool IsWinner(PlayerIdentity player)
     {
-        return player.id == Winner;
+        return winner is not null && player.id == winner;
     }
 
     public bool IsWinner(uint id)
     {
-        return id == Winner;
+        return winner is not null && id == winner;
     }
 
-    public void OnOutcomeDecided()
+    private void OnOutcomeDecided()
     {
         foreach (var player in playerManagers)
         {
@@ -117,20 +117,16 @@ public class Round
         {
             kills[killer.id].Add(victim.id);
             PersistentInfo.RegisterKill(killer.identity);
-            CheckWinCondition();
         }
         // If it was a suicide, we should give the surviving player the win if there's only one
-        else if (livingPlayers.Count < 2)
-        {
-            CheckWinCondition();
-        }
+        CheckWinCondition();
     }
 
     private void CheckWinCondition()
     {
         if (livingPlayers.Count < 2)
         {
-            winner = livingPlayers.FirstOrDefault();
+            winner = livingPlayers.FirstOrDefault(null);
             MatchController.Singleton.EndActiveRound();
         }
     }

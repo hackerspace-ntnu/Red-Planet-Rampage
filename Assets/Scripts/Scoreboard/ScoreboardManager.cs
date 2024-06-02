@@ -149,7 +149,7 @@ public class ScoreboardManager : MonoBehaviour
         if (matchController == null)
             matchController = MatchController.Singleton;
 
-        Round lastRound = matchController.GetLastRound;
+        Round lastRound = matchController.LastRound;
 
         // Loop through each player, assign points as commented
         for (int i = 0; i < players.Count; i++)
