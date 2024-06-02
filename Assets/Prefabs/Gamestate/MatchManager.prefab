@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3049982711304716190}
   - component: {fileID: 7042748633319679116}
   - component: {fileID: 3686467445548701086}
+  - component: {fileID: 8579724153786085231}
   m_Layer: 0
   m_Name: MatchManager
   m_TagString: Untagged
@@ -47,10 +48,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e06c294a3dd98964b89405af885f5b4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   roundLength: 180
   delayBeforeRoundResults: 3
   roundEndDelay: 15
-  biddingEndDelay: 1
   matchEndDelay: 5
   startAmount: 0
   rewardWin: 1
@@ -59,7 +62,6 @@ MonoBehaviour:
   roundTimer: {fileID: 7042748633319679116}
   globalHUDController: {fileID: 1760732758}
   collectableChips: []
-  loadingScreen: {fileID: 0}
 --- !u!114 &7042748633319679116
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -87,14 +89,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b18a938eb13d13540b14e958b874d1b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 71015680234268067, guid: 2872a05bf8e94d541a70726bb35085f3, type: 3}
   spawnPoints: []
   playerSelectItemPrefab: {fileID: 6596575034333967962, guid: 6f9988a3327983940a8001c11c3fe0e7, type: 3}
-  aIOpponent: {fileID: 4770448693040840586, guid: f714f883e6b675640bea00d14ffec549, type: 3}
-  aIBidder: {fileID: 0}
-  aiIdentity: {fileID: 8959912941406370206, guid: e915b82d39eb5ca4ba5977d1c718d4ed, type: 3}
-  globalHUDController: {fileID: 1760732758}
-  overrideMatchManager: 0
+--- !u!114 &8579724153786085231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4244699971652222381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 2340569019
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!1001 &3272573476935254913
 PrefabInstance:
   m_ObjectHideFlags: 0

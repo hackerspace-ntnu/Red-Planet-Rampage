@@ -74,6 +74,11 @@ public class PlayerIdentity : MonoBehaviour
         }
     }
 
+    public void UpdateChipSilently(int amount)
+    {
+        chips = amount;
+    }
+
     public void PerformTransaction(Item item)
     {
         switch (item.augmentType)
