@@ -10,8 +10,7 @@ public class PlayerInputManagerController : MonoBehaviour
     public List<InputManager> LocalPlayerInputs = new();
     public Dictionary<uint, InputManager> InputByPlayer = new();
 
-    public List<NetworkConnectionToClient> NetworkClients = new List<NetworkConnectionToClient>();
-    public int PlayerCount => Peer2PeerTransport.NumPlayers;
+    public int PlayerCount => RPRNetworkManager.NumPlayers;
 
     public PlayerInputManager PlayerInputManager;
 
@@ -28,11 +27,12 @@ public class PlayerInputManagerController : MonoBehaviour
 
     public delegate void JoinEvent(InputManager inputManager);
 
-    public JoinEvent onPlayerInputJoined;
+    public JoinEvent OnPlayerInputJoined;
+    public JoinEvent OnPlayerInputLeft;
 
     public bool MatchHasAI = false;
 
-    void Awake()
+    private void Awake()
     {
         #region Singleton boilerplate
 
@@ -57,13 +57,16 @@ public class PlayerInputManagerController : MonoBehaviour
 
     public void RemoveJoinListener()
     {
+        PlayerInputManager.DisableJoining();
         PlayerInputManager.onPlayerJoined -= OnPlayerJoined;
+        PlayerInputManager.onPlayerLeft -= OnPlayerLeft;
     }
 
     public void AddJoinListener()
     {
         PlayerInputManager.EnableJoining();
         PlayerInputManager.onPlayerJoined += OnPlayerJoined;
+        PlayerInputManager.onPlayerLeft += OnPlayerLeft;
     }
 
     public void RemoveListeners()
@@ -73,19 +76,24 @@ public class PlayerInputManagerController : MonoBehaviour
 
     private void OnPlayerJoined(PlayerInput playerInput)
     {
-        // TODO refactor this for online (should not source info from here)
-        var playerIdentity = playerInput.GetComponent<PlayerIdentity>();
-        playerIdentity.color = playerColors[LocalPlayerInputs.Count];
-        playerIdentity.playerName = playerNames[LocalPlayerInputs.Count];
-
         var inputManager = playerInput.GetComponent<InputManager>();
         inputManager.PlayerCamera.enabled = false;
         LocalPlayerInputs.Add(inputManager);
-        onPlayerInputJoined?.Invoke(inputManager);
+        OnPlayerInputJoined?.Invoke(inputManager);
         // TODO: Make cursor visible if mouseandkeyboard input joims when our buttons can be clicked by a mouse..
 
         if (NetworkManager.singleton.isNetworkActive)
             NetworkClient.Send(new PlayerConnectedMessage(LocalPlayerInputs.Count - 1));
+    }
+
+    private void OnPlayerLeft(PlayerInput playerInput)
+    {
+        var inputManager = playerInput.GetComponent<InputManager>();
+        OnPlayerInputLeft?.Invoke(inputManager);
+        LocalPlayerInputs.Remove(inputManager);
+
+        if (NetworkManager.singleton.isNetworkActive)
+            NetworkClient.Send(new PlayerDisconnectedInputMessage());
     }
 
     public void JoinAllInputs()

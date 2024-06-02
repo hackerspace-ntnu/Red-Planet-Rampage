@@ -164,10 +164,10 @@ public class MatchController : MonoBehaviour
         // TODO add a timeout thingy for when one player doesn't join in time
         // TODO keep loading screen open while this while loop spins
         // Spin while waiting for players to spawn
-        while (players.Count < Peer2PeerTransport.NumPlayers)
+        while (players.Count < RPRNetworkManager.NumPlayers)
         {
 #if UNITY_EDITOR
-            Debug.Log($"{players.Count} of {Peer2PeerTransport.NumPlayers} players spawned");
+            Debug.Log($"{players.Count} of {RPRNetworkManager.NumPlayers} players spawned");
 #endif
             yield return null;
         }

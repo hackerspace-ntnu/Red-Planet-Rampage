@@ -38,6 +38,8 @@ public struct PlayerConnectedMessage : NetworkMessage
     public int inputID;
 }
 
+public struct PlayerDisconnectedInputMessage : NetworkMessage { }
+
 public struct PlayerLeftMessage : NetworkMessage
 {
     public PlayerLeftMessage(uint id)
@@ -116,7 +118,7 @@ public enum PlayerType
     Remote
 }
 
-public class Peer2PeerTransport : NetworkManager
+public class RPRNetworkManager : NetworkManager
 {
     private const int FPSPlayerPrefabIndex = 0;
     private const int BiddingPlayerPrefabIndexOffset = 1;
@@ -178,6 +180,7 @@ public class Peer2PeerTransport : NetworkManager
     public override void OnStartServer()
     {
         NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
+        NetworkServer.RegisterHandler<PlayerDisconnectedInputMessage>(OnRemovePlayerInput);
         NetworkServer.RegisterHandler<UpdateLoadoutMessage>(OnReceiveUpdateLoadout);
 
         ResetState();
@@ -221,6 +224,28 @@ public class Peer2PeerTransport : NetworkManager
             }
         }
         OnDisconnect?.Invoke(connection.connectionId);
+    }
+
+    private void OnRemovePlayerInput(NetworkConnectionToClient connection, PlayerDisconnectedInputMessage message)
+    {
+        if (!playersForConnection.TryGetValue(connection.connectionId, out var playerIDs))
+            return;
+        var playerToRemove = PlayerDetails.Where(p => playerIDs.Contains(p.id)).OrderByDescending(p => p.localInputID).First();
+        Debug.Log($"Removed player {playerToRemove.id} with local id {playerToRemove.localInputID} for connection {connection.connectionId}");
+
+        playerIDs.Remove(playerToRemove.id);
+        if (playerIDs.Count == 0)
+        {
+            connection.Disconnect();
+            return; // OnServerDisconnect handles the rest of the job!
+        }
+
+        connectedPlayers.Remove(playerToRemove.id);
+        if (!isInMatch)
+        {
+            availableColors.Push(playerToRemove.color);
+            NetworkServer.SendToAll(new PlayerLeftMessage(playerToRemove.id));
+        }
     }
 
     public override void OnStopServer()
@@ -353,7 +378,6 @@ public class Peer2PeerTransport : NetworkManager
             return;
 
         // Register connection
-        PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
         if (!connections.Contains(connection))
         {
             connections.Add(connection);
