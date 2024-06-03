@@ -245,7 +245,6 @@ public class Peer2PeerTransport : NetworkManager
         LoadingScreen.Singleton.Hide();
         MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
-        SceneManager.LoadSceneAsync(Scenes.Menu);
         if (NetworkClient.active)
             StopClient();
         else

@@ -328,9 +328,8 @@ public class MatchController : NetworkBehaviour
         rounds = new List<Round>();
         MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
-        SceneManager.LoadSceneAsync(Scenes.Menu);
 
-        // TODO go back to lobby instead
+        // Mirror pulls us to the main menu automatically
         NetworkManager.singleton.StopHost();
     }
 }
