@@ -159,7 +159,8 @@ public class MatchController : NetworkBehaviour
         roundTimer.StartTimer(roundLength);
         roundTimer.OnTimerUpdate += AdjustMusic;
         roundTimer.OnTimerUpdate += HUDTimerUpdate;
-        roundTimer.OnTimerRunCompleted += EndActiveRound;
+        if (isServer)
+            roundTimer.OnTimerRunCompleted += EndActiveRound;
         isRoundInProgress = true;
     }
 
@@ -318,7 +319,7 @@ public class MatchController : NetworkBehaviour
         ReturnToMainMenu();
     }
 
-    public void ReturnToMainMenu()
+    private void ReturnToMainMenu()
     {
         // Remove AI identities
         FindObjectsOfType<PlayerIdentity>()
