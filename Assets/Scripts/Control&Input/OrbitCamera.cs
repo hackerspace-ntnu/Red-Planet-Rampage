@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using VectorExtensions;
 
 public class OrbitCamera : MonoBehaviour
 {
@@ -43,13 +44,7 @@ public class OrbitCamera : MonoBehaviour
             ? InputManager.lookInput
             : InputManager.lookInput * Time.deltaTime;
         aimAngle += lookInput * 10; // TODO idk set this properly
-        // TODO create an extension method or something?
-        // Constrain aiming angle vertically and wrap horizontally.
-        // + and - Mathf.Deg2Rad is offsetting with 1 degree in radians,
-        // which is neccesary to avoid IK shortest path slerping that causes aniamtions to break at exactly the halfway points.
-        // This is way more computationaly efficient than creating edgecase checks in IK with practically no gameplay impact
-        aimAngle.y = Mathf.Clamp(aimAngle.y, -Mathf.PI / 2 + Mathf.Deg2Rad, Mathf.PI / 2 - Mathf.Deg2Rad);
-        aimAngle.x = (aimAngle.x + Mathf.PI) % (2 * Mathf.PI) - Mathf.PI;
+        aimAngle = aimAngle.ClampedLookAngles();
     }
 
     private void UpdateOrbit()
