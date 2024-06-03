@@ -19,8 +19,7 @@ public class ReturnToMainMenuGate : MonoBehaviour, Interactable
     {
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
         PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
-        // TODO Is this really correct?
+        // Mirror pulls us to the main menu automatically
         NetworkManager.singleton.StopHost();
-        SceneManager.LoadSceneAsync(Scenes.Menu);
     }
 }
