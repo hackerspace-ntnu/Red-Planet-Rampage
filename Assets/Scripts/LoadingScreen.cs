@@ -103,9 +103,12 @@ public class LoadingScreen : MonoBehaviour
         enabled = true;
         gameObject.transform.GetChild(0).gameObject.SetActive(true);
 
-        // Old stuff, move if necessary
-        backgroundVelocity = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f)).normalized * Random.Range(.5f, 1.5f);
-        if (backgroundVelocity.magnitude < .1) backgroundVelocity = new Vector2(.5f, .8f);
+        // Random background funkiness
+        var angle = Random.Range(-15f, 15f);
+        background.transform.eulerAngles = angle * Vector3.forward;
+        // Background moves along same angle as it is tilted, but horizontally
+        backgroundVelocity = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+
         PlayerInputManagerController.Singleton.RemoveListeners();
         loadingCounter += 1;
         StartCoroutine(UpdateTimer(mandatoryDuration));
