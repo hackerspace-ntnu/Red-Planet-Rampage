@@ -76,6 +76,7 @@ public class MatchController : NetworkBehaviour
     public bool IsAuction => isAuction;
 
     private bool isRoundInProgress = false;
+    public bool IsRoundInProgress => isRoundInProgress;
 
     private void Awake()
     {

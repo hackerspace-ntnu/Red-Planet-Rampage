@@ -174,7 +174,7 @@ public class PlayerHUDController : MonoBehaviour
         if (LeanTween.isTweening(hudParentJumpTween))
         {
             LeanTween.cancel(hudParentJumpTween);
-            hudParent.localPosition = new Vector3 (hudParent.localPosition.x, hudParentLocalY.Value, hudParent.localPosition.z);
+            hudParent.localPosition = new Vector3(hudParent.localPosition.x, hudParentLocalY.Value, hudParent.localPosition.z);
         }
         hudParentJumpTween = hudParent.LeanMoveLocalY(hudParent.localPosition.y - 10f, 1.3f)
             .setEasePunch()
@@ -283,6 +283,11 @@ public class PlayerHUDController : MonoBehaviour
         deathScreen.SetActive(true);
         ammoHud.parent.gameObject.SetActive(false);
         speedLines.gameObject.SetActive(false);
+    }
+
+    public void HideDeathScreen()
+    {
+        deathScreen.SetActive(false);
     }
 
     // x and y expected to be in range [-1, 1]
