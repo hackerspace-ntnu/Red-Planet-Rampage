@@ -287,10 +287,6 @@ MonoBehaviour:
   - {fileID: 3287810421863630874}
   animatorToDisable: {fileID: 289053663840324231}
   rigidbodyToPush: {fileID: 3287810421183947676}
-  cameraParent: {fileID: 8159248892074053650}
-  ragdollMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!82 &7607358150439154286
 AudioSource:
   m_ObjectHideFlags: 0
@@ -442,6 +438,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96b868dfbe6858442a5fc0353ea1ff8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cullingMask:
+    serializedVersion: 2
+    m_Bits: 69631
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 1
+  initialTarget: {fileID: 8159248892074053650}
+  maxRadius: 5
+  minRadius: 1
 --- !u!1 &345906872987025452
 GameObject:
   m_ObjectHideFlags: 0

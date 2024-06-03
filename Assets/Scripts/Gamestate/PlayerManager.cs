@@ -209,15 +209,17 @@ public class PlayerManager : NetworkBehaviour
         if (gunController)
             gunController.gameObject.SetActive(false);
         GunHolder.gameObject.SetActive(false);
-        // Disable all colliders and physics
-        // Ragdollify
+
+        if (inputManager)
+        {
+            var orbitCamera = GetComponent<OrbitCamera>();
+            orbitCamera.Camera = inputManager.PlayerCamera;
+            orbitCamera.InputManager = inputManager;
+            orbitCamera.Activate();
+        }
 
         // TODO: Make accurate hitbox forces for the different limbs of the player
-
         var ragdollController = GetComponent<RagdollController>();
-        if (inputManager)
-            ragdollController.AnimateCamera(inputManager.PlayerCamera, inputManager.transform);
-
         var force = info.force.normalized * Mathf.Log(info.damage) * deathKnockbackForceMultiplier;
         ragdollController.EnableRagdoll(force);
     }
@@ -478,7 +480,7 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
-    protected void SetLayerOnSubtree(GameObject node, int layer)
+    private void SetLayerOnSubtree(GameObject node, int layer)
     {
         node.layer = layer;
         foreach (Transform child in node.transform)
@@ -487,10 +489,7 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
-    new public string ToString()
-    {
-        return "Player " + inputManager.playerInput.playerIndex;
-    }
+    public new string ToString() => identity.ToString();
 
     protected void PlayOnHit()
     {
