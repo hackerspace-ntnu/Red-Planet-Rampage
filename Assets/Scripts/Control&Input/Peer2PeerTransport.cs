@@ -136,6 +136,7 @@ public class Peer2PeerTransport : NetworkManager
 
     private static Dictionary<uint, PlayerDetails> players = new();
     public static int NumPlayers => players.Count;
+    public static int NumAvailableSlots => Mathf.Max(0, MaxPlayers - players.Count);
     public const int MaxPlayers = 4;
     public static IEnumerable<PlayerDetails> PlayerDetails => players.Values;
 
@@ -153,11 +154,15 @@ public class Peer2PeerTransport : NetworkManager
     public static ReadOnlyCollection<NetworkConnectionToClient> Connections;
 
     public delegate void LobbyPlayerEvent(PlayerDetails details);
-    public LobbyPlayerEvent OnPlayerRecieved;
+    public LobbyPlayerEvent OnPlayerReceived;
     public LobbyPlayerEvent OnPlayerRemoved;
 
     public delegate void ConnectionEvent(int connectionID);
     public ConnectionEvent OnDisconnect;
+
+    public delegate void GamestateEvent();
+    public GamestateEvent OnMatchStart;
+    public GamestateEvent OnMatchEnd;
 
     private void ResetState()
     {
@@ -203,7 +208,7 @@ public class Peer2PeerTransport : NetworkManager
 
     public override void OnServerDisconnect(NetworkConnectionToClient connection)
     {
-        if (!playersForConnection.ContainsKey(connection.connectionId))
+        if (playersForConnection == null || !playersForConnection.ContainsKey(connection.connectionId))
             return;
         Debug.Log($"Removed connection {connections.IndexOf(connection)} which has players {playersForConnection[connection.connectionId].ToCommaSeparatedString()}");
         connections.Remove(connection);
@@ -345,12 +350,23 @@ public class Peer2PeerTransport : NetworkManager
         LoadingScreen.Singleton.Show();
     }
 
+    private void RefuseConnection(NetworkConnectionToClient connection)
+    {
+        // Don't refuse existing connections
+        if (connections.Contains(connection))
+            return;
+
+        connection.Disconnect();
+    }
+
     private void OnSpawnPlayerInput(NetworkConnectionToClient connection, PlayerConnectedMessage message)
     {
         // Avoid adding more than the four allowed players
-        // TODO prevent this in some other more sustainable way :)))))
-        if (NumPlayers >= MaxPlayers)
+        if (NumPlayers + 1 >= MaxPlayers)
+        {
+            RefuseConnection(connection);
             return;
+        }
 
         // Register connection
         PlayerInputManagerController.Singleton.NetworkClients.Add(connection);
@@ -374,6 +390,7 @@ public class Peer2PeerTransport : NetworkManager
         if (SteamManager.IsSteamActive && SteamManager.Singleton.IsHosting)
         {
             var steamIndex = SteamManager.Singleton.PlayerNames.Count - 1;
+            // TODO THE THING SHOULD OH MY GOD WHAT HOW DO WE FIND PLAYER AND STEAM ID HERE????
             playerName = SteamManager.Singleton.PlayerNames[steamIndex];
             steamID = SteamManager.Singleton.PlayerIDs[steamIndex];
             playerType = steamID == SteamManager.Singleton.SteamID.m_SteamID ? PlayerType.Local : PlayerType.Remote;
@@ -413,6 +430,9 @@ public class Peer2PeerTransport : NetworkManager
 
     private void OnReceivePlayerDetails(InitialPlayerDetailsMessage message)
     {
+        if (NumPlayers + 1 >= MaxPlayers)
+            return;
+
         var details = message.details;
         if (players.ContainsKey(details.id))
             return;
@@ -435,7 +455,7 @@ public class Peer2PeerTransport : NetworkManager
         details.extensions = details.extension != null ? new string[] { details.extension } : new string[] { };
         Debug.Log($"Received info for player {details.id}: name=<color=#{details.color.ToHexString()}>{details.name}</color> type={details.type}");
         players.Add(details.id, details);
-        OnPlayerRecieved?.Invoke(details);
+        OnPlayerReceived?.Invoke(details);
     }
 
     private void OnReceiveUpdatedPlayerDetails(UpdatedPlayerDetailsMessage message)
@@ -520,6 +540,8 @@ public class Peer2PeerTransport : NetworkManager
             AddAiPlayers();
         }
 
+        var wasInMatch = isInMatch;
+
         switch (newSceneName)
         {
             case Scenes.Bidding:
@@ -536,6 +558,11 @@ public class Peer2PeerTransport : NetworkManager
                 NetworkServer.ReplaceHandler<SpawnPlayerMessage>(OnSpawnFPSPlayer);
                 break;
         }
+
+        if (isInMatch && !wasInMatch)
+            OnMatchStart?.Invoke();
+        else if (!isInMatch && wasInMatch)
+            OnMatchEnd?.Invoke();
     }
 
     public void UpdateLoadout()

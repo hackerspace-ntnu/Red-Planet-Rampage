@@ -26,13 +26,13 @@ public class LobbyListMenu : MonoBehaviour
     private void LobbyListUpdate()
     {
         int count = 0;
-        foreach (CSteamID lobby in SteamManager.Singleton.Lobbies.Keys)
+        foreach (Lobby lobby in SteamManager.Singleton.Lobbies)
         {
             if (!(count < lobbies.Length))
                 break;
-            lobbies[count].GetComponentInChildren<TMP_Text>().text = SteamManager.Singleton.Lobbies[lobby] + "'s lobby";
+            lobbies[count].GetComponentInChildren<TMP_Text>().text = lobby.name;
             lobbies[count].onClick.RemoveAllListeners();
-            lobbies[count].onClick.AddListener(() => SteamManager.Singleton.RequestLobbyJoin(lobby));
+            lobbies[count].onClick.AddListener(() => SteamManager.Singleton.RequestLobbyJoin(lobby.id));
             count++;
         }
         for (int i = count; i < lobbies.Length; i++)
