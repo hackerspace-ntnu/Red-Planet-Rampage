@@ -30,12 +30,14 @@ public struct PlayerDetails
 
 public struct PlayerConnectedMessage : NetworkMessage
 {
-    public PlayerConnectedMessage(int inputID)
+    public PlayerConnectedMessage(int inputID, ulong steamID = 0)
     {
         this.inputID = inputID;
+        this.steamID = steamID;
     }
 
     public int inputID;
+    public ulong steamID;
 }
 
 public struct PlayerLeftMessage : NetworkMessage
@@ -389,10 +391,8 @@ public class Peer2PeerTransport : NetworkManager
         ulong steamID = 0;
         if (SteamManager.IsSteamActive && SteamManager.Singleton.IsHosting)
         {
-            var steamIndex = SteamManager.Singleton.PlayerNames.Count - 1;
-            // TODO THE THING SHOULD OH MY GOD WHAT HOW DO WE FIND PLAYER AND STEAM ID HERE????
-            playerName = SteamManager.Singleton.PlayerNames[steamIndex];
-            steamID = SteamManager.Singleton.PlayerIDs[steamIndex];
+            playerName = SteamManager.Singleton.PlayerNameById[message.steamID];
+            steamID = message.steamID;
             playerType = steamID == SteamManager.Singleton.SteamID.m_SteamID ? PlayerType.Local : PlayerType.Remote;
         }
 

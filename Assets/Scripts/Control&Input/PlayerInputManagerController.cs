@@ -87,14 +87,14 @@ public class PlayerInputManagerController : MonoBehaviour
         // TODO: Make cursor visible if mouseandkeyboard input joims when our buttons can be clicked by a mouse..
 
         if (NetworkManager.singleton.isNetworkActive)
-            NetworkClient.Send(new PlayerConnectedMessage(LocalPlayerInputs.Count - 1));
+            NetworkClient.Send(new PlayerConnectedMessage(LocalPlayerInputs.Count - 1, SteamManager.Singleton.SteamID.m_SteamID));
     }
 
     public void JoinAllInputs()
     {
         for (int i = 0; i < LocalPlayerInputs.Count; i++)
         {
-            NetworkClient.Send(new PlayerConnectedMessage(i));
+            NetworkClient.Send(new PlayerConnectedMessage(i, SteamManager.Singleton.SteamID.m_SteamID));
         }
     }
 

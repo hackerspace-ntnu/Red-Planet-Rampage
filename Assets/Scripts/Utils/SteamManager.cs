@@ -73,14 +73,15 @@ public class SteamManager : MonoBehaviour
 
     public string UserName;
     public CSteamID SteamID;
-    public List<string> PlayerNames = new();
-    public List<ulong> PlayerIDs = new();
 
     public delegate void LobbyEvent();
     public LobbyEvent LobbyPlayerUpdate;
     public LobbyEvent LobbyListUpdate;
 
     private CSteamID lobbyID;
+    public Dictionary<ulong, string> PlayerNameById = new();
+    public List<ulong> PlayerIDs = new();
+
     private List<Lobby> lobbies = new();
     public ReadOnlyCollection<Lobby> Lobbies;
     public Dictionary<ulong, Lobby> lobbiesById = new();
@@ -253,8 +254,7 @@ public class SteamManager : MonoBehaviour
                 continue;
             Debug.Log($"Steam user {name} (id={id.m_SteamID}) entered lobby");
 
-            // TODO replace these separate lists with *one*
-            PlayerNames.Add(name);
+            PlayerNameById[id.m_SteamID] = name;
             PlayerIDs.Add(id.m_SteamID);
         }
         LobbyPlayerUpdate?.Invoke();
@@ -310,7 +310,7 @@ public class SteamManager : MonoBehaviour
 
         Debug.Log("Left steam lobby");
 
-        PlayerNames = new();
+        PlayerNameById = new();
         PlayerIDs = new();
 
         IsHosting = false;
