@@ -90,7 +90,7 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.PlayerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
         if (SceneManager.GetActiveScene().name == "Menu")
-            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved += UpdateStartButton;
+            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived += UpdateStartButton;
         if (playerInputManagerController.LocalPlayerInputs.Count > 0)
         {
             // Already played, just show the menu.
@@ -174,7 +174,7 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.onPlayerInputJoined -= AddPlayer;
         playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
         if (SceneManager.GetActiveScene().name == "Menu")
-            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRecieved -= UpdateStartButton;
+            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived -= UpdateStartButton;
     }
 
     /// <summary>

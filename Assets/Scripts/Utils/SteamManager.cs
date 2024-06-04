@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 using Steamworks;
+using System.Collections.ObjectModel;
+using UnityEngine.InputSystem.Controls;
 
 public enum AchievementType
 {
@@ -22,6 +24,40 @@ public enum AchievementType
     HatTrick,
     LongShot,
     RemoteWorker
+}
+
+public class Lobby
+{
+    public Lobby(CSteamID id)
+    {
+        this.id = id;
+        UpdateMetadata();
+    }
+
+    public void UpdateMetadata()
+    {
+        host = SteamMatchmaking.GetLobbyOwner(id);
+        name = SteamMatchmaking.GetLobbyData(id, NameProperty);
+
+        availableSlots = 0;
+        if (int.TryParse(SteamMatchmaking.GetLobbyData(id, AvailableSlotsProperty), out var slots))
+            availableSlots = slots;
+
+        // TODO replace these with custom data!
+        players = SteamMatchmaking.GetNumLobbyMembers(id);
+        capacity = SteamMatchmaking.GetLobbyMemberLimit(id);
+    }
+
+    public static string NameProperty = "name";
+    public static string AvailableSlotsProperty = "availableSlots";
+
+    public CSteamID id;
+    public CSteamID host;
+
+    public string name;
+    public int players;
+    public int capacity;
+    public int availableSlots;
 }
 
 public class SteamManager : MonoBehaviour
@@ -45,8 +81,9 @@ public class SteamManager : MonoBehaviour
     public LobbyEvent LobbyListUpdate;
 
     private CSteamID lobbyID;
-    private List<CSteamID> lobbies = new();
-    public Dictionary<CSteamID, string> Lobbies = new();
+    private List<Lobby> lobbies = new();
+    public ReadOnlyCollection<Lobby> Lobbies;
+    public Dictionary<ulong, Lobby> lobbiesById = new();
 
     private bool shouldStoreStats = false;
 
@@ -95,6 +132,8 @@ public class SteamManager : MonoBehaviour
     {
         if (!isSteamInitialized)
             return;
+
+        Lobbies = new(lobbies);
 
         lobbyCreated = Callback<LobbyCreated_t>.Create(OnlobbyCreated);
         lobbyEnter = Callback<LobbyEnter_t>.Create(OnLobbyEnter);
@@ -164,16 +203,40 @@ public class SteamManager : MonoBehaviour
             return;
         NetworkManager.singleton.StartHost();
         IsHosting = true;
-        SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey, SteamUser.GetSteamID().ToString());
-        SteamMatchmaking.SetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), "name", UserName);
+        lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
+        SteamMatchmaking.SetLobbyData(lobbyID, hostkey, SteamUser.GetSteamID().ToString());
+        SteamMatchmaking.SetLobbyData(lobbyID, Lobby.NameProperty, UserName);
+        SteamMatchmaking.SetLobbyData(lobbyID, Lobby.AvailableSlotsProperty, Peer2PeerTransport.NumAvailableSlots.ToString());
+        // TODO unsubscribe
+        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived += UpdateAvailableSlots;
+        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRemoved += UpdateAvailableSlots;
+        ((Peer2PeerTransport)NetworkManager.singleton).OnMatchStart += SetAsNotJoinable;
+        ((Peer2PeerTransport)NetworkManager.singleton).OnMatchEnd += SetAsJoinable;
+    }
+
+    private void UpdateAvailableSlots(PlayerDetails player)
+    {
+        SteamMatchmaking.SetLobbyData(lobbyID, Lobby.AvailableSlotsProperty, Peer2PeerTransport.NumAvailableSlots.ToString());
+    }
+
+    // TODO We wanna do this differently for rejoining disconnected player
+    private void SetAsNotJoinable()
+    {
+        SteamMatchmaking.SetLobbyJoinable(lobbyID, false);
+    }
+
+    private void SetAsJoinable()
+    {
+        SteamMatchmaking.SetLobbyJoinable(lobbyID, true);
     }
 
     private void OnJoinRequest(GameLobbyJoinRequested_t callback)
     {
         // TODO verify that the lobby *should* be joined by more players!
         //      and verify that this is run on the server!
+        Debug.Log("LOBBY JOIN REQUEST");
         if (Peer2PeerTransport.NumPlayers >= Peer2PeerTransport.MaxPlayers || Peer2PeerTransport.IsInMatch)
-            return;
+            NetworkManager.singleton.StopClient();
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
     }
 
@@ -199,6 +262,13 @@ public class SteamManager : MonoBehaviour
 
     private void OnLobbyEnter(LobbyEnter_t callback)
     {
+        if (callback.m_EChatRoomEnterResponse != (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
+        {
+            // Stop networking and return to main menu if rejected
+            NetworkManager.singleton.StopHost();
+            return;
+        }
+
         // All users
         IsInLobby = true;
         UpdateLobbyData(callback.m_ulSteamIDLobby);
@@ -214,19 +284,29 @@ public class SteamManager : MonoBehaviour
         UpdateLobbyData(callback.m_ulSteamIDLobby);
     }
 
-    public void HostLobby()
+    public void HostLobby(ELobbyType type = ELobbyType.k_ELobbyTypePublic)
     {
         if (!isSteamInitialized)
             return;
 
         // TODO support public and friend lobbies
-        SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, NetworkManager.singleton.maxConnections);
+        SteamMatchmaking.CreateLobby(type, NetworkManager.singleton.maxConnections);
+        // TODO use this for something?
+        SteamMatchmaking.SetLobbyMemberLimit(lobbyID, 4);
     }
 
     public void LeaveLobby()
     {
         if (!isSteamInitialized)
             return;
+
+        if (IsHosting)
+        {
+            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived -= UpdateAvailableSlots;
+            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRemoved -= UpdateAvailableSlots;
+            ((Peer2PeerTransport)NetworkManager.singleton).OnMatchStart -= SetAsNotJoinable;
+            ((Peer2PeerTransport)NetworkManager.singleton).OnMatchEnd -= SetAsJoinable;
+        }
 
         Debug.Log("Left steam lobby");
 
@@ -242,6 +322,10 @@ public class SteamManager : MonoBehaviour
     public void FetchLobbyInfo()
     {
         FetchFriendLobbyInfo();
+        // Ensure we have enough available slots
+        SteamMatchmaking.AddRequestLobbyListNumericalFilter(Lobby.AvailableSlotsProperty,
+                                                            PlayerInputManagerController.Singleton.NumInputs,
+                                                            ELobbyComparison.k_ELobbyComparisonEqualToOrGreaterThan);
         SteamMatchmaking.RequestLobbyList();
     }
 
@@ -254,7 +338,7 @@ public class SteamManager : MonoBehaviour
             CSteamID steamIDFriend = SteamFriends.GetFriendByIndex(i, EFriendFlags.k_EFriendFlagImmediate);
             if (SteamFriends.GetFriendGamePlayed(steamIDFriend, out friendGameInfo) && friendGameInfo.m_steamIDLobby.IsValid())
             {
-                lobbies.Add(friendGameInfo.m_steamIDLobby);
+                lobbies.Add(new Lobby(friendGameInfo.m_steamIDLobby));
                 SteamMatchmaking.RequestLobbyData(friendGameInfo.m_steamIDLobby);
             }
         }
@@ -262,31 +346,38 @@ public class SteamManager : MonoBehaviour
 
     private void OnLobbiesFetched(LobbyMatchList_t lobbyList)
     {
+        lobbies = new();
+        Lobbies = new(lobbies);
+        lobbiesById = new();
+
         for (int i = 0; i < lobbyList.m_nLobbiesMatching; i++)
         {
             CSteamID lobbyID = SteamMatchmaking.GetLobbyByIndex(i);
-            lobbies.Add(lobbyID);
-            Lobbies[lobbyID] = SteamMatchmaking.GetLobbyData(lobbyID, "name");
+            var lobby = new Lobby(lobbyID);
+            lobbies.Add(lobby);
+            lobbiesById.Add(lobby.id.m_SteamID, lobby);
+
             SteamMatchmaking.RequestLobbyData(lobbyID);
         }
+
         LobbyListUpdate?.Invoke();
     }
 
     private void OnLobbyInfo(LobbyDataUpdate_t result)
     {
-        for (int i = 0; i < lobbies.Count; i++)
-        {
-            if (lobbies[i].m_SteamID == result.m_ulSteamIDLobby)
-            {
-                Lobbies[(CSteamID)lobbies[i].m_SteamID] = SteamMatchmaking.GetLobbyData((CSteamID)lobbies[i].m_SteamID, "name");
-                return;
-            }
-        }
+        if (!lobbiesById.TryGetValue(result.m_ulSteamIDLobby, out var lobby))
+            return;
+
+        lobby.UpdateMetadata();
         LobbyListUpdate?.Invoke();
     }
 
     public void RequestLobbyJoin(CSteamID lobbyId)
     {
+        var hasLessCapacityThanNeeded = !int.TryParse(SteamMatchmaking.GetLobbyData(lobbyId, Lobby.AvailableSlotsProperty), out var slots)
+                                        || slots < PlayerInputManagerController.Singleton.NumInputs;
+        if (hasLessCapacityThanNeeded)
+            return;
         SteamMatchmaking.JoinLobby(lobbyId);
     }
 

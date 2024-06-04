@@ -10,6 +10,8 @@ public class PlayerInputManagerController : MonoBehaviour
     public List<InputManager> LocalPlayerInputs = new();
     public Dictionary<uint, InputManager> InputByPlayer = new();
 
+    public int NumInputs => LocalPlayerInputs.Count;
+
     public List<NetworkConnectionToClient> NetworkClients = new List<NetworkConnectionToClient>();
     public int PlayerCount => Peer2PeerTransport.NumPlayers;
 
