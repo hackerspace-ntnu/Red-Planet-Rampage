@@ -42,10 +42,6 @@ public class Lobby
         availableSlots = 0;
         if (int.TryParse(SteamMatchmaking.GetLobbyData(id, AvailableSlotsProperty), out var slots))
             availableSlots = slots;
-
-        // TODO replace these with custom data!
-        players = SteamMatchmaking.GetNumLobbyMembers(id);
-        capacity = SteamMatchmaking.GetLobbyMemberLimit(id);
     }
 
     public static string NameProperty = "name";
@@ -55,8 +51,6 @@ public class Lobby
     public CSteamID host;
 
     public string name;
-    public int players;
-    public int capacity;
     public int availableSlots;
 }
 
@@ -204,11 +198,13 @@ public class SteamManager : MonoBehaviour
             return;
         NetworkManager.singleton.StartHost();
         IsHosting = true;
+
         lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
         SteamMatchmaking.SetLobbyData(lobbyID, hostkey, SteamUser.GetSteamID().ToString());
         SteamMatchmaking.SetLobbyData(lobbyID, Lobby.NameProperty, UserName);
         SteamMatchmaking.SetLobbyData(lobbyID, Lobby.AvailableSlotsProperty, Peer2PeerTransport.NumAvailableSlots.ToString());
-        // TODO unsubscribe
+
+        // Update filterable information when necessary
         ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived += UpdateAvailableSlots;
         ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRemoved += UpdateAvailableSlots;
         ((Peer2PeerTransport)NetworkManager.singleton).OnMatchStart += SetAsNotJoinable;
@@ -233,9 +229,6 @@ public class SteamManager : MonoBehaviour
 
     private void OnJoinRequest(GameLobbyJoinRequested_t callback)
     {
-        // TODO verify that the lobby *should* be joined by more players!
-        //      and verify that this is run on the server!
-        Debug.Log("LOBBY JOIN REQUEST");
         if (Peer2PeerTransport.NumPlayers >= Peer2PeerTransport.MaxPlayers || Peer2PeerTransport.IsInMatch)
             NetworkManager.singleton.StopClient();
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);

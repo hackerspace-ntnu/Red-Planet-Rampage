@@ -219,11 +219,14 @@ public class Peer2PeerTransport : NetworkManager
         playersForConnection.Remove(connection.connectionId);
         if (!isInMatch)
         {
-            foreach (var id in playerIDs)
+            foreach (var id in playerIDs.AsEnumerable().Reverse())
             {
                 if (!players.TryGetValue(id, out var details))
                     continue;
                 availableColors.Push(details.color);
+                // This should be done here and not in the handler for player left message
+                players.Remove(id);
+                OnPlayerRemoved?.Invoke(details);
                 NetworkServer.SendToAll(new PlayerLeftMessage(id));
             }
         }
@@ -364,8 +367,9 @@ public class Peer2PeerTransport : NetworkManager
     private void OnSpawnPlayerInput(NetworkConnectionToClient connection, PlayerConnectedMessage message)
     {
         // Avoid adding more than the four allowed players
-        if (NumPlayers + 1 >= MaxPlayers)
+        if (NumPlayers >= MaxPlayers || isInMatch)
         {
+            Debug.LogWarning($"Refused connection for player {message.steamID} at {NumPlayers} players");
             RefuseConnection(connection);
             return;
         }
@@ -430,8 +434,11 @@ public class Peer2PeerTransport : NetworkManager
 
     private void OnReceivePlayerDetails(InitialPlayerDetailsMessage message)
     {
-        if (NumPlayers + 1 >= MaxPlayers)
+        if (NumPlayers >= MaxPlayers)
+        {
+            Debug.LogWarning($"Received player details for player when at {NumPlayers} players");
             return;
+        }
 
         var details = message.details;
         if (players.ContainsKey(details.id))

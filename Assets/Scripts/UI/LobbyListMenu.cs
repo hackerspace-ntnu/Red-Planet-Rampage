@@ -30,7 +30,7 @@ public class LobbyListMenu : MonoBehaviour
         {
             if (!(count < lobbies.Length))
                 break;
-            lobbies[count].GetComponentInChildren<TMP_Text>().text = lobby.name;
+            lobbies[count].GetComponentInChildren<TMP_Text>().text = $"{lobby.name} ({4 - lobby.availableSlots}/4)";
             lobbies[count].onClick.RemoveAllListeners();
             lobbies[count].onClick.AddListener(() => SteamManager.Singleton.RequestLobbyJoin(lobby.id));
             count++;
