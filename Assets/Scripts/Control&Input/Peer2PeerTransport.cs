@@ -360,11 +360,13 @@ public class Peer2PeerTransport : NetworkManager
         {
             isConnectionAlreadyPresent = false;
             connections.Add(connection);
-            connectedPlayers.Add((uint)playerIndex);
         }
+
+        // Register player
         if (!playersForConnection.ContainsKey(connection.connectionId))
             playersForConnection[connection.connectionId] = new();
         playersForConnection[connection.connectionId].Add((uint)playerIndex);
+        connectedPlayers.Add((uint)playerIndex);
 
         // Determine metadata
         var playerType = PlayerType.Local;
