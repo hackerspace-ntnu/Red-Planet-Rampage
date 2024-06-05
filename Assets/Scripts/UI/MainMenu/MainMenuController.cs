@@ -325,11 +325,12 @@ public class MainMenuController : MonoBehaviour
         startButton.colors = colors;
     }
 
-    // Currently invoked when entering characterselect menu
-    // TODO: Make dedicated hosting UI instead.
     public void HostLocalLobby()
     {
-        NetworkManager.singleton.StartHost();
+        if (SteamManager.IsSteamActive)
+            SteamManager.Singleton.HostLobby(Steamworks.ELobbyType.k_ELobbyTypeFriendsOnly);
+        else
+            NetworkManager.singleton.StartHost();
         playerSelectManager.UpdateLobby();
     }
 
