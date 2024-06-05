@@ -3,7 +3,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.Serialization;
 
 [RequireComponent(typeof(PlayerMovement))]
 [RequireComponent(typeof(AudioSource))]
@@ -20,6 +19,9 @@ public class PlayerManager : NetworkBehaviour
 
     private const int defaultLayer = 1;
     public int HitMask => hitMask;
+
+    private int layerIndex;
+    public int LayerIndex => layerIndex;
 
     [SerializeField]
     private LayerMask interactMask;
@@ -400,6 +402,7 @@ public class PlayerManager : NetworkBehaviour
 
     public virtual void SetLayer(int playerIndex)
     {
+        layerIndex = playerIndex;
         int playerLayer = LayerMask.NameToLayer("Player " + playerIndex);
 
         // Set layers for the camera to ignore (the other players' gun layers, and this layer)

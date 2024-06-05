@@ -9,10 +9,10 @@ public class OrbitCamera : MonoBehaviour
 {
     [SerializeField] private LayerMask cullingMask;
     [SerializeField] private LayerMask collisionMask;
-    [SerializeField] private Transform initialTarget;
     [SerializeField] private float maxRadius = 5;
     [SerializeField] private float minRadius = 1;
     [SerializeField] private float collisionOffset = .3f;
+    [SerializeField] private float lookSensitivity = 5;
 
     public InputManager InputManager;
 
@@ -24,7 +24,7 @@ public class OrbitCamera : MonoBehaviour
         set
         {
             camera = value;
-            camera.cullingMask = cullingMask;
+            camera.cullingMask = cullingMask | (1 << (12 + player.LayerIndex));
             cameraTransform = value.transform;
         }
     }
@@ -37,9 +37,11 @@ public class OrbitCamera : MonoBehaviour
 
     private PlayerManager[] otherPlayers;
     private int targetIndex = 0;
+    private PlayerManager player;
 
     private void Start()
     {
+        player = GetComponent<PlayerManager>();
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += StopTracking;
     }
@@ -56,7 +58,7 @@ public class OrbitCamera : MonoBehaviour
 
     public void Activate()
     {
-        StartTracking(initialTarget);
+        StartTracking(player);
         if (!MatchController.Singleton.IsRoundInProgress)
             return;
         otherPlayers = MatchController.Singleton.Players.Where(p => p != GetComponent<PlayerManager>()).ToArray();
@@ -65,10 +67,18 @@ public class OrbitCamera : MonoBehaviour
 
     private IEnumerator WaitAndStopTrackingRagdoll()
     {
-        yield return new WaitForSeconds(7f);
-        StopTracking();
-        GetComponent<PlayerManager>().HUDController.HideDeathScreen();
+        yield return new WaitForSeconds(3f);
+        player.HUDController.DisplaySpectateHint();
         InputManager.onSelect += SwitchTarget;
+        InputManager.onFirePerformed += SwitchTarget;
+        yield return new WaitForSeconds(3f);
+        var isStillOnPlayer = target = player.AiAimSpot;
+        if (isStillOnPlayer)
+        {
+            StopTracking();
+            // Will focus on next player next time
+            targetIndex = 1;
+        }
     }
 
     private void SwitchTarget(InputAction.CallbackContext ctx)
@@ -76,21 +86,24 @@ public class OrbitCamera : MonoBehaviour
         if (!MatchController.Singleton.IsRoundInProgress)
             return;
 
-        if (targetIndex >= otherPlayers.Length)
+        // 0 is a special index, and the remainder is i+1 so we can safely subtract.
+        if (targetIndex == 0)
             StopTracking();
         else
-            StartTracking(otherPlayers[targetIndex].AiAimSpot);
+            StartTracking(otherPlayers[targetIndex - 1]);
 
         targetIndex = (targetIndex + 1) % (otherPlayers.Length + 1);
     }
 
-    private void StartTracking(Transform nextTarget)
+    private void StartTracking(PlayerManager nextTarget)
     {
         if (!cameraTransform || !InputManager || !MatchController.Singleton.IsRoundInProgress)
             return;
         isTracking = true;
         camera.enabled = true;
-        target = nextTarget;
+        target = nextTarget.AiAimSpot;
+        if (nextTarget != player)
+            player.HUDController.DisplaySpectatorScreen(nextTarget.identity);
     }
 
     private void StopTracking()
@@ -115,7 +128,7 @@ public class OrbitCamera : MonoBehaviour
         var lookInput = InputManager.IsMouseAndKeyboard
             ? InputManager.lookInput
             : InputManager.lookInput * Time.deltaTime;
-        aimAngle += lookInput * 10; // TODO idk set this properly
+        aimAngle += lookInput * lookSensitivity; // TODO idk set this properly
         aimAngle = aimAngle.ClampedLookAngles();
     }
 
