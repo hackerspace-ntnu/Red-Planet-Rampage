@@ -38,7 +38,7 @@ public class RagdollController : MonoBehaviour
         {
             rigidbody.isKinematic = true;
             rigidbody.useGravity = false;
-            rigidbody.velocity = Vector3.zero;
+            rigidbody.AddForce(-rigidbody.GetAccumulatedForce());
         }
         foreach (var rigidbody in rigidbodiesToEnable)
         {

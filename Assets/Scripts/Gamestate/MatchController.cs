@@ -163,6 +163,7 @@ public class MatchController : NetworkBehaviour
         if (isServer)
             roundTimer.OnTimerRunCompleted += EndActiveRound;
         isRoundInProgress = true;
+        ScoreboardManager.Singleton.SetupPosters();
     }
 
     private IEnumerator WaitForClientsAndInitialize()
