@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 using TMPro;
+using UnityEngine.Serialization;
 
 public class PlayerHUDController : MonoBehaviour
 {
@@ -62,6 +63,15 @@ public class PlayerHUDController : MonoBehaviour
 
     [SerializeField]
     private TMP_Text deathText;
+
+    [SerializeField]
+    private TMP_Text spectateHintText;
+
+    [SerializeField]
+    private GameObject spectatorScreen;
+
+    [SerializeField]
+    private TMP_Text spectatorTargetText;
 
     [SerializeField]
     private float damageBorderFlashDuration = .2f;
@@ -281,13 +291,22 @@ public class PlayerHUDController : MonoBehaviour
         deathText.text = killer.playerName;
         deathText.color = killer.color;
         deathScreen.SetActive(true);
+        spectateHintText.gameObject.SetActive(false);
         ammoHud.parent.gameObject.SetActive(false);
         speedLines.gameObject.SetActive(false);
     }
 
-    public void HideDeathScreen()
+    public void DisplaySpectateHint()
+    {
+        spectateHintText.gameObject.SetActive(true);
+    }
+
+    public void DisplaySpectatorScreen(PlayerIdentity target)
     {
         deathScreen.SetActive(false);
+        spectatorScreen.SetActive(true);
+        spectatorTargetText.text = target.playerName;
+        spectatorTargetText.color = target.color;
     }
 
     // x and y expected to be in range [-1, 1]
