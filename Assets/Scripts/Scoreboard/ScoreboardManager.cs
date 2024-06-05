@@ -62,15 +62,13 @@ public class ScoreboardManager : MonoBehaviour
 
     private void Start()
     {
-        matchController = MatchController.Singleton;
-
         audioSource = GetComponent<AudioSource>();
 
-        matchController.onRoundStart += SetupPosters;
     }
 
-    private void SetupPosters()
+    public void SetupPosters()
     {
+        matchController = MatchController.Singleton;
         players = matchController.Players.OrderBy(p => p.id).ToList();
 
         scoreboards = GetComponentsInChildren<Scoreboard>().ToList();
