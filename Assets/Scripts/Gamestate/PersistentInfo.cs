@@ -78,44 +78,38 @@ public class PersistentInfo : MonoBehaviour
 
         #endregion Singleton boilerplate
 
-        if (File.Exists(FilePath))
-        {
-            LoadPersistentFile();
-        }
-        else
+        if (!File.Exists(FilePath))
         {
             CreateDefaultFile();
         }
+        LoadPersistentFile();
     }
 
     #region I/O
 
     private void LoadPersistentFile()
     {
-        if (File.Exists(FilePath))
+        BinaryFormatter persistentDataFormatter = new();
+        FileStream persistentDataStream = File.Open(FilePath, FileMode.Open);
+        List<CombinationStats> weaponData = new();
+        try
         {
-            BinaryFormatter persistentDataFormatter = new();
-            FileStream persistentDataStream = File.Open(FilePath, FileMode.Open);
-            List<CombinationStats> weaponData = new();
-            try
-            {
-                weaponData = ((PersistentData)persistentDataFormatter.Deserialize(persistentDataStream)).Data;
-                Debug.Log($"Loaded stats for {weaponData.Count} combinations");
-            }
-            catch
-            {
-                // TODO: Give users feedback that their persistent data file is corrupt!
-                Debug.Log("File empty or corrupt, resetting to default");
-                persistentDataStream.Close();
-                CreateDefaultFile();
-                persistentDataStream = File.Open(FilePath, FileMode.Open);
-                weaponData = ((PersistentData)persistentDataFormatter.Deserialize(persistentDataStream)).Data;
-            }
-
-            persistentDataStream.Close();
-            CombinationStats = weaponData.OrderByDescending(data => data.KillCount).ToList();
-            combinationStatsLookup = new(weaponData.Select(d => KeyValuePair.Create((d.Body, d.Barrel, d.Extension), d)));
+            weaponData = ((PersistentData)persistentDataFormatter.Deserialize(persistentDataStream)).Data;
+            Debug.Log($"Loaded stats for {weaponData.Count} combinations");
         }
+        catch
+        {
+            // TODO: Give users feedback that their persistent data file is corrupt!
+            Debug.Log("File empty or corrupt, resetting to default");
+            persistentDataStream.Close();
+            CreateDefaultFile();
+            persistentDataStream = File.Open(FilePath, FileMode.Open);
+            weaponData = ((PersistentData)persistentDataFormatter.Deserialize(persistentDataStream)).Data;
+        }
+
+        persistentDataStream.Close();
+        CombinationStats = weaponData.OrderByDescending(data => data.KillCount).ToList();
+        combinationStatsLookup = new(weaponData.Select(d => KeyValuePair.Create((d.Body, d.Barrel, d.Extension), d)));
     }
 
     private void CreateDefaultFile()
