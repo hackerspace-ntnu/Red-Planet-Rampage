@@ -191,7 +191,8 @@ public class PlayerManager : NetworkBehaviour
         {
             killer = lastPlayerThatHitMe;
         }
-        onDeath?.Invoke(killer, this, info);
+        if (isAlive)
+            onDeath?.Invoke(killer, this, info);
         isAlive = false;
         aimAssistCollider.SetActive(false);
         TurnIntoRagdoll(info);

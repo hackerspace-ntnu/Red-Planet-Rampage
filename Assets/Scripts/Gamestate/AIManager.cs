@@ -154,7 +154,8 @@ public class AIManager : PlayerManager
         {
             killer = lastPlayerThatHitMe;
         }
-        onDeath?.Invoke(killer, this, info);
+        if (!isDead)
+            onDeath?.Invoke(killer, this, info);
         aimAssistCollider.SetActive(false);
         aiTargetCollider.gameObject.SetActive(false);
         aiMovement.enabled = false;
