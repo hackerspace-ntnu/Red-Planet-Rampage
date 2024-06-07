@@ -321,6 +321,11 @@ public class MatchController : NetworkBehaviour
         ReturnToMainMenu();
     }
 
+    public void ResetMatch()
+    {
+        rounds = new List<Round>();
+    }
+
     private void ReturnToMainMenu()
     {
         // Remove AI identities
@@ -328,7 +333,7 @@ public class MatchController : NetworkBehaviour
             .Where(identity => identity.IsAI)
             .ToList().ForEach(aiIdentity => Destroy(aiIdentity));
 
-        rounds = new List<Round>();
+        ResetMatch();
         MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
 
