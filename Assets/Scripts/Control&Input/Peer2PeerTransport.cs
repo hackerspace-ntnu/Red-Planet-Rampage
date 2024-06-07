@@ -771,6 +771,13 @@ public class Peer2PeerTransport : NetworkManager
         {
             Debug.Log($"Spawning local player {playerDetails.id}");
             var input = PlayerInputManagerController.Singleton.LocalPlayerInputs[playerDetails.localInputID];
+
+            // Reset camera transform (it may have been kerfluffled by the spectator cam thingy)
+            input.transform.localPosition = Vector3.zero;
+            input.transform.localRotation = Quaternion.identity;
+            input.PlayerCamera.transform.localRotation = Quaternion.identity;
+            input.PlayerCamera.transform.localPosition = Vector3.zero;
+
             // Make playerInput child of player it's attached to
             input.transform.parent = player.transform;
             // Set received playerInput (and most importantly its camera) at an offset from player's position
@@ -900,6 +907,12 @@ public class Peer2PeerTransport : NetworkManager
         {
             Debug.Log($"Spawning local player {playerDetails.id}");
             var input = PlayerInputManagerController.Singleton.LocalPlayerInputs[playerDetails.localInputID];
+
+            // Reset camera transform (ensuring we don't mess up in weapon building)
+            input.transform.localPosition = Vector3.zero;
+            input.transform.localRotation = Quaternion.identity;
+            input.PlayerCamera.transform.localRotation = Quaternion.identity;
+            input.PlayerCamera.transform.localPosition = Vector3.zero;
 
             // Make playerInput child of player it's attached to
             input.transform.parent = player.transform;
