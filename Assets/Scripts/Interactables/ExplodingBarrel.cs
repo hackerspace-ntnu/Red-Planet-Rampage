@@ -16,6 +16,8 @@ public class ExplodingBarrel : MonoBehaviour
 
     private HealthController healthController;
 
+    private bool isAlive = true;
+
     private void Start()
     {
         healthController = GetComponent<HealthController>();
@@ -30,11 +32,14 @@ public class ExplodingBarrel : MonoBehaviour
 
     private void Explode(HealthController controller, float damage, DamageInfo info)
     {
+        if (!isAlive)
+            return;
         barrelMesh.enabled = false;
         GetComponentsInChildren<Collider>().ToList().ForEach(c => c.enabled = false);
         explosion.Explode(info.sourcePlayer);
         LeaveMark();
         Destroy(gameObject, 4);
+        isAlive = false;
     }
 
     private void LeaveMark()
