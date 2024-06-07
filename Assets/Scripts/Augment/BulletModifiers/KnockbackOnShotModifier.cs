@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class KnockbackOnShotModifier : MonoBehaviour, ProjectileModifier
@@ -11,6 +12,8 @@ public class KnockbackOnShotModifier : MonoBehaviour, ProjectileModifier
     private GunController gunController;
 
     private float calculatedPushPower;
+
+    private (ProjectileState, List<HitboxController>) collidersHitWithShot;
 
     private void Awake()
     {
@@ -33,7 +36,16 @@ public class KnockbackOnShotModifier : MonoBehaviour, ProjectileModifier
     private void KnockAwayTargets(HitboxController controller, ref ProjectileState state)
     {
         Vector3 normal = gunController.transform.forward;
+        if (collidersHitWithShot.Item1 == state && collidersHitWithShot.Item2.Contains(controller))
+            return;
 
+        if (collidersHitWithShot.Item1 != state)
+        {
+            collidersHitWithShot.Item2.Clear();
+            collidersHitWithShot.Item1 = state;
+        }
+
+        collidersHitWithShot.Item2.Add(controller);
         if (controller.health.TryGetComponent<Rigidbody>(out var rigidbody))
         {
             // If AI, enable physics for a small time frame
