@@ -127,25 +127,28 @@ public class PlayerHUDController : MonoBehaviour
         ammoBar.material = ammoCapacityMaterial;
         ammoCapacityMaterial.SetFloat("_Arc2", 0);
 
-        healthBarScaleX = healthBar.transform.localScale.x;
-        healthBar.color = healthMax;
-        healthTextPosition = healthText.transform.localPosition;
         defaultCrosshairScale = crosshair.localScale;
 
         originalChipY = chipBox.anchoredPosition.y;
-        // Anchor to top right if there's only one player.
-        // This keeps the chip counter from conflicting with the timer
         if (!MatchController.Singleton || PlayerInputManagerController.Singleton.LocalPlayerInputs.Count() == 1)
         {
+            // Anchor to top right if there's only one player.
+            // This keeps the chip counter from conflicting with the timer
             chipBox.anchorMin = Vector2.one;
             chipBox.anchorMax = Vector2.one;
             originalChipX = -chipBox.sizeDelta.x / 2f - 10;
+            // Also scale down the health bar stuff
+            hudParent.localScale = .6f * Vector3.one;
         }
         else
         {
             originalChipX = 0;
         }
         chipBox.anchoredPosition = new Vector2(originalChipX, -originalChipY);
+
+        healthBarScaleX = healthBar.transform.localScale.x;
+        healthBar.color = healthMax;
+        healthTextPosition = healthText.transform.localPosition;
     }
 
     public void SetSpeedLines(Vector3 velocity)
