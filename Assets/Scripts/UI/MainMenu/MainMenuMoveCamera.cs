@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MainMenuMoveCamera : MonoBehaviour
@@ -41,7 +39,7 @@ public class MainMenuMoveCamera : MonoBehaviour
         playerSelectCamera.gameObject.SetActive(true);
         mainMenuCamera.gameObject.SetActive(false);
         directionalLight.SetActive(false);
-        
+
         if (inLevelSelect)
         {
             inLevelSelect = false;
