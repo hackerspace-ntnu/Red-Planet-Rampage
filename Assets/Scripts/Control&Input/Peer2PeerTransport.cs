@@ -502,6 +502,15 @@ public class Peer2PeerTransport : NetworkManager
         }
     }
 
+    private void RemoveAiPlayers()
+    {
+        foreach (var ai in players.Values.Where(p => p.type is PlayerType.AI))
+        {
+            NetworkServer.SendToAll(new PlayerLeftMessage(ai.id));
+        }
+    }
+
+
     // Called after shooting rounds (TODO just use the same matchcontroller stuff???)
     private static void UpdatePlayerDetailsAfterShootingRound()
     {
@@ -543,7 +552,8 @@ public class Peer2PeerTransport : NetworkManager
 
     public override void OnServerChangeScene(string newSceneName)
     {
-        var needsExtraAiPlayers = PlayerInputManagerController.Singleton.MatchHasAI && !MatchController.Singleton;
+        var isAiEnabled = PlayerInputManagerController.Singleton.MatchHasAI;
+        var needsExtraAiPlayers = isAiEnabled && !MatchController.Singleton;
         if (needsExtraAiPlayers)
         {
             AddAiPlayers();
@@ -560,6 +570,8 @@ public class Peer2PeerTransport : NetworkManager
                 break;
             case Scenes.Menu:
                 isInMatch = false;
+                if (isAiEnabled)
+                    RemoveAiPlayers();
                 NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
                 break;
             default:

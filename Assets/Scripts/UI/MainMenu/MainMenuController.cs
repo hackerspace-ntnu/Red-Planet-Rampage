@@ -132,11 +132,14 @@ public class MainMenuController : MonoBehaviour
             SelectControl(playerSelectMenuDefaultButton);
             SetStartButtonState();
             playerSelectManager.UpdateLobby();
+            if (playerInputManagerController.MatchHasAI)
+                aIButton.Toggle();
         }
         else
         {
             // Clients should go to their own lobby scene
-            SceneManager.LoadScene(Scenes.ClientLobby);
+            if (SceneManager.GetActiveScene().name == Scenes.Menu)
+                SceneManager.LoadScene(Scenes.ClientLobby);
         }
     }
 
