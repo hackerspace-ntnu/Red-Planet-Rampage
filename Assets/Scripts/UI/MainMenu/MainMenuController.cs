@@ -65,12 +65,13 @@ public class MainMenuController : MonoBehaviour
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
 
-    private int loadingDuration = 6;
-
     private Coroutine introRoutine;
 
     [SerializeField]
     private GameObject mainMenuCamera;
+
+    [SerializeField]
+    private GameObject videoPlayerCamera;
 
     private void Awake()
     {
@@ -91,6 +92,7 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
         if (SceneManager.GetActiveScene().name == "Menu")
             ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived += UpdateStartButton;
+
         if (playerInputManagerController.LocalPlayerInputs.Count > 0)
         {
             // Already played, just show the menu.
@@ -99,6 +101,8 @@ public class MainMenuController : MonoBehaviour
             introVideo.Stop();
             introVideo.gameObject.SetActive(false);
             introVideoFirstFrame.SetActive(false);
+            videoPlayerCamera.SetActive(false);
+            mainMenuCamera.SetActive(true);
             // Reset loading screen
             LoadingScreen.ResetCounter();
         }
@@ -165,6 +169,8 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
         skipIntroText.gameObject.SetActive(false);
         introVideo.gameObject.SetActive(false);
+        videoPlayerCamera.SetActive(false);
+        mainMenuCamera.SetActive(true);
         defaultMenu.SetActive(true);
         SelectControl(defaultButton);
     }
