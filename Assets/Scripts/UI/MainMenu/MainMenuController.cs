@@ -3,6 +3,7 @@ using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -41,6 +42,10 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private CreditsMenu creditsMenu;
     [SerializeField]
+    private GameObject playerSelectMenu;
+    [SerializeField]
+    private Selectable playerSelectMenuDefaultButton;
+    [SerializeField]
     private GameObject mapSelectMenu;
     [SerializeField]
     private LevelSelectManager levelSelectManager;
@@ -54,8 +59,6 @@ public class MainMenuController : MonoBehaviour
     private Button startButton;
     [SerializeField]
     private GameObject innputManagerPrefab;
-    [SerializeField]
-    private string[] mapNames;
     private AudioSource audioSource;
     [SerializeField]
     private AudioClip[] uiSelectSounds;
@@ -110,6 +113,30 @@ public class MainMenuController : MonoBehaviour
             playerInputManagerController.onPlayerInputJoined += ShowSkipText;
             defaultMenu.SetActive(false);
             introRoutine = StartCoroutine(WaitForIntroVideoToEnd());
+        }
+
+        if (NetworkManager.singleton.isNetworkActive)
+        {
+            GoBackToLobby();
+        }
+    }
+
+    private void GoBackToLobby()
+    {
+        PlayerInputManagerController.Singleton.RemoveJoinListener();
+        if (NetworkServer.active)
+        {
+            // Hosts should be yeeted back into the lobby menu
+            mainMenuCamera.GetComponentInChildren<MainMenuMoveCamera>().MoveToPlayerSelect();
+            SwitchToMenu(playerSelectMenu);
+            SelectControl(playerSelectMenuDefaultButton);
+            SetStartButtonState();
+            playerSelectManager.UpdateLobby();
+        }
+        else
+        {
+            // Clients should go to their own lobby scene
+            SceneManager.LoadScene(Scenes.ClientLobby);
         }
     }
 
