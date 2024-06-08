@@ -17,6 +17,7 @@ public class BiddingAI : BiddingPlayer
     [SerializeField]
     private Vector3 platformDestinationOffset = Vector3.back * 2;
 
+    private int platformsEvaluated = 0;
     private bool shouldEvaluate = true;
 
     void Start()
@@ -40,28 +41,41 @@ public class BiddingAI : BiddingPlayer
     private IEnumerator WaitAndEvaluate()
     {
         foreach (BiddingPlatform platform in AuctionDriver.Singleton.BiddingPlatforms)
-            if (platform.IsActive)
-                EvaluatePlatformStates(platform);
+            EvaluatePlatformStates(platform);
+        ChooseDestination();
         yield return new WaitForSeconds(2);
         StartCoroutine(WaitAndEvaluate());
     }
 
     private void EvaluatePlatformStates(BiddingPlatform platform)
     {
-        if (platform.LeadingBidder == playerManager.id)
+        var isAlreadyInTheLead = platform.IsActive && platform.LeadingBidder == playerManager.id;
+        if (isAlreadyInTheLead)
             return;
 
-        if (platform.chips >= playerManager.identity.chips)
+        var isNotActive = !platform.IsActive;
+        var isTooExpensive = platform.chips >= playerManager.identity.chips;
+        if (isNotActive || isTooExpensive)
             priorities[platform] = -1;
+    }
 
+    private void ChooseDestination()
+    {
         currentDestination = priorities.ToList()
             .OrderByDescending(x => x.Value)
             .Select(x => x.Key).First();
 
-        if (currentDestination)
-            agent.SetDestination(currentDestination.transform.position + platformDestinationOffset);
+        if (!currentDestination)
+            return;
 
-        if (currentDestination == playerManager.SelectedBiddingPlatform)
+        var isAlreadyInTheLead = currentDestination.LeadingBidder == playerManager.id;
+        if (isAlreadyInTheLead)
+            return;
+
+        agent.SetDestination(currentDestination.transform.position + platformDestinationOffset);
+
+        var isAlreadyAtThisPlatform = currentDestination == playerManager.SelectedBiddingPlatform;
+        if (isAlreadyAtThisPlatform)
             OnBiddingPlatformChange(currentDestination);
     }
 
@@ -83,11 +97,11 @@ public class BiddingAI : BiddingPlayer
                     .Sum((augment) => augment.KillCount);
                 break;
         }
-        priorities.Add(platform, priority);
-        // Move towards a position that does not obscure the cost text (!)
-        agent.SetDestination(platform.transform.position + platformDestinationOffset);
+        // (re)set the priority (reassignment in case we have multiple bidding rounds)
+        priorities[platform] = priority;
 
-        if (!shouldEvaluate)
+        platformsEvaluated++;
+        if (platformsEvaluated < 3 || !shouldEvaluate)
             return;
         StartCoroutine(WaitAndEvaluate());
         shouldEvaluate = false;
@@ -105,7 +119,7 @@ public class BiddingAI : BiddingPlayer
 
     private void OnBiddingPlatformChange(BiddingPlatform platform)
     {
-        if (!platform || !currentDestination || platform != currentDestination || platform.LeadingBidder == playerManager.id)
+        if (!platform || !currentDestination || platform != currentDestination || platform.LeadingBidder == playerManager.id || platform != playerManager.SelectedBiddingPlatform)
             return;
 
         AnimateBid();
