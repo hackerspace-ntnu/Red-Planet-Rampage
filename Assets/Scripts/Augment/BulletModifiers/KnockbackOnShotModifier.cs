@@ -13,7 +13,7 @@ public class KnockbackOnShotModifier : MonoBehaviour, ProjectileModifier
 
     private float calculatedPushPower;
 
-    private (ProjectileState, List<HitboxController>) collidersHitWithShot;
+    private (ProjectileState shot, List<HitboxController> colliders) collidersHitWithShot = (null, new());
 
     private void Awake()
     {
@@ -36,16 +36,16 @@ public class KnockbackOnShotModifier : MonoBehaviour, ProjectileModifier
     private void KnockAwayTargets(HitboxController controller, ref ProjectileState state)
     {
         Vector3 normal = gunController.transform.forward;
-        if (collidersHitWithShot.Item1 == state && collidersHitWithShot.Item2.Contains(controller))
+        if (collidersHitWithShot.shot == state && collidersHitWithShot.colliders.Contains(controller))
             return;
 
-        if (collidersHitWithShot.Item1 != state)
+        if (collidersHitWithShot.shot != state)
         {
-            collidersHitWithShot.Item2.Clear();
-            collidersHitWithShot.Item1 = state;
+            collidersHitWithShot.colliders.Clear();
+            collidersHitWithShot.shot = state;
         }
 
-        collidersHitWithShot.Item2.Add(controller);
+        collidersHitWithShot.colliders.Add(controller);
         if (controller.health.TryGetComponent<Rigidbody>(out var rigidbody))
         {
             // If AI, enable physics for a small time frame
