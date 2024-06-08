@@ -338,6 +338,7 @@ public class MatchController : NetworkBehaviour
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
 
         // Mirror pulls us to the main menu automatically
-        NetworkManager.singleton.StopHost();
+        if (isServer)
+            NetworkManager.singleton.ServerChangeScene(Scenes.Menu);
     }
 }
