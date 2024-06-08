@@ -72,7 +72,7 @@ public class OrbitCamera : MonoBehaviour
         InputManager.onSelect += SwitchTarget;
         InputManager.onFirePerformed += SwitchTarget;
         yield return new WaitForSeconds(3f);
-        var isStillOnPlayer = target = player.AiAimSpot;
+        var isStillOnPlayer = target == player.AiAimSpot;
         if (isStillOnPlayer)
         {
             StopTracking();
