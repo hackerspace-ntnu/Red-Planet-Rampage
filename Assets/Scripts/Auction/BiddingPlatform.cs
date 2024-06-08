@@ -1,4 +1,5 @@
 using Mirror;
+using Org.BouncyCastle.Tls;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -137,6 +138,13 @@ public class BiddingPlatform : NetworkBehaviour
         CmdPlaceBid(playerIdentity.id);
     }
 
+    private bool CanBid(PlayerIdentity bidder)
+    {
+        bool isLeadingPlayerAndCanIncrement = bidder.id == leadingBidder && bidder.chips > 0;
+        bool bidderHasEnoughChips = bidder.chips > chips;
+        return isLeadingPlayerAndCanIncrement || bidderHasEnoughChips;
+    }
+
     // All players should be able to place bids, thus we ignore authority (for the time being).
     // TODO verify that the player is on the platform and is from the connection that calls this cmd.
     [Command(requiresAuthority = false)]
@@ -158,8 +166,7 @@ public class BiddingPlatform : NetworkBehaviour
 
         Debug.Log($"Got bidding request from {playerIdentity.ToColorString()} (chips={playerIdentity.chips}) on {item.displayName} (chips={chips}, leader={leadingBidderIdentity?.ToColorString()})");
 
-        bool leadingPlayerCanIncrement = playerIdentity.id == leadingBidder && playerIdentity.chips > 0;
-        if (playerIdentity.chips > chips || leadingPlayerCanIncrement)
+        if (CanBid(playerIdentity))
         {
             Debug.Log($"Accepted request from {playerIdentity.ToColorString()} on {item.displayName}");
             RpcAcceptBid(playerIdentity.id);
@@ -181,6 +188,13 @@ public class BiddingPlatform : NetworkBehaviour
         }
         var playerIdentity = player.identity;
 
+        if (!CanBid(playerIdentity))
+        {
+            Debug.LogWarning($"Invalid bid request from {playerIdentity.ToColorString()} for {item.displayName}");
+            onBidDenied?.Invoke(this);
+            return;
+        }
+
         // TODO consider rewriting some of the following
 
         // Refund
@@ -197,7 +211,7 @@ public class BiddingPlatform : NetworkBehaviour
         chips++;
         playerIdentity.UpdateChip(-chips);
         itemCostText.text = chips.ToString() + "<sprite name=\"chip\">";
-        leadingBidText.text = playerIdentity.playerName.ToUpper()+":";
+        leadingBidText.text = playerIdentity.playerName.ToUpper() + ":";
         LeanTween.value(
             gameObject,
             (color) => material.SetColor("_BidderColor", color),

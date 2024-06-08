@@ -60,7 +60,16 @@ public class PlayerIdentity : MonoBehaviour
     public void UpdateChip(int amount)
     {
         if (amount == 0) return;
-        chips += amount;
+        if (chips + amount < 0)
+        {
+            Debug.LogWarning($"Player {id} {ToColorString()} almost got negative chips {chips + amount}");
+            // Safeguard against cheating by locking chip amount to 0 when this sort of bug appears.
+            chips = 0;
+        }
+        else
+        {
+            chips += amount;
+        }
 
         onChipChange?.Invoke(chips);
 
