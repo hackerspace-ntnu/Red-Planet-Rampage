@@ -92,6 +92,20 @@ public class BulletController : ProjectileController
 
     private void FireProjectile()
     {
+        if (authority)
+            CmdFireProjectile(projectileOutput.position, projectileRotation * projectileOutput.forward, projectileRotation * projectileOutput.rotation);
+    }
+
+    [Command]
+    private void CmdFireProjectile(Vector3 output, Vector3 direction, Quaternion rotation)
+    {
+        // TODO verify that this input is reasonable!
+        RpcFireProjectile(output, direction, rotation);
+    }
+
+    [ClientRpc]
+    private void RpcFireProjectile(Vector3 output, Vector3 direction, Quaternion rotation)
+    {
         for (int k = 0; k < stats.ProjectilesPerShot; k++)
         {
             Quaternion randomSpread = Quaternion.Lerp(Quaternion.identity, random.Rotation(), stats.ProjectileSpread);
@@ -102,11 +116,11 @@ public class BulletController : ProjectileController
                 active = true,
                 distanceTraveled = 0f,
                 damage = stats.ProjectileDamage,
-                position = projectileOutput.position,
-                oldPosition = projectileOutput.position,
-                direction = randomSpread * projectileRotation * projectileOutput.forward,
+                position = output,
+                oldPosition = output,
+                direction = randomSpread * direction,
                 maxDistance = maxDistance,
-                rotation = randomSpread * projectileRotation * projectileOutput.rotation,
+                rotation = randomSpread * rotation,
                 initializationTime = Time.fixedTime,
                 speedFactor = stats.ProjectileSpeedFactor,
                 gravity = stats.ProjectileGravityModifier * 9.81f

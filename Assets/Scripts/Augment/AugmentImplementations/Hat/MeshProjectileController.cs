@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.VFX;
 using System.Linq;
 using UnityEngine.Serialization;
+using Mirror;
 
 /// <summary>
 /// Class that processes and renders mesh projectiles
@@ -85,13 +86,29 @@ public class MeshProjectileController : ProjectileController
 
     public override void InitializeProjectile(GunStats stats)
     {
-        loadedProjectile = new ProjectileState(stats, projectileOutput);
-        loadedProjectile.maxDistance = maxDistance;
+        loadedProjectile = new ProjectileState(stats, projectileOutput)
+        {
+            maxDistance = maxDistance
+        };
 
         animator.OnFire(stats);
     }
 
     private void FireProjectile()
+    {
+        if (authority)
+            CmdFireProjectile(projectileOutput.position, projectileRotation * projectileOutput.forward, projectileRotation * projectileOutput.rotation);
+    }
+
+    [Command]
+    private void CmdFireProjectile(Vector3 output, Vector3 direction, Quaternion rotation)
+    {
+        // TODO verify that this input is reasonable!
+        RpcFireProjectile(output, direction, rotation);
+    }
+
+    [ClientRpc]
+    private void RpcFireProjectile(Vector3 output, Vector3 direction, Quaternion rotation)
     {
         if (loadedProjectile == null) return;
 
@@ -105,9 +122,9 @@ public class MeshProjectileController : ProjectileController
             if (projectiles[currentStateIndex] == null || !projectiles[currentStateIndex].active)
             {
                 loadedProjectile.initializationTime = Time.fixedTime;
-                loadedProjectile.position = projectileOutput.position;
-                loadedProjectile.direction = projectileRotation * projectileOutput.forward;
-                loadedProjectile.rotation = projectileRotation * projectileOutput.rotation;
+                loadedProjectile.position = output;
+                loadedProjectile.direction = direction;
+                loadedProjectile.rotation = rotation;
                 loadedProjectile.size = size;
                 loadedProjectile.additionalProperties["lastCollider"] = null;
 

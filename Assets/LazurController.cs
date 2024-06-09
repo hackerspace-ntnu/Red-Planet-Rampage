@@ -1,6 +1,7 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.VFX;
+using Mirror;
 
 public class LazurController : ProjectileController
 {
@@ -35,8 +36,9 @@ public class LazurController : ProjectileController
         animator.OnChargeStart += PlayChargeUpSound;
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         if (!gunController || !gunController.Player || !animator)
             return;
         animator.OnShotFiredAnimation -= FireLazur;
@@ -50,15 +52,29 @@ public class LazurController : ProjectileController
 
     private void FireLazur()
     {
+        if (authority)
+            CmdFireProjectile(projectileOutput.position, projectileRotation * projectileOutput.forward);
+    }
+
+    [Command]
+    private void CmdFireProjectile(Vector3 output, Vector3 direction)
+    {
+        // TODO verify that this input is reasonable!
+        RpcFireProjectile(output, direction);
+    }
+
+    [ClientRpc]
+    private void RpcFireProjectile(Vector3 output, Vector3 direction)
+    {
         projectile = new()
         {
             active = true,
             distanceTraveled = 0f,
             damage = stats.ProjectileDamage,
-            position = projectileOutput.position,
-            oldPosition = projectileOutput.position,
-            direction = projectileRotation * projectileOutput.forward,
-            maxDistance = this.MaxDistance,
+            position = output,
+            oldPosition = output,
+            direction = direction,
+            maxDistance = MaxDistance,
             initializationTime = Time.fixedTime
         };
         projectile.additionalProperties.Clear();
