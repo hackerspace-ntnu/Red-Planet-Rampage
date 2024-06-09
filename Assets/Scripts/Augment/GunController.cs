@@ -1,3 +1,4 @@
+using System.Collections;
 using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -56,6 +57,9 @@ public class GunController : NetworkBehaviour
     /// </summary>
     public GunEvent onInitializeBullet;
 
+    private uint nextShotID = 0;
+    public uint CurrentShotID => nextShotID;
+
     public void SetPlayer(PlayerManager player)
     {
         Player = player;
@@ -73,7 +77,6 @@ public class GunController : NetworkBehaviour
     private bool isFiring = false;
 
     private int recoilTween;
-    private int zoomTween;
 
     private void Start()
     {
@@ -213,7 +216,7 @@ public class GunController : NetworkBehaviour
 
     private void ActuallyFire()
     {
-        projectile.InitializeProjectile(stats);
+        projectile.InitializeProjectile(stats, nextShotID++);
         onInitializeBullet?.Invoke(stats);
     }
 

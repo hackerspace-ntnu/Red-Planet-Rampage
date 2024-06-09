@@ -35,6 +35,8 @@ public class BulletController : ProjectileController
 
     private ProjectileState projectile = new ProjectileState();
 
+    private uint currentShotID;
+
     private Random random = new();
 
     protected override void Awake()
@@ -70,8 +72,7 @@ public class BulletController : ProjectileController
 
     public void SetTrail(VisualEffect newTrail)
     {
-        if (trailPositionBuffer.Buffer != null)
-            trailPositionBuffer.Buffer.Release();
+        trailPositionBuffer.Buffer?.Release();
         trail = newTrail;
     }
 
@@ -85,8 +86,9 @@ public class BulletController : ProjectileController
         animator.OnReload(stats);
     }
 
-    public override void InitializeProjectile(GunStats stats)
+    public override void InitializeProjectile(GunStats stats, uint shotID)
     {
+        currentShotID = shotID;
         animator.OnFire(stats);
     }
 
@@ -113,6 +115,7 @@ public class BulletController : ProjectileController
             projectile = new()
             {
                 // TODO: Possibly standardize this better
+                shotID = currentShotID,
                 active = true,
                 distanceTraveled = 0f,
                 damage = stats.ProjectileDamage,

@@ -26,6 +26,8 @@ public class LazurController : ProjectileController
     [SerializeField]
     private AudioGroup chargeUpAudio;
 
+    private uint currentShotID;
+
     protected override void Awake()
     {
         base.Awake();
@@ -68,6 +70,7 @@ public class LazurController : ProjectileController
     {
         projectile = new()
         {
+            shotID = currentShotID,
             active = true,
             distanceTraveled = 0f,
             damage = stats.ProjectileDamage,
@@ -136,8 +139,9 @@ public class LazurController : ProjectileController
     {
         animator.OnReload(stats);
     }
-    public override void InitializeProjectile(GunStats stats)
+    public override void InitializeProjectile(GunStats stats, uint shotID)
     {
+        currentShotID = shotID;
         animator.OnFire(stats);
     }
 

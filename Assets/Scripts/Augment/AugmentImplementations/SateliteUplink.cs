@@ -48,7 +48,7 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
     private ObjectPool<TargetingReticle> targetingReticlePool;
     private Transform garbageParent;
 
-    private bool isTrackingCurrentShot = false;
+    private uint currentShotID = uint.MaxValue;
     private bool isReady = false;
 
     private System.Random random = new System.Random();
@@ -60,7 +60,6 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
             return;
 
         gunController.onFireStart += StartTracking;
-        gunController.onFireEnd += StopTracking;
 
         garbagePool = new ObjectPool<FallingHazard>(PickTemplate, maxGarbagePresent);
         targetingReticlePool = new ObjectPool<TargetingReticle>(targetingReticle, maxLaunchesPerShot);
@@ -109,14 +108,9 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
     {
         if (!isReady)
             return;
-        isTrackingCurrentShot = true;
+        currentShotID = gunController.CurrentShotID;
         launchesThisShot = 0;
         RestartCooldown();
-    }
-
-    private void StopTracking(GunStats stats)
-    {
-        isTrackingCurrentShot = false;
     }
 
     public void Attach(ProjectileController projectile)
@@ -135,7 +129,7 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
 
     private void Track(ref ProjectileState state, GunStats stats)
     {
-        if (!isTrackingCurrentShot)
+        if (state.shotID != currentShotID)
             return;
         trackedProjectiles.Add(state);
         StartCoroutine(UnTrack(state));
@@ -145,7 +139,6 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
     {
         yield return new WaitForSeconds(10);
         trackedProjectiles.Remove(state);
-
     }
 
     private void Target(RaycastHit hit, ref ProjectileState state)
@@ -201,6 +194,5 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
         if (!gunController)
             return;
         gunController.onFireStart -= StartTracking;
-        gunController.onFireEnd -= StopTracking;
     }
 }
