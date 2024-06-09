@@ -179,7 +179,7 @@ public class MainMenuController : MonoBehaviour
     {
         playerInputManagerController.onPlayerInputJoined -= AddPlayer;
         playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
-        if (SceneManager.GetActiveScene().name == "Menu")
+        if (SceneManager.GetActiveScene().name == "Menu" && NetworkManager.singleton)
             ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived -= UpdateStartButton;
     }
 
