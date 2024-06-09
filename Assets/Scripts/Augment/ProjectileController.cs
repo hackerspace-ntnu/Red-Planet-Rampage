@@ -6,6 +6,8 @@ using Mirror;
 [System.Serializable]
 public class ProjectileState
 {
+    public uint shotID;
+
     // When the projectile was started
     public float initializationTime = 0f;
 
@@ -167,7 +169,7 @@ public abstract class ProjectileController : NetworkBehaviour
 
     // The meat and potatoes of the gun, this is what initializes a "bullet", whatever the fuck that is supposed to mean
     // Again, subclasses decide for themselves what initializing a bullet does
-    public abstract void InitializeProjectile(GunStats stats);
+    public abstract void InitializeProjectile(GunStats stats, uint shotID);
 }
 
 
