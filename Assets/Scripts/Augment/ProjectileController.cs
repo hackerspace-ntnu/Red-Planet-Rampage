@@ -136,6 +136,7 @@ public abstract class ProjectileController : NetworkBehaviour
 
     protected virtual void Awake()
     {
+        syncDirection = SyncDirection.ClientToServer;
 
         collisionLayers = LayerMask.GetMask("Default", "HitBox");
 
