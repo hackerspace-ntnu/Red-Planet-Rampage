@@ -105,6 +105,8 @@ public class MainMenuController : MonoBehaviour
             mainMenuCamera.SetActive(true);
             // Reset loading screen
             LoadingScreen.ResetCounter();
+
+            Cursor.visible = true;
         }
         else
         {
@@ -116,6 +118,8 @@ public class MainMenuController : MonoBehaviour
             playerInputManagerController.onPlayerInputJoined += ShowSkipText;
             defaultMenu.SetActive(false);
             introRoutine = StartCoroutine(WaitForIntroVideoToEnd());
+
+            Debug.Log("Nah, it enters here mate");
         }
     }
 
