@@ -99,11 +99,11 @@ public class InputManager : MonoBehaviour
         playerInput.actions["Look"].canceled += Look;
 
         // Imprison mouse
-        if (playerInput.currentControlScheme == "MouseAndKeyboard")
-        {
-            isMouseAndKeyboard = true;
-            Cursor.lockState = CursorLockMode.Locked;
-        }
+        //if (playerInput.currentControlScheme == "MouseAndKeyboard")
+        //{
+        //    isMouseAndKeyboard = true;
+        //    Cursor.lockState = CursorLockMode.Locked;
+        //}
 
         AddExtraListeners();
     }

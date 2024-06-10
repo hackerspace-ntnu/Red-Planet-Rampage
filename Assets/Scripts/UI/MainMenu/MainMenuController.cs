@@ -109,6 +109,8 @@ public class MainMenuController : MonoBehaviour
         else
         {
             // First time in menu, play intro video.
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
             introVideo.started += StopFirstFrame;
             DontDestroyOnLoad(EventSystem.current);
             playerInputManagerController.onPlayerInputJoined += ShowSkipText;
@@ -166,6 +168,8 @@ public class MainMenuController : MonoBehaviour
     private void EndIntro()
     {
         sun.Restart();
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
         skipIntroText.gameObject.SetActive(false);
         introVideo.gameObject.SetActive(false);
