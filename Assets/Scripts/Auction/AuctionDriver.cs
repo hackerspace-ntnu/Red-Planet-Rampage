@@ -126,6 +126,8 @@ public class AuctionDriver : NetworkBehaviour
 
     public void ScreenShake()
     {
+        if (cameraAnimator.transform.localPosition != cameraStandbyPosition)
+            return;
         cameraAnimator.enabled = false;
         if (LeanTween.isTweening(screenShakeTween))
         {
