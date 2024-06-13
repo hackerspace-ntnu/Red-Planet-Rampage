@@ -28,6 +28,8 @@ public class RopeBody : GunBody
     private PlayerHand playerHandRight;
     [SerializeField]
     private AudioSource audioSource;
+    [SerializeField]
+    private LayerMask ignoreLayer;
 
     [SerializeField]
     private float pullForce = 10f;
@@ -35,6 +37,7 @@ public class RopeBody : GunBody
     private float ropeLength = 60f;
 
     private bool isWired = true;
+    private bool isThrowing = false;
     private float oldLength = 0f;
 
     public override void Start()
@@ -90,14 +93,11 @@ public class RopeBody : GunBody
 
     private void CheckForWirePlanting(GunStats stats)
     {
-        if (isWired || movement.StateIsAir)
+        if (isWired || isThrowing)
             return;
-        plugAnchor.transform.position = gunController.Player.transform.position;
-        movement.CanMove = false;
-        movement.CanLook = false;
+
         animator.SetTrigger("Plant");
-        isWired = true;
-        rope.ResetRope(plugAnchor.WireOrigin);
+        isThrowing = true;
     }
 
     // Called by animator
@@ -105,11 +105,55 @@ public class RopeBody : GunBody
     {
         if (!plugAnchor)
             return;
-        rope.enabled = true;
-        plugAnchor.gameObject.SetActive(true);
-        movement.CanMove = true;
-        movement.CanLook = true;
-        gunController.stats.Ammo = gunController.stats.MagazineSize;
+        if (Physics.Raycast(gunController.Player.inputManager.transform.position, gunController.Player.inputManager.transform.forward, out RaycastHit hit, ropeLength, ignoreLayer))
+        {
+            plugAnchor.transform.position = gunController.Player.transform.position;
+            plugAnchor.transform.forward = hit.normal;
+            rope.enabled = true;
+            LeanTween.value(gameObject, SetThrowValue, 0f, ropeLength, 0.02f * ropeLength);
+            plugAnchor.gameObject.LeanMove(hit.point, 0.02f * hit.distance)
+                .setOnComplete(() =>
+                {
+                    rope.ResetRope(plugAnchor.WireOrigin);
+                    isThrowing = false;
+                    isWired = true;
+                    gunController.stats.Ammo = gunController.stats.MagazineSize;
+                });
+            rope.ResetRope(plugAnchor.WireOrigin);
+            plugAnchor.gameObject.SetActive(true);
+        }
+        else
+        {
+            plugAnchor.transform.position = gunController.Player.transform.position;
+            plugAnchor.transform.forward = gunController.Player.inputManager.transform.forward;
+            rope.enabled = true;
+            plugAnchor.gameObject.SetActive(true);
+            LeanTween.value(gameObject, SetThrowValue, 0f, ropeLength, 0.02f * ropeLength)
+                .setEaseOutElastic();
+            plugAnchor.gameObject.LeanMove(gunController.Player.inputManager.transform.position + gunController.Player.inputManager.transform.forward * ropeLength, 0.02f * ropeLength)
+                .setOnComplete(() =>
+                {
+                    LeanTween.value(gameObject, SetPullbackValue, 1f, 0f, 1f)
+                    .setOnComplete(() =>
+                    {
+                        rope.enabled = false;
+                        isThrowing = false;
+                        plugAnchor.gameObject.SetActive(false);
+                    });
+                });
+        }
+    }
+
+    public void SetThrowValue(float value)
+    {
+        rope.ResetRope(plugAnchor.WireOrigin);
+    }
+
+    public void SetPullbackValue(float value)
+    {
+        // TODO: pullback through every control point of the rope
+        plugAnchor.transform.position = ropeTarget.position + (ropeTarget.position - plugAnchor.transform.position) * value;
+        rope.ResetRope(plugAnchor.WireOrigin);
     }
 
     public void PlayVFX()
