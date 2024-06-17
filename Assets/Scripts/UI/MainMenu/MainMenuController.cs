@@ -118,8 +118,6 @@ public class MainMenuController : MonoBehaviour
             playerInputManagerController.onPlayerInputJoined += ShowSkipText;
             defaultMenu.SetActive(false);
             introRoutine = StartCoroutine(WaitForIntroVideoToEnd());
-
-            Debug.Log("Nah, it enters here mate");
         }
     }
 
