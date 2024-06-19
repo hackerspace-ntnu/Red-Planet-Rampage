@@ -70,7 +70,7 @@ public class PlayerStatUI : MonoBehaviour
 
     private void OnInventoryChange(Item item)
     {
-        SetBaseGunStats(GunFactory.GetGunStats(StaticInfo.Singleton.StartingBody, StaticInfo.Singleton.StartingBarrel, StaticInfo.Singleton.StartingExtension));
+        SetBaseGunStats(GunFactory.GetGunStats(MatchRules.Current.StartingWeapon.Body, MatchRules.Current.StartingWeapon.Barrel, MatchRules.Current.StartingWeapon.Extension));
     }
 
     public void UpdateStats()

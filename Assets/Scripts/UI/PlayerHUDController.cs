@@ -208,8 +208,8 @@ public class PlayerHUDController : MonoBehaviour
         // TODO replace by not requiring UI stuff on the bidding players
         if (!chipAmount)
             return;
-        bool isMax = amount == PlayerIdentity.MaxChips;
-        chipAmount.text =  isMax ? "MAX" : amount.ToString();
+        bool isMax = amount == MatchRules.Current.MaxChips;
+        chipAmount.text = isMax ? "MAX" : amount.ToString();
         chipAmount.color = isMax ? maxChipColor : Color.white;
         if (LeanTween.isTweening(chipTween))
         {

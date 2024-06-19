@@ -61,7 +61,7 @@ public class StaticInfo : MonoBehaviour
     private float cameraFov;
     public float CameraFov => cameraFov;
 
-    void Start()
+    private void Awake()
     {
         #region Singleton boilerplate
 
@@ -84,11 +84,11 @@ public class StaticInfo : MonoBehaviour
         Barrels = new ReadOnlyArray<Item>(barrels);
         Extensions = new ReadOnlyArray<Item>(extensions);
         SecretNames = new ReadOnlyArray<OverrideName>(secretNames.Overrides);
-        bodyAuction.SetItems(bodies);
-        barrelAuction.SetItems(barrels);
-        extensionAuction.SetItems(extensions);
+        bodyAuction.SetItems(bodies.Where(i => i != startingBody).ToArray());
+        barrelAuction.SetItems(barrels.Where(i => i != startingBarrel).ToArray());
+        extensionAuction.SetItems(extensions.Where(i => i != startingExtension).ToArray());
         ItemsById = new ReadOnlyDictionary<string, Item>(new Dictionary<string, Item>(bodies.Union(barrels)
-            .Union(extensions).Union(new Item[] { startingBody, startingBarrel })
+            .Union(extensions)
             .Select(item => new KeyValuePair<string, Item>(item.id, item))));
     }
 }

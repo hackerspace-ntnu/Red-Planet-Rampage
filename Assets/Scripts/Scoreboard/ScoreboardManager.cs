@@ -155,11 +155,11 @@ public class ScoreboardManager : MonoBehaviour
             var player = players[i];
             var scoreboard = scoreboards[i];
 
-            var baseReward = matchController.RewardBase;
-            var killsReward = matchController.RewardKill * lastRound.KillCount(player);
-            var winReward = lastRound.IsWinner(player.identity) ? matchController.RewardWin : 0;
+            var baseReward = MatchRules.Current.ChipsPerRoundPassed;
+            var killsReward = MatchRules.Current.ChipsPerKill * lastRound.KillCount(player);
+            var winReward = lastRound.IsWinner(player.identity) ? MatchRules.Current.ChipsPerWin : 0;
 
-            var total = player.identity.chips;
+            var total = player.identity.Chips;
             var gain = baseReward + killsReward + winReward;
             var savings = total - gain;
 

@@ -1,10 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
+using CollectionExtensions;
 using UnityEngine;
 using Unity.VisualScripting;
 
 public class PlayerIdentity : MonoBehaviour
 {
+    public uint id;
+
     [Header("Cosmetics")]
     public Color color;
     public string playerName;
@@ -29,9 +32,10 @@ public class PlayerIdentity : MonoBehaviour
     public List<Item> Barrels { get; private set; } = new List<Item>();
     public List<Item> Extensions { get; private set; } = new List<Item>();
 
-    public int chips { get; private set; } = 0;
-    public const int MaxChips = 20;
-    public uint id;
+    public int Chips { get; private set; } = 0;
+    public bool HasMaxChips => Chips >= MatchRules.Current.MaxChips;
+
+    public int Score { get; private set; } = 0;
 
     public delegate void ChipEvent(int amount);
     public delegate void ItemEvent(Item item);
@@ -39,6 +43,7 @@ public class PlayerIdentity : MonoBehaviour
     public ChipEvent onChipGain;
     public ChipEvent onChipSpent;
     public ChipEvent onChipChange;
+    public ChipEvent onScoreChange;
     public ItemEvent onInventoryChange;
 
     private void Start()
@@ -57,22 +62,43 @@ public class PlayerIdentity : MonoBehaviour
         }
     }
 
+    public void AssignReward(Reward reward)
+    {
+        switch (reward.Type)
+        {
+            case RewardType.Chips:
+                UpdateChipSilently(reward.Amount);
+                break;
+            case RewardType.Score:
+                Score += reward.Amount;
+                break;
+        }
+    }
+
+    public void UpdateScore(int amount)
+    {
+        if (amount == 0) return;
+        Score += amount;
+
+        onScoreChange?.Invoke(Score);
+    }
+
     public void UpdateChip(int amount)
     {
         if (amount == 0) return;
-        if (chips + amount < 0)
+        if (Chips + amount < 0)
         {
-            Debug.LogWarning($"Player {id} {ToColorString()} almost got negative chips {chips + amount}");
+            Debug.LogWarning($"Player {id} {ToColorString()} almost got negative chips {Chips + amount}");
             // Safeguard against cheating by locking chip amount to 0 when this sort of bug appears.
-            chips = 0;
+            Chips = 0;
         }
         else
         {
-            chips += amount;
-            chips = Mathf.Min(chips, MaxChips);
+            Chips += amount;
+            Chips = Mathf.Min(Chips, MatchRules.Current.MaxChips);
         }
 
-        onChipChange?.Invoke(chips);
+        onChipChange?.Invoke(Chips);
 
         if (amount < 0)
         {
@@ -86,8 +112,8 @@ public class PlayerIdentity : MonoBehaviour
 
     public void UpdateChipSilently(int amount)
     {
-        chips += amount;
-        chips = Mathf.Min(chips, MaxChips);
+        Chips += amount;
+        Chips = Mathf.Min(Chips, MatchRules.Current.MaxChips);
     }
 
     public void PerformTransaction(Item item)
@@ -121,10 +147,32 @@ public class PlayerIdentity : MonoBehaviour
         Bodies = new List<Item>();
         Barrels = new List<Item>();
         Extensions = new List<Item>();
-        body = StaticInfo.Singleton.StartingBody;
-        barrel = StaticInfo.Singleton.StartingBarrel;
-        extension = StaticInfo.Singleton.StartingExtension;
-        chips = 0;
+
+        switch (MatchRules.Current.StartingWeapon.Type)
+        {
+            case StartingWeaponType.IndividualRandom:
+                body = StaticInfo.Singleton.Bodies.RandomElement();
+                barrel = StaticInfo.Singleton.Barrels.RandomElement();
+                extension = StaticInfo.Singleton.Extensions.RandomElement();
+                break;
+
+            case StartingWeaponType.SharedRandom:
+            case StartingWeaponType.Specific:
+            case StartingWeaponType.Standard:
+                body = MatchRules.Current.StartingWeapon.Body;
+                barrel = MatchRules.Current.StartingWeapon.Barrel;
+                extension = MatchRules.Current.StartingWeapon.Extension;
+                break;
+        }
+
+        Bodies.Add(body);
+        Barrels.Add(barrel);
+        Extensions.Add(extension);
+
+        foreach (var reward in MatchRules.Current.Rewards.Where(r => r.Condition == RewardCondition.Start))
+        {
+            AssignReward(reward);
+        }
     }
 
 
@@ -158,7 +206,7 @@ public class PlayerIdentity : MonoBehaviour
         playerName = name;
         color = playerDetails.color;
 
-        chips = playerDetails.chips;
+        Chips = playerDetails.chips;
 
         SetItems(playerDetails.bodies, playerDetails.barrels, playerDetails.extensions);
         SetLoadout(playerDetails.body, playerDetails.barrel, playerDetails.extension);
@@ -166,5 +214,9 @@ public class PlayerIdentity : MonoBehaviour
 
     public override string ToString() => playerName;
 
+#if UNITY_EDITOR
     public string ToColorString() => $"<color=#{color.ToHexString()}>{playerName}</color>";
+#else
+    public string ToColorString() => playerName;
+#endif
 }

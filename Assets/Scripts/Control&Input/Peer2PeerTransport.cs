@@ -456,9 +456,11 @@ public class Peer2PeerTransport : NetworkManager
             localPlayerIds.Add(details.id);
         }
         // TODO move this bit!
-        details.body = StaticInfo.Singleton.StartingBody.id;
-        details.barrel = StaticInfo.Singleton.StartingBarrel.id;
-        details.extension = StaticInfo.Singleton.StartingExtension ? StaticInfo.Singleton.StartingExtension.id : null;
+        //      it should happen at the start of each round, not only when a player joins
+        details.chips = MatchRules.Current.StartingChips;
+        details.body = MatchRules.Current.StartingWeapon.Body.id;
+        details.barrel = MatchRules.Current.StartingWeapon.Barrel.id;
+        details.extension = MatchRules.Current.StartingWeapon.Extension ? MatchRules.Current.StartingWeapon.Extension.id : null;
         details.bodies = new string[] { details.body };
         details.barrels = new string[] { details.barrel };
         details.extensions = details.extension != null ? new string[] { details.extension } : new string[] { };
@@ -533,7 +535,7 @@ public class Peer2PeerTransport : NetworkManager
             return;
         }
 
-        playerDetails.chips = identity.chips;
+        playerDetails.chips = identity.Chips;
         playerDetails.bodies = identity.Bodies.Select(item => item.id).ToArray();
         playerDetails.barrels = identity.Barrels.Select(item => item.id).ToArray();
         playerDetails.extensions = identity.Extensions.Select(item => item.id).ToArray();

@@ -23,31 +23,10 @@ public class MatchController : NetworkBehaviour
 
     [Header("Timing")]
     [SerializeField]
-    private float roundLength;
-
-    [SerializeField]
     private float delayBeforeRoundResults = 3f;
 
     [SerializeField]
-    private float roundEndDelay;
-
-    [SerializeField]
     private float matchEndDelay = 5;
-
-
-    [Header("Chip rewards")]
-    [SerializeField]
-    private int startAmount = 5;
-    public int StartAmount => startAmount;
-    [SerializeField]
-    private int rewardWin = 1;
-    public int RewardWin => rewardWin;
-    [SerializeField]
-    private int rewardKill = 1;
-    public int RewardKill => rewardKill;
-    [SerializeField]
-    private int rewardBase = 2;
-    public int RewardBase => rewardBase;
 
     public Timer roundTimer;
 
@@ -157,7 +136,7 @@ public class MatchController : NetworkBehaviour
         isAuction = false;
         GlobalHUD.RoundTimer.enabled = true;
         rounds.Add(new Round(players.ToList()));
-        roundTimer.StartTimer(roundLength);
+        roundTimer.StartTimer(MatchRules.Singleton.Rules.RoundLength);
         roundTimer.OnTimerUpdate += AdjustMusic;
         roundTimer.OnTimerUpdate += HUDTimerUpdate;
         if (isServer)
@@ -251,23 +230,35 @@ public class MatchController : NetworkBehaviour
     private void AssignRewards()
     {
         var lastRound = rounds.Last();
+        var rules = MatchRules.Singleton.Rules;
         foreach (var player in players)
         {
-            // Base reward and kill bonus
-            var reward = rewardBase + lastRound.KillCount(player) * rewardKill;
-            // Win bonus
-            if (lastRound.IsWinner(player.identity))
-                reward += rewardWin;
-
-            // TODO alternatively, instead of avoiding to show chip count here,
-            //      could we show chip count going up for each kill?
-            player.identity.UpdateChipSilently(reward);
+            foreach (Reward reward in rules.Rewards)
+            {
+                switch (reward.Condition)
+                {
+                    case RewardCondition.Survive:
+                        player.identity.AssignReward(reward);
+                        break;
+                    case RewardCondition.Kill:
+                        var calculatedReward = reward;
+                        calculatedReward.Amount = reward.Amount * lastRound.KillCount(player);
+                        player.identity.AssignReward(calculatedReward);
+                        break;
+                    case RewardCondition.Win:
+                        if (lastRound.IsWinner(player.identity))
+                            player.identity.AssignReward(reward);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 
     private void AdjustMusic()
     {
-        if (roundTimer.ElapsedTime > roundLength * .7f)
+        if (roundTimer.ElapsedTime > MatchRules.Singleton.Rules.RoundLength * .7f)
         {
             MusicTrackManager.Singleton.IntensifyBattleTheme();
         }
@@ -275,24 +266,27 @@ public class MatchController : NetworkBehaviour
 
     private void HUDTimerUpdate()
     {
-        globalHUDController.OnTimerUpdate(roundLength - roundTimer.ElapsedTime);
+        globalHUDController.OnTimerUpdate(MatchRules.Singleton.Rules.RoundLength - roundTimer.ElapsedTime);
     }
 
     private bool IsWin()
     {
-        var winnerId = rounds.Last().Winner;
-        if (winnerId is null || !playerById.TryGetValue((uint)winnerId, out var winner)) { return false; }
-        var wins = PlayerWins(winner);
-        Debug.Log($"Current winner ({winner.identity.playerName}) has {wins} wins.");
-        if (wins >= 3)
-        {
-            // We have a winner!
-            StartCoroutine(DisplayWinScreenAndRestart(winner.identity));
-            // Remember stats from this match.
-            PersistentInfo.SavePersistentData();
-            return true;
-        }
-        return false;
+        var lastWinnerId = rounds.Last().Winner;
+        if (lastWinnerId is null || !playerById.TryGetValue((uint)lastWinnerId, out var lastWinner)) { return false; }
+        if (!MatchRules.Current.IsMatchOver(rounds, lastWinner.id))
+            return false;
+
+        Debug.Log($"Current winner {lastWinner.identity.ToColorString()} has {PlayerWins(lastWinner)} wins.");
+
+        var winnerId = MatchRules.Current.DetermineWinner(rounds);
+        if (!playerById.TryGetValue(winnerId, out var winner))
+            return false;
+
+        // We have a winner!
+        StartCoroutine(DisplayWinScreenAndRestart(winner.identity));
+        // Remember stats from this match.
+        PersistentInfo.SavePersistentData();
+        return true;
     }
 
     public int PlayerWins(PlayerManager player)
