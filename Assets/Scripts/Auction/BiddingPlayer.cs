@@ -17,6 +17,8 @@ public class BiddingPlayer : NetworkBehaviour
     [SerializeField]
     protected TMP_Text chipText;
     [SerializeField]
+    private Color maxChipColor;
+    [SerializeField]
     protected TMP_Text signCross;
     protected BiddingPlatform currentPlatform = null;
 
@@ -29,7 +31,8 @@ public class BiddingPlayer : NetworkBehaviour
     public void SetIdentity()
     {
         playerManager.identity.onChipChange += UpdateChipStatus;
-        chipText.text = playerManager.identity.chips.ToString();
+        chipText.text = "<sprite name=\"chip\">" + playerManager.identity.chips.ToString();
+        chipText.color = playerManager.identity.chips == PlayerIdentity.MaxChips ? maxChipColor : Color.black;
     }
 
     public void SetPlayerInput()
@@ -98,7 +101,8 @@ public class BiddingPlayer : NetworkBehaviour
 
     protected void UpdateChipStatus(int chips)
     {
-        chipText.text = chips.ToString();
+        chipText.text = "<sprite name=\"chip\">" + chips.ToString();
+        chipText.color = playerManager.identity.chips == PlayerIdentity.MaxChips ? maxChipColor : Color.black;
     }
 
     private void FixedUpdate()

@@ -50,7 +50,8 @@ public class PlayerHUDController : MonoBehaviour
 
     [SerializeField]
     private TMP_Text chipAmount;
-
+    [SerializeField]
+    private Color maxChipColor;
     private int chipTween;
 
     private float originalChipY;
@@ -136,7 +137,7 @@ public class PlayerHUDController : MonoBehaviour
             // This keeps the chip counter from conflicting with the timer
             chipBox.anchorMin = Vector2.one;
             chipBox.anchorMax = Vector2.one;
-            originalChipX = -chipBox.sizeDelta.x / 2f - 10;
+            originalChipX = -chipBox.sizeDelta.x / 2f - 40;
             // Also scale down the health bar stuff
             hudParent.localScale = .6f * Vector3.one;
         }
@@ -207,8 +208,9 @@ public class PlayerHUDController : MonoBehaviour
         // TODO replace by not requiring UI stuff on the bidding players
         if (!chipAmount)
             return;
-
-        chipAmount.text = amount.ToString();
+        bool isMax = amount == PlayerIdentity.MaxChips;
+        chipAmount.text =  isMax ? "MAX" : amount.ToString();
+        chipAmount.color = isMax ? maxChipColor : Color.white;
         if (LeanTween.isTweening(chipTween))
         {
             LeanTween.cancel(chipTween);

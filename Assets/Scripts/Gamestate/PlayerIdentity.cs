@@ -30,7 +30,7 @@ public class PlayerIdentity : MonoBehaviour
     public List<Item> Extensions { get; private set; } = new List<Item>();
 
     public int chips { get; private set; } = 0;
-
+    public const int MaxChips = 20;
     public uint id;
 
     public delegate void ChipEvent(int amount);
@@ -69,6 +69,7 @@ public class PlayerIdentity : MonoBehaviour
         else
         {
             chips += amount;
+            chips = Mathf.Min(chips, MaxChips);
         }
 
         onChipChange?.Invoke(chips);
@@ -86,6 +87,7 @@ public class PlayerIdentity : MonoBehaviour
     public void UpdateChipSilently(int amount)
     {
         chips += amount;
+        chips = Mathf.Min(chips, MaxChips);
     }
 
     public void PerformTransaction(Item item)
