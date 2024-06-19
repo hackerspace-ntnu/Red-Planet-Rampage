@@ -14,11 +14,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 71015680234268067, guid: 2872a05bf8e94d541a70726bb35085f3, type: 3}
       propertyPath: m_Name
-      value: BiddingPlayer Variant
+      value: BiddingPlayer
       objectReference: {fileID: 0}
     - target: {fileID: 71015680234268071, guid: 2872a05bf8e94d541a70726bb35085f3, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 71015680234268071, guid: 2872a05bf8e94d541a70726bb35085f3, type: 3}
       propertyPath: m_LocalPosition.x
@@ -118,11 +118,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c85ae4dc2c19fa34f8629863582cad91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   playerManager: {fileID: 9008804336744780163}
   sign: {fileID: 7513734972606371177}
   signMesh: {fileID: 6644921302523891212}
   signTarget: {fileID: 5126564517472471787}
   chipText: {fileID: 8806784467613749292}
+  maxChipColor: {r: 0.9607843, g: 0.2784314, b: 0.23921569, a: 1}
   signCross: {fileID: 3206215793599913730}
 --- !u!114 &9008804336744780163 stripped
 MonoBehaviour:

@@ -34,8 +34,9 @@ public class BiddingAI : BiddingPlayer
 
     public void SetIdentity(PlayerIdentity identity)
     {
-        chipText.text = identity.chips.ToString();
+        chipText.text = "<sprite name=\"chip\">" + identity.chips.ToString();
         identity.onChipChange += UpdateChipStatus;
+        chipText.color = playerManager.identity.chips == PlayerIdentity.MaxChips ? Color.red : Color.black;
     }
 
     private IEnumerator WaitAndEvaluate()
