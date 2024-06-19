@@ -82,11 +82,11 @@ public class AuctionDriver : NetworkBehaviour
         while (FindObjectsOfType<PlayerManager>().Count() < Peer2PeerTransport.NumPlayers)
             yield return null;
 
-        availableAuctionStages = MatchController.Singleton.RoundCount switch
+        availableAuctionStages = MatchRules.Current.AuctionForRound(MatchController.Singleton.RoundCount) switch
         {
-            1 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction },
-            2 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BarrelAuction },
-            3 => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction },
+            AuctionType.Body => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction },
+            AuctionType.Barrel => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BarrelAuction },
+            AuctionType.Extension => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction },
             _ => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction }
         };
 

@@ -102,4 +102,25 @@ namespace CollectionExtensions
         public static void Resize<T>(this T[] arr, int n) => System.Array.Resize(ref arr, n);
 
     }
+
+    public static class LinqExtensions
+    {
+        public static T MaxBy<T, By>(this IEnumerable<T> values, System.Func<T, By> selector)
+        where By : System.IComparable<By>
+        {
+            By max = default;
+            T maxValue = default;
+
+            foreach (var value in values)
+            {
+                if (selector(value).CompareTo(max) > 0)
+                {
+                    max = selector(value);
+                    maxValue = value;
+                }
+            }
+
+            return maxValue;
+        }
+    }
 }

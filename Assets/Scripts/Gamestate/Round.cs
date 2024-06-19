@@ -61,8 +61,11 @@ public class Round
 
     private readonly List<DamageInfo> damageThisFrame = new();
 
+    private readonly RoundWinCondition winCondition;
+
     public Round(IEnumerable<PlayerManager> roundPlayers)
     {
+        winCondition = MatchRules.Singleton.Rules.RoundWinCondition;
         var ids = roundPlayers.Select(p => p.id);
         playerManagers = roundPlayers.ToList();
         players = ids.ToList();
@@ -85,6 +88,14 @@ public class Round
         }
 
         MatchController.Singleton.onOutcomeDecided += OnOutcomeDecided;
+    }
+
+    public int KillCount(uint id)
+    {
+#if DEBUG
+        Debug.Assert(kills.ContainsKey(id), $"Player {id} not registered in round statistics!");
+#endif
+        return kills[id].Count;
     }
 
     public int KillCount(PlayerManager player)
@@ -170,10 +181,10 @@ public class Round
         {
             winner = winner,
             stats = kills.Select(pair => new PlayerStats
-                {
-                    player = pair.Key,
-                    kills = pair.Value.ToArray()
-                }
+            {
+                player = pair.Key,
+                kills = pair.Value.ToArray()
+            }
             ).ToArray()
         };
 

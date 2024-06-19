@@ -139,8 +139,8 @@ public class BiddingPlatform : NetworkBehaviour
 
     private bool CanBid(PlayerIdentity bidder)
     {
-        bool isLeadingPlayerAndCanIncrement = bidder.id == leadingBidder && bidder.chips > 0;
-        bool bidderHasEnoughChips = bidder.chips > chips;
+        bool isLeadingPlayerAndCanIncrement = bidder.id == leadingBidder && bidder.Chips > 0;
+        bool bidderHasEnoughChips = bidder.Chips > chips;
         return isLeadingPlayerAndCanIncrement || bidderHasEnoughChips;
     }
 
@@ -163,7 +163,7 @@ public class BiddingPlatform : NetworkBehaviour
         }
         var playerIdentity = player.identity;
 
-        Debug.Log($"Got bidding request from {playerIdentity.ToColorString()} (chips={playerIdentity.chips}) on {item.displayName} (chips={chips}, leader={leadingBidderIdentity?.ToColorString()})");
+        Debug.Log($"Got bidding request from {playerIdentity.ToColorString()} (chips={playerIdentity.Chips}) on {item.displayName} (chips={chips}, leader={leadingBidderIdentity?.ToColorString()})");
 
         if (CanBid(playerIdentity))
         {

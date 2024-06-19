@@ -34,9 +34,9 @@ public class BiddingAI : BiddingPlayer
 
     public void SetIdentity(PlayerIdentity identity)
     {
-        chipText.text = "<sprite name=\"chip\">" + identity.chips.ToString();
+        chipText.text = "<sprite name=\"chip\">" + identity.Chips.ToString();
         identity.onChipChange += UpdateChipStatus;
-        chipText.color = playerManager.identity.chips == PlayerIdentity.MaxChips ? Color.red : Color.black;
+        chipText.color = playerManager.identity.HasMaxChips ? Color.red : Color.black;
     }
 
     private IEnumerator WaitAndEvaluate()
@@ -55,7 +55,7 @@ public class BiddingAI : BiddingPlayer
             return;
 
         var isNotActive = !platform.IsActive;
-        var isTooExpensive = platform.chips >= playerManager.identity.chips;
+        var isTooExpensive = platform.chips >= playerManager.identity.Chips;
         if (isNotActive || isTooExpensive)
             priorities[platform] = -1;
     }

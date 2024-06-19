@@ -99,13 +99,9 @@ public class ItemSelectMenu : MonoBehaviour
         player = inputManager.GetComponent<PlayerIdentity>();
         playerStatUI.PlayerIdentity = player;
 
-        var bodyItems = new List<Item>(player.Bodies);
-        bodyItems.Insert(0, StaticInfo.Singleton.StartingBody);
-        bodySlot.SetItems(bodyItems, player.Body);
+        bodySlot.SetItems(player.Bodies, player.Body);
 
-        var barrelItems = new List<Item>(player.Barrels);
-        barrelItems.Insert(0, StaticInfo.Singleton.StartingBarrel);
-        barrelSlot.SetItems(barrelItems, player.Barrel);
+        barrelSlot.SetItems(player.Barrels, player.Barrel);
 
         var extensionItems = new List<Item>(player.Extensions);
         if (StaticInfo.Singleton.StartingExtension)

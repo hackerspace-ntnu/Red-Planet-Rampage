@@ -31,8 +31,8 @@ public class BiddingPlayer : NetworkBehaviour
     public void SetIdentity()
     {
         playerManager.identity.onChipChange += UpdateChipStatus;
-        chipText.text = "<sprite name=\"chip\">" + playerManager.identity.chips.ToString();
-        chipText.color = playerManager.identity.chips == PlayerIdentity.MaxChips ? maxChipColor : Color.black;
+        chipText.text = "<sprite name=\"chip\">" + playerManager.identity.Chips.ToString();
+        chipText.color = playerManager.identity.HasMaxChips ? maxChipColor : Color.black;
     }
 
     public void SetPlayerInput()
@@ -87,8 +87,8 @@ public class BiddingPlayer : NetworkBehaviour
     // TODO this stuff plays on the wrong player for network players
     protected void AnimateSignContent(BiddingPlatform platform)
     {
-        bool isLeaderAndCanBid = (platform.LeadingBidder == playerManager.id) && (playerManager.identity.chips > 0);
-        if (platform.chips < playerManager.identity.chips || isLeaderAndCanBid)
+        bool isLeaderAndCanBid = (platform.LeadingBidder == playerManager.id) && (playerManager.identity.Chips > 0);
+        if (platform.chips < playerManager.identity.Chips || isLeaderAndCanBid)
         {
             if (LeanTween.isTweening(signCross.gameObject))
                 LeanTween.cancel(signCross.gameObject);
@@ -102,7 +102,7 @@ public class BiddingPlayer : NetworkBehaviour
     protected void UpdateChipStatus(int chips)
     {
         chipText.text = "<sprite name=\"chip\">" + chips.ToString();
-        chipText.color = playerManager.identity.chips == PlayerIdentity.MaxChips ? maxChipColor : Color.black;
+        chipText.color = playerManager.identity.HasMaxChips ? maxChipColor : Color.black;
     }
 
     private void FixedUpdate()

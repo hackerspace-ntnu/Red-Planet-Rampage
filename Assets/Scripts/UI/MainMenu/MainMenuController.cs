@@ -110,7 +110,6 @@ public class MainMenuController : MonoBehaviour
         {
             // First time in menu, play intro video.
             introVideo.started += StopFirstFrame;
-            DontDestroyOnLoad(EventSystem.current);
             playerInputManagerController.onPlayerInputJoined += ShowSkipText;
             defaultMenu.SetActive(false);
             introRoutine = StartCoroutine(WaitForIntroVideoToEnd());
