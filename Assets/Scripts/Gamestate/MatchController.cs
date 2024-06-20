@@ -208,7 +208,6 @@ public class MatchController : NetworkBehaviour
         roundTimer.OnTimerUpdate -= AdjustMusic;
         roundTimer.OnTimerUpdate -= HUDTimerUpdate;
         GlobalHUD.RoundTimer.enabled = false;
-        AssignRewards();
         StartCoroutine(WaitAndShowResults());
     }
 
@@ -225,35 +224,6 @@ public class MatchController : NetworkBehaviour
         LoadingScreen.Singleton.Show();
         yield return new WaitForSeconds(LoadingScreen.Singleton.MandatoryDuration);
         NetworkManager.singleton.ServerChangeScene(currentMapName);
-    }
-
-    private void AssignRewards()
-    {
-        var lastRound = rounds.Last();
-        var rules = MatchRules.Singleton.Rules;
-        foreach (var player in players)
-        {
-            foreach (Reward reward in rules.Rewards)
-            {
-                switch (reward.Condition)
-                {
-                    case RewardCondition.Survive:
-                        player.identity.AssignReward(reward);
-                        break;
-                    case RewardCondition.Kill:
-                        var calculatedReward = reward;
-                        calculatedReward.Amount = reward.Amount * lastRound.KillCount(player);
-                        player.identity.AssignReward(calculatedReward);
-                        break;
-                    case RewardCondition.Win:
-                        if (lastRound.IsWinner(player.identity))
-                            player.identity.AssignReward(reward);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
     }
 
     private void AdjustMusic()
@@ -276,7 +246,7 @@ public class MatchController : NetworkBehaviour
         if (!MatchRules.Current.IsMatchOver(rounds, lastWinner.id))
             return false;
 
-        Debug.Log($"Current winner {lastWinner.identity.ToColorString()} has {PlayerWins(lastWinner)} wins.");
+        Debug.Log($"Current winner {lastWinner.identity.ToColorString()} has {WinsForPlayer(lastWinner)} wins.");
 
         var winnerId = MatchRules.Current.DetermineWinner(rounds);
         if (!playerById.TryGetValue(winnerId, out var winner))
@@ -289,9 +259,14 @@ public class MatchController : NetworkBehaviour
         return true;
     }
 
-    public int PlayerWins(PlayerManager player)
+    public int WinsForPlayer(PlayerManager player)
     {
-        return rounds.Count(round => round.IsWinner(player.id));
+        return rounds.Count(r => r.IsWinner(player.id));
+    }
+
+    public int KillsForPlayer(PlayerManager player)
+    {
+        return rounds.Sum(r => r.KillCount(player));
     }
 
     public void RemoveChip(CollectableChip chip)

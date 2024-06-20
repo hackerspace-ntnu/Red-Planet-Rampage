@@ -22,7 +22,7 @@ public class LoadingScreen : MonoBehaviour
 
     [SerializeField] private GameObject auctionInstructions;
 
-    [SerializeField] private List<string> tips;
+    [TextArea][SerializeField] private List<string> tips;
 
     [SerializeField] private RawImage background;
 

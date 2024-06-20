@@ -136,11 +136,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 052d455433a3d704bb18b5659f74ef7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   playerManager: {fileID: 140384169917400099}
   sign: {fileID: 3821055119355997902}
   signMesh: {fileID: 105478284776306091}
   signTarget: {fileID: 1901658151239201100}
   chipText: {fileID: 2843671969894542219}
+  maxChipColor: {r: 0, g: 0, b: 0, a: 0}
   signCross: {fileID: 8160521433336915109}
   agent: {fileID: 134257096152051027}
   animator: {fileID: 6749550340076101364}
@@ -201,7 +205,6 @@ MonoBehaviour:
   extraHitSounds: {fileID: 0}
   DestinationTarget: {fileID: 0}
   ShootingTarget: {fileID: 0}
-  TrackedPlayers: []
   animator: {fileID: 0}
   ignoreMask:
     serializedVersion: 2
