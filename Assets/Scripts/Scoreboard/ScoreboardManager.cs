@@ -5,6 +5,16 @@ using System.Linq;
 using CollectionExtensions;
 using System;
 
+internal struct Rewards
+{
+    public int savings;
+    public int baseReward;
+    public int kills;
+    public int killReward;
+    public int winReward;
+    public int total;
+}
+
 [RequireComponent(typeof(AudioSource))]
 public class ScoreboardManager : MonoBehaviour
 {
@@ -142,12 +152,50 @@ public class ScoreboardManager : MonoBehaviour
         }
     }
 
+    private Rewards AssignAndDetermineRewards(PlayerManager player)
+    {
+        var lastRound = matchController.LastRound;
+        var result = new Rewards
+        {
+            savings = player.identity.Chips,
+            kills = lastRound.KillCount(player)
+        };
+        foreach (Reward reward in MatchRules.Current.Rewards)
+        {
+            switch (reward.Condition)
+            {
+                case RewardCondition.Survive:
+                    if (reward.Type is RewardType.Chips)
+                        result.baseReward += reward.Amount;
+                    player.identity.AssignReward(reward);
+                    break;
+                case RewardCondition.Kill:
+                    var calculatedReward = reward;
+                    calculatedReward.Amount = reward.Amount * result.kills;
+                    if (reward.Type is RewardType.Chips)
+                        result.killReward += calculatedReward.Amount;
+                    player.identity.AssignReward(calculatedReward);
+                    break;
+                case RewardCondition.Win:
+                    if (lastRound.IsWinner(player.identity))
+                    {
+                        if (reward.Type is RewardType.Chips)
+                            result.winReward += reward.Amount;
+                        player.identity.AssignReward(reward);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        result.total = result.savings + result.baseReward + result.killReward + result.winReward;
+        return result;
+    }
+
     public void SetPosterValues()
     {
         if (matchController == null)
             matchController = MatchController.Singleton;
-
-        Round lastRound = matchController.LastRound;
 
         // Loop through each player, assign points as commented
         for (int i = 0; i < players.Count; i++)
@@ -155,33 +203,27 @@ public class ScoreboardManager : MonoBehaviour
             var player = players[i];
             var scoreboard = scoreboards[i];
 
-            var baseReward = MatchRules.Current.ChipsPerRoundPassed;
-            var killsReward = MatchRules.Current.ChipsPerKill * lastRound.KillCount(player);
-            var winReward = lastRound.IsWinner(player.identity) ? MatchRules.Current.ChipsPerWin : 0;
+            var rewards = AssignAndDetermineRewards(player);
 
-            var total = player.identity.Chips;
-            var gain = baseReward + killsReward + winReward;
-            var savings = total - gain;
-
-            scoreboard.AddPosterCrime("Savings", savings);
+            scoreboard.AddReward("Savings", rewards.savings);
 
             // Participation award
-            scoreboard.AddPosterCrime("Base", baseReward);
+            scoreboard.AddReward("Base", rewards.baseReward);
 
-            // Kill Award (shows 0 if none)
-            scoreboard.AddPosterCrime("Kills", killsReward);
+            // Kill Award, 0 if none
+            scoreboard.AddReward("Kills", rewards.killReward);
 
-            // Round winner award
-            if (winReward > 0)
+            // Round winner award, blank if none
+            if (rewards.winReward > 0)
             {
-                scoreboard.AddPosterCrime("Victor", winReward);
+                scoreboard.AddReward("Victor", rewards.winReward);
             }
             else
             {
-                scoreboard.AddBlankPoster();
+                scoreboard.AddBlankReward();
             }
 
-            scoreboard.AddPosterCrime("Total", total);
+            scoreboard.AddReward("Total", rewards.total);
         }
 
         StartCoroutine(ShowMatchResults());
