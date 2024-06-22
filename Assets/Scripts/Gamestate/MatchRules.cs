@@ -3,11 +3,27 @@ using UnityEngine;
 public class MatchRules : MonoBehaviour
 {
     public static MatchRules Singleton { get; private set; }
-
-    public Ruleset Rules;
     public static Ruleset Current => Singleton.Rules;
 
-    public void Initialize() => Rules.Initialize();
+    [SerializeField]
+    private Ruleset rules;
+    public Ruleset Rules
+    {
+        get => rules;
+        set
+        {
+            rules = value;
+            rules.Initialize();
+        }
+    }
+
+    [SerializeField]
+    private Ruleset[] gamemodes;
+    public Ruleset[] Gamemodes => gamemodes;
+
+    [SerializeField]
+    private Ruleset customRulesTemplate;
+    public Ruleset CustomRulesTemplate => customRulesTemplate;
 
     private void Awake()
     {
@@ -33,6 +49,6 @@ public class MatchRules : MonoBehaviour
 
     private void Start()
     {
-        Initialize();
+        rules.Initialize();
     }
 }
