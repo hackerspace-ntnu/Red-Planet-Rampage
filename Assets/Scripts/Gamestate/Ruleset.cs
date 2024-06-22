@@ -1,19 +1,21 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using CollectionExtensions;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum MatchWinConditionType
 {
     Kills,
     Wins,
-    Score,
+    Chips,
 }
 
 public enum MatchStopConditionType
 {
     AfterXRounds,
-    FirstToXWins,
+    FirstToX,
 }
 
 [System.Serializable]
@@ -217,27 +219,82 @@ public class Ruleset : ScriptableObject
         return AuctionProgress[index].Type;
     }
 
+    #region Winning
     public bool IsMatchOver(List<Round> rounds, uint currentWinner) =>
-         MatchWinCondition.StopCondition switch
-         {
-             MatchStopConditionType.FirstToXWins => rounds.Where(r => r.IsWinner(currentWinner)).Count() >= MatchWinCondition.AmountForStopCondition,
-             MatchStopConditionType.AfterXRounds => rounds.Count >= MatchWinCondition.AmountForStopCondition,
-             _ => true,
-         };
-
-    public uint DetermineWinner(List<Round> rounds) =>
-        MatchWinCondition.WinCondition switch
+        MatchWinCondition.StopCondition switch
         {
-            MatchWinConditionType.Wins => WinnerByWins(rounds),
-            MatchWinConditionType.Kills => WinnerByKills(rounds),
+            MatchStopConditionType.FirstToX => CandidatesForFirstToX(rounds).Any(p => p.id == currentWinner),
+            MatchStopConditionType.AfterXRounds =>
+                rounds.Count >= MatchWinCondition.AmountForStopCondition
+                && IsWinnerForAfterXRoundsDetermined(rounds, currentWinner),
+            _ => true,
+        };
+
+    private bool IsWinnerForAfterXRoundsDetermined(List<Round> rounds, uint currentWinner)
+    {
+        var candidates = CandidatesForLastXRounds(rounds).ToList();
+        return candidates.Count == 1 || candidates.Any(p => p.id == currentWinner);
+    }
+
+    /// <summary>
+    /// Assumes that IsMatchOver() is true, call that one first
+    /// </summary>
+    public uint DetermineWinner(List<Round> rounds, uint currentWinner) =>
+        MatchWinCondition.StopCondition switch
+        {
+            MatchStopConditionType.FirstToX => currentWinner,
+            MatchStopConditionType.AfterXRounds => WinnerForAfterXRounds(rounds, currentWinner),
             _ => 0,
         };
 
-    private uint WinnerByWins(List<Round> rounds) =>
-        Peer2PeerTransport.PlayerDetails.MaxBy(p => rounds.Where(r => r.IsWinner(p.id)).Count()).id;
+    private uint WinnerForAfterXRounds(List<Round> rounds, uint currentWinner)
+    {
+        var candidates = CandidatesForLastXRounds(rounds).ToList();
+        if (candidates.Count == 1)
+            return candidates.Single().id;
+        else
+            return candidates.Single(p => p.id == currentWinner).id;
+    }
 
-    private uint WinnerByKills(List<Round> rounds) =>
-        Peer2PeerTransport.PlayerDetails.MaxBy(p => rounds.Sum(r => r.KillCount(p.id))).id;
+    private IEnumerable<PlayerDetails> CandidatesForFirstToX(List<Round> rounds) =>
+        MatchWinCondition.WinCondition switch
+        {
+            MatchWinConditionType.Wins =>
+                Peer2PeerTransport.PlayerDetails.Where(p => rounds.Where(r => r.IsWinner(p.id)).Count() >= MatchWinCondition.AmountForStopCondition),
+            MatchWinConditionType.Kills =>
+                Peer2PeerTransport.PlayerDetails.Where(p => rounds.Sum(r => r.KillCount(p.id)) >= MatchWinCondition.AmountForStopCondition),
+            MatchWinConditionType.Chips =>
+                Peer2PeerTransport.PlayerDetails.Where(p => Peer2PeerTransport.PlayerInstanceByID[p.id].identity.Chips >= MatchWinCondition.AmountForStopCondition),
+            _ => Peer2PeerTransport.PlayerDetails,
+        };
+
+    private IEnumerable<PlayerDetails> CandidatesForLastXRounds(List<Round> rounds)
+    {
+        var max = MaxForWinCondition(rounds);
+        return MatchWinCondition.WinCondition switch
+        {
+            MatchWinConditionType.Wins =>
+                Peer2PeerTransport.PlayerDetails.Where(p => rounds.Where(r => r.IsWinner(p.id)).Count() == max),
+            MatchWinConditionType.Kills =>
+                Peer2PeerTransport.PlayerDetails.Where(p => rounds.Sum(r => r.KillCount(p.id)) == max),
+            MatchWinConditionType.Chips =>
+                Peer2PeerTransport.PlayerDetails.Where(p => Peer2PeerTransport.PlayerInstanceByID[p.id].identity.Chips == max),
+            _ => Peer2PeerTransport.PlayerDetails,
+        };
+    }
+
+    private int MaxForWinCondition(List<Round> rounds) =>
+        MatchWinCondition.WinCondition switch
+        {
+            MatchWinConditionType.Wins =>
+                Peer2PeerTransport.PlayerDetails.Max(p => rounds.Where(r => r.IsWinner(p.id)).Count()),
+            MatchWinConditionType.Kills =>
+                Peer2PeerTransport.PlayerDetails.Max(p => rounds.Sum(r => r.KillCount(p.id))),
+            MatchWinConditionType.Chips =>
+                Peer2PeerTransport.PlayerDetails.Max(p => Peer2PeerTransport.PlayerInstanceByID[p.id].identity.Chips),
+            _ => 0
+        };
+    #endregion
 
     public NetworkRuleset ToNetworkRuleset() =>
         new NetworkRuleset

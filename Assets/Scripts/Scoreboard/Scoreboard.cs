@@ -3,8 +3,6 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
-using System.Runtime.InteropServices;
-using JetBrains.Annotations;
 
 public class Scoreboard : MonoBehaviour
 {
@@ -117,7 +115,13 @@ public class Scoreboard : MonoBehaviour
 
     private void ShowVictoryProgress()
     {
-        if (MatchRules.Current.MatchWinCondition.StopCondition == MatchStopConditionType.FirstToXWins)
+        var isModeFirstToXWins =
+            MatchRules.Current.MatchWinCondition.StopCondition is MatchStopConditionType.FirstToX
+            && MatchRules.Current.MatchWinCondition.WinCondition is MatchWinConditionType.Wins
+            // TODO make box display able to show more than just 3 wins
+            && MatchRules.Current.MatchWinCondition.AmountForStopCondition <= 3;
+
+        if (isModeFirstToXWins)
         {
             StartCoroutine(AnimateVictoryProgress());
         }
@@ -163,7 +167,7 @@ public class Scoreboard : MonoBehaviour
         {
             MatchWinConditionType.Wins => MatchController.Singleton.WinsForPlayer(player),
             MatchWinConditionType.Kills => MatchController.Singleton.KillsForPlayer(player),
-            MatchWinConditionType.Score => player.identity.Score,
+            MatchWinConditionType.Chips => player.identity.Chips,
             _ => 0,
         };
 
@@ -171,23 +175,30 @@ public class Scoreboard : MonoBehaviour
         {
             MatchWinConditionType.Wins => MatchController.Singleton.LastRound.IsWinner(player.id) ? 1 : 0,
             MatchWinConditionType.Kills => MatchController.Singleton.LastRound.KillCount(player),
-            // TODO find gain when score is implemented
-            MatchWinConditionType.Score => player.identity.Score,
+            // TODO find gain somehow :S
+            MatchWinConditionType.Chips => 0,
             _ => 0,
         };
 
         int previousScore = score - scoreGain;
 
         // TODO change this once we have more than 3 kills possible per round!
-        const float delayTime = 0.3f;
-        scoreText.text = $"{previousScore}";
+        var delayTime = MatchRules.Current.MatchWinCondition.WinCondition is MatchWinConditionType.Kills ? 0.3f : 0.1f;
+        scoreText.text = FormatScore(previousScore);
         for (int i = 1; i <= scoreGain; i++)
         {
             yield return new WaitForSeconds(delayTime);
-            scoreText.text = (previousScore + i).ToString();
+            scoreText.text = FormatScore(previousScore + i);
             scoreText.gameObject.LeanScale(1.5f * Vector3.one, delayTime).setEasePunch();
         }
         // TODO avoid hardcoding progress display time
         yield return new WaitForSeconds(scoreboardManager.matchProgressDelay - 1.5f);
+    }
+
+    private string FormatScore(int score)
+    {
+        if (MatchRules.Current.MatchWinCondition.StopCondition is MatchStopConditionType.FirstToX)
+            return $"{score}/{MatchRules.Current.MatchWinCondition.AmountForStopCondition}";
+        return $"{score}";
     }
 }
