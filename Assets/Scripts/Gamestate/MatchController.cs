@@ -241,14 +241,14 @@ public class MatchController : NetworkBehaviour
 
     private bool IsWin()
     {
-        var lastWinnerId = rounds.Last().Winner;
-        if (lastWinnerId is null || !playerById.TryGetValue((uint)lastWinnerId, out var lastWinner)) { return false; }
-        if (!MatchRules.Current.IsMatchOver(rounds, lastWinner.id))
+        var currentWinnerID = rounds.Last().Winner;
+        if (currentWinnerID is null || !playerById.TryGetValue((uint)currentWinnerID, out var currentWinner)) { return false; }
+        if (!MatchRules.Current.IsMatchOver(rounds, currentWinner.id))
             return false;
 
-        Debug.Log($"Current winner {lastWinner.identity.ToColorString()} has {WinsForPlayer(lastWinner)} wins.");
+        Debug.Log($"Current winner {currentWinner.identity.ToColorString()} has {WinsForPlayer(currentWinner)} wins.");
 
-        var winnerId = MatchRules.Current.DetermineWinner(rounds);
+        var winnerId = MatchRules.Current.DetermineWinner(rounds, currentWinner.id);
         if (!playerById.TryGetValue(winnerId, out var winner))
             return false;
 

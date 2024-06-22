@@ -15,6 +15,9 @@ public class GamemodeEditor : MonoBehaviour
     private Slider stopConditionAmountSlider;
 
     [SerializeField]
+    private TMP_Text stopConditionAmountLabel;
+
+    [SerializeField]
     private Slider startingChipsSlider;
 
     [SerializeField]
@@ -48,6 +51,7 @@ public class GamemodeEditor : MonoBehaviour
         chipsPerKillSlider.value = ruleset.ChipsPerKill;
         chipsPerWinSlider.value = ruleset.ChipsPerWin;
         maxChipsSlider.value = ruleset.MaxChips;
+        ApplyCondition();
     }
 
     public void ApplyRuleset()
@@ -55,11 +59,24 @@ public class GamemodeEditor : MonoBehaviour
         MatchRules.Singleton.Rules = Instantiate(ruleset);
     }
 
+    private void ApplyCondition()
+    {
+        if (ruleset.MatchWinCondition.StopCondition is MatchStopConditionType.AfterXRounds)
+        {
+            stopConditionAmountLabel.text = "Rounds";
+            return;
+        }
+
+        // Otherwise, display the X in First to X
+        stopConditionAmountLabel.text = ruleset.MatchWinCondition.WinCondition.ToString();
+    }
+
     public void SetWinCondition(int index)
     {
         var changed = ruleset.MatchWinCondition;
         changed.WinCondition = (MatchWinConditionType)index;
         ruleset.MatchWinCondition = changed;
+        ApplyCondition();
     }
 
     public void SetStopCondition(int index)
@@ -67,21 +84,7 @@ public class GamemodeEditor : MonoBehaviour
         var changed = ruleset.MatchWinCondition;
         changed.StopCondition = (MatchStopConditionType)index;
         ruleset.MatchWinCondition = changed;
-
-        // Change max values to account for there only being 3 slots for wins in scoreboards
-        // TODO make wins in scoreboards more dynamic to fix this :c
-        switch (changed.StopCondition)
-        {
-            case MatchStopConditionType.FirstToXWins:
-                stopConditionAmountSlider.value = 3;
-                stopConditionAmountSlider.maxValue = 3;
-                break;
-            case MatchStopConditionType.AfterXRounds:
-            default:
-                stopConditionAmountSlider.maxValue = 10;
-                stopConditionAmountSlider.value = 6;
-                break;
-        }
+        ApplyCondition();
     }
 
     public void SetRounds(float value)

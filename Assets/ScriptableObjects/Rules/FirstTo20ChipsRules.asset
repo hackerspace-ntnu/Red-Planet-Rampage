@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0492989bd80b87190af4d1be785b4bb3, type: 3}
-  m_Name: FunkyTestRules
+  m_Name: FirstTo20ChipsRules
   m_EditorClassIdentifier: 
   MatchWinCondition:
-    WinCondition: 0
-    StopCondition: 0
-    AmountForStopCondition: 2
+    WinCondition: 2
+    StopCondition: 1
+    AmountForStopCondition: 20
   RoundWinCondition:
     Type: 0
     Amount: 0
@@ -23,17 +23,17 @@ MonoBehaviour:
   Rewards:
   - Condition: 0
     Type: 0
-    Amount: 10
+    Amount: 0
   - Condition: 1
     Type: 0
-    Amount: 4
+    Amount: 2
   - Condition: 2
     Type: 0
-    Amount: 1
+    Amount: 2
   - Condition: 3
     Type: 0
-    Amount: 9
-  MaxChips: 12
+    Amount: 1
+  MaxChips: 20
   StartingWeapon:
     Type: 0
     Body: {fileID: 11400000, guid: bf9666eedd80829a0a6b59278813ba72, type: 2}
@@ -42,4 +42,6 @@ MonoBehaviour:
   WeaponProgress:
     Type: 0
   AuctionProgress:
+  - Type: 0
+  - Type: 1
   - Type: 2
