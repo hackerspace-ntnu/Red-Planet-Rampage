@@ -13,6 +13,7 @@ public class TabGroup : MonoBehaviour
     public TabsButton selectedTab;
 
     private MainMenuController mainMenuController;
+
     public void SetPlayerInput(InputManager inputManager)
     {
         inputManager.onLeftTab += OnLeftButton;
@@ -58,24 +59,24 @@ public class TabGroup : MonoBehaviour
 
     private void OnLeftButton(InputAction.CallbackContext ctx)
     {
-        if (this.isActiveAndEnabled)
-        {
-            // Move to the previous tab
-            int i = tabButtons.FindIndex(x => x == selectedTab);
-            if (i > 0)
-                SelectTab(tabButtons[i - 1]);
-        }
+        if (!isActiveAndEnabled)
+            return;
+
+        // Move to the previous tab
+        int i = tabButtons.FindIndex(x => x == selectedTab);
+        if (i > 0)
+            SelectTab(tabButtons[i - 1]);
     }
 
     private void OnRightButton(InputAction.CallbackContext ctx)
     {
-        if (this.isActiveAndEnabled)
-        {
-            // Move to the next tab
-            int i = tabButtons.FindIndex(x => x == selectedTab);
-            if (i < tabButtons.Count - 1)
-                SelectTab(tabButtons[i + 1]);
-        }
+        if (!isActiveAndEnabled)
+            return;
+
+        // Move to the next tab
+        int i = tabButtons.FindIndex(x => x == selectedTab);
+        if (i < tabButtons.Count - 1)
+            SelectTab(tabButtons[i + 1]);
     }
 
     public void ResetTabs()

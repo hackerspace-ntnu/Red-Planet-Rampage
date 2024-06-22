@@ -1,17 +1,13 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using CollectionExtensions;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public enum MatchWinConditionType
 {
+    Kills,
     Wins,
     Score,
-    Kills,
 }
 
 public enum MatchStopConditionType
@@ -78,6 +74,33 @@ public struct StartingWeapon
     public Item Body;
     public Item Barrel;
     public Item Extension;
+
+    public NetworkStartingWeapon ToNetworkStartingWeapon() =>
+        new NetworkStartingWeapon
+        {
+            Type = Type,
+            Body = Body.id,
+            Barrel = Barrel.id,
+            Extension = Extension ? Extension.id : "None",
+        };
+}
+
+[System.Serializable]
+public struct NetworkStartingWeapon
+{
+    public StartingWeaponType Type;
+    public string Body;
+    public string Barrel;
+    public string Extension;
+
+    public StartingWeapon ToStartingWeapon() =>
+        new StartingWeapon
+        {
+            Type = Type,
+            Body = StaticInfo.Singleton.ItemsById[Body],
+            Barrel = StaticInfo.Singleton.ItemsById[Barrel],
+            Extension = Extension != null && Extension != "None" ? StaticInfo.Singleton.ItemsById[Extension] : null,
+        };
 }
 
 public enum WeaponProgressType
@@ -106,6 +129,35 @@ public enum AuctionType
 public struct Auction
 {
     public AuctionType Type;
+}
+
+[System.Serializable]
+public struct NetworkRuleset
+{
+    public MatchWinCondition MatchWinCondition;
+
+    public RoundWinCondition RoundWinCondition;
+    public float RoundLength;
+
+    public Reward[] Rewards;
+    public int MaxChips;
+
+    public NetworkStartingWeapon StartingWeapon;
+    public WeaponProgress WeaponProgress;
+    public Auction[] AuctionProgress;
+
+    public Ruleset ToRuleset() =>
+        new Ruleset
+        {
+            MatchWinCondition = MatchWinCondition,
+            RoundWinCondition = RoundWinCondition,
+            RoundLength = RoundLength,
+            Rewards = Rewards,
+            MaxChips = MaxChips,
+            StartingWeapon = StartingWeapon.ToStartingWeapon(),
+            WeaponProgress = WeaponProgress,
+            AuctionProgress = AuctionProgress
+        };
 }
 
 [CreateAssetMenu(menuName = "Ruleset")]
@@ -186,4 +238,17 @@ public class Ruleset : ScriptableObject
 
     private uint WinnerByKills(List<Round> rounds) =>
         Peer2PeerTransport.PlayerDetails.MaxBy(p => rounds.Sum(r => r.KillCount(p.id))).id;
+
+    public NetworkRuleset ToNetworkRuleset() =>
+        new NetworkRuleset
+        {
+            MatchWinCondition = MatchWinCondition,
+            RoundWinCondition = RoundWinCondition,
+            RoundLength = RoundLength,
+            Rewards = Rewards,
+            MaxChips = MaxChips,
+            StartingWeapon = StartingWeapon.ToNetworkStartingWeapon(),
+            WeaponProgress = WeaponProgress,
+            AuctionProgress = AuctionProgress
+        };
 }

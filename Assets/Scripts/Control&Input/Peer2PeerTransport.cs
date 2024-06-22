@@ -50,6 +50,15 @@ public struct PlayerLeftMessage : NetworkMessage
     public uint id;
 }
 
+public struct RulesetMessage : NetworkMessage
+{
+    public RulesetMessage(Ruleset ruleset)
+    {
+        this.ruleset = ruleset.ToNetworkRuleset();
+    }
+    public NetworkRuleset ruleset;
+}
+
 public struct InitialPlayerDetailsMessage : NetworkMessage
 {
     public InitialPlayerDetailsMessage(PlayerDetails details)
@@ -200,6 +209,7 @@ public class Peer2PeerTransport : NetworkManager
         NetworkClient.RegisterHandler<InitialPlayerDetailsMessage>(OnReceivePlayerDetails);
         NetworkClient.RegisterHandler<InitializePlayerMessage>(InitializeFPSPlayer);
         NetworkClient.RegisterHandler<UpdatedPlayerDetailsMessage>(OnReceiveUpdatedPlayerDetails);
+        NetworkClient.RegisterHandler<RulesetMessage>(OnReceiveRuleset);
 
         // Send message for the input that we assume is registered
         // TODO doesn't work if players haven't pressed a key yet
@@ -402,9 +412,10 @@ public class Peer2PeerTransport : NetworkManager
             playerType = steamID == SteamManager.Singleton.SteamID.m_SteamID ? PlayerType.Local : PlayerType.Remote;
         }
 
-        // Send information about existing players to the new one
+        // Send information about rules and existing players to the new one
         if (!isConnectionAlreadyPresent)
         {
+            connection.Send(new RulesetMessage(MatchRules.Current));
             foreach (var existingPlayer in players.Values)
             {
                 connection.Send(new InitialPlayerDetailsMessage(existingPlayer));
@@ -432,6 +443,11 @@ public class Peer2PeerTransport : NetworkManager
         // Send information about this player to all
         NetworkServer.SendToAll(new InitialPlayerDetailsMessage(details));
         playerIndex++;
+    }
+
+    private void OnReceiveRuleset(RulesetMessage message)
+    {
+        MatchRules.Singleton.Rules = message.ruleset.ToRuleset();
     }
 
     private void OnReceivePlayerDetails(InitialPlayerDetailsMessage message)

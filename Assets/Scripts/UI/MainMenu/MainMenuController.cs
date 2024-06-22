@@ -4,20 +4,21 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
+internal enum LobbyType
+{
+    Local,
+    Public,
+}
+
 public class MainMenuController : MonoBehaviour
 {
     [Unity.Collections.ReadOnly, SerializeField]
     private GameObject currentMenu;
-    [SerializeField]
-    private RectTransform characterView;
-    [SerializeField]
-    private GameObject playerBackgroundPanel;
 
     [SerializeField]
     private VideoPlayer introVideo;
@@ -54,8 +55,6 @@ public class MainMenuController : MonoBehaviour
     private Button startButton;
     [SerializeField]
     private GameObject innputManagerPrefab;
-    [SerializeField]
-    private string[] mapNames;
     private AudioSource audioSource;
     [SerializeField]
     private AudioClip[] uiSelectSounds;
@@ -72,6 +71,8 @@ public class MainMenuController : MonoBehaviour
 
     [SerializeField]
     private GameObject videoPlayerCamera;
+
+    private LobbyType lobbyType;
 
     private void Awake()
     {
@@ -324,18 +325,15 @@ public class MainMenuController : MonoBehaviour
 
     private void SetStartButtonState()
     {
-        bool canPlay = (playerInputManagerController.MatchHasAI || Peer2PeerTransport.NumPlayers > 1);
+        bool canPlay = playerInputManagerController.MatchHasAI || Peer2PeerTransport.NumPlayers > 1;
         var colors = startButton.colors;
         colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
         startButton.colors = colors;
     }
 
-    // Currently invoked when entering characterselect menu
-    // TODO: Make dedicated hosting UI instead.
     public void HostLocalLobby()
     {
-        NetworkManager.singleton.StartHost();
-        playerSelectManager.UpdateLobby();
+        lobbyType = LobbyType.Local;
     }
 
     public void StartTrainingMode()
@@ -347,10 +345,7 @@ public class MainMenuController : MonoBehaviour
 
     public void HostSteamLobby()
     {
-        if (!SteamManager.IsSteamActive)
-            return;
-        SteamManager.Singleton.HostLobby();
-        playerSelectManager.UpdateLobby();
+        lobbyType = LobbyType.Public;
     }
 
     public void FetchLobbyInfo()
@@ -360,6 +355,23 @@ public class MainMenuController : MonoBehaviour
         SteamManager.Singleton.FetchLobbyInfo();
     }
 
+    public void SetGamemode(Ruleset gamemode)
+    {
+        MatchRules.Singleton.Rules = gamemode;
+    }
+
+    public void StartLobby()
+    {
+        if (lobbyType is LobbyType.Local || !SteamManager.IsSteamActive)
+        {
+            NetworkManager.singleton.StartHost();
+        }
+        else
+        {
+            SteamManager.Singleton.HostLobby();
+        }
+        playerSelectManager.UpdateLobby();
+    }
 
     public void LeaveLobby()
     {
