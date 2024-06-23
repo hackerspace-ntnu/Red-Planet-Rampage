@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Rope : MonoBehaviour
 {
-    private List<Vector3> collisionPoints = new List<Vector3>();
+    public List<Vector3> CollisionPoints = new List<Vector3>();
     [SerializeField]
     private Transform anchor;
     public Transform Anchor 
@@ -15,7 +16,7 @@ public class Rope : MonoBehaviour
         }
         set
         {
-            collisionPoints.Add(value.position);
+            CollisionPoints.Add(value.position);
             anchor = value;
         }
     }
@@ -27,18 +28,19 @@ public class Rope : MonoBehaviour
     private LineRenderer line;
     public LineRenderer Line => line;
     private float accumulatedAnchorLength = 0f;
+    public bool CollisionCheckActive = true;
     public float RopeLength 
     {
         get
         {
-            return accumulatedAnchorLength + Vector3.Distance(Target.position, collisionPoints[collisionPoints.Count - 1]);
+            return accumulatedAnchorLength + Vector3.Distance(Target.position, CollisionPoints[CollisionPoints.Count - 1]);
         }
     }
     public Vector3 CurrentAnchor
     {
         get
         {
-            return collisionPoints[collisionPoints.Count - 1];
+            return CollisionPoints[CollisionPoints.Count - 1];
         }
     }
 
@@ -46,44 +48,52 @@ public class Rope : MonoBehaviour
     {
         if (!anchor)
             return;
-        collisionPoints.Add(anchor.position);
+        CollisionPoints.Add(anchor.position);
     }
 
     public void ResetRope(Vector3 position)
     {
-        collisionPoints = new List<Vector3>();
-        collisionPoints.Add(position);
+        CollisionPoints = new List<Vector3>();
+        CollisionPoints.Add(position);
         accumulatedAnchorLength = 0f;
     }
     public void ResetRope(Transform anchor)
     {
-        collisionPoints = new List<Vector3>();
+        CollisionPoints = new List<Vector3>();
         this.anchor = anchor;
-        collisionPoints.Add(anchor.position);
+        CollisionPoints.Add(anchor.position);
         accumulatedAnchorLength = 0f;
     }
 
     private float CollisionLength()
     {
         var accumulatedLength = 0f;
-        if (collisionPoints.Count > 1)
-            for (int i = 0; i < collisionPoints.Count - 1; i++)
-                accumulatedLength += Vector3.Distance(collisionPoints[i], collisionPoints[i + 1]);
+        if (CollisionPoints.Count > 1)
+            for (int i = 0; i < CollisionPoints.Count - 1; i++)
+                accumulatedLength += Vector3.Distance(CollisionPoints[i], CollisionPoints[i + 1]);
         return accumulatedLength;
     }
 
     private void FixedUpdate()
     {
-        if (!anchor || !Target || collisionPoints.Count == 0)
+        if (!anchor || !Target || CollisionPoints.Count == 0)
             return;
 
-        if (Physics.Linecast(Target.position, collisionPoints[collisionPoints.Count - 1], out RaycastHit hitInfo, colliderLayers))
+        if (!CollisionCheckActive)
         {
-            if (collisionPoints.Count > 1)
+            line.positionCount = CollisionPoints.Count + 1;
+            line.SetPositions(CollisionPoints.ToArray());
+            line.SetPosition(CollisionPoints.Count, Target.position);
+            return;
+        }
+
+        if (Physics.Linecast(Target.position, CollisionPoints[CollisionPoints.Count - 1], out RaycastHit hitInfo, colliderLayers))
+        {
+            if (CollisionPoints.Count > 1)
             {
-                if (Vector3.Distance(hitInfo.point, collisionPoints[collisionPoints.Count - 1]) > 0.2f)
+                if (Vector3.Distance(hitInfo.point, CollisionPoints[CollisionPoints.Count - 1]) > 0.2f)
                 {
-                    collisionPoints.Add(hitInfo.point);
+                    CollisionPoints.Add(hitInfo.point);
                     accumulatedAnchorLength = CollisionLength();
                 }
                     
@@ -91,31 +101,31 @@ public class Rope : MonoBehaviour
             // First point, nothing to compare to
             else
             {
-                collisionPoints.Add(hitInfo.point);
+                CollisionPoints.Add(hitInfo.point);
                 accumulatedAnchorLength = CollisionLength();
             }
                 
         }
-        if (collisionPoints.Count > 1)
+        if (CollisionPoints.Count > 1)
         {
             // Extra failsafe in case rope gets stuck on corners
-            var previousAnchor = collisionPoints[collisionPoints.Count - 2];
-            var activeAnchor = collisionPoints[collisionPoints.Count - 1];      
+            var previousAnchor = CollisionPoints[CollisionPoints.Count - 2];
+            var activeAnchor = CollisionPoints[CollisionPoints.Count - 1];      
             if (Vector3.Dot((activeAnchor - previousAnchor).normalized, (activeAnchor - Target.position).normalized) > 0.1f)
             {
-                collisionPoints.RemoveAt(collisionPoints.Count - 1);
+                CollisionPoints.RemoveAt(CollisionPoints.Count - 1);
                 accumulatedAnchorLength = CollisionLength();
             }
             if (!Physics.Linecast(Target.position, previousAnchor, colliderLayers) && Vector3.Distance(Target.position, previousAnchor) < Vector3.Distance(Target.position, activeAnchor) )
             {
-                collisionPoints.RemoveAt(collisionPoints.Count - 1);
+                CollisionPoints.RemoveAt(CollisionPoints.Count - 1);
                 accumulatedAnchorLength = CollisionLength();
             }
         }
         // +1 to add target vertex at the end
-        line.positionCount = collisionPoints.Count + 1;
-        line.SetPositions(collisionPoints.ToArray());
-        line.SetPosition(collisionPoints.Count, Target.position);
+        line.positionCount = CollisionPoints.Count + 1;
+        line.SetPositions(CollisionPoints.ToArray());
+        line.SetPosition(CollisionPoints.Count, Target.position);
     }
 
     private void OnEnable()
