@@ -93,7 +93,6 @@ public class AuctionDriver : NetworkBehaviour
         playerFactory = GetComponent<PlayerFactory>();
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
 
-        AnimateAuctionStart();
         StartCoroutine(WaitAndStartCameraAnimation());
         StartCoroutine(PopulatePlatforms());
         LoadingScreen.Singleton.Hide();
@@ -109,13 +108,6 @@ public class AuctionDriver : NetworkBehaviour
             biddingPlatforms[i].onBiddingExtended -= ActivateAuctioneerHaste;
             biddingPlatforms[i].onBidDenied -= ActivateAuctioneerMissing;
         }
-    }
-
-    private void AnimateAuctionStart()
-    {
-        //TODO: Animate auctioneer presenting items instead, meanwhile this functionality should still be here
-        GlobalHUDController globalHUD = GetComponentInChildren<GlobalHUDController>();
-        StartCoroutine(globalHUD.DisplayStartScreen(biddingBeginDelay + 2));
     }
 
     private IEnumerator WaitAndStartCameraAnimation()
