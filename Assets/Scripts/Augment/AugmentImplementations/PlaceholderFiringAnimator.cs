@@ -7,6 +7,8 @@ public class PlaceholderFiringAnimator : AugmentAnimator
 
     public override void OnFire(GunStats stats)
     {
+        if (DoWeNeedToEscape())
+            return;
         OnShotFiredAnimation?.Invoke();
         OnAnimationEnd?.Invoke();
     }

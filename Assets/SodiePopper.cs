@@ -53,6 +53,7 @@ public class SodiePopper : GunBody
 
     [SerializeField]
     private AudioGroup slosh;
+
     public override void Start()
     {
         gunController = transform.parent?.GetComponent<GunController>();

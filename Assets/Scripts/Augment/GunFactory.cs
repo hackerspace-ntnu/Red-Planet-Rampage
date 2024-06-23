@@ -32,6 +32,7 @@ public class GunFactory : MonoBehaviour
 
         var firstPersonGunController = gun.GetComponent<GunFactory>().GunController;
         var gunAnimations = displayGun.GetComponentsInChildren<AugmentAnimator>(includeInactive: true);
+        // TODO THESE ARE NEVER UNSUBSCRIBED RIGHT?
         foreach (var animation in gunAnimations)
         {
             animation.OnInitialize(firstPersonGunController.stats);

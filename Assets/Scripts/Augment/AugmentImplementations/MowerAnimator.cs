@@ -15,6 +15,8 @@ public class MowerAnimator : AugmentAnimator
 
     public override void OnFire(GunStats stats)
     {
+        if (DoWeNeedToEscape())
+            return;
         animator.SetTrigger("PistonPump");
         handAnimator.SetTrigger("Pull");
     }
@@ -26,6 +28,8 @@ public class MowerAnimator : AugmentAnimator
 
     public override void OnReload(GunStats stats)
     {
+        if (DoWeNeedToEscape())
+            return;
         exhaustParticles.Play();
     }
 }

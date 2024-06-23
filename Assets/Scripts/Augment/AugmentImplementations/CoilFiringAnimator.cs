@@ -16,6 +16,8 @@ public class CoilFiringAnimator : AugmentAnimator
 
     public override void OnFire(GunStats stats)
     {
+        if (DoWeNeedToEscape())
+            return;
         animator.SetTrigger("Fire");
     }
 

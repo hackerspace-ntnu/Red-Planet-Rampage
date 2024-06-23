@@ -15,9 +15,7 @@ public class TrainingModeAugmentPlacer : MonoBehaviour
 
     private void Start()
     {
-#if UNITY_EDITOR 
         SpawnAugments();
-#endif
     }
 
     private void SpawnAugments()

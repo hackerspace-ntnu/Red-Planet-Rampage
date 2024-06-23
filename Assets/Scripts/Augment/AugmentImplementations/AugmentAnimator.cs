@@ -13,4 +13,20 @@ public abstract class AugmentAnimator : MonoBehaviour
     public abstract void OnInitialize(GunStats stats);
     public abstract void OnReload(GunStats stats);
     public abstract void OnFire(GunStats stats);
+
+    protected bool DoWeNeedToEscape()
+    {
+        try
+        {
+            if (!gameObject)
+            {
+                return true;
+            }
+        }
+        catch (System.NullReferenceException)
+        {
+            return true;
+        }
+        return false;
+    }
 }

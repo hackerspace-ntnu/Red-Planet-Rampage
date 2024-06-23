@@ -19,6 +19,8 @@ public class BarrelFiringAnimator : AugmentAnimator
 
     public override void OnFire(GunStats stats)
     {
+        if (DoWeNeedToEscape())
+            return;
         animator.SetTrigger("Fire");
         // TODO wait for firing animation to end
         OnShotFiredAnimation?.Invoke();

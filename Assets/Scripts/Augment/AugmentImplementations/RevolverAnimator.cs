@@ -12,7 +12,7 @@ public class RevolverAnimator : AugmentAnimator
     private GunBarrel barrel;
     private GunExtension extension;
 
-    public override void OnFire(GunStats stats){}
+    public override void OnFire(GunStats stats) { }
 
     public override void OnInitialize(GunStats stats)
     {
@@ -27,6 +27,8 @@ public class RevolverAnimator : AugmentAnimator
 
     public override void OnReload(GunStats stats)
     {
+        if (DoWeNeedToEscape())
+            return;
         canReload = !canReload;
         if (!canReload)
             return;
