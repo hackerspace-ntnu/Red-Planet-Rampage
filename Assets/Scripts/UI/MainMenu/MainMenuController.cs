@@ -61,6 +61,9 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private AudioGroup uiChooseSounds;
 
+    [SerializeField]
+    private TMP_Text versionText;
+
     private PlayerInputManagerController playerInputManagerController;
     private List<InputManager> playerInputs = new List<InputManager>();
 
@@ -86,6 +89,7 @@ public class MainMenuController : MonoBehaviour
         aiButtonOriginalPosition = aIButton.transform.localPosition;
         PlayerInputManagerController.Singleton.MatchHasAI = false;
         audioSource = GetComponent<AudioSource>();
+        versionText.text = $"Early Access {Application.version}";
 
         playerInputManagerController = PlayerInputManagerController.Singleton;
         playerInputManagerController.AddJoinListener();
