@@ -4,9 +4,12 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CollectionExtensions;
 using Mirror;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using NetworkClient = Mirror.NetworkClient;
+using NetworkManager = Mirror.NetworkManager;
 
 // TODO consider splitting this into match-specific state and general player metadata
 public struct PlayerDetails
@@ -111,6 +114,10 @@ public struct InitializePlayerMessage : NetworkMessage
     public Quaternion rotation;
 }
 
+public struct ClientHasInitializedPlayersMessage : NetworkMessage {}
+
+public struct StartRoundMessage : NetworkMessage {}
+
 public enum PlayerType
 {
     Local,
@@ -186,6 +193,7 @@ public class Peer2PeerTransport : NetworkManager
     {
         NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
         NetworkServer.RegisterHandler<UpdateLoadoutMessage>(OnReceiveUpdateLoadout);
+        NetworkServer.RegisterHandler<ClientHasInitializedPlayersMessage>(OnClientHasInitializedPlayers);
 
         ResetState();
     }
@@ -200,6 +208,7 @@ public class Peer2PeerTransport : NetworkManager
         NetworkClient.RegisterHandler<InitialPlayerDetailsMessage>(OnReceivePlayerDetails);
         NetworkClient.RegisterHandler<InitializePlayerMessage>(InitializeFPSPlayer);
         NetworkClient.RegisterHandler<UpdatedPlayerDetailsMessage>(OnReceiveUpdatedPlayerDetails);
+        NetworkServer.RegisterHandler<StartRoundMessage>(OnStartRound);
 
         // Send message for the input that we assume is registered
         // TODO doesn't work if players haven't pressed a key yet
@@ -660,6 +669,7 @@ public class Peer2PeerTransport : NetworkManager
 
         foreach (var p in players.Values.Where(p => p.type is PlayerType.Remote && !connectedPlayers.Contains(p.id)))
         {
+            Debug.Log($"Spawning disconnected player {p.id}");
             NetworkClient.Send(new SpawnPlayerMessage(p.id, PlayerType.Local));
         }
     }
