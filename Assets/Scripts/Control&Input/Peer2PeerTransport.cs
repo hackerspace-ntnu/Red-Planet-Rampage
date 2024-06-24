@@ -471,15 +471,28 @@ public class Peer2PeerTransport : NetworkManager
         {
             localPlayerIds.Add(details.id);
         }
+
         // TODO move this bit!
-        //      it should happen at the start of each round, not only when a player joins
+        //      it should happen at the start of each match, not only when a player joins
         details.chips = MatchRules.Current.StartingChips;
-        details.body = MatchRules.Current.StartingWeapon.Body.id;
-        details.barrel = MatchRules.Current.StartingWeapon.Barrel.id;
-        details.extension = MatchRules.Current.StartingWeapon.Extension ? MatchRules.Current.StartingWeapon.Extension.id : null;
+
+        if (MatchRules.Current.StartingWeapon.Type is StartingWeaponType.IndividualRandom)
+        {
+            details.body = StaticInfo.Singleton.Bodies.RandomElement().id;
+            details.barrel = StaticInfo.Singleton.Barrels.RandomElement().id;
+            details.extension = StaticInfo.Singleton.Extensions.RandomElement().id;
+        }
+        else
+        {
+            details.body = MatchRules.Current.StartingWeapon.Body.id;
+            details.barrel = MatchRules.Current.StartingWeapon.Barrel.id;
+            details.extension = MatchRules.Current.StartingWeapon.Extension ? MatchRules.Current.StartingWeapon.Extension.id : null;
+        }
+
         details.bodies = new string[] { details.body };
         details.barrels = new string[] { details.barrel };
         details.extensions = details.extension != null ? new string[] { details.extension } : new string[] { };
+
         Debug.Log($"Received info for player {details.id}: name=<color=#{details.color.ToHexString()}>{details.name}</color> type={details.type}");
         players.Add(details.id, details);
         OnPlayerReceived?.Invoke(details);
