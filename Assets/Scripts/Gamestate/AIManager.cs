@@ -101,14 +101,32 @@ public class AIManager : PlayerManager
     public override void SetGun(Transform offset)
     {
         overrideAimTarget = false;
-        bool hasDisabledBody = identity.Bodies.Count > 1 && IsDisabledItem(identity.Body);
-        bool hasDisabledBarrel = identity.Barrels.Count > 1 && IsDisabledItem(identity.Barrel);
-        bool hasDisabledExtension = identity.Extensions.Count > 1 && IsDisabledItem(identity.Extension);
-        var gun = GunFactory.InstantiateGunAI(
-            hasDisabledBody ? identity.Bodies.Where(item => !IsDisabledItem(item)).RandomElement() : identity.Body,
-            hasDisabledBarrel ? identity.Barrels.Where(item => !IsDisabledItem(item)).RandomElement() : identity.Barrel,
-            hasDisabledExtension ? identity.Extensions.Where(item => !IsDisabledItem(item)).RandomElement() : identity?.Extension,
-            this, offset);
+
+        bool hasDisabledBody = IsDisabledItem(identity.Body);
+        var safeBodies = identity.Bodies.Where(item => !IsDisabledItem(item)).ToList();
+        var body = StaticInfo.Singleton.StartingBody;
+        if (!hasDisabledBody)
+            body = identity.Body;
+        else if (safeBodies.Count > 0)
+            body = safeBodies.RandomElement();
+
+        bool hasDisabledBarrel = IsDisabledItem(identity.Barrel);
+        var safeBarrels = identity.Barrels.Where(item => !IsDisabledItem(item)).ToList();
+        var barrel = StaticInfo.Singleton.StartingBarrel;
+        if (!hasDisabledBarrel)
+            barrel = identity.Barrel;
+        else if (safeBarrels.Count > 0)
+            barrel = safeBarrels.RandomElement();
+
+        bool hasDisabledExtension = IsDisabledItem(identity.Extension);
+        var safeExtensions = identity.Extensions.Where(item => !IsDisabledItem(item)).ToList();
+        var extension = StaticInfo.Singleton.StartingExtension;
+        if (!hasDisabledExtension)
+            extension = identity.Extension;
+        else if (safeExtensions.Count > 0)
+            extension = safeExtensions.RandomElement();
+
+        var gun = GunFactory.InstantiateGunAI(body, barrel, extension, this, offset);
         gunController = gun.GetComponent<GunController>();
         gunController.Initialize();
         gunController.onFireStart += UpdateAimTarget;
