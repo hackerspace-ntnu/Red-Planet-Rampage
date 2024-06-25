@@ -82,7 +82,6 @@ public class LazurController : ProjectileController
             size = stats.ProjectileSize
         };
         projectile.additionalProperties.Clear();
-        projectile.hitHealthControllers.Clear();
 
         OnProjectileInit?.Invoke(ref projectile, stats);
 
@@ -90,6 +89,9 @@ public class LazurController : ProjectileController
         Collider lastCollider = null;
         while (projectile.active)
         {
+            // Allow hitting the same player multiple times
+            projectile.hitHealthControllers.Clear();
+
             projectile.oldPosition = projectile.position;
 
             RaycastHit[] rayCasts = Physics.SphereCastAll(projectile.position, projectile.size, projectile.direction, MaxDistance - projectile.distanceTraveled, collisionLayers);
