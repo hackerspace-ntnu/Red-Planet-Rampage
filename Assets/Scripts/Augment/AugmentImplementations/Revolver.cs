@@ -51,7 +51,6 @@ public class Revolver : GunBody
             extension.transform.SetParent(attachmentSite, true);
 
         animator.SetTrigger("Reload");
-        gunController.onReload?.Invoke(stats);
     }
 
     public void TriggerSteam()
