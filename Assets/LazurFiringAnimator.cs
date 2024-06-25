@@ -24,8 +24,14 @@ public class LazurFiringAnimator : AugmentAnimator
 
     public void ShootLazer()
     {
-        this.OnShotFiredAnimation?.Invoke();
-        this.OnAnimationEnd?.Invoke();
+        Debug.Log("SHOOP DA WOOP");
+        OnShotFiredAnimation?.Invoke();
+    }
+
+    public void EndFiring()
+    {
+        Debug.Log("SHOOP DONE");
+        OnAnimationEnd?.Invoke();
     }
 
     public override void OnFire(GunStats stats)
