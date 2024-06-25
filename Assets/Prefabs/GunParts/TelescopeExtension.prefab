@@ -161,7 +161,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0c81d3eda0eb05409f4ccfe7cce839b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  statModifiers: []
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  statModifiers:
+  - name: ProjectileGravityModifier
+    addition: 0
+    multiplier: 0
+    exponential: 0
+  - name: ProjectileSpeedFactor
+    addition: 1
+    multiplier: 0.5
+    exponential: 1
+  - name: ProjectileSpread
+    addition: 0
+    multiplier: 0
+    exponential: 0
   outputs:
   - {fileID: 32494311255358874}
   midpoint: {fileID: 6440842260644592729}

@@ -35,6 +35,13 @@ public class Telescope : GunExtension
         gunMeshes = gunController.GetComponentsInChildren<MeshRenderer>().ToList();
         gunSkinMeshes = gunController.GetComponentsInChildren<SkinnedMeshRenderer>().ToList();
 
+        // Remove path altering modifiers so bullets always travel straight!
+        gunController.GetComponentInChildren<GunBarrel>()?
+            .GetModifiers()
+            .Where(modifier => modifier is ZigzagPathModifier || modifier is SpiralPathModifier)
+            .FirstOrDefault()?
+            .Detach(gunController.projectile);
+
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += CancelZoom;
     }
