@@ -194,7 +194,7 @@ public class GunController : NetworkBehaviour
 
     private void FireGun()
     {
-        if (stats.Ammo <= 0)
+        if (stats.Ammo < 1)
         {
             CmdFireWithNoAmmo();
             return;
