@@ -78,7 +78,8 @@ public class LazurController : ProjectileController
             oldPosition = output,
             direction = direction,
             maxDistance = MaxDistance,
-            initializationTime = Time.fixedTime
+            initializationTime = Time.fixedTime,
+            size = stats.ProjectileSize
         };
         projectile.additionalProperties.Clear();
         projectile.hitHealthControllers.Clear();
@@ -91,7 +92,7 @@ public class LazurController : ProjectileController
         {
             projectile.oldPosition = projectile.position;
 
-            RaycastHit[] rayCasts = Physics.RaycastAll(projectile.position, projectile.direction, MaxDistance - projectile.distanceTraveled, collisionLayers);
+            RaycastHit[] rayCasts = Physics.SphereCastAll(projectile.position, projectile.size, projectile.direction, MaxDistance - projectile.distanceTraveled, collisionLayers);
             rayCasts = rayCasts.OrderBy(x => x.distance).Where(p => p.collider != lastCollider).ToArray();
 
 
