@@ -65,8 +65,8 @@ public enum StartingWeaponType
 {
     Standard,
     Specific,
-    IndividualRandom,
     SharedRandom,
+    IndividualRandom,
 }
 
 [System.Serializable]
