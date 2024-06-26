@@ -3,6 +3,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
+using System.Linq;
 
 public class Scoreboard : MonoBehaviour
 {
@@ -175,8 +176,9 @@ public class Scoreboard : MonoBehaviour
         {
             MatchWinConditionType.Wins => MatchController.Singleton.LastRound.IsWinner(player.id) ? 1 : 0,
             MatchWinConditionType.Kills => MatchController.Singleton.LastRound.KillCount(player),
-            // TODO find gain somehow :S
-            MatchWinConditionType.Chips => 0,
+            // Use player details as previous chip count, since the chip amount there is only set at round start
+            MatchWinConditionType.Chips =>
+                player.identity.Chips - Peer2PeerTransport.PlayerDetails.Where(p => p.id == player.id).SingleOrDefault().chips,
             _ => 0,
         };
 

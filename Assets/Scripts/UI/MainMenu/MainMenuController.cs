@@ -361,7 +361,7 @@ public class MainMenuController : MonoBehaviour
 
     public void SetGamemode(Ruleset gamemode)
     {
-        MatchRules.Singleton.Rules = gamemode;
+        MatchRules.Singleton.SetCreatedRuleset(gamemode);
     }
 
     public void StartLobby()
