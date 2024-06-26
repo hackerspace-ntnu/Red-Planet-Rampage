@@ -166,6 +166,16 @@ public struct NetworkRuleset
 [CreateAssetMenu(menuName = "Ruleset")]
 public class Ruleset : ScriptableObject
 {
+    [Header("Fluff")]
+    [SerializeField]
+    private string displayName;
+    public string DisplayName => displayName;
+
+    [TextArea]
+    [SerializeField]
+    private string description;
+    public string Description => description;
+
     [Header("Win Condition")]
     public MatchWinCondition MatchWinCondition;
 
