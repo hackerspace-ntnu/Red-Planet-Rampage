@@ -37,7 +37,7 @@ public class AIMovement : PlayerMovement
             enabled = false;
             return;
         }
-        var direction = (Target.position - transform.position).normalized;
+        var direction = -transform.forward;
         UpdatePosition(new Vector3(direction.x, 0, direction.z));
     }
 
