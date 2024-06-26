@@ -32,13 +32,10 @@ public class AIMovement : PlayerMovement
 
     protected override void FixedUpdate()
     {
-        if (!StateIsAir && (!Target || Vector3.Distance(Target.position, transform.position) > 35))
-        {
-            enabled = false;
-            return;
-        }
         var direction = -transform.forward;
         UpdatePosition(new Vector3(direction.x, 0, direction.z));
+        if (!StateIsAir && (!Target || Vector3.Distance(Target.position, transform.position) > 35))
+            enabled = false;
     }
 
     private void OnEnable()
