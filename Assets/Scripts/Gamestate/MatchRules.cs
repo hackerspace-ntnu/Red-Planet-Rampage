@@ -7,15 +7,7 @@ public class MatchRules : MonoBehaviour
 
     [SerializeField]
     private Ruleset rules;
-    public Ruleset Rules
-    {
-        get => rules;
-        set
-        {
-            rules = value;
-            rules.Initialize();
-        }
-    }
+    public Ruleset Rules => rules;
 
     [SerializeField]
     private Ruleset[] gamemodes;
@@ -49,6 +41,17 @@ public class MatchRules : MonoBehaviour
 
     private void Start()
     {
-        rules.Initialize();
+        rules.InitializeRulesAfterCreation();
+    }
+
+    public void SetReceivedRuleset(NetworkRuleset ruleset)
+    {
+        rules = ruleset.ToRuleset();
+    }
+
+    public void SetCreatedRuleset(Ruleset ruleset)
+    {
+        rules = ruleset;
+        rules.InitializeRulesAfterCreation();
     }
 }

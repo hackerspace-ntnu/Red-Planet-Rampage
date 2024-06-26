@@ -447,7 +447,7 @@ public class Peer2PeerTransport : NetworkManager
 
     private void OnReceiveRuleset(RulesetMessage message)
     {
-        MatchRules.Singleton.Rules = message.ruleset.ToRuleset();
+        MatchRules.Singleton.SetReceivedRuleset(message.ruleset);
     }
 
     private void OnReceivePlayerDetails(InitialPlayerDetailsMessage message)

@@ -34,6 +34,10 @@ public class StaticInfo : MonoBehaviour
     public WeightedRandomisedAuctionStage ExtensionAuction => extensionAuction;
 
     [SerializeField]
+    private WeightedRandomisedAuctionStage everythingAuction;
+    public WeightedRandomisedAuctionStage EverythingAuction => everythingAuction;
+
+    [SerializeField]
     private Item startingBody;
     public Item StartingBody => startingBody;
 
@@ -84,9 +88,15 @@ public class StaticInfo : MonoBehaviour
         Barrels = new ReadOnlyArray<Item>(barrels);
         Extensions = new ReadOnlyArray<Item>(extensions);
         SecretNames = new ReadOnlyArray<OverrideName>(secretNames.Overrides);
-        bodyAuction.SetItems(bodies.Where(i => i != startingBody).ToArray());
-        barrelAuction.SetItems(barrels.Where(i => i != startingBarrel).ToArray());
-        extensionAuction.SetItems(extensions.Where(i => i != startingExtension).ToArray());
+
+        var bodiesWithoutStarter = bodies.Where(i => i != startingBody).ToArray();
+        var barrelsWithoutStarter = barrels.Where(i => i != startingBarrel).ToArray();
+        var extensionsWithoutStarter = extensions.Where(i => i != startingExtension).ToArray();
+        bodyAuction.SetItems(bodiesWithoutStarter);
+        barrelAuction.SetItems(barrelsWithoutStarter);
+        extensionAuction.SetItems(extensionsWithoutStarter);
+        everythingAuction.SetItems(bodiesWithoutStarter.Union(barrelsWithoutStarter).Union(extensionsWithoutStarter).ToArray());
+
         ItemsById = new ReadOnlyDictionary<string, Item>(new Dictionary<string, Item>(bodies.Union(barrels)
             .Union(extensions)
             .Select(item => new KeyValuePair<string, Item>(item.id, item))));

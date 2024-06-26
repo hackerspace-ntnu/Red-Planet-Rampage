@@ -87,6 +87,7 @@ public class AuctionDriver : NetworkBehaviour
             AuctionType.Body => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction },
             AuctionType.Barrel => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BarrelAuction },
             AuctionType.Extension => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.ExtensionAuction },
+            AuctionType.Random => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.EverythingAuction },
             _ => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction }
         };
 

@@ -2,8 +2,6 @@ using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -98,33 +96,25 @@ public class AIManager : PlayerManager
         gameObject.layer = playerLayer;
     }
 
+    private Item ChoosePart(Item current, IEnumerable<Item> available, Item fallback)
+    {
+        bool hasDisabledPart = IsDisabledItem(current);
+        var safeParts = available.Where(item => !IsDisabledItem(item)).ToList();
+        var part = fallback;
+        if (!hasDisabledPart)
+            part = current;
+        else if (safeParts.Count > 0)
+            part = safeParts.RandomElement();
+        return part;
+    }
+
     public override void SetGun(Transform offset)
     {
         overrideAimTarget = false;
 
-        bool hasDisabledBody = IsDisabledItem(identity.Body);
-        var safeBodies = identity.Bodies.Where(item => !IsDisabledItem(item)).ToList();
-        var body = StaticInfo.Singleton.StartingBody;
-        if (!hasDisabledBody)
-            body = identity.Body;
-        else if (safeBodies.Count > 0)
-            body = safeBodies.RandomElement();
-
-        bool hasDisabledBarrel = IsDisabledItem(identity.Barrel);
-        var safeBarrels = identity.Barrels.Where(item => !IsDisabledItem(item)).ToList();
-        var barrel = StaticInfo.Singleton.StartingBarrel;
-        if (!hasDisabledBarrel)
-            barrel = identity.Barrel;
-        else if (safeBarrels.Count > 0)
-            barrel = safeBarrels.RandomElement();
-
-        bool hasDisabledExtension = IsDisabledItem(identity.Extension);
-        var safeExtensions = identity.Extensions.Where(item => !IsDisabledItem(item)).ToList();
-        var extension = StaticInfo.Singleton.StartingExtension;
-        if (!hasDisabledExtension)
-            extension = identity.Extension;
-        else if (safeExtensions.Count > 0)
-            extension = safeExtensions.RandomElement();
+        var body = ChoosePart(identity.Body, identity.Bodies, StaticInfo.Singleton.StartingBody);
+        var barrel = ChoosePart(identity.Barrel, identity.Barrels, StaticInfo.Singleton.StartingBarrel);
+        var extension = ChoosePart(identity.Extension, identity.Extensions, StaticInfo.Singleton.StartingExtension);
 
         var gun = GunFactory.InstantiateGunAI(body, barrel, extension, this, offset);
         gunController = gun.GetComponent<GunController>();

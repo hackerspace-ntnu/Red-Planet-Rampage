@@ -124,6 +124,7 @@ public enum AuctionType
     Body,
     Barrel,
     Extension,
+    OneOfEach,
     Random,
 }
 
@@ -186,7 +187,7 @@ public class Ruleset : ScriptableObject
     public int ChipsPerKill => Rewards.Where(r => r.Condition == RewardCondition.Kill && r.Type == RewardType.Chips).Sum(r => r.Amount);
     public int ChipsPerWin => Rewards.Where(r => r.Condition == RewardCondition.Win && r.Type == RewardType.Chips).Sum(r => r.Amount);
 
-    public void Initialize()
+    public void InitializeRulesAfterCreation()
     {
         var editedStartingWeapon = StartingWeapon;
         switch (StartingWeapon.Type)
@@ -215,7 +216,7 @@ public class Ruleset : ScriptableObject
     {
         var index = round - 1;
         if (index < 0 || index >= AuctionProgress.Length)
-            return AuctionType.Random;
+            return AuctionType.OneOfEach;
         return AuctionProgress[index].Type;
     }
 

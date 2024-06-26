@@ -89,7 +89,7 @@ public class GamemodeEditor : MonoBehaviour
 
     public void ApplyRuleset()
     {
-        MatchRules.Singleton.Rules = Instantiate(ruleset);
+        MatchRules.Singleton.SetCreatedRuleset(ruleset);
     }
 
     private void ApplyCondition()
