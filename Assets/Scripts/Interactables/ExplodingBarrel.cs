@@ -1,6 +1,7 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.VFX;
 
 public class ExplodingBarrel : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class ExplodingBarrel : MonoBehaviour
     [SerializeField] private LayerMask explosionMarkMask;
 
     [SerializeField] private float explosionMarkLifeTime = 60;
+
+    [SerializeField] private VisualEffect[] dynamiteSmokes;
 
     private HealthController healthController;
 
@@ -36,6 +39,7 @@ public class ExplodingBarrel : MonoBehaviour
             return;
         barrelMesh.enabled = false;
         GetComponentsInChildren<Collider>().ToList().ForEach(c => c.enabled = false);
+        dynamiteSmokes.ToList().ForEach(smoke => smoke.enabled = false);
         explosion.Explode(info.sourcePlayer);
         LeaveMark();
         Destroy(gameObject, 4);
