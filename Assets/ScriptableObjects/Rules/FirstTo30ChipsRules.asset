@@ -10,12 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0492989bd80b87190af4d1be785b4bb3, type: 3}
-  m_Name: FirstTo20ChipsRules
+  m_Name: FirstTo30ChipsRules
   m_EditorClassIdentifier: 
+  displayName: First to 30 Chips
+  description: 'Be the first to win a round with 30 chips!
+
+    Players carry up
+    to 30 chips at a time and receive limited chip rewards.
+
+    Spend your chips
+    strategically and outsmart your opponents.'
   MatchWinCondition:
     WinCondition: 2
     StopCondition: 1
-    AmountForStopCondition: 20
+    AmountForStopCondition: 30
   RoundWinCondition:
     Type: 0
     Amount: 0
@@ -33,7 +41,7 @@ MonoBehaviour:
   - Condition: 3
     Type: 0
     Amount: 1
-  MaxChips: 20
+  MaxChips: 30
   StartingWeapon:
     Type: 0
     Body: {fileID: 11400000, guid: bf9666eedd80829a0a6b59278813ba72, type: 2}

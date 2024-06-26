@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using OperatorExtensions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -31,12 +32,10 @@ public class TabGroup : MonoBehaviour
     {
         ResetTabs();
     }
+
     public void Subscribe(TabsButton button)
     {
-        if (tabButtons == null)
-        {
-            tabButtons = new List<TabsButton>();
-        }
+        tabButtons ??= new List<TabsButton>();
 
         tabButtons.Add(button);
     }
@@ -63,9 +62,7 @@ public class TabGroup : MonoBehaviour
             return;
 
         // Move to the previous tab
-        int i = tabButtons.FindIndex(x => x == selectedTab);
-        if (i > 0)
-            SelectTab(tabButtons[i - 1]);
+        SwitchTab(-1);
     }
 
     private void OnRightButton(InputAction.CallbackContext ctx)
@@ -74,9 +71,13 @@ public class TabGroup : MonoBehaviour
             return;
 
         // Move to the next tab
+        SwitchTab(+1);
+    }
+
+    private void SwitchTab(int direction)
+    {
         int i = tabButtons.FindIndex(x => x == selectedTab);
-        if (i < tabButtons.Count - 1)
-            SelectTab(tabButtons[i + 1]);
+        SelectTab(tabButtons[(i + direction).Mod(tabButtons.Count)]);
     }
 
     public void ResetTabs()
