@@ -141,7 +141,11 @@ public class AIManager : PlayerManager
         agent.enabled = false;
         body.isKinematic = false;
         colliderBox.isTrigger = false;
-        yield return new WaitForSeconds(0.5f);
+
+        yield return new WaitForSeconds(0.25f);
+        while (aiMovement.StateIsAir)
+            yield return null;
+
         body.isKinematic = true;
         agent.enabled = true;
         colliderBox.isTrigger = true;
