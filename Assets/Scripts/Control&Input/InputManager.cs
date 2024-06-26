@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -46,6 +47,8 @@ public class InputManager : MonoBehaviour
     private float mouseLookScale = 0.02f;
     [SerializeField]
     private float gamepadLookScale = 0.75f;
+    [SerializeField]
+    public float adjustScaleMulti { get; set; } = 1.0f;
     [SerializeField]
     private Camera playerCamera;
     public Camera PlayerCamera => playerCamera;
@@ -146,12 +149,13 @@ public class InputManager : MonoBehaviour
     {
         if (isMouseAndKeyboard)
         {
-            lookInput = ctx.ReadValue<Vector2>() * mouseLookScale;
+            lookInput = ctx.ReadValue<Vector2>() * ( mouseLookScale * adjustScaleMulti );
         }
         else
         {
-            lookInput = ctx.ReadValue<Vector2>() * gamepadLookScale;
+            lookInput = ctx.ReadValue<Vector2>() * ( gamepadLookScale * adjustScaleMulti );
         }
+        Debug.Log("The adjust: " + adjustScaleMulti);
     }
 
     private void LookInputCanceled(InputAction.CallbackContext ctx)

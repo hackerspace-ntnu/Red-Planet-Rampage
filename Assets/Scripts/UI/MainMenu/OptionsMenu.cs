@@ -2,6 +2,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.UI;
 
 public class OptionsMenu : MonoBehaviour
 {
@@ -37,6 +38,16 @@ public class OptionsMenu : MonoBehaviour
     private AudioMixer mainAudioMixer;
 
     #endregion
+    #region Sensitivity variables
+    [SerializeField]
+    private Slider sensitivitySlider;
+    private float lowerLimit, upperLimit;
+
+    [SerializeField]
+    private TMP_InputField sensitivityInputField;
+    #endregion
+
+    private InputManager playerInput;
 
     void Awake()
     {
@@ -46,6 +57,8 @@ public class OptionsMenu : MonoBehaviour
         maxVolumeMusic = musicVolume;
         mainAudioMixer.GetFloat(audioGroupSFX, out float sfxVolume);
         maxVolumeSFX = sfxVolume;
+
+        lowerLimit = sensitivitySlider.minValue; upperLimit = sensitivitySlider.maxValue;
     }
 
 
@@ -103,5 +116,38 @@ public class OptionsMenu : MonoBehaviour
     public void SetDisplayMode(int displayMode)
     {
         Screen.fullScreenMode = (FullScreenMode)displayMode;
+    }
+
+    public void CheckSensInputValue(string inputValue)
+    {
+        sensitivityInputField.text = ClampSensValue(float.Parse(inputValue)).ToString("0.00");
+    }
+
+    public void ChangeSensInputField(float value)
+    {
+        sensitivityInputField.text = value.ToString("0.00");
+        SetSensMultiplier(value);
+    }
+
+    private float ClampSensValue(float inputValue)
+    {
+        return Mathf.Clamp(inputValue, lowerLimit, upperLimit);
+    }
+
+    public void ChangeSensSliderValue(string inputValue)
+    {
+        float value = ClampSensValue(float.Parse(inputValue));
+        sensitivitySlider.value = value;
+        SetSensMultiplier(value);
+    }
+
+    public void SetSensMultiplier(float multiplier)
+    {
+        playerInput.adjustScaleMulti = multiplier;
+    }
+
+    public void SetPlayerInput(InputManager inputManager)
+    {
+        playerInput = inputManager;
     }
 }

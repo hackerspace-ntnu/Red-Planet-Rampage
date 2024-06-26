@@ -43,6 +43,8 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private GameObject mapSelectMenu;
     [SerializeField]
+    private OptionsMenu optionsMenu;
+    [SerializeField]
     private LevelSelectManager levelSelectManager;
     [SerializeField]
     private PlayerSelectManager playerSelectManager;
@@ -107,6 +109,7 @@ public class MainMenuController : MonoBehaviour
             LoadingScreen.ResetCounter();
 
             Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
         }
         else
         {
@@ -244,6 +247,7 @@ public class MainMenuController : MonoBehaviour
     /// <param name="sceneName"></param>
     public void ChangeScene(string name)
     {
+        Cursor.lockState = CursorLockMode.Locked;
         PlayerInputManagerController.Singleton.RemoveJoinListener();
         ((Peer2PeerTransport)NetworkManager.singleton).StartMatch(name);
     }
@@ -280,6 +284,7 @@ public class MainMenuController : MonoBehaviour
         galleryMenu.SetPlayerInput(inputManager);
         creditsMenu.SetPlayerInput(inputManager);
         levelSelectManager.SetPlayerInput(inputManager);
+        optionsMenu.SetPlayerInput(inputManager);
     }
 
     private void PlayUISelectAudio(InputAction.CallbackContext ctx)
