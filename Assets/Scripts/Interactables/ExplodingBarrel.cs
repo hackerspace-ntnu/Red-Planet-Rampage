@@ -5,7 +5,7 @@ using UnityEngine.VFX;
 
 public class ExplodingBarrel : MonoBehaviour
 {
-    [SerializeField] private MeshRenderer barrelMesh;
+    [SerializeField] private MeshRenderer[] barrelMesh;
 
     [SerializeField] private ExplosionController explosion;
 
@@ -37,7 +37,7 @@ public class ExplodingBarrel : MonoBehaviour
     {
         if (!isAlive)
             return;
-        barrelMesh.enabled = false;
+        barrelMesh.ToList().ForEach(b => b.enabled = false);
         GetComponentsInChildren<Collider>().ToList().ForEach(c => c.enabled = false);
         dynamiteSmokes.ToList().ForEach(smoke => smoke.enabled = false);
         explosion.Explode(info.sourcePlayer);
