@@ -8,6 +8,7 @@ using System;
 internal struct Rewards
 {
     public int savings;
+    public int collected;
     public int baseReward;
     public int kills;
     public int killReward;
@@ -155,9 +156,11 @@ public class ScoreboardManager : MonoBehaviour
     private Rewards AssignAndDetermineRewards(PlayerManager player)
     {
         var lastRound = matchController.LastRound;
+        var playerDetails = Peer2PeerTransport.PlayerDetails.Where(p => p.id == player.id).SingleOrDefault();
         var result = new Rewards
         {
-            savings = player.identity.Chips,
+            savings = playerDetails.chips,
+            collected = player.identity.Chips - playerDetails.chips,
             kills = lastRound.KillCount(player)
         };
         foreach (Reward reward in MatchRules.Current.Rewards)
@@ -188,7 +191,7 @@ public class ScoreboardManager : MonoBehaviour
                     break;
             }
         }
-        result.total = result.savings + result.baseReward + result.killReward + result.winReward;
+        result.total = result.savings + result.collected + result.baseReward + result.killReward + result.winReward;
         return result;
     }
 
@@ -209,6 +212,8 @@ public class ScoreboardManager : MonoBehaviour
 
             // Participation award
             scoreboard.AddReward("Base", rewards.baseReward);
+
+            scoreboard.AddReward("Pickups", rewards.collected);
 
             // Kill Award, 0 if none
             scoreboard.AddReward("Kills", rewards.killReward);
