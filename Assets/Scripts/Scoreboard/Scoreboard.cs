@@ -51,6 +51,9 @@ public class Scoreboard : MonoBehaviour
     private TMP_Text scoreText;
 
     [SerializeField]
+    private TMP_Text hintText;
+
+    [SerializeField]
     private TMP_Text roundText;
 
     private int currentStep;
@@ -58,7 +61,7 @@ public class Scoreboard : MonoBehaviour
     private List<(string label, string amount)> rewardData = new();
     private List<(TMP_Text label, TMP_Text amount)> rewardComponents = new();
 
-    void Start()
+    private void Start()
     {
         scoreboardManager = ScoreboardManager.Singleton;
     }
@@ -122,6 +125,8 @@ public class Scoreboard : MonoBehaviour
             // TODO make box display able to show more than just 3 wins
             && MatchRules.Current.MatchWinCondition.AmountForStopCondition <= 3;
 
+        roundText.text = $"Round {MatchController.Singleton.RoundCount}";
+
         if (isModeFirstToXWins)
         {
             StartCoroutine(AnimateVictoryProgress());
@@ -150,6 +155,17 @@ public class Scoreboard : MonoBehaviour
         yield return new WaitForSeconds(scoreboardManager.matchProgressDelay - delayTime * 3);
     }
 
+    private int ScoreForPlayer(PlayerManager player)
+    {
+        return MatchRules.Current.MatchWinCondition.WinCondition switch
+        {
+            MatchWinConditionType.Wins => MatchController.Singleton.WinsForPlayer(player),
+            MatchWinConditionType.Kills => MatchController.Singleton.KillsForPlayer(player),
+            MatchWinConditionType.Chips => player.identity.Chips,
+            _ => 0,
+        };
+    }
+
     private IEnumerator AnimateScoreProgress()
     {
         wantedPoster.SetActive(false);
@@ -160,17 +176,10 @@ public class Scoreboard : MonoBehaviour
 
         if (MatchRules.Current.MatchWinCondition.StopCondition == MatchStopConditionType.AfterXRounds)
         {
-            roundText.gameObject.SetActive(true);
             roundText.text = $"Round {MatchController.Singleton.RoundCount}/{MatchRules.Current.MatchWinCondition.AmountForStopCondition}";
         }
 
-        int score = MatchRules.Current.MatchWinCondition.WinCondition switch
-        {
-            MatchWinConditionType.Wins => MatchController.Singleton.WinsForPlayer(player),
-            MatchWinConditionType.Kills => MatchController.Singleton.KillsForPlayer(player),
-            MatchWinConditionType.Chips => player.identity.Chips,
-            _ => 0,
-        };
+        int score = ScoreForPlayer(player);
 
         int scoreGain = MatchRules.Current.MatchWinCondition.WinCondition switch
         {
@@ -193,6 +202,21 @@ public class Scoreboard : MonoBehaviour
             scoreText.text = FormatScore(previousScore + i);
             scoreText.gameObject.LeanScale(1.5f * Vector3.one, delayTime).setEasePunch();
         }
+
+        // Show hint below current score
+        hintText.text = "";
+        if (MatchRules.Current.MatchWinCondition.StopCondition == MatchStopConditionType.AfterXRounds)
+        {
+            int maxScore = Peer2PeerTransport.PlayerInstanceByID.Values.Max(p => ScoreForPlayer(p));
+            if (score >= maxScore)
+                hintText.text = "LEADER";
+        }
+        else
+        {
+            if (score >= MatchRules.Current.MatchWinCondition.AmountForStopCondition)
+                hintText.text = "CAN WIN";
+        }
+
         // TODO avoid hardcoding progress display time
         yield return new WaitForSeconds(scoreboardManager.matchProgressDelay - 1.5f);
     }
