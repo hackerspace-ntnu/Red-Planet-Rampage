@@ -644,7 +644,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   textMesh: {fileID: 3316381399893442416}
-  AnimateText: 0
 --- !u!1 &6006424913092988723
 GameObject:
   m_ObjectHideFlags: 0
@@ -1039,7 +1038,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b54f2e511c1e2c4d2abbd091776bd3a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timer: {fileID: 8546860006739031995}
+  timer: {fileID: 0}
   text: {fileID: 7705336065034340431}
   progressCircle: {fileID: 3801319747409921609}
 --- !u!1 &6552369768490001351
@@ -1089,7 +1088,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6154156806219520954}
   - component: {fileID: 5392219698050781977}
-  - component: {fileID: 8546860006739031995}
   - component: {fileID: 4669453428060273032}
   m_Layer: 0
   m_Name: ItemSelectPlayer
@@ -1129,7 +1127,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canvas: {fileID: 8642731799569895425}
   handleModel: {fileID: 6201125803538669898}
-  timer: {fileID: 8546860006739031995}
+  radialTimer: {fileID: 4171424913646926842}
   cameraPosition: {fileID: 3467480324082098118}
   bodySlot: {fileID: 4803670567717312901}
   barrelSlot: {fileID: 2486123476282149344}
@@ -1142,21 +1140,6 @@ MonoBehaviour:
   readyAudio: {fileID: 8300000, guid: 5a885dd7cf3b00c409d9ef56429de6f7, type: 3}
   handleStartRotation: {x: 70, y: 0, z: 90}
   handleEndRotation: {x: -70, y: 0, z: 90}
---- !u!114 &8546860006739031995
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6596575034333967962}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bf39a137c20631044b50258ded7b8ed2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  baseWaitTime: 0
-  additionalWaitTime: 0
-  repeat: 0
 --- !u!82 &4669453428060273032
 AudioSource:
   m_ObjectHideFlags: 0
