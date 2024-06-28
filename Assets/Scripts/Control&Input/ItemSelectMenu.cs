@@ -13,7 +13,7 @@ public class ItemSelectMenu : MonoBehaviour
     private GameObject handleModel;
 
     [SerializeField]
-    private Timer timer;
+    private RadialTimer radialTimer;
 
     [SerializeField]
     private Transform cameraPosition;
@@ -51,7 +51,7 @@ public class ItemSelectMenu : MonoBehaviour
 
     private Vector2 moveInput;
 
-    private const float errorMarginInput = 0.1f;
+    private const float errorMarginInput = 0.3f;
 
     private bool gamepadMoveReady = true;
 
@@ -121,9 +121,12 @@ public class ItemSelectMenu : MonoBehaviour
         inputManager.onMoveCanceled += MoveInputCanceled;
 
         inputManager.onSelect += SelectPerformed;
+    }
 
-        timer.StartTimer(20f);
+    public void SetTimer(Timer timer)
+    {
         timer.OnTimerRunCompleted += OnTimerRunCompleted;
+        radialTimer.SetTimer(timer);
     }
 
 

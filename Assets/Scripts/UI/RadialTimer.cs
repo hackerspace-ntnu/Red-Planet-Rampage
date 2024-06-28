@@ -17,13 +17,28 @@ public class RadialTimer : MonoBehaviour
     {
         progressCircle.material = Instantiate(progressCircle.material);
         progressCircle.material.SetFloat("_Arc2", 0);
+        if (timer)
+            InitializeTimer();
+    }
+
+    private void InitializeTimer()
+    {
         timer.OnTimerUpdate += OnTimerUpdate;
     }
 
+    public void SetTimer(Timer timer)
+    {
+        this.timer = timer;
+        InitializeTimer();
+    }
+
+
     private void OnDestroy()
     {
-        timer.OnTimerUpdate -= OnTimerUpdate;
+        if (timer)
+            timer.OnTimerUpdate -= OnTimerUpdate;
     }
+
     private void OnTimerUpdate()
     {
         text.text = Mathf.Round(timer.WaitTime - timer.ElapsedTime).ToString();

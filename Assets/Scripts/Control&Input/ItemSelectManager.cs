@@ -22,17 +22,26 @@ public class ItemSelectManager : NetworkBehaviour
 
     private Coroutine waitRoutine;
 
-    private int delayDuration = 2;
+    private Timer timer;
 
-    // TODO network version of this thing
+    private void Start()
+    {
+        timer = GetComponent<Timer>();
+    }
+
     public void StartTrackingMenus()
     {
+        timer.StartTimer(20f);
+
+        timer.OnTimerRunCompleted += OnTimerRunCompleted;
+
         itemSelectMenus = new List<ItemSelectMenu>();
         foreach (var menu in FindObjectsOfType<ItemSelectMenu>())
         {
             itemSelectMenus.Add(menu);
             menu.OnReady += OnReady;
             menu.OnNotReady += OnNotReady;
+            menu.SetTimer(timer);
         }
 
         if (isServer)
@@ -52,6 +61,7 @@ public class ItemSelectManager : NetworkBehaviour
 
     private void OnDestroy()
     {
+        timer.OnTimerRunCompleted -= OnTimerRunCompleted;
         if (isServer)
         {
             ((Peer2PeerTransport)Peer2PeerTransport.singleton).OnDisconnect -= OnDisconnect;
@@ -112,6 +122,14 @@ public class ItemSelectManager : NetworkBehaviour
     {
         clientReadyByID[connection.connectionId] = true;
         CheckIfAllAreReady();
+    }
+
+    private void OnTimerRunCompleted()
+    {
+        if (waitRoutine != null)
+            StopCoroutine(waitRoutine);
+
+        Finish();
     }
 
     private void CheckIfAllAreReady()
