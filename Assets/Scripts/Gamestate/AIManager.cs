@@ -79,7 +79,7 @@ public class AIManager : PlayerManager
         this.identity = identity;
         if (!biddingAI)
             SetGun(GunHolder);
-        meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
+        meshBase.ToList().ForEach(mesh => mesh.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color);
         if (biddingAI)
             biddingAI.SetIdentity(identity);
     }

@@ -1,5 +1,6 @@
 using Mirror;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
@@ -92,7 +93,7 @@ public class PlayerManager : NetworkBehaviour
     [Header("Physics")]
 
     [SerializeField]
-    protected GameObject meshBase;
+    protected GameObject[] meshBase;
 
     [SerializeField]
     protected PlayerIK playerIK;
@@ -266,7 +267,7 @@ public class PlayerManager : NetworkBehaviour
     public void ApplyIdentity()
     {
         // Set player color
-        meshBase.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color;
+        meshBase.ToList().ForEach(mesh => mesh.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color);
         if (playerIK.TryGetComponent<BiddingPlayer>(out var biddingPlayer))
         {
             // TODO refactor identity subscriptions
@@ -424,7 +425,7 @@ public class PlayerManager : NetworkBehaviour
 
         // Set correct layer on self, mesh and gun (TODO)
         gameObject.layer = playerLayer;
-        SetLayerOnSubtree(meshBase, playerLayer);
+        meshBase.ToList().ForEach(mesh => SetLayerOnSubtree(mesh, playerLayer));
         if (hudController)
             SetLayerOnSubtree(hudController.gameObject, LayerMask.NameToLayer("Gun " + playerIndex));
     }

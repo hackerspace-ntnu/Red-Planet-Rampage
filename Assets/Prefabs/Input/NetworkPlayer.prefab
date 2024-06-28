@@ -12,9 +12,13 @@ PrefabInstance:
       propertyPath: identity
       value: 
       objectReference: {fileID: 7954090679051958240}
+    - target: {fileID: -437592331247616425, guid: 2872a05bf8e94d541a70726bb35085f3, type: 3}
+      propertyPath: AiAimSpot
+      value: 
+      objectReference: {fileID: 5496672953944389380}
     - target: {fileID: 71015680234268067, guid: 2872a05bf8e94d541a70726bb35085f3, type: 3}
       propertyPath: m_Name
-      value: NetworkPlayer Variant
+      value: NetworkPlayer
       objectReference: {fileID: 0}
     - target: {fileID: 71015680234268069, guid: 2872a05bf8e94d541a70726bb35085f3, type: 3}
       propertyPath: m_Enabled
@@ -90,11 +94,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 7954090679051958240}
   m_SourcePrefab: {fileID: 100100000, guid: 2872a05bf8e94d541a70726bb35085f3, type: 3}
---- !u!95 &1883308170059415089 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 289053663840324231, guid: 2872a05bf8e94d541a70726bb35085f3, type: 3}
-  m_PrefabInstance: {fileID: 2170794445371421878}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2223786909503164689 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 71015680234268071, guid: 2872a05bf8e94d541a70726bb35085f3, type: 3}
@@ -121,7 +120,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   clientAuthority: 1
-  animator: {fileID: 1883308170059415089}
+  animator: {fileID: 3043983234383150226}
 --- !u!114 &3102452166401960446
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -174,4 +173,14 @@ MonoBehaviour:
   body: {fileID: 0}
   barrel: {fileID: 0}
   extension: {fileID: 0}
-  bounty: 5
+  id: 0
+--- !u!95 &3043983234383150226 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 3755527737191155748, guid: 2872a05bf8e94d541a70726bb35085f3, type: 3}
+  m_PrefabInstance: {fileID: 2170794445371421878}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &5496672953944389380 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5938045475689792434, guid: 2872a05bf8e94d541a70726bb35085f3, type: 3}
+  m_PrefabInstance: {fileID: 2170794445371421878}
+  m_PrefabAsset: {fileID: 0}
