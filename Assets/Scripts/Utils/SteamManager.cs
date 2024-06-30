@@ -42,16 +42,20 @@ public class Lobby
         availableSlots = 0;
         if (int.TryParse(SteamMatchmaking.GetLobbyData(id, AvailableSlotsProperty), out var slots))
             availableSlots = slots;
+        if (int.TryParse(SteamMatchmaking.GetLobbyData(id, GameModeProperty), out var type))
+            gameMode = (LobbyGameMode)type;
     }
 
     public static string NameProperty = "name";
     public static string AvailableSlotsProperty = "availableSlots";
+    public static string GameModeProperty = "gameMode";
 
     public CSteamID id;
     public CSteamID host;
 
     public string name;
     public int availableSlots;
+    public LobbyGameMode gameMode;
 }
 
 public class SteamManager : MonoBehaviour
@@ -203,7 +207,7 @@ public class SteamManager : MonoBehaviour
         SteamMatchmaking.SetLobbyData(lobbyID, hostkey, SteamUser.GetSteamID().ToString());
         SteamMatchmaking.SetLobbyData(lobbyID, Lobby.NameProperty, UserName);
         SteamMatchmaking.SetLobbyData(lobbyID, Lobby.AvailableSlotsProperty, Peer2PeerTransport.NumAvailableSlots.ToString());
-
+        SteamMatchmaking.SetLobbyData(lobbyID, Lobby.GameModeProperty, ((int)MatchRules.Singleton.Rules.GameMode).ToString());
         // Update filterable information when necessary
         ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived += UpdateAvailableSlots;
         ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRemoved += UpdateAvailableSlots;
@@ -319,6 +323,20 @@ public class SteamManager : MonoBehaviour
         SteamMatchmaking.AddRequestLobbyListNumericalFilter(Lobby.AvailableSlotsProperty,
                                                             PlayerInputManagerController.Singleton.NumInputs,
                                                             ELobbyComparison.k_ELobbyComparisonEqualToOrGreaterThan);
+        SteamMatchmaking.RequestLobbyList();
+    }
+
+    public void FetchFilteredLobbyInfo()
+    {
+        var selectedGameMode = (int)MatchRules.Singleton.Rules.GameMode;
+        SteamMatchmaking.AddRequestLobbyListStringFilter(Lobby.GameModeProperty,
+                                                    selectedGameMode.ToString(),
+                                                    ELobbyComparison.k_ELobbyComparisonEqual);
+
+        SteamMatchmaking.AddRequestLobbyListNumericalFilter(Lobby.AvailableSlotsProperty,
+                                                    PlayerInputManagerController.Singleton.NumInputs,
+                                                    ELobbyComparison.k_ELobbyComparisonEqualToOrGreaterThan);
+
         SteamMatchmaking.RequestLobbyList();
     }
 
