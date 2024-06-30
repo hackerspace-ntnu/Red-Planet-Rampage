@@ -163,6 +163,14 @@ public struct NetworkRuleset
         };
 }
 
+public enum LobbyGameMode
+{
+    Custom,
+    Chips,
+    Rounds,
+    Kills
+}
+
 [CreateAssetMenu(menuName = "Ruleset")]
 public class Ruleset : ScriptableObject
 {
@@ -175,6 +183,10 @@ public class Ruleset : ScriptableObject
     [SerializeField]
     private string description;
     public string Description => description;
+
+    [SerializeField]
+    private LobbyGameMode gameMode = LobbyGameMode.Custom;
+    public LobbyGameMode GameMode => gameMode;
 
     [Header("Win Condition")]
     public MatchWinCondition MatchWinCondition;
