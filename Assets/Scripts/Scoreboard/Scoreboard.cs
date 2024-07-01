@@ -174,6 +174,9 @@ public class Scoreboard : MonoBehaviour
         scoreProgressSection.SetActive(true);
         progressHeader.text = MatchRules.Current.MatchWinCondition.WinCondition.ToString();
 
+        // Reset hint text until it is set
+        hintText.text = "";
+
         if (MatchRules.Current.MatchWinCondition.StopCondition == MatchStopConditionType.AfterXRounds)
         {
             roundText.text = $"Round {MatchController.Singleton.RoundCount}/{MatchRules.Current.MatchWinCondition.AmountForStopCondition}";
@@ -204,7 +207,6 @@ public class Scoreboard : MonoBehaviour
         }
 
         // Show hint below current score
-        hintText.text = "";
         if (MatchRules.Current.MatchWinCondition.StopCondition == MatchStopConditionType.AfterXRounds)
         {
             int maxScore = Peer2PeerTransport.PlayerInstanceByID.Values.Max(p => ScoreForPlayer(p));
