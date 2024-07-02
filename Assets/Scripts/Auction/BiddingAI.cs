@@ -30,6 +30,7 @@ public class BiddingAI : BiddingPlayer
         }
         playerManager.onSelectedBiddingPlatformChange += OnBiddingPlatformChange;
         playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
+        InstatiateMaterials();
     }
 
     public void SetIdentity(PlayerIdentity identity)
