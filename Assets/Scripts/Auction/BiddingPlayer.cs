@@ -1,5 +1,8 @@
 using Mirror;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -20,12 +23,48 @@ public class BiddingPlayer : NetworkBehaviour
     private Color maxChipColor;
     [SerializeField]
     protected TMP_Text signCross;
-    protected BiddingPlatform currentPlatform = null;
+    private BiddingPlatform _currentPlatform = null;
+    protected BiddingPlatform currentPlatform
+    {
+        get => _currentPlatform;
+        set
+        {
+            _currentPlatform = value;
+            instantiatedMaterials
+                .ForEach(material => 
+                    material.SetFloat("_DitherDensity", value != null ? 0.9f : 1f));
+        }
+    }
+    [SerializeField]
+    protected SkinnedMeshRenderer[] playerRenderers;
+    [SerializeField]
+    protected MeshRenderer signRenderer;
+    protected List<Material> instantiatedMaterials = new();
 
     private void Start()
     {
         GetComponent<PlayerIK>().RightHandIKTarget = signTarget;
         playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
+        InstatiateMaterials();
+    }
+
+    protected void InstatiateMaterials()
+    {
+        playerRenderers.ToList()
+            .ForEach(mesh =>
+            {
+                for (int i = 0; i < mesh.materials.Length; i++)
+                {
+                    mesh.materials[i] = Instantiate(mesh.materials[i]);
+                    instantiatedMaterials.Add(mesh.materials[i]);
+                }
+            });
+
+        for (int i = 0; i < signRenderer.materials.Length; i++)
+        {
+            signRenderer.materials[i] = Instantiate(signRenderer.materials[i]);
+            instantiatedMaterials.Add(signRenderer.materials[i]);
+        }
     }
 
     public void SetIdentity()
