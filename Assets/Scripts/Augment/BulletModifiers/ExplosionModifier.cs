@@ -26,7 +26,9 @@ public class ExplosionModifier : MonoBehaviour, ProjectileModifier
     private void Explode(RaycastHit other, ref ProjectileState state)
     {
         var instance = Instantiate(explosion, state.position, Quaternion.identity);
+        instance.Radius *= projectile.stats.ProjectileScale;
         instance.Init();
+
         var targets = instance.Explode(player);
 
         // Trigger on hit, excluding this effect and using the scaled damage from the explosion

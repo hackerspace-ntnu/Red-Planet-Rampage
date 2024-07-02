@@ -57,6 +57,7 @@ public class BulletController : ProjectileController
         trail.SetInt("StripLength", vfxPositionsPerSample * collisionSamples);
         trail.SetInt("TextureSize", vfxPositionsPerSample * collisionSamples * bulletsPerShot);
         trail.SetInt("TrailsPerEvent", bulletsPerShot);
+        trail.SetFloat("Size", stats.ProjectileScale);
 
         if (isServer)
             RpcSeedRandom(random.Next());
@@ -74,10 +75,12 @@ public class BulletController : ProjectileController
     {
         trailPositionBuffer.Buffer?.Release();
         trail = newTrail;
+        trail.SetFloat("Size", stats.ProjectileScale);
     }
 
     protected override void OnInitialize(GunStats gunstats)
     {
+        trail.SetFloat("Size", stats.ProjectileScale);
         animator.OnInitialize(gunstats);
     }
 
@@ -126,8 +129,10 @@ public class BulletController : ProjectileController
                 rotation = randomSpread * rotation,
                 initializationTime = Time.fixedTime,
                 speedFactor = stats.ProjectileSpeedFactor,
-                gravity = stats.ProjectileGravityModifier * 9.81f
+                gravity = stats.ProjectileGravityModifier * 9.81f,
+                size = Mathf.Max(0, (stats.ProjectileScale - 1)*.1f),
             };
+
             projectile.additionalProperties.Clear();
             projectile.hitHealthControllers.Clear();
 
@@ -159,16 +164,16 @@ public class BulletController : ProjectileController
                     var collider = collisions[i].collider;
                     HitboxController hitbox = collider.GetComponent<HitboxController>();
                     if (hitbox != null)
-                        if (hitbox.health.Player == player && projectile.distanceTraveled < player.GunController.OutputTransitionDistance)
+                        if (hitbox.health.Player == player && projectile.distanceTraveled < GunController.InvulnerabilityDistance)
                             continue;
 
-                    projectile.position = collisions[i].point;
+                    projectile.position += projectile.direction * collisions[i].distance;
                     if (hitbox != null)
                         OnHitboxCollision?.Invoke(hitbox, ref projectile);
 
                     OnColliderHit?.Invoke(collisions[i], ref projectile);
 
-                    if (totalCollisions == this.collisionsBeforeInactive)
+                    if (totalCollisions == collisionsBeforeInactive)
                         projectile.active = false;
 
                     if (sampleNum < collisionSamples)
