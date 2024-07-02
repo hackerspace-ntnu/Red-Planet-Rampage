@@ -79,7 +79,7 @@ public class LazurController : ProjectileController
             direction = direction,
             maxDistance = MaxDistance,
             initializationTime = Time.fixedTime,
-            size = stats.ProjectileSize
+            size = stats.ProjectileSize * stats.ProjectileScale
         };
         projectile.additionalProperties.Clear();
 
@@ -100,23 +100,26 @@ public class LazurController : ProjectileController
 
             if (rayCasts.Length > 0)
             {
-
-                Collider collider = rayCasts[0].collider;
+                var hit = rayCasts[0];
+                var collider = hit.collider;
                 lastCollider = collider;
-                HitboxController hitbox = collider.GetComponent<HitboxController>();
 
-                projectile.position = rayCasts[0].point;
-                OnRicochet?.Invoke(rayCasts[0], ref projectile);
-                if (hitbox != null)
-                    OnHitboxCollision?.Invoke(hitbox, ref projectile);
-                OnColliderHit?.Invoke(rayCasts[0], ref projectile);
+                projectile.position += projectile.direction * hit.distance;
 
-                projectile.distanceTraveled += rayCasts[0].distance;
+                OnRicochet?.Invoke(hit, ref projectile);
 
+                if (collider.TryGetComponent<HitboxController>(out var hitbox))
+                    if (!(hitbox.health.Player == player && projectile.distanceTraveled + hit.distance < GunController.InvulnerabilityDistance))
+                        OnHitboxCollision?.Invoke(hitbox, ref projectile);
+
+                OnColliderHit?.Invoke(hit, ref projectile);
+
+                projectile.direction = Vector3.Reflect(projectile.direction, hit.normal);
+                projectile.distanceTraveled += hit.distance;
             }
             else
             {
-                projectile.position = projectile.position + projectile.direction.normalized * (MaxDistance - projectile.distanceTraveled);
+                projectile.position += projectile.direction.normalized * (MaxDistance - projectile.distanceTraveled);
                 projectile.active = false;
             }
 
@@ -136,12 +139,15 @@ public class LazurController : ProjectileController
 
     protected override void OnInitialize(GunStats gunstats)
     {
+        Vfx.SetFloat("Size", gunstats.ProjectileScale);
         animator.OnInitialize(gunstats);
     }
+
     protected override void OnReload(GunStats stats)
     {
         animator.OnReload(stats);
     }
+
     public override void InitializeProjectile(GunStats stats, uint shotID)
     {
         currentShotID = shotID;

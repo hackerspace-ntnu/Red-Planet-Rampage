@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2011919946570164602}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.284}
+  m_LocalPosition: {x: 0, y: 0, z: 0.328}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -55,7 +55,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4320344545349446905}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.235}
+  m_LocalPosition: {x: 0, y: 0, z: 0.486}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -72,7 +72,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8196151136836888530}
   - component: {fileID: 7575752308601990708}
-  - component: {fileID: -1314935375335004500}
   m_Layer: 0
   m_Name: EnlargerExtension
   m_TagString: Untagged
@@ -115,26 +114,29 @@ MonoBehaviour:
   syncInterval: 0
   statModifiers:
   - name: ScreenShakeFactor
-    addition: 0.5
+    addition: 0.7
     multiplier: 0
     exponential: 1
+  - name: ProjectileScale
+    addition: 0
+    multiplier: 0
+    exponential: 3
+  - name: ProjectileDamage
+    addition: 0
+    multiplier: 0.5
+    exponential: 1
+  - name: ProjectileSpeedFactor
+    addition: 0
+    multiplier: 0
+    exponential: 0.5
+  - name: Firerate
+    addition: 0
+    multiplier: 0
+    exponential: 0.5
   outputs:
   - {fileID: 932626616956480431}
   midpoint: {fileID: 5729402012261899082}
   model: {fileID: 993201347869452232}
---- !u!114 &-1314935375335004500
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8350213044137146345}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 586f8df323151294a9220b1f0d464466, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  multiplier: 10
 --- !u!1001 &74844362063714969
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -148,16 +150,28 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5523b592edc638e439fe26cdeebe8b79, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5523b592edc638e439fe26cdeebe8b79, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5523b592edc638e439fe26cdeebe8b79, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5523b592edc638e439fe26cdeebe8b79, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5523b592edc638e439fe26cdeebe8b79, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.053
+      value: -0.066
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5523b592edc638e439fe26cdeebe8b79, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.245
+      value: 0.2918
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5523b592edc638e439fe26cdeebe8b79, type: 3}
       propertyPath: m_LocalRotation.w
@@ -186,6 +200,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 5523b592edc638e439fe26cdeebe8b79, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5523b592edc638e439fe26cdeebe8b79, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 5523b592edc638e439fe26cdeebe8b79, type: 3}
       propertyPath: m_Name

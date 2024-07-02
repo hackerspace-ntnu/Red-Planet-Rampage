@@ -3,6 +3,7 @@ using UnityEngine.VFX;
 using System.Linq;
 using UnityEngine.Serialization;
 using Mirror;
+using System.Runtime.InteropServices;
 
 /// <summary>
 /// Class that processes and renders mesh projectiles
@@ -66,8 +67,6 @@ public class MeshProjectileController : ProjectileController
         positionActiveBuffer.Initialize(maxProjectiles);
         vfx.SetGraphicsBuffer("Positions", positionActiveBuffer.Buffer);
         vfx.SetInt("MaxParticleCount", maxProjectiles);
-        vfx.SetFloat("Size", visualSize);
-        vfx.SendEvent(VisualEffectAsset.PlayEventID);
 
         if (!gunController || !gunController.Player)
             return;
@@ -76,6 +75,8 @@ public class MeshProjectileController : ProjectileController
 
     protected override void OnInitialize(GunStats gunstats)
     {
+        vfx.SetFloat("Size", visualSize * gunstats.ProjectileScale);
+        vfx.SendEvent(VisualEffectAsset.PlayEventID);
         animator.OnInitialize(gunstats);
     }
 
@@ -126,7 +127,14 @@ public class MeshProjectileController : ProjectileController
                 loadedProjectile.position = output;
                 loadedProjectile.direction = direction;
                 loadedProjectile.rotation = rotation;
-                loadedProjectile.size = size;
+
+                // Hat hitbox should be smaller when large :/
+                // Otherwise they bounce off weirdly
+                if (player.identity.Barrel.id == "Hatapult")
+                    loadedProjectile.size = size * (1 + (stats.ProjectileScale - 1) * .3f);
+                else
+                    loadedProjectile.size = size * stats.ProjectileScale;
+
                 loadedProjectile.additionalProperties["lastCollider"] = null;
 
                 projectiles[currentStateIndex] = loadedProjectile;
@@ -177,16 +185,16 @@ public class MeshProjectileController : ProjectileController
             state.active = false;
         }
 
-        var collisions = ProjectileMotions.GetPathCollisions(state, collisionLayers).Where(p => p.collider != lastCollider).ToArray();
+        var collisions = ProjectileMotions.GetPathCollisions(state, collisionLayers).Where(p => p.collider != lastCollider).OrderBy(p => p.distance).ToArray();
 
         state.additionalProperties["lastCollider"] = collisions.Length > 0 ? collisions[0].collider : null;
 
         if (collisions.Length <= 0) return;
 
 
-        if (collisions[0].collider.TryGetComponent<HitboxController>(out HitboxController hitbox))
+        if (collisions[0].collider.TryGetComponent<HitboxController>(out var hitbox))
         {
-            var hasHitYourselfTooEarly = hitbox.health.Player == player && state.distanceTraveled < player.GunController.OutputTransitionDistance;
+            var hasHitYourselfTooEarly = hitbox.health.Player == player && state.distanceTraveled < GunController.InvulnerabilityDistance;
             if (hasHitYourselfTooEarly)
                 return;
 

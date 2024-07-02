@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 public class GunController : NetworkBehaviour
 {
     private const float outputTransitionDistance = 2;
-    public float OutputTransitionDistance => outputTransitionDistance;
+    public const float InvulnerabilityDistance = 3;
 
     [HideInInspector]
     public ProjectileController projectile;

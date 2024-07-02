@@ -11,7 +11,14 @@ public class ExplosionController : MonoBehaviour
     [SerializeField] private AnimationCurve damageCurve;
 
     [SerializeField] private float radius;
-    public float Radius => radius;
+    public float Radius
+    {
+        get => radius;
+        set
+        {
+            radius = value;
+        }
+    }
 
     [SerializeField] private float knockbackForce = 2000;
 
@@ -36,7 +43,10 @@ public class ExplosionController : MonoBehaviour
     public void Init()
     {
         visualEffects = GetComponentsInChildren<VisualEffect>().ToList();
-        visualEffects.ForEach(vfx => vfx.enabled = false);
+        visualEffects.ForEach(vfx => {
+            vfx.enabled = false;
+            vfx.SetFloat("Size", radius / 6f);
+        });
         audioSource = GetComponent<AudioSource>();
     }
 

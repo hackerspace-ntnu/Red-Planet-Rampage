@@ -26,6 +26,8 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
 
     private PlayerManager source;
 
+    private float scale = 1;
+
     public Priority GetPriority()
     {
         return priority;
@@ -34,6 +36,7 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
     public void Attach(ProjectileController projectile)
     {
         projectile.OnColliderHit += StickToTarget;
+        scale = projectile.stats.ProjectileScale;
         source = projectile.player;
     }
 
@@ -49,6 +52,7 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
 
         var stuck = Instantiate(stuckObject, hit.ClosestPoint(state.position), state.rotation);
         stuck.transform.ParentUnscaled(hit.collider.transform);
+        stuck.transform.localScale = stuck.transform.localScale * scale;
         if (stuck.TryGetComponent<ContinuousDamage>(out var continuousDamage))
             continuousDamage.source = source;
         Destroy(stuck, stuckLifeTime);
