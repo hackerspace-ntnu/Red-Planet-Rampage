@@ -252,6 +252,7 @@ public class MainMenuController : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         settingsInfo.SetChangesToLocalAllInputs();
+        PlayerInputManagerController.Singleton.EnableAllInputs();
         PlayerInputManagerController.Singleton.RemoveJoinListener();
         ((Peer2PeerTransport)NetworkManager.singleton).StartMatch(name);
     }

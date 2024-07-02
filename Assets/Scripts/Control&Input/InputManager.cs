@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 
 public class InputManager : MonoBehaviour
 {
@@ -58,11 +60,21 @@ public class InputManager : MonoBehaviour
     public bool ZoomActive = false;
     public bool CrouchActive = false;
 
+    public static bool IsMenuFirst = false;
+    private InputActionAsset menuInputActions;
+    private InputActionMap keyboard;
+    private InputActionMap gamepad;
+
     void Start()
     {
         playerInput = GetComponent<PlayerInput>();
-        AddListeners();
         DontDestroyOnLoad(gameObject);
+        AddListeners();
+        var inputModule = EventSystem.current.currentInputModule as InputSystemUIInputModule;
+        if (inputModule != null )
+        {
+            menuInputActions = inputModule.actionsAsset;
+        }
     }
 
     void OnDestroy()
@@ -100,12 +112,28 @@ public class InputManager : MonoBehaviour
         playerInput.actions["Look"].performed += Look;
         playerInput.actions["Look"].canceled += Look;
 
-        // Imprison mouse
-        //if (playerInput.currentControlScheme == "MouseAndKeyboard")
-        //{
-        //    isMouseAndKeyboard = true;
-        //    Cursor.lockState = CursorLockMode.Locked;
-        //}
+        if (playerInput.currentControlScheme == "MouseAndKeyboard")
+        {
+            isMouseAndKeyboard = true;
+        }
+
+        if (!IsMenuFirst)
+        {
+            IsMenuFirst = true;
+        }
+        else
+        {
+            gamepad = menuInputActions.FindActionMap("Gamepad");
+            keyboard = menuInputActions.FindActionMap("MouseAndKeyboard");
+            if (isMouseAndKeyboard)
+            {
+                keyboard.Disable();
+            }
+            else
+            {
+                gamepad.Disable();
+            }
+        }
 
         AddExtraListeners();
     }
@@ -185,6 +213,14 @@ public class InputManager : MonoBehaviour
         {
             Cursor.lockState = CursorLockMode.None;
         }
+    }
+
+    public void EnableInput()
+    {
+        if (isMouseAndKeyboard)
+            keyboard.Enable();
+        else
+            gamepad.Enable();
     }
 
     #region OnEvent Functions

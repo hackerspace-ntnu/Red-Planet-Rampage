@@ -124,4 +124,12 @@ public class PlayerInputManagerController : MonoBehaviour
                 Destroy(previousParent.gameObject);
         });
     }
+
+    public void EnableAllInputs()
+    {
+        foreach (InputManager playerInput in LocalPlayerInputs)
+        {
+            playerInput.EnableInput();
+        }
+    }
 }
