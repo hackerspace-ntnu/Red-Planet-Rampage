@@ -13,6 +13,7 @@ internal enum LobbyType
 {
     Local,
     Public,
+    Friends
 }
 
 public class MainMenuController : MonoBehaviour
@@ -340,6 +341,11 @@ public class MainMenuController : MonoBehaviour
         lobbyType = LobbyType.Local;
     }
 
+    public void HostFriendsOnlyLobby()
+    {
+        lobbyType = LobbyType.Friends;
+    }
+
     public void StartTrainingMode()
     {
         PlayerInputManagerController.Singleton.RemoveJoinListener();
@@ -359,6 +365,11 @@ public class MainMenuController : MonoBehaviour
         SteamManager.Singleton.FetchLobbyInfo();
     }
 
+    public void FetchQueueLobbyInfo()
+    {
+        SteamManager.Singleton.FetchQueueLobbyInfo();
+    }
+
     public void SetGamemode(Ruleset gamemode)
     {
         MatchRules.Singleton.SetCreatedRuleset(gamemode);
@@ -366,13 +377,25 @@ public class MainMenuController : MonoBehaviour
 
     public void StartLobby()
     {
-        if (lobbyType is LobbyType.Local || !SteamManager.IsSteamActive)
+        if (!SteamManager.IsSteamActive)
         {
             NetworkManager.singleton.StartHost();
         }
         else
         {
-            SteamManager.Singleton.HostLobby();
+            switch (lobbyType)
+            {
+                case LobbyType.Public:
+                    SteamManager.Singleton.HostLobby();
+                    break;
+                case LobbyType.Friends:
+                    SteamManager.Singleton.HostLobby(Steamworks.ELobbyType.k_ELobbyTypeFriendsOnly);
+                    break;
+                case LobbyType.Local:
+                default:
+                    NetworkManager.singleton.StartHost();
+                    break;
+            }
         }
         playerSelectManager.UpdateLobby();
     }
