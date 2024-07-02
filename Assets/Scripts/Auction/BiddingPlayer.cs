@@ -1,5 +1,8 @@
 using Mirror;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -21,11 +24,29 @@ public class BiddingPlayer : NetworkBehaviour
     [SerializeField]
     protected TMP_Text signCross;
     protected BiddingPlatform currentPlatform = null;
+    [SerializeField]
+    protected Renderer[] playerRenderers;
+    protected List<Material> instantiatedMaterials = new();
 
     private void Start()
     {
         GetComponent<PlayerIK>().RightHandIKTarget = signTarget;
         playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
+        playerManager.onSelectedBiddingPlatformChange += ToggleDither;
+        InstantiateMaterials();
+    }
+
+    protected void InstantiateMaterials()
+    {
+        playerRenderers.ToList()
+            .ForEach(mesh =>
+            {
+                for (int i = 0; i < mesh.materials.Length; i++)
+                {
+                    mesh.materials[i] = Instantiate(mesh.materials[i]);
+                    instantiatedMaterials.Add(mesh.materials[i]);
+                }
+            });
     }
 
     public void SetIdentity()
@@ -84,6 +105,13 @@ public class BiddingPlayer : NetworkBehaviour
         AnimateSignContent(platform);
     }
 
+    protected void ToggleDither(BiddingPlatform platform)
+    {
+        instantiatedMaterials
+            .ForEach(material =>
+                material.SetFloat("_DitherDensity", platform != null ? 0.9f : 1f));
+    }
+
     // TODO this stuff plays on the wrong player for network players
     protected void AnimateSignContent(BiddingPlatform platform)
     {
@@ -117,6 +145,7 @@ public class BiddingPlayer : NetworkBehaviour
     {
         if (!playerManager)
             return;
+        playerManager.onSelectedBiddingPlatformChange -= ToggleDither;
         if (playerManager.inputManager)
         {
             playerManager.inputManager.onFirePerformed -= AnimateBid;
