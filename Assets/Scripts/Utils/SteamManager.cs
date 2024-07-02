@@ -43,19 +43,20 @@ public class Lobby
         if (int.TryParse(SteamMatchmaking.GetLobbyData(id, AvailableSlotsProperty), out var slots))
             availableSlots = slots;
         if (int.TryParse(SteamMatchmaking.GetLobbyData(id, GameModeProperty), out var type))
-            gameMode = (LobbyGameMode)type;
+            gameMode = (GameModeVariant)type;
     }
 
     public static string NameProperty = "name";
     public static string AvailableSlotsProperty = "availableSlots";
     public static string GameModeProperty = "gameMode";
+    public static string GameVersionProperty = "version";
 
     public CSteamID id;
     public CSteamID host;
 
     public string name;
     public int availableSlots;
-    public LobbyGameMode gameMode;
+    public GameModeVariant gameMode;
 }
 
 public class SteamManager : MonoBehaviour
@@ -208,6 +209,7 @@ public class SteamManager : MonoBehaviour
         SteamMatchmaking.SetLobbyData(lobbyID, Lobby.NameProperty, UserName);
         SteamMatchmaking.SetLobbyData(lobbyID, Lobby.AvailableSlotsProperty, Peer2PeerTransport.NumAvailableSlots.ToString());
         SteamMatchmaking.SetLobbyData(lobbyID, Lobby.GameModeProperty, ((int)MatchRules.Singleton.Rules.GameMode).ToString());
+        SteamMatchmaking.SetLobbyData(lobbyID, Lobby.GameVersionProperty, Application.version);
         // Update filterable information when necessary
         ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived += UpdateAvailableSlots;
         ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRemoved += UpdateAvailableSlots;
@@ -319,20 +321,29 @@ public class SteamManager : MonoBehaviour
     public void FetchLobbyInfo()
     {
         FetchFriendLobbyInfo();
-        // Ensure we have enough available slots
+        // Filter lobbies of same game version
+        SteamMatchmaking.AddRequestLobbyListStringFilter(Lobby.GameVersionProperty,
+                                                            Application.version,
+                                                            ELobbyComparison.k_ELobbyComparisonEqual);
+        // Filter lobbies with available player slots
         SteamMatchmaking.AddRequestLobbyListNumericalFilter(Lobby.AvailableSlotsProperty,
                                                             PlayerInputManagerController.Singleton.NumInputs,
                                                             ELobbyComparison.k_ELobbyComparisonEqualToOrGreaterThan);
         SteamMatchmaking.RequestLobbyList();
     }
 
-    public void FetchFilteredLobbyInfo()
+    public void FetchQueueLobbyInfo()
     {
+        // Filter lobbies of same game version
+        SteamMatchmaking.AddRequestLobbyListStringFilter(Lobby.GameVersionProperty,
+                                                            Application.version,
+                                                            ELobbyComparison.k_ELobbyComparisonEqual);
+        // Filter lobbies according to gamemodes
         var selectedGameMode = (int)MatchRules.Singleton.Rules.GameMode;
         SteamMatchmaking.AddRequestLobbyListStringFilter(Lobby.GameModeProperty,
                                                     selectedGameMode.ToString(),
                                                     ELobbyComparison.k_ELobbyComparisonEqual);
-
+        // Filter lobbies with available player slots
         SteamMatchmaking.AddRequestLobbyListNumericalFilter(Lobby.AvailableSlotsProperty,
                                                     PlayerInputManagerController.Singleton.NumInputs,
                                                     ELobbyComparison.k_ELobbyComparisonEqualToOrGreaterThan);
@@ -383,13 +394,14 @@ public class SteamManager : MonoBehaviour
         LobbyListUpdate?.Invoke();
     }
 
-    public void RequestLobbyJoin(CSteamID lobbyId)
+    public bool RequestLobbyJoin(CSteamID lobbyId)
     {
         var hasLessCapacityThanNeeded = !int.TryParse(SteamMatchmaking.GetLobbyData(lobbyId, Lobby.AvailableSlotsProperty), out var slots)
                                         || slots < PlayerInputManagerController.Singleton.NumInputs;
         if (hasLessCapacityThanNeeded)
-            return;
+            return false;
         SteamMatchmaking.JoinLobby(lobbyId);
+        return true;
     }
 
     #endregion Lobby

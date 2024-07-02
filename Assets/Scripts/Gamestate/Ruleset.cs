@@ -163,7 +163,7 @@ public struct NetworkRuleset
         };
 }
 
-public enum LobbyGameMode
+public enum GameModeVariant
 {
     Custom,
     Chips,
@@ -185,8 +185,8 @@ public class Ruleset : ScriptableObject
     public string Description => description;
 
     [SerializeField]
-    private LobbyGameMode gameMode = LobbyGameMode.Custom;
-    public LobbyGameMode GameMode => gameMode;
+    private GameModeVariant gameMode = GameModeVariant.Custom;
+    public GameModeVariant GameMode => gameMode;
 
     [Header("Win Condition")]
     public MatchWinCondition MatchWinCondition;
