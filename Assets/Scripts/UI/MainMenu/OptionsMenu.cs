@@ -47,6 +47,9 @@ public class OptionsMenu : MonoBehaviour
     private TMP_InputField sensitivityInputField;
     #endregion
 
+    [SerializeField]
+    private SettingsInfo settingsInfo;
+
     private InputManager playerInput;
 
     void Awake()
@@ -143,11 +146,6 @@ public class OptionsMenu : MonoBehaviour
 
     public void SetSensMultiplier(float multiplier)
     {
-        playerInput.adjustScaleMulti = multiplier;
-    }
-
-    public void SetPlayerInput(InputManager inputManager)
-    {
-        playerInput = inputManager;
+        settingsInfo.sensMultiplier = multiplier;
     }
 }

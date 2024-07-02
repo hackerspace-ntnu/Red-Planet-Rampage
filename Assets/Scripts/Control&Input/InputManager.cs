@@ -47,7 +47,6 @@ public class InputManager : MonoBehaviour
     private float mouseLookScale = 0.02f;
     [SerializeField]
     private float gamepadLookScale = 0.75f;
-    [SerializeField]
     public float adjustScaleMulti { get; set; } = 1.0f;
     [SerializeField]
     private Camera playerCamera;
@@ -155,7 +154,6 @@ public class InputManager : MonoBehaviour
         {
             lookInput = ctx.ReadValue<Vector2>() * ( gamepadLookScale * adjustScaleMulti );
         }
-        Debug.Log("The adjust: " + adjustScaleMulti);
     }
 
     private void LookInputCanceled(InputAction.CallbackContext ctx)

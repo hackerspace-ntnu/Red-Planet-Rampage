@@ -75,6 +75,9 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private GameObject videoPlayerCamera;
 
+    [SerializeField]
+    private SettingsInfo settingsInfo;
+
     private void Awake()
     {
         if (!FindAnyObjectByType<PlayerInputManagerController>())
@@ -248,6 +251,7 @@ public class MainMenuController : MonoBehaviour
     public void ChangeScene(string name)
     {
         Cursor.lockState = CursorLockMode.Locked;
+        settingsInfo.SetChangesToLocalAllInputs();
         PlayerInputManagerController.Singleton.RemoveJoinListener();
         ((Peer2PeerTransport)NetworkManager.singleton).StartMatch(name);
     }
@@ -284,7 +288,6 @@ public class MainMenuController : MonoBehaviour
         galleryMenu.SetPlayerInput(inputManager);
         creditsMenu.SetPlayerInput(inputManager);
         levelSelectManager.SetPlayerInput(inputManager);
-        optionsMenu.SetPlayerInput(inputManager);
     }
 
     private void PlayUISelectAudio(InputAction.CallbackContext ctx)
