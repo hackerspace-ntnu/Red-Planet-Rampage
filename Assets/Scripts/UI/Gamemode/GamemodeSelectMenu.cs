@@ -20,6 +20,12 @@ public class GamemodeSelectMenu : MonoBehaviour
         description.text = gamemode.Description;
     }
 
+    public void ClearText()
+    {
+        title.text = "";
+        description.text = "";
+    }
+
     public void SetGamemode(Ruleset gamemode)
     {
         MatchRules.Singleton.SetCreatedRuleset(gamemode);
