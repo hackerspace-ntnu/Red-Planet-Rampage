@@ -320,6 +320,9 @@ public class SteamManager : MonoBehaviour
 
     public void FetchLobbyInfo()
     {
+        if (!IsSteamActive)
+            return;
+
         FetchFriendLobbyInfo();
         // Filter lobbies of same game version
         SteamMatchmaking.AddRequestLobbyListStringFilter(Lobby.GameVersionProperty,
@@ -334,6 +337,9 @@ public class SteamManager : MonoBehaviour
 
     public void FetchQueueLobbyInfo()
     {
+        if (!IsSteamActive)
+            return;
+
         // Filter lobbies of same game version
         SteamMatchmaking.AddRequestLobbyListStringFilter(Lobby.GameVersionProperty,
                                                             Application.version,

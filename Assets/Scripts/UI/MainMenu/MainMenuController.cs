@@ -360,8 +360,6 @@ public class MainMenuController : MonoBehaviour
 
     public void FetchLobbyInfo()
     {
-        if (!SteamManager.IsSteamActive)
-            return;
         SteamManager.Singleton.FetchLobbyInfo();
     }
 
