@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -20,7 +21,7 @@ public class ExplosionController : MonoBehaviour
 
     [SerializeField] private AudioGroup soundEffect;
 
-    private VisualEffect visualEffect;
+    private List<VisualEffect> visualEffects = new();
     private AudioSource audioSource;
 
     // Makes sure a player doesn't take damage for each hitbox
@@ -29,13 +30,13 @@ public class ExplosionController : MonoBehaviour
 
     private void Start()
     {
-        if (!visualEffect) Init();
+        if (visualEffects.Count < 1) Init();
     }
 
     public void Init()
     {
-        visualEffect = GetComponent<VisualEffect>();
-        visualEffect.enabled = false;
+        visualEffects = GetComponentsInChildren<VisualEffect>().ToList();
+        visualEffects.ForEach(vfx => vfx.enabled = false);
         audioSource = GetComponent<AudioSource>();
     }
 
@@ -47,8 +48,11 @@ public class ExplosionController : MonoBehaviour
 
     public List<(RaycastHit hit, float damage)> Explode(PlayerManager sourcePlayer)
     {
-        visualEffect.enabled = true;
-        visualEffect.SendEvent(VisualEffectAsset.PlayEventID);
+        visualEffects.ForEach(vfx => 
+        {
+            vfx.enabled = true;
+            vfx.SendEvent(VisualEffectAsset.PlayEventID);
+        });
         soundEffect.Play(audioSource);
         var targets = Physics.SphereCastAll(transform.position, radius, Vector3.up, 0.01f, hitBoxLayers);
         var hits = new List<(RaycastHit, float)>(targets.Length);
