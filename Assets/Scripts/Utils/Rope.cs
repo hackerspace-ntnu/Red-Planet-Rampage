@@ -33,6 +33,8 @@ public class Rope : MonoBehaviour
     {
         get
         {
+            if (Target == null || CollisionPoints.Count < 1)
+                return accumulatedAnchorLength;
             return accumulatedAnchorLength + Vector3.Distance(Target.position, CollisionPoints[CollisionPoints.Count - 1]);
         }
     }
