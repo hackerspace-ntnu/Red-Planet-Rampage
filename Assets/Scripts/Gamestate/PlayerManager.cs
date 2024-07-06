@@ -129,6 +129,12 @@ public class PlayerManager : NetworkBehaviour
     [SerializeField]
     private AudioGroup extraHitSounds;
 
+    [SerializeField]
+    private AudioGroup jumpSounds;
+
+    [SerializeField]
+    private AudioGroup leapSounds;
+
     private PlayerMovement movement;
 
     private void Start()
@@ -243,6 +249,8 @@ public class PlayerManager : NetworkBehaviour
         playerMovement.SetPlayerInput(inputManager);
         playerMovement.OnMove += UpdateHudOnMove;
         playerMovement.OnJumpPerformed += UpdateHudOnJump;
+        playerMovement.OnJumpPerformed += PlayJumpAudio;
+        playerMovement.OnLeapPerformed += PlayLeapAudio;
         // Subscribe relevant input events
         inputManager.onFirePerformed += Fire;
         inputManager.onFireCanceled += FireEnd;
@@ -295,6 +303,8 @@ public class PlayerManager : NetworkBehaviour
         {
             playerMovement.OnMove -= UpdateHudOnMove;
             playerMovement.OnJumpPerformed -= UpdateHudOnJump;
+            playerMovement.OnJumpPerformed -= PlayJumpAudio;
+            playerMovement.OnLeapPerformed -= PlayLeapAudio;
         }
         if (hudController)
             identity.onChipChange -= hudController.OnChipChange;
@@ -355,6 +365,16 @@ public class PlayerManager : NetworkBehaviour
     {
         if (hudController)
             hudController.AnimateHudJump();
+    }
+
+    private void PlayJumpAudio(Rigidbody body)
+    {
+        jumpSounds.Play(audioSource);
+    }
+
+    private void PlayLeapAudio(Rigidbody body)
+    {
+        leapSounds.Play(audioSource);
     }
 
     private void UpdateHudFire(GunStats stats)
@@ -499,7 +519,7 @@ public class PlayerManager : NetworkBehaviour
 
     protected void PlayOnHit()
     {
-        if (Random.Range(0, 10000) > 5)
+        if (Random.Range(0, 100000) > 5)
         {
             hitSounds.Play(audioSource);
         }

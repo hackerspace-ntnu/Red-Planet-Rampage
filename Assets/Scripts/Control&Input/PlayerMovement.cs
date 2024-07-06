@@ -133,6 +133,7 @@ public class PlayerMovement : MonoBehaviour
     public delegate void MovementEventBody(Rigidbody body);
     public MovementEventBody OnMove;
     public MovementEventBody OnJumpPerformed;
+    public MovementEventBody OnLeapPerformed;
 
     private int gunCrouchPerformedTween;
     private int cameraCrouchPerformedTween;
@@ -221,6 +222,7 @@ public class PlayerMovement : MonoBehaviour
                     body.AddForce(forwardDirection * leapForce, ForceMode.VelocityChange);
                     StartCoroutine(LeapTimeout());
                     animator.SetTrigger("Leap");
+                    OnLeapPerformed?.Invoke(body);
                     break;
                 }
             case JumpState.LeapHop:
@@ -229,6 +231,7 @@ public class PlayerMovement : MonoBehaviour
                     body.AddForce(forwardDirection * leapForce * dashForwardMultiplier, ForceMode.VelocityChange);
                     StartCoroutine(LeapTimeout());
                     animator.SetTrigger("Leap");
+                    OnLeapPerformed?.Invoke(body);
                     break;
                 }
             case JumpState.Normal:
