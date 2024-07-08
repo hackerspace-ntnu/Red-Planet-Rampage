@@ -39,7 +39,6 @@ public class LoadingScreen : MonoBehaviour
 
     private Vector2 backgroundVelocity;
 
-    // TODO turn into dontdestroyonload singleton actually
     private void Awake()
     {
         #region Singleton boilerplate
@@ -100,6 +99,9 @@ public class LoadingScreen : MonoBehaviour
 
     public void Show()
     {
+        if (enabled)
+            return;
+
         enabled = true;
         gameObject.transform.GetChild(0).gameObject.SetActive(true);
 
