@@ -176,8 +176,6 @@ public class MatchController : NetworkBehaviour
         LoadingScreen.Singleton.Show();
         yield return new WaitForSeconds(LoadingScreen.Singleton.MandatoryDuration);
 
-        // TODO only switch to this track after auction has loaded!
-        MusicTrackManager.Singleton.SwitchTo(MusicType.Bidding);
         onBiddingStart?.Invoke();
         PlayerInputManagerController.Singleton.PlayerInputManager.splitScreen = false;
         isAuction = true;

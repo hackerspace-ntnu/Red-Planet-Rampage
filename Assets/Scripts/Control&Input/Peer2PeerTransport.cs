@@ -649,11 +649,12 @@ public class Peer2PeerTransport : NetworkManager
         var originalSceneName = SceneManager.GetActiveScene().name;
         switch (newSceneName)
         {
-            // TODO consider just pushing music change into this switch block
             case Scenes.Bidding:
                 isInMatch = true;
                 NetworkClient.ReplaceHandler<InitializePlayerMessage>(InitializeBiddingPlayer);
                 PlayerInputManagerController.Singleton.ChangeInputMaps("Bidding");
+                // Change music here since auction isn't initialized in a sane way yet
+                MusicTrackManager.Singleton.SwitchTo(MusicType.Bidding);
                 break;
             case Scenes.Menu:
                 isInMatch = false;
