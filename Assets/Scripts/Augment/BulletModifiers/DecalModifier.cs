@@ -1,3 +1,4 @@
+using MiscExtensions;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -21,7 +22,7 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
     [Range(0f, 1f)][SerializeField] private float stickToNormalFraction = 0;
 
     [Range(0f, 180f)][SerializeField] private float angleVariation = 180f;
-    
+
     private const int allGunsAndPlayersMask = (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
     private void Awake()
@@ -71,7 +72,7 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
 
         // Place the decal some distance away from the target so that it is more likely to be projected onto a surface
         var depthOffset = decal.size.z * depthOffsetFraction;
-        spawnedDecal.transform.position = target.collider.ClosestPoint(state.position) - state.direction * depthOffset;
+        spawnedDecal.transform.position = target.ClosestPoint(state.position) - state.direction * depthOffset;
         spawnedDecal.transform.rotation = DetermineRotation(target.collider, state);
         spawnedDecal.transform.parent = target.collider.transform;
 
