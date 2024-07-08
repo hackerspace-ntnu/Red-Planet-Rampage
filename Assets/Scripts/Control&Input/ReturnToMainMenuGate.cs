@@ -17,8 +17,6 @@ public class ReturnToMainMenuGate : MonoBehaviour, Interactable
 
     private void ReturnToMainMenu()
     {
-        PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
-        PlayerInputManagerController.Singleton.LocalPlayerInputs.ForEach(input => input.GetComponent<PlayerIdentity>().ResetItems());
         // Mirror pulls us to the main menu automatically
         NetworkManager.singleton.StopHost();
     }

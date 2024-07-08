@@ -170,14 +170,9 @@ public class PlayerMovement : MonoBehaviour
     /// <param name="player"></param>
     public void SetPlayerInput(InputManager player)
     {
-        inputManager = player;
+        ReassignPlayerInput(player);
         var playerManager = GetComponent<PlayerManager>();
         gunHolder = playerManager.GunHolder.gameObject;
-        inputManager.onSelect += OnJump;
-        inputManager.onCrouchPerformed += OnCrouch;
-        inputManager.onCrouchCanceled += OnCrouch;
-        inputManager.onZoomPerformed += OnZoom;
-        inputManager.onZoomCanceled += OnZoomCanceled;
         localCameraHeight = inputManager.transform.localPosition.y;
         localGunHolderX = gunHolder.transform.localPosition.x;
         localGunHolderHeight = gunHolder.transform.localPosition.y;
@@ -186,6 +181,16 @@ public class PlayerMovement : MonoBehaviour
 
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += ResetZoom;
+    }
+
+    public void ReassignPlayerInput(InputManager input)
+    {
+        inputManager = input;
+        inputManager.onSelect += OnJump;
+        inputManager.onCrouchPerformed += OnCrouch;
+        inputManager.onCrouchCanceled += OnCrouch;
+        inputManager.onZoomPerformed += OnZoom;
+        inputManager.onZoomCanceled += OnZoomCanceled;
     }
 
     public void SetInitialRotation(float radians)
@@ -261,7 +266,7 @@ public class PlayerMovement : MonoBehaviour
         gunHolder.LeanMoveLocalX(localGunHolderX, 0.2f);
     }
 
-    private void ResetZoom()
+    public void ResetZoom()
     {
         inputManager.ZoomActive = false;
         inputManager.onZoomPerformed -= OnZoom;

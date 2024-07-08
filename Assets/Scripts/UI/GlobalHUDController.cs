@@ -1,4 +1,3 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -14,10 +13,7 @@ public class GlobalHUDController : MonoBehaviour
     [SerializeField]
     private GameObject winScreen;
 
-    [SerializeField]
-    private TMP_Text startText;
-
-    void Start()
+    private void Start()
     {
         // Places the roundTimer at appropriate place on split screen
         if (PlayerInputManagerController.Singleton.LocalPlayerInputs.Count > 2)
@@ -42,22 +38,6 @@ public class GlobalHUDController : MonoBehaviour
             int seconds = Mathf.FloorToInt(time % 60);
             roundTimer.text = Mathf.FloorToInt(time / 60) + ":" + (seconds < 10 ? "0" : "") + seconds;
         }
-    }
-
-    public IEnumerator DisplayStartScreen(float seconds)
-    {
-        var colorTransparent = startText.color;
-        var color = colorTransparent;
-        color.a = 1f;
-        LeanTween.value(startText.gameObject, TMPFade, colorTransparent, color, 1.5f);
-        startText.gameObject.LeanScale(new Vector3(1.1f, 1.1f, 1.1f), 1f).setEaseOutBounce();
-        yield return new WaitForSeconds(seconds);
-        LeanTween.value(startText.gameObject, TMPFade, color, colorTransparent, 1.5f);
-    }
-
-    private void TMPFade(Color color)
-    {
-        startText.color = color;   
     }
 
     public void DisplayWinScreen(PlayerIdentity winner)

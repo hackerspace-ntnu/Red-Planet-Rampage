@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CollectionExtensions;
 using Mirror;
+using OperatorExtensions;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -155,6 +156,7 @@ public class Peer2PeerTransport : NetworkManager
 
     private static Dictionary<uint, PlayerManager> playerInstances = new();
     public static ReadOnlyDictionary<uint, PlayerManager> PlayerInstanceByID;
+    public static IEnumerable<PlayerManager> LocalPlayerInstances => playerInstances.Values.Where(p => p.inputManager);
 
     /// <summary>
     /// List of client connections. Will be uninitialized on clients.
@@ -527,7 +529,7 @@ public class Peer2PeerTransport : NetworkManager
                 steamID = 0,
                 name = "HCU",
                 type = PlayerType.AI,
-                color = PlayerInputManagerController.Singleton.AIColors[i - players.Count + 1],
+                color = PlayerInputManagerController.Singleton.AIColors[(i - players.Count + 1).Mod(PlayerInputManagerController.Singleton.AIColors.Length)],
             };
             NetworkServer.SendToAll(new InitialPlayerDetailsMessage(details));
         }
@@ -574,7 +576,9 @@ public class Peer2PeerTransport : NetworkManager
 
     public override void OnServerChangeScene(string newSceneName)
     {
-        var needsExtraAiPlayers = PlayerInputManagerController.Singleton.MatchHasAI && !MatchController.Singleton;
+        var needsExtraAiPlayers =
+            newSceneName != Scenes.Menu && newSceneName != Scenes.TrainingMode &&
+            PlayerInputManagerController.Singleton.MatchHasAI && !MatchController.Singleton;
         if (needsExtraAiPlayers)
         {
             AddAiPlayers();

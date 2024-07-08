@@ -65,11 +65,16 @@ public class GunController : NetworkBehaviour
         Player = player;
         if (!Player.inputManager)
             return;
-        Player.inputManager.onZoomPerformed += OnZoom;
-        Player.inputManager.onZoomCanceled += OnZoomCanceled;
+        SetPlayerInput(player.inputManager);
         Player.inputManager.GetComponentInChildren<JiggleBone>().body = Player.GetComponent<PlayerMovement>().Body;
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += CancelZoom;
+    }
+
+    public void SetPlayerInput(InputManager input)
+    {
+        input.onZoomPerformed += OnZoom;
+        input.onZoomCanceled += OnZoomCanceled;
     }
 
     private AugmentAnimator barrelAnimator;
