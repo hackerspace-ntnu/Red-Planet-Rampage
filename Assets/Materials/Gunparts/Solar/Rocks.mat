@@ -1,5 +1,18 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-6337750689722108698
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 7
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -7,11 +20,14 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Wire2
-  m_Shader: {fileID: -6465566751694194690, guid: c5f92ba5fc8552c4dacafaa631cd2fb8, type: 3}
+  m_Name: Rocks
+  m_Shader: {fileID: -6465566751694194690, guid: f8ec4cafbe9538b4aa600770a5a8bf02, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - MAIN_LIGHT_CALCULATE_SHADOWS
+  - _MAIN_LIGHT_SHADOWS_CASCADE
+  - _SHADOWS_SOFT
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -55,7 +71,7 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _Metallic_Map:
+    - _Metallic_Texture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -76,11 +92,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Texture:
-        m_Texture: {fileID: 2800000, guid: 09e504f22c214c242aa0eb84fdcbba7f, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _Triplanar_6ca021b8b8b84617a472c2608835416d_Texture_1:
-        m_Texture: {fileID: 2800000, guid: 5ef5d25785740444ab670640848feec7, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Triplanar_8082379ce2a14f38b8de533a506ee294_Texture_1:
@@ -101,10 +113,9 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - MAIN_LIGHT_CALCULATE_SHADOWS: 0
+    - MAIN_LIGHT_CALCULATE_SHADOWS: 1
     - _AlphaClip: 0
     - _AlphaToMask: 0
-    - _BendStartOffset: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
@@ -118,19 +129,19 @@ Material:
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
     - _GlossMapScale: 1
-    - _Glossiness: 0.70183486
+    - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _MAIN_LIGHT_SHADOWS_CASCADE: 0
+    - _MAIN_LIGHT_SHADOWS_CASCADE: 1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _QueueControl: 1
+    - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _SHADOWS_SOFT: 0
+    - _SHADOWS_SOFT: 1
     - _Shadow_Texture: 1
-    - _Smoothness: 0.70183486
+    - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -143,22 +154,9 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.15470341, g: 0.70467436, b: 0.9063317, a: 1}
-    - _Color: {r: 0.15470338, g: 0.70467436, b: 0.9063317, a: 1}
-    - _Distance: {r: 0, g: 0, b: 0, a: 0}
+    - _BaseColor: {r: 0.70143306, g: 0.7501512, b: 0.75400543, a: 1}
+    - _Color: {r: 0.70143306, g: 0.7501512, b: 0.75400543, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _Texture_Tiling: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
---- !u!114 &6114655029257399308
-MonoBehaviour:
-  m_ObjectHideFlags: 11
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  version: 7
