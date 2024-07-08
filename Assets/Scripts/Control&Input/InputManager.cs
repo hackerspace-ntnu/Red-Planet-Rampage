@@ -16,6 +16,7 @@ public class InputManager : MonoBehaviour
     // Menu-related
     public InputEvent onSelect;
     public InputEvent onCancel;
+    public InputEvent onExit;
     public InputEvent onLeftTab;
     public InputEvent onRightTab;
     public InputEvent onAnyKey;
@@ -80,6 +81,7 @@ public class InputManager : MonoBehaviour
         playerInput.actions["Join"].performed += AnyKey;
         playerInput.actions["Select"].performed += Select;
         playerInput.actions["Cancel"].performed += Cancel;
+        playerInput.actions["Exit"].performed += Exit;
         playerInput.actions["Move"].performed += Move;
         playerInput.actions["Move"].canceled += Move;
         playerInput.actions["LeftTab"].performed += LeftTab;
@@ -164,6 +166,7 @@ public class InputManager : MonoBehaviour
         // Abusing that empty delegate bodies are defined as null to remove all invocation lists.
         onSelect = null;
         onCancel = null;
+        onExit = null;
         onMovePerformed = null;
         onMoveCanceled = null;
         onLeftTab = null;
@@ -201,6 +204,11 @@ public class InputManager : MonoBehaviour
         onCancel?.Invoke(ctx);
     }
 
+    private void Exit(InputAction.CallbackContext ctx)
+    {
+        onExit?.Invoke(ctx);
+    }
+
     private void LeftTab(InputAction.CallbackContext ctx)
     {
         onLeftTab?.Invoke(ctx);
@@ -230,7 +238,8 @@ public class InputManager : MonoBehaviour
 
     private void Crouch(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed) {
+        if (ctx.performed)
+        {
             CrouchActive = true;
             onCrouchPerformed?.Invoke(ctx);
             return;
@@ -251,11 +260,11 @@ public class InputManager : MonoBehaviour
 
     private void Zoom(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed) 
-        { 
+        if (ctx.performed)
+        {
             ZoomActive = true;
             onZoomPerformed?.Invoke(ctx);
-            return; 
+            return;
         }
         ZoomActive = false;
         onZoomCanceled?.Invoke(ctx);

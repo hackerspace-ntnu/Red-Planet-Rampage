@@ -242,7 +242,7 @@ public class PlayerManager : NetworkBehaviour
     /// <param name="playerInput"></param>
     public void SetPlayerInput(InputManager playerInput)
     {
-        inputManager = playerInput;
+        ListenToPlayerInput(playerInput);
         identity = inputManager.GetComponent<PlayerIdentity>();
         var playerMovement = GetComponent<PlayerMovement>();
         playerMovement.enabled = true;
@@ -251,12 +251,6 @@ public class PlayerManager : NetworkBehaviour
         playerMovement.OnJumpPerformed += UpdateHudOnJump;
         playerMovement.OnJumpPerformed += PlayJumpAudio;
         playerMovement.OnLeapPerformed += PlayLeapAudio;
-        // Subscribe relevant input events
-        inputManager.onFirePerformed += Fire;
-        inputManager.onFireCanceled += FireEnd;
-        inputManager.onSelect += TryPlaceBid;
-        inputManager.onFirePerformed += TryPlaceBid;
-        inputManager.onInteract += Interact;
         // Set camera on canvas
         if (hudController)
         {
@@ -270,6 +264,27 @@ public class PlayerManager : NetworkBehaviour
         {
             biddingPlayer.SetPlayerInput();
         }
+    }
+
+    private void ListenToPlayerInput(InputManager playerInput)
+    {
+        inputManager = playerInput;
+        // Subscribe relevant input events
+        inputManager.onFirePerformed += Fire;
+        inputManager.onFireCanceled += FireEnd;
+        inputManager.onSelect += TryPlaceBid;
+        inputManager.onFirePerformed += TryPlaceBid;
+        inputManager.onInteract += Interact;
+    }
+
+    public void ReassignPlayerInput(InputManager playerInput)
+    {
+        ListenToPlayerInput(playerInput);
+
+        var playerMovement = GetComponent<PlayerMovement>();
+        playerMovement.ReassignPlayerInput(inputManager);
+        if (gunController)
+            gunController.SetPlayerInput(playerInput);
     }
 
     public void ApplyIdentity()

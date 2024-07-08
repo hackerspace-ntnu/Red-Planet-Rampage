@@ -297,15 +297,6 @@ public class MatchController : NetworkBehaviour
 
     private void ReturnToMainMenu()
     {
-        // Remove AI identities
-        FindObjectsOfType<PlayerIdentity>()
-            .Where(identity => identity.IsAI)
-            .ToList().ForEach(aiIdentity => Destroy(aiIdentity));
-
-        ResetMatch();
-        MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
-        PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
-
         // Mirror pulls us to the main menu automatically
         NetworkManager.singleton.StopHost();
     }
