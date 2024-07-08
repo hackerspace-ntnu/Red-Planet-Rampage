@@ -102,7 +102,6 @@ public class PlayerManager : NetworkBehaviour
     [SerializeField]
     private float deathKnockbackForceMultiplier = 10;
 
-
     private BiddingPlatform selectedBiddingPlatform;
     public BiddingPlatform SelectedBiddingPlatform
     {
@@ -191,7 +190,7 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
-    private void OnDeath(HealthController healthController, float damage, DamageInfo info)
+    protected virtual void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
         var killer = info.sourcePlayer;
         if (info.sourcePlayer == this && lastPlayerThatHitMe)
@@ -200,6 +199,9 @@ public class PlayerManager : NetworkBehaviour
         }
         if (!isAlive)
             return;
+
+        EventLog.Singleton.Log(info.DeathToString(this));
+
         onDeath?.Invoke(killer, this, info);
         isAlive = false;
         aimAssistCollider.SetActive(false);
@@ -207,7 +209,8 @@ public class PlayerManager : NetworkBehaviour
         aiTargetCollider.gameObject.SetActive(false);
         if (hudController)
             hudController.DisplayDeathScreen(killer.identity);
-        playerShadow.gameObject.SetActive(false);
+        if (playerShadow)
+            playerShadow.gameObject.SetActive(false);
     }
 
     protected void TurnIntoRagdoll(DamageInfo info)

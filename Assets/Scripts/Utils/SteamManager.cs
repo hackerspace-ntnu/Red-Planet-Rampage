@@ -251,6 +251,7 @@ public class SteamManager : MonoBehaviour
 
             if (PlayerIDs.Contains(id.m_SteamID))
                 continue;
+
             Debug.Log($"Steam user {name} (id={id.m_SteamID}) entered lobby");
 
             PlayerNameById[id.m_SteamID] = name;

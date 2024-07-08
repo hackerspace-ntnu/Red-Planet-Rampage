@@ -23,11 +23,13 @@ public class AIManager : PlayerManager
     }
     private const float autoAwareRadius = 25f;
     private const float ignoreAwareRadius = 1000f;
+
     [SerializeField]
     private Animator animator;
-    private bool isDead = false;
+
     [SerializeField]
     private LayerMask ignoreMask;
+
     public BiddingAI biddingAI;
     private Rigidbody body;
     private Collider colliderBox;
@@ -159,22 +161,12 @@ public class AIManager : PlayerManager
         colliderBox.isTrigger = true;
     }
 
-    void OnDeath(HealthController healthController, float damage, DamageInfo info)
+    protected override void OnDeath(HealthController healthController, float damage, DamageInfo info)
     {
-        var killer = info.sourcePlayer;
-        if (info.sourcePlayer == this && lastPlayerThatHitMe)
-        {
-            killer = lastPlayerThatHitMe;
-        }
-        if (!isDead)
-            onDeath?.Invoke(killer, this, info);
-        aimAssistCollider.SetActive(false);
-        aiTargetCollider.gameObject.SetActive(false);
+        base.OnDeath(healthController, damage, info);
         aiMovement.enabled = false;
         agent.enabled = false;
         body.isKinematic = false;
-        TurnIntoRagdoll(info);
-        isDead = true;
     }
 
     private void UpdateAimTarget(GunStats stats)
@@ -193,7 +185,7 @@ public class AIManager : PlayerManager
 
     private IEnumerator LookForTargets()
     {
-        if (isDead)
+        if (!IsAlive)
             yield break;
         if (!aiMovement || !aiMovement.enabled)
             FindPlayers();
@@ -325,7 +317,7 @@ public class AIManager : PlayerManager
 
     private void FixedUpdate()
     {
-        if (isDead || !agent.enabled)
+        if (!IsAlive || !agent.enabled)
             return;
         var nextPosition = agent.nextPosition;
         transform.position = Vector3.Lerp(transform.position, nextPosition, agent.speed * Time.fixedDeltaTime);

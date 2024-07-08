@@ -282,7 +282,7 @@ public class Peer2PeerTransport : NetworkManager
             return;
         }
 
-        Debug.Log($"Player {message.id} {playerDetails.name} left");
+        EventLog.Singleton.Log($"Player {message.id} {playerDetails.name} left");
 
         players.Remove(message.id);
         if (playerInstances.ContainsKey(message.id))
