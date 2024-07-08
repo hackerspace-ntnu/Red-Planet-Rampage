@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using MiscExtensions;
 using TransformExtensions;
 
 /// <summary>
@@ -47,7 +46,8 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
     {
         if (!(affectedLayers == (affectedLayers | (1 << hit.collider.gameObject.layer))))
             return;
-        var stuck = Instantiate(stuckObject, hit.collider.ClosestPoint(state.position), state.rotation);
+
+        var stuck = Instantiate(stuckObject, hit.ClosestPoint(state.position), state.rotation);
         stuck.transform.ParentUnscaled(hit.collider.transform);
         if (stuck.TryGetComponent<ContinuousDamage>(out var continuousDamage))
             continuousDamage.source = source;
