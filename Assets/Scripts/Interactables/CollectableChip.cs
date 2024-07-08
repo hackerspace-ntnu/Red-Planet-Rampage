@@ -28,7 +28,9 @@ public class CollectableChip : MonoBehaviour
     {
         if (!other.gameObject.TryGetComponent<PlayerManager>(out var player))
             return;
+
         player.identity.UpdateChip(1);
+
         soundEffect.Play(audioSource);
         GetComponent<Collider>().enabled = false;
         chipModel.GetComponent<Renderer>().enabled = false;

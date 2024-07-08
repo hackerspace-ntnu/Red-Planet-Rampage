@@ -139,8 +139,6 @@ public class ItemSelectMenu : MonoBehaviour
         {
             itemObjects.Add(Instantiate(items[i].augment, Vector3.zero, Quaternion.Euler(new Vector3(0, 90, -20))));
         }
-        Debug.Log(items.Count);
-        Debug.Log(itemObjects.Count);
     }
 
     private void MoveInputPerformed(InputAction.CallbackContext ctx)

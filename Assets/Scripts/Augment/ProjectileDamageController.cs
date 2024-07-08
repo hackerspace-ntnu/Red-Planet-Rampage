@@ -6,9 +6,10 @@ public enum DamageType
     Explosion,
     Falling,
     Continuous,
+    // TODO emit these two damage types (or do a separate effect type?)
     Fire,
     Hacking,
-    // TODO determine if "knockback" should be its own thing
+    // TODO determine if "knockback" should be its own type (effect type?)
 }
 
 public struct DamageInfo
@@ -42,6 +43,32 @@ public struct DamageInfo
         position = info.position;
         force = info.force;
     }
+
+    public readonly string DeathToString(PlayerManager victim) =>
+        sourcePlayer == victim
+        ? $"{victim.identity.ToColorString()} {SuicideTypeToString()}"
+        : $"{sourcePlayer.identity.ToColorString()} {KillTypeToString()} {victim.identity.ToColorString()}";
+
+    private readonly string SuicideTypeToString() =>
+        damageType switch
+        {
+            DamageType.Explosion => "exploded themselves",
+            DamageType.Falling => "fell to their death",
+            // TODO fix the emitted damage type from fire extension
+            DamageType.Continuous => "burned in their own trail",
+            _ => "committed sudoku"
+        };
+
+    private readonly string KillTypeToString() =>
+        damageType switch
+        {
+            DamageType.Weapon => "shot",
+            DamageType.Explosion => "blew up",
+            // TODO fix the emitted damage type from fire extension
+            DamageType.Continuous => "fried",
+            DamageType.Hacking => "hacked",
+            _ => "killed",
+        };
 }
 
 public struct NetworkDamageInfo
