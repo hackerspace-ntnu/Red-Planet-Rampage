@@ -258,8 +258,7 @@ public class Peer2PeerTransport : NetworkManager
         Debug.Log("Stopped client");
         if (SteamManager.IsSteamActive && SteamManager.Singleton.IsInLobby)
             SteamManager.Singleton.LeaveLobby();
-        if (MatchController.Singleton)
-            MatchController.Singleton.ResetMatch();
+        MatchController.ResetMatch();
         ResetState();
     }
 

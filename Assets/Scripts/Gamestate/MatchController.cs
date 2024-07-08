@@ -290,7 +290,7 @@ public class MatchController : NetworkBehaviour
         ReturnToMainMenu();
     }
 
-    public void ResetMatch()
+    public static void ResetMatch()
     {
         rounds = new List<Round>();
     }
