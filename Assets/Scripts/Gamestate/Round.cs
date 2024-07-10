@@ -132,6 +132,7 @@ public class Round
         Debug.Assert(kills.ContainsKey(killer.id), "killer not registered in start of round!", killer);
 #endif
         livingPlayers.Remove(victim.id);
+        damageThisFrame.Add(info);
 
         if (livingPlayers.Count == 2)
         {
@@ -139,13 +140,18 @@ public class Round
         }
 
         // Only register a kill if it wasn't a suicide
-        if (killer != victim)
-        {
-            kills[killer.id].Add(victim.id);
-            PersistentInfo.RegisterKill(killer.identity);
-        }
+        if (killer == victim)
+            return;
 
-        damageThisFrame.Add(info);
+        kills[killer.id].Add(victim.id);
+        PersistentInfo.RegisterKill(killer.identity);
+
+        // TODO Add theoretical chips from win?
+        var isFirstTo30Chips = MatchRules.Current.GameMode is GameModeVariant.FirstTo30Chips;
+        var isAboutToReachChipLimit = victim.identity.Chips >= MatchRules.Current.MatchWinCondition.AmountForStopCondition;
+        var isKillerLocalPlayer = Peer2PeerTransport.LocalPlayerInstances.Any(p => p.id == killer.id);
+        if (isFirstTo30Chips && isAboutToReachChipLimit && isKillerLocalPlayer)
+            SteamManager.Singleton.UnlockAchievement(AchievementType.Clutch);
     }
 
     /// <summary>

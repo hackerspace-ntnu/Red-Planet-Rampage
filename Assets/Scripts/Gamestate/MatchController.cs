@@ -241,6 +241,10 @@ public class MatchController : NetworkBehaviour
     {
         var currentWinnerID = rounds.Last().Winner;
         if (currentWinnerID is null || !playerById.TryGetValue((uint)currentWinnerID, out var currentWinner)) { return false; }
+
+        if (Peer2PeerTransport.PlayerDetails.Any(p => p.id == currentWinnerID && p.type is PlayerType.Local))
+            SteamManager.Singleton.UnlockAchievement(AchievementType.WinARound);
+
         if (!MatchRules.Current.IsMatchOver(rounds, currentWinner.id))
             return false;
 
@@ -282,6 +286,20 @@ public class MatchController : NetworkBehaviour
     private IEnumerator DisplayWinScreenAndRestart(PlayerIdentity winner)
     {
         globalHUDController.DisplayWinScreen(winner);
+
+        // TODO extract to achievement class
+        var isNotCustomGamemode = MatchRules.Current.GameMode is not GameModeVariant.Custom;
+        var winnerIsLocalPlayer = Peer2PeerTransport.PlayerDetails.Any(p => p.id == winner.id && p.type is PlayerType.Local);
+        if (isNotCustomGamemode && winnerIsLocalPlayer)
+        {
+            SteamManager.Singleton.UnlockAchievement(MatchRules.Current.GameMode switch
+            {
+                GameModeVariant.FirstTo30Chips => AchievementType.Win30Chips,
+                GameModeVariant.SixRounds => AchievementType.WinSixRounds,
+                GameModeVariant.ThreeStrikes => AchievementType.WinThreeStrikes,
+                _ => AchievementType.None,
+            });
+        }
 
         yield return new WaitForSecondsRealtime(matchEndDelay);
 

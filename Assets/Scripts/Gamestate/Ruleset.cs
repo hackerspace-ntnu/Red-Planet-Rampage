@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using CollectionExtensions;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public enum MatchWinConditionType
 {
@@ -137,6 +138,7 @@ public struct Auction
 [System.Serializable]
 public struct NetworkRuleset
 {
+    public GameModeVariant GameMode;
     public MatchWinCondition MatchWinCondition;
 
     public RoundWinCondition RoundWinCondition;
@@ -152,6 +154,7 @@ public struct NetworkRuleset
     public Ruleset ToRuleset() =>
         new Ruleset
         {
+            GameMode = GameMode,
             MatchWinCondition = MatchWinCondition,
             RoundWinCondition = RoundWinCondition,
             RoundLength = RoundLength,
@@ -166,9 +169,9 @@ public struct NetworkRuleset
 public enum GameModeVariant
 {
     Custom,
-    Chips,
-    Rounds,
-    Kills
+    FirstTo30Chips,
+    SixRounds,
+    ThreeStrikes,
 }
 
 [CreateAssetMenu(menuName = "Ruleset")]
@@ -185,8 +188,8 @@ public class Ruleset : ScriptableObject
     public string Description => description;
 
     [SerializeField]
-    private GameModeVariant gameMode = GameModeVariant.Custom;
-    public GameModeVariant GameMode => gameMode;
+    [FormerlySerializedAs("gameMode")]
+    public GameModeVariant GameMode = GameModeVariant.Custom;
 
     [Header("Win Condition")]
     public MatchWinCondition MatchWinCondition;
@@ -322,6 +325,7 @@ public class Ruleset : ScriptableObject
     public NetworkRuleset ToNetworkRuleset() =>
         new NetworkRuleset
         {
+            GameMode = GameMode,
             MatchWinCondition = MatchWinCondition,
             RoundWinCondition = RoundWinCondition,
             RoundLength = RoundLength,

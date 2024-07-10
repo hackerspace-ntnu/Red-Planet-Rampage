@@ -8,7 +8,7 @@ public struct OverrideName
     public Item Barrel;
     public Item Extension;
     public string Name;
-    public AchievementType Achievement;
+    public SecretCombinationType Achievement;
 }
 
 /// <summary>

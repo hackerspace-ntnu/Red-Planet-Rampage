@@ -839,7 +839,6 @@ public class Peer2PeerTransport : NetworkManager
             playerManager.SetLayer(input.playerInput.playerIndex);
             movement.SetInitialRotation(message.rotation.eulerAngles.y * Mathf.Deg2Rad);
 
-            // TODO jeez this should stay elsewhere
             if (GunFactory.TryGetGunAchievement(playerManager.identity.Body, playerManager.identity.Barrel,
                     playerManager.identity.Extension, out var achievement))
                 SteamManager.Singleton.UnlockAchievement(achievement);

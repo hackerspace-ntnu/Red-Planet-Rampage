@@ -31,7 +31,9 @@ public class CreditsMenu : MonoBehaviour
 
         tween = LeanTween.sequence()
             .append(1)
-            .append(LeanTween.value(content.gameObject, SetPosition, 0, 1, height / speed))
+            .append(
+                LeanTween.value(content.gameObject, SetPosition, 0, 1, height / speed)
+                .setOnComplete(() => SteamManager.Singleton.UnlockAchievement(AchievementType.SitThroughCredits)))
             .id;
     }
 
