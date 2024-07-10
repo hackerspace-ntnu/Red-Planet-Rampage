@@ -23,7 +23,10 @@ public enum AchievementType
     ItalianPlumber,
     HatTrick,
     LongShot,
-    RemoteWorker
+    RemoteWorker,
+    BigIron,
+    Nuke,
+    MadHatter,
 }
 
 public class Lobby
@@ -174,7 +177,10 @@ public class SteamManager : MonoBehaviour
         { AchievementType.ItalianPlumber, "WEAPON_ITALIAN_PLUMBER" },
         { AchievementType.HatTrick, "WEAPON_HAT_TRICK" },
         { AchievementType.LongShot, "WEAPON_LONG_SHOT" },
-        { AchievementType.RemoteWorker, "WEAPON_REMOTE_WORKER" }
+        { AchievementType.RemoteWorker, "WEAPON_REMOTE_WORKER" },
+        { AchievementType.BigIron, "WEAPON_BIG_IRON" },
+        { AchievementType.Nuke, "WEAPON_NUKE" },
+        { AchievementType.MadHatter, "WEAPON_MAD_HATTER" },
     };
 
     public void UnlockAchievement(AchievementType type)
