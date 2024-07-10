@@ -146,7 +146,13 @@ public class ScoreboardManager : MonoBehaviour
         }
         else
         {
+            var isEveryoneReadyToWin =
+                Peer2PeerTransport.PlayerInstanceByID.Values.All(p => MatchController.Singleton.WinsForPlayer(p) == 2);
+            if (MatchRules.Current.GameMode is GameModeVariant.ThreeStrikes && isEveryoneReadyToWin)
+                SteamManager.Singleton.UnlockAchievement(AchievementType.MatchPoint);
+
             ShowVictoryProgress?.Invoke();
+
             // Start next round
             yield return new WaitForSeconds(matchProgressDelay);
             matchController.StartNextBidding();

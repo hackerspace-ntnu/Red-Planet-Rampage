@@ -3,9 +3,8 @@ using UnityEngine;
 using Mirror;
 using Steamworks;
 using System.Collections.ObjectModel;
-using UnityEngine.InputSystem.Controls;
 
-public enum AchievementType
+public enum SecretCombinationType
 {
     None,
     DiscoInferno,
@@ -27,6 +26,19 @@ public enum AchievementType
     BigIron,
     Nuke,
     MadHatter,
+}
+
+public enum AchievementType
+{
+    None,
+    WinARound,
+    Win30Chips,
+    WinSixRounds,
+    WinThreeStrikes,
+    SitThroughCredits,
+    AllIn,
+    Clutch,
+    MatchPoint,
 }
 
 public class Lobby
@@ -160,40 +172,73 @@ public class SteamManager : MonoBehaviour
 
     #region Achievements
 
+    private readonly Dictionary<SecretCombinationType, string> combinationAchievementNames = new()
+    {
+        { SecretCombinationType.DiscoInferno, "WEAPON_DISCO_INFERNO" },
+        { SecretCombinationType.WireFraud, "WEAPON_WIRE_FRAUD" },
+        { SecretCombinationType.SchizoidMan, "WEAPON_SCHIZOID_MAN" },
+        { SecretCombinationType.BlueHat, "WEAPON_BLUE_HAT" },
+        { SecretCombinationType.BlackHat, "WEAPON_BLACK_HAT" },
+        { SecretCombinationType.EagleEyed, "WEAPON_EAGLE_EYED" },
+        { SecretCombinationType.PogoStick, "WEAPON_POGO_STICK" },
+        { SecretCombinationType.Skater, "WEAPON_SKATER" },
+        { SecretCombinationType.SprayNPray, "WEAPON_SPRAY_N_PRAY" },
+        { SecretCombinationType.PingPonginator, "WEAPON_PING_PONG" },
+        { SecretCombinationType.Flamethrower, "WEAPON_FLAMETHROWER" },
+        { SecretCombinationType.OrbitalTrashCannon, "WEAPON_ORBITAL_TRASH_CANNON" },
+        { SecretCombinationType.ItalianPlumber, "WEAPON_ITALIAN_PLUMBER" },
+        { SecretCombinationType.HatTrick, "WEAPON_HAT_TRICK" },
+        { SecretCombinationType.LongShot, "WEAPON_LONG_SHOT" },
+        { SecretCombinationType.RemoteWorker, "WEAPON_REMOTE_WORKER" },
+        { SecretCombinationType.BigIron, "WEAPON_BIG_IRON" },
+        { SecretCombinationType.Nuke, "WEAPON_NUKE" },
+        { SecretCombinationType.MadHatter, "WEAPON_MAD_HATTER" },
+    };
+
     private readonly Dictionary<AchievementType, string> achievementNames = new()
     {
-        { AchievementType.DiscoInferno, "WEAPON_DISCO_INFERNO" },
-        { AchievementType.WireFraud, "WEAPON_WIRE_FRAUD" },
-        { AchievementType.SchizoidMan, "WEAPON_SCHIZOID_MAN" },
-        { AchievementType.BlueHat, "WEAPON_BLUE_HAT" },
-        { AchievementType.BlackHat, "WEAPON_BLACK_HAT" },
-        { AchievementType.EagleEyed, "WEAPON_EAGLE_EYED" },
-        { AchievementType.PogoStick, "WEAPON_POGO_STICK" },
-        { AchievementType.Skater, "WEAPON_SKATER" },
-        { AchievementType.SprayNPray, "WEAPON_SPRAY_N_PRAY" },
-        { AchievementType.PingPonginator, "WEAPON_PING_PONG" },
-        { AchievementType.Flamethrower, "WEAPON_FLAMETHROWER" },
-        { AchievementType.OrbitalTrashCannon, "WEAPON_ORBITAL_TRASH_CANNON" },
-        { AchievementType.ItalianPlumber, "WEAPON_ITALIAN_PLUMBER" },
-        { AchievementType.HatTrick, "WEAPON_HAT_TRICK" },
-        { AchievementType.LongShot, "WEAPON_LONG_SHOT" },
-        { AchievementType.RemoteWorker, "WEAPON_REMOTE_WORKER" },
-        { AchievementType.BigIron, "WEAPON_BIG_IRON" },
-        { AchievementType.Nuke, "WEAPON_NUKE" },
-        { AchievementType.MadHatter, "WEAPON_MAD_HATTER" },
+        { AchievementType.WinARound, "WIN_A_ROUND" },
+        { AchievementType.Win30Chips, "WIN_30_CHIPS" },
+        { AchievementType.WinSixRounds, "WIN_SIX_ROUNDS" },
+        { AchievementType.WinThreeStrikes, "WIN_THREE_STRIKES" },
+        { AchievementType.AllIn, "ACHIEVEMENT_ALL_IN" },
+        { AchievementType.SitThroughCredits, "ACHIEVEMENT_CREDITS" },
+        { AchievementType.Clutch, "ACHIEVEMENT_CLUTCH" },
+        { AchievementType.MatchPoint, "ACHIEVEMENT_MATCH_POINT" },
     };
+
+    public void UnlockAchievement(SecretCombinationType type)
+    {
+        if (type is SecretCombinationType.None || !combinationAchievementNames.TryGetValue(type, out var name))
+            return;
+
+        UnlockAchievement(name);
+    }
 
     public void UnlockAchievement(AchievementType type)
     {
-        if (!isSteamInitialized)
-            return;
         if (type is AchievementType.None || !achievementNames.TryGetValue(type, out var name))
+            return;
+
+#if UNITY_EDITOR
+        Debug.Log($"Attempting to unlock achievement {name}");
+#endif
+        UnlockAchievement(name);
+    }
+
+    private void UnlockAchievement(string name)
+    {
+        if (!isSteamInitialized)
             return;
 
         SteamUserStats.GetAchievement(name, out var isAlreadyUnlocked);
 
         if (isAlreadyUnlocked)
             return;
+
+#if UNITY_EDITOR
+        Debug.Log($"Unlocked achievement {name}");
+#endif
 
         SteamUserStats.SetAchievement(name);
         shouldStoreStats = true;

@@ -1,3 +1,4 @@
+using System.Linq;
 using Mirror;
 using TMPro;
 using UnityEngine;
@@ -272,6 +273,9 @@ public class BiddingPlatform : NetworkBehaviour
         }
         Debug.Log($"Rewarding {item.displayName} to {player.identity.ToColorString()}");
         player.identity.PerformTransaction(item);
+
+        if (chips >= 15 && player.identity.Chips == 0 && Peer2PeerTransport.LocalPlayerInstances.Any(p => p.id == playerID))
+            SteamManager.Singleton.UnlockAchievement(AchievementType.AllIn);
     }
 
     public void SetItem(Item item)

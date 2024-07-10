@@ -140,12 +140,12 @@ public class GunFactory : MonoBehaviour
         return $"The {body.secretName.Capitalized()} {extension.secretName.Capitalized()} {barrel.secretName.Capitalized()}";
     }
 
-    public static bool TryGetGunAchievement(Item body, Item barrel, Item extension, out AchievementType achievement)
+    public static bool TryGetGunAchievement(Item body, Item barrel, Item extension, out SecretCombinationType achievement)
     {
         OverrideName result = StaticInfo.Singleton.SecretNames
                                         .FirstOrDefault(x => x.Body == body && x.Barrel == barrel && x.Extension == extension);
 
-        achievement = AchievementType.None;
+        achievement = SecretCombinationType.None;
         if (result.Name is null)
             return false;
 
