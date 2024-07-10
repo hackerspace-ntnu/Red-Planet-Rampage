@@ -9,6 +9,11 @@ public class LevelCard : MonoBehaviour
     public GameObject LevelCardPrefab => levelCard;
 
     [SerializeField]
+    private Canvas canvas;
+
+    public Canvas Canvas => canvas;
+
+    [SerializeField]
     private string cardName;
     public string CardName => cardName;
 }

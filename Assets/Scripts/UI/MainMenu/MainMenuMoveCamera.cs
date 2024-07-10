@@ -30,6 +30,9 @@ public class MainMenuMoveCamera : MonoBehaviour
         mainMenuCamera.gameObject.SetActive(true);
         directionalLight.SetActive(true);
 
+        // Have to turn cursor back to visible as it seems it turns into invisible when switching cam.
+        Cursor.visible = true;
+
         LeanTween.sequence()
             .append(LeanTween.rotateY(mainMenuCamera.gameObject, 120, cameraSpeed).setEaseInOutQuart());
     }

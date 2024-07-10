@@ -37,6 +37,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     public float LookSpeedZoom = 0.75f;
 
+    private float sensScale;
+
     [SerializeField]
     [Tooltip("Reduction in look speed for mice when zoomed")]
     private float mouseZoomSpeedFactor = 0.1f;
@@ -177,7 +179,8 @@ public class PlayerMovement : MonoBehaviour
         localGunHolderX = gunHolder.transform.localPosition.x;
         localGunHolderHeight = gunHolder.transform.localPosition.y;
         playerCamera = inputManager.PlayerCamera;
-        startingFov = StaticInfo.Singleton.CameraFov;
+        SetFOVFromSettings();
+        sensScale = SettingsInfo.Singleton.settings.sensScale;
 
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += ResetZoom;
@@ -191,6 +194,16 @@ public class PlayerMovement : MonoBehaviour
         inputManager.onCrouchCanceled += OnCrouch;
         inputManager.onZoomPerformed += OnZoom;
         inputManager.onZoomCanceled += OnZoomCanceled;
+    }
+
+    public void SetFOVFromSettings()
+    {
+        if (playerCamera != null)
+        {
+            startingFov = SettingsInfo.Singleton.settings.playerFOV;
+            playerCamera.fieldOfView = SettingsInfo.Singleton.settings.playerFOV;
+            ZoomFov = SettingsInfo.Singleton.settings.zoomFOV;
+        }
     }
 
     public void SetInitialRotation(float radians)
@@ -425,12 +438,12 @@ public class PlayerMovement : MonoBehaviour
         if (!CanLook)
             return;
         var lookSpeedFactor = inputManager.ZoomActive
-            ? inputManager.IsMouseAndKeyboard ? LookSpeedZoom * mouseZoomSpeedFactor : LookSpeedZoom
+            ? inputManager.IsMouseAndKeyboard ? LookSpeedZoom * mouseZoomSpeedFactor: LookSpeedZoom
             : lookSpeed;
         var lookInput = inputManager.IsMouseAndKeyboard
             ? inputManager.lookInput
             : inputManager.lookInput * Time.deltaTime;
-        aimAngle += lookInput * lookSpeedFactor;
+        aimAngle += lookInput * lookSpeedFactor * sensScale;
         aimAngle = aimAngle.ClampedLookAngles();
         // Rotate rigidbody.
         body.MoveRotation(Quaternion.AngleAxis(aimAngle.x * Mathf.Rad2Deg, Vector3.up));

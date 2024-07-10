@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -45,6 +46,8 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private GameObject mapSelectMenu;
     [SerializeField]
+    private OptionsMenu optionsMenu;
+    [SerializeField]
     private LevelSelectManager levelSelectManager;
     [SerializeField]
     private PlayerSelectManager playerSelectManager;
@@ -77,6 +80,11 @@ public class MainMenuController : MonoBehaviour
     private GameObject videoPlayerCamera;
 
     private LobbyType lobbyType;
+
+    [SerializeField]
+    private SettingsInfo settingsInfo;
+
+    private InputManager firstInputJoined;
 
     private void Awake()
     {
@@ -111,10 +119,20 @@ public class MainMenuController : MonoBehaviour
             mainMenuCamera.SetActive(true);
             // Reset loading screen
             LoadingScreen.ResetCounter();
+
+
+            if (firstInputJoined.IsMouseAndKeyboard) EnableVisibleMouse();
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
         }
         else
         {
             // First time in menu, play intro video.
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
             introVideo.started += StopFirstFrame;
             playerInputManagerController.onPlayerInputJoined += ShowSkipText;
             defaultMenu.SetActive(false);
@@ -171,6 +189,7 @@ public class MainMenuController : MonoBehaviour
     private void EndIntro()
     {
         sun.Restart();
+        if (firstInputJoined.IsMouseAndKeyboard) EnableVisibleMouse();
         playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
         skipIntroText.gameObject.SetActive(false);
         introVideo.gameObject.SetActive(false);
@@ -203,6 +222,21 @@ public class MainMenuController : MonoBehaviour
     {
         yield return null;
         target?.Select();
+    }
+
+    public void DeselectControl()
+    {
+        if (EventSystem.current != null)
+        {
+            // I find no better way to deselect game objects. This is mainly used so you don't have to click twice in tabs.
+            StartCoroutine(WaitUnselect());
+        }
+    }
+
+    private IEnumerator WaitUnselect()
+    {
+        yield return null;
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     /// <summary>
@@ -264,6 +298,9 @@ public class MainMenuController : MonoBehaviour
     {
         playerInputs.Add(inputManager);
 
+        if (firstInputJoined == null)
+            firstInputJoined = inputManager;
+
         bool canPlay = playerInputs.Count > 1;
         var colors = startButton.colors;
         colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
@@ -279,6 +316,12 @@ public class MainMenuController : MonoBehaviour
         galleryMenu.SetPlayerInput(inputManager);
         creditsMenu.SetPlayerInput(inputManager);
         levelSelectManager.SetPlayerInput(inputManager);
+    }
+
+    private void EnableVisibleMouse()
+    {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 
     private void PlayUISelectAudio(InputAction.CallbackContext ctx)

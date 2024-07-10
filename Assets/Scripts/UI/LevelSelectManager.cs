@@ -21,6 +21,8 @@ public class LevelSelectManager : MonoBehaviour
     private float totalDegrees = 130f;
     [SerializeField]
     private float radius = 0.5f;
+    [SerializeField]
+    private Camera playerSelectCam;
 
 
     private List<GameObject> instantiatedCards = new List<GameObject>();
@@ -49,6 +51,8 @@ public class LevelSelectManager : MonoBehaviour
             GameObject levelCard = Instantiate(levelCards[i].LevelCardPrefab, newParent.transform.position, Quaternion.Euler(-90f, 180f, 180f), newParent.transform);
             levelCard.transform.localPosition += new Vector3(newParent.transform.localPosition.x, newParent.transform.localPosition.y, newParent.transform.localPosition.z - 0.8f);
             newParent.transform.rotation = rotation;
+
+            levelCard.GetComponentInChildren<LevelCard>().Canvas.worldCamera = playerSelectCam;
 
             //Add levelcard to list for later use
             instantiatedCards.Add(levelCard);
