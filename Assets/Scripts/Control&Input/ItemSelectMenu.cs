@@ -150,12 +150,12 @@ public class ItemSelectMenu : MonoBehaviour
 
         if (moveInput.y > 1 - errorMarginInput && gamepadMoveReady)
         {
-            MoveDownPerformed();
+            MoveUpPerformed();
             DelayIfGamepad();
         }
         else if (moveInput.y < -1 + errorMarginInput && gamepadMoveReady)
         {
-            MoveUpPerformed();
+            MoveDownPerformed();
             DelayIfGamepad();
         }
         else if (moveInput.x < -1 + errorMarginInput && gamepadMoveReady)

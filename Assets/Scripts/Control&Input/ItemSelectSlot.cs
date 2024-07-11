@@ -39,33 +39,43 @@ public class ItemSelectSlot : MonoBehaviour
     private GameObject tileHolder;
 
     private List<Item> items;
-    private List<(GameObject instance, Vector3 originalPosition, Vector3 offset)> augmentModels = new List<(GameObject instance, Vector3 originalPosition, Vector3 offset)>();
+    private List<(GameObject instance, Vector3 originalPosition, Vector3 offset)> augmentModels = new();
+
+    private int slotIndexOffset = 2;
 
     private int selectedIndex = 0;
     public Item SelectedItem => items.Count > 0 ? items[selectedIndex] : null;
 
-    private void Start()
+    private void Awake()
     {
+        slotIndexOffset = Mathf.FloorToInt(itemSlots.Length / 2);
         background.color = deselectedColor;
     }
 
-    public void SetItems(List<Item> items, Item initialItem)
+    public void SetItems(IEnumerable<Item> availableItems, Item initialItem)
     {
-        this.items = items;
+        items = availableItems.ToList();
 
         if (type == AugmentType.Extension)
             items.Insert(0, null);
 
         int itemCount = items.Count;
-        if (itemCount < 6)
-            for (int i = 0; i < 6 - itemCount; i++)
-                items.Insert(itemCount + i, items[(itemCount + i).Mod(itemCount)]);
+        // Repeat until we have enough to fill all slots
+        while (items.Count < itemSlots.Length)
+            items.AddRange(items.GetRange(0, itemCount));
+
+
+        selectedIndex = items.IndexOf(initialItem);
+        // For extensions, we may not find any available item
+        if (selectedIndex < 0) selectedIndex = 0;
+
 
         // Instantiate all items at offset spacing down from holder
         for (var i = 0; i < items.Count; i++)
         {
+            var item = items[i];
             // Item is probably an empty extension slot!
-            if (items[i] == null)
+            if (item == null)
             {
                 var missing = Instantiate(missingObject, Vector3.zero, itemHolder.rotation, itemHolder);
                 missing.transform.localPosition = Vector3.zero;
@@ -78,12 +88,13 @@ public class ItemSelectSlot : MonoBehaviour
             if (PlayerInputManagerController.Singleton.LocalPlayerInputs.Count > 2)
                 scale *= 3;
 
-            // Item is an augment
+            // Item is an augment, so it needs to be instantiated
             var rotation = Quaternion.Euler(new Vector3(0, 90, -20));
-            var instance = Instantiate(items[i].augment, Vector3.zero, rotation, itemHolder);
+            var instance = Instantiate(item.augment, Vector3.zero, rotation, itemHolder);
             instance.transform.ScaleAndParent(scale, itemHolder);
+
             Transform itemCenter;
-            if (items[i].augmentType == AugmentType.Body)
+            if (item.augmentType == AugmentType.Body)
             {
                 itemCenter = instance.GetComponent<GunBody>().midpoint;
             }
@@ -91,17 +102,14 @@ public class ItemSelectSlot : MonoBehaviour
             {
                 itemCenter = instance.GetComponent<Augment>().midpoint;
             }
+
             var offset = instance.transform.position - itemCenter.transform.position;
-            instance.transform.localPosition = itemSlots[i].transform.position + offset / scale;
+            var slotPosition = itemSlots[SlotIndexForItem(i)].transform.position;
+            instance.transform.localPosition = slotPosition + offset / scale;
 
             Augment.DisableInstance(instance, type);
-            augmentModels.Add((instance, itemSlots[i].transform.position, offset / scale));
+            augmentModels.Add((instance, slotPosition, offset / scale));
         }
-
-        selectedIndex = items.IndexOf(initialItem);
-
-        // For extensions, we may not find any available item
-        if (selectedIndex < 0) selectedIndex = 0;
 
         StartCoroutine(WaitAndSetWeapons());
     }
@@ -125,37 +133,43 @@ public class ItemSelectSlot : MonoBehaviour
 
     public void Previous()
     {
-        ChangeItemDisplayed((selectedIndex - 1).Mod(items.Count));
-        LeanTween.moveLocal(tileHolder, itemSlots[5].transform.localPosition, .2f)
-            .setEaseInOutBounce()
-            .setOnComplete(() => tileHolder.transform.localPosition = Vector3.zero);
+        ChangeItemDisplayedByDelta(-1);
     }
 
     public void Next()
     {
-        ChangeItemDisplayed((selectedIndex + 1).Mod(items.Count));
-        LeanTween.moveLocal(tileHolder, itemSlots[3].transform.localPosition, .2f)
+        ChangeItemDisplayedByDelta(+1);
+    }
+
+    private void ChangeItemDisplayedByDelta(int delta)
+    {
+        ChangeItemDisplayed((selectedIndex + delta).Mod(items.Count));
+        LeanTween.moveLocal(tileHolder, itemSlots[slotIndexOffset - delta].transform.localPosition, .2f)
             .setEaseInOutBounce()
             .setOnComplete(() => tileHolder.transform.localPosition = Vector3.zero);
     }
+
+    private int SlotIndexForItem(int i) =>
+        Mathf.Clamp((i - selectedIndex + slotIndexOffset).Mod(items.Count), 0, itemSlots.Length - 1);
 
     private void ChangeItemDisplayed(int nextIndex)
     {
         if (nextIndex < 0 || nextIndex >= items.Count)
             return;
 
-
         selectedIndex = nextIndex;
 
         label.text = SelectedItem != null ? SelectedItem.displayName : "None";
-        for (int i = 0; i < augmentModels.Count; i++)
-        {
-            var model = augmentModels[i];
-            model.instance.SetActive(false);
-            if (i == selectedIndex || i == (selectedIndex + 1).Mod(itemSlots.Length) || i == (selectedIndex - 1).Mod(itemSlots.Length))
-                model.instance.SetActive(true);
 
-            LeanTween.move(augmentModels[i].Item1, itemSlots[(selectedIndex - i).Mod(itemSlots.Length)].transform.position + model.offset, .2f).setEaseInOutBounce();
+        for (int i = 0; i < items.Count; i++)
+        {
+            var (instance, _, offset) = augmentModels[i];
+
+            var isSelectedOrNeighbour = i == selectedIndex || i == (selectedIndex + 1).Mod(items.Count) || i == (selectedIndex - 1).Mod(items.Count);
+            instance.SetActive(isSelectedOrNeighbour);
+
+            var slotIndex = SlotIndexForItem(i);
+            LeanTween.move(instance, itemSlots[slotIndex].transform.position + offset, .2f).setEaseInOutBounce();
         }
     }
 }
