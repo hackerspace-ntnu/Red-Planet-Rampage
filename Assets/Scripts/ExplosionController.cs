@@ -92,7 +92,7 @@ public class ExplosionController : MonoBehaviour
         if (hasHealth && hasNotBeenRegisteredYet)
         {
             hitHealthControllers.Add(hitbox.health);
-            scaledDamage = damage * damageCurve.Evaluate(Vector3.Distance(target.transform.position, transform.position) / radius);
+            scaledDamage = Mathf.Max(1, damage * damageCurve.Evaluate(Vector3.Distance(target.transform.position, transform.position) / radius));
             hitbox.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage, target.transform.position, (target.transform.position - transform.position).normalized, DamageType.Explosion));
         }
 
