@@ -19,11 +19,14 @@ public class OrbitCamera : MonoBehaviour
     private Transform cameraTransform;
     private new Camera camera;
 
+    private LayerMask previousCullingMask;
+
     public Camera Camera
     {
         set
         {
             camera = value;
+            previousCullingMask = camera.cullingMask;
             camera.cullingMask = cullingMask | (1 << (12 + player.LayerIndex));
             cameraTransform = value.transform;
         }
@@ -71,6 +74,7 @@ public class OrbitCamera : MonoBehaviour
     {
         StopTracking();
         StopCoroutine(trackingRoutine);
+        camera.cullingMask = previousCullingMask;
     }
 
     private IEnumerator WaitAndStopTrackingRagdoll()

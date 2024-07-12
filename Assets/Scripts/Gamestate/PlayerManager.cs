@@ -273,6 +273,32 @@ public class PlayerManager : NetworkBehaviour
 
         transform.position = spawnpoint.position;
         transform.rotation = spawnpoint.rotation;
+
+        playerIK.transform.localPosition = Vector3.zero;
+        playerIK.transform.localRotation = Quaternion.identity;
+        //inputManager.transform.position = Vector3.zero;
+        //inputManager.transform.localPosition = Vector3.zero;
+        inputManager.transform.rotation = Quaternion.identity;
+        inputManager.PlayerCamera.transform.rotation = Quaternion.identity;
+        GetComponent<Rigidbody>().position = spawnpoint.position;
+        GetComponent<PlayerMovement>().SetInitialRotation(spawnpoint.rotation.eulerAngles.y);
+
+        hudController.DisplayHUD();
+
+        SetPlayerInput(inputManager);
+
+        StartCoroutine(SetTransformAfterRespawn(spawnpoint));
+    }
+
+    private IEnumerator SetTransformAfterRespawn(Transform spawnpoint)
+    {
+        yield return null;
+
+        //playerIK.transform.localPosition = Vector3.zero;
+        //inputManager.transform.parent.position = Vector3.zero;
+        //inputManager.transform.parent.localPosition = Vector3.zero;
+        //inputManager.transform.parent.rotation = Quaternion.identity;
+        //inputManager.PlayerCamera.transform.rotation = Quaternion.identity;
         GetComponent<Rigidbody>().position = spawnpoint.position;
         GetComponent<PlayerMovement>().SetInitialRotation(spawnpoint.rotation.eulerAngles.y);
     }

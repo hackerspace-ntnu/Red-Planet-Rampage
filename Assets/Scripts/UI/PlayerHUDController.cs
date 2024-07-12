@@ -314,6 +314,14 @@ public class PlayerHUDController : MonoBehaviour
         spectatorTargetText.color = target.color;
     }
 
+    public void DisplayHUD()
+    {
+        deathScreen.SetActive(false);
+        spectatorScreen.SetActive(false);
+        ammoHud.parent.gameObject.SetActive(true);
+        speedLines.gameObject.SetActive(true);
+    }
+
     // x and y expected to be in range [-1, 1]
     public void MoveCrosshair(float x, float y)
     {
