@@ -249,7 +249,8 @@ public class AIManager : PlayerManager
         agent.stoppingDistance = ShootingTarget ? shootingStoppingDistance : itemStoppingDistance;
         try
         {
-            agent.SetDestination(DestinationTarget.position);
+            if (agent.enabled)
+                agent.SetDestination(DestinationTarget.position);
         }
         catch
         {
@@ -287,7 +288,9 @@ public class AIManager : PlayerManager
             normalizedTime += Time.deltaTime / duration;
             yield return null;
         }
-        agent.CompleteOffMeshLink();
+        // TODO why is the agent sometimes not enabled here?
+        if (agent.enabled)
+            agent.CompleteOffMeshLink();
         onLinkEnd?.Invoke();
     }
 

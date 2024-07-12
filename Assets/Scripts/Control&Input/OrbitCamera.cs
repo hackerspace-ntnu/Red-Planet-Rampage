@@ -19,11 +19,14 @@ public class OrbitCamera : MonoBehaviour
     private Transform cameraTransform;
     private new Camera camera;
 
+    private LayerMask previousCullingMask;
+
     public Camera Camera
     {
         set
         {
             camera = value;
+            previousCullingMask = camera.cullingMask;
             camera.cullingMask = cullingMask | (1 << (12 + player.LayerIndex));
             cameraTransform = value.transform;
         }
@@ -38,6 +41,8 @@ public class OrbitCamera : MonoBehaviour
     private PlayerManager[] otherPlayers;
     private int targetIndex = 0;
     private PlayerManager player;
+
+    private Coroutine trackingRoutine;
 
     private void Start()
     {
@@ -62,23 +67,40 @@ public class OrbitCamera : MonoBehaviour
         if (!MatchController.Singleton.IsRoundInProgress)
             return;
         otherPlayers = MatchController.Singleton.Players.Where(p => p != GetComponent<PlayerManager>()).ToArray();
-        StartCoroutine(WaitAndStopTrackingRagdoll());
+        trackingRoutine = StartCoroutine(WaitAndStopTrackingRagdoll());
+    }
+
+    public void Deactivate()
+    {
+        StopTracking();
+        StopCoroutine(trackingRoutine);
+        camera.cullingMask = previousCullingMask;
     }
 
     private IEnumerator WaitAndStopTrackingRagdoll()
     {
-        yield return new WaitForSeconds(3f);
-        player.HUDController.DisplaySpectateHint();
         InputManager.onSelect += SwitchTarget;
         InputManager.onFirePerformed += SwitchTarget;
+        // TODO remove
+        InputManager.onZoomPerformed += Respawn;
+
         yield return new WaitForSeconds(3f);
-        var isStillOnPlayer = target == player.AiAimSpot;
+        player.HUDController.DisplaySpectateHint();
+
+        yield return new WaitForSeconds(3f);
+        var isStillOnPlayer = isTracking && target == player.AiAimSpot;
         if (isStillOnPlayer)
         {
             StopTracking();
             // Will focus on next player next time
             targetIndex = 1;
         }
+    }
+
+    // TODO remove
+    private void Respawn(InputAction.CallbackContext ctx)
+    {
+        player.Respawn(FindObjectOfType<PlayerFactory>().GetRandomSpawnpoints().First());
     }
 
     private void SwitchTarget(InputAction.CallbackContext ctx)
@@ -97,7 +119,7 @@ public class OrbitCamera : MonoBehaviour
 
     private void StartTracking(PlayerManager nextTarget)
     {
-        if (!cameraTransform || !InputManager || !MatchController.Singleton.IsRoundInProgress)
+        if (!cameraTransform || !InputManager)
             return;
         isTracking = true;
         camera.enabled = true;
@@ -110,6 +132,10 @@ public class OrbitCamera : MonoBehaviour
     {
         if (!camera)
             return;
+        InputManager.onSelect -= SwitchTarget;
+        InputManager.onFirePerformed -= SwitchTarget;
+        // TODO remove
+        InputManager.onZoomPerformed -= Respawn;
         isTracking = false;
         camera.enabled = false;
         ResetCamera();

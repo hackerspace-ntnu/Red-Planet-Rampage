@@ -221,7 +221,7 @@ public class PlayerManager : NetworkBehaviour
         playerIK.enabled = false;
         // TODO display guns falling to the floor
         if (gunController)
-            gunController.gameObject.SetActive(false);
+            gunController.enabled = false;
         GunHolder.gameObject.SetActive(false);
 
         if (inputManager)
@@ -236,6 +236,73 @@ public class PlayerManager : NetworkBehaviour
         var ragdollController = GetComponent<RagdollController>();
         var force = info.force.normalized * Mathf.Log(info.damage) * deathKnockbackForceMultiplier;
         ragdollController.EnableRagdoll(force);
+    }
+
+    public virtual void Respawn(Transform spawnpoint)
+    {
+        Debug.Log("RESPAWNING????");
+
+        isAlive = true;
+        aimAssistCollider.SetActive(true);
+        aiTargetCollider.gameObject.SetActive(true);
+        if (playerShadow)
+            playerShadow.gameObject.SetActive(true);
+
+        // Disable components
+        GetComponent<PlayerMovement>().enabled = true;
+        // TODO give back health
+        healthController.enabled = true;
+        playerIK.enabled = true;
+        if (gunController)
+        {
+            gunController.enabled = false;
+            gunController.Reset();
+            gunController.Reload(1);
+        }
+        GunHolder.gameObject.SetActive(true);
+
+        if (inputManager)
+        {
+            var orbitCamera = GetComponent<OrbitCamera>();
+            orbitCamera.Deactivate();
+        }
+
+        // TODO: Make accurate hitbox forces for the different limbs of the player
+        var ragdollController = GetComponent<RagdollController>();
+        ragdollController.DisableRagdoll();
+
+
+        // post orbit and ragdoll reset
+        inputManager.PlayerCamera.enabled = true;
+
+        transform.position = spawnpoint.position;
+        transform.rotation = spawnpoint.rotation;
+
+        playerIK.transform.localPosition = Vector3.zero;
+        playerIK.transform.localRotation = Quaternion.identity;
+        //inputManager.transform.position = Vector3.zero;
+        //inputManager.transform.localPosition = Vector3.zero;
+        inputManager.transform.rotation = Quaternion.identity;
+        inputManager.PlayerCamera.transform.rotation = Quaternion.identity;
+        GetComponent<Rigidbody>().position = spawnpoint.position;
+        GetComponent<PlayerMovement>().SetInitialRotation(spawnpoint.rotation.eulerAngles.y);
+
+        hudController.DisplayHUD();
+
+        StartCoroutine(SetTransformAfterRespawn(spawnpoint));
+    }
+
+    private IEnumerator SetTransformAfterRespawn(Transform spawnpoint)
+    {
+        yield return null;
+
+        //playerIK.transform.localPosition = Vector3.zero;
+        //inputManager.transform.parent.position = Vector3.zero;
+        //inputManager.transform.parent.localPosition = Vector3.zero;
+        //inputManager.transform.parent.rotation = Quaternion.identity;
+        //inputManager.PlayerCamera.transform.rotation = Quaternion.identity;
+        GetComponent<Rigidbody>().position = spawnpoint.position;
+        GetComponent<PlayerMovement>().SetInitialRotation(spawnpoint.rotation.eulerAngles.y);
     }
 
     /// <summary>
