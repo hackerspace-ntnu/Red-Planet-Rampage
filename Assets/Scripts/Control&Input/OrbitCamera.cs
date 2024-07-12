@@ -97,7 +97,7 @@ public class OrbitCamera : MonoBehaviour
 
     private void StartTracking(PlayerManager nextTarget)
     {
-        if (!cameraTransform || !InputManager || !MatchController.Singleton.IsRoundInProgress)
+        if (!cameraTransform || !InputManager)
             return;
         isTracking = true;
         camera.enabled = true;
