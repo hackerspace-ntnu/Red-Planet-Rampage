@@ -13,15 +13,12 @@ public class OptionsMenu : MonoBehaviour
     private TMP_Dropdown resolutionDropdown;
 
     // The resolutions available as this menu starts its lifetime.
-    Resolution[] resolutions;
 
     [SerializeField]
     private TMP_Dropdown fullscreenTypeDropdown;
 
     [SerializeField]
     private TMP_Dropdown qualityDropdown;
-
-    private string[] qualityNames;
 
     #endregion
     #region Audio Variables
@@ -77,7 +74,7 @@ public class OptionsMenu : MonoBehaviour
 
     private void SetOptionItems()
     {
-        resolutionDropdown.value = settingsDataManager.SettingsDataInstance.ResolutionPresetIndex;
+        resolutionDropdown.value = System.Array.FindIndex(settingsDataManager.Resolutions, r => r.width == Screen.currentResolution.width && r.height == Screen.currentResolution.height);
 
         fullscreenTypeDropdown.value = settingsDataManager.SettingsDataInstance.DisplayModeIndex;
 
@@ -93,10 +90,10 @@ public class OptionsMenu : MonoBehaviour
         sensitivityInputField.text = settingsDataManager.SettingsDataInstance.SensitivityScale.ToString("0.00");
 
         FOVSlider.value = settingsDataManager.SettingsDataInstance.PlayerFOV;
-        FOVInputField.text = settingsDataManager.SettingsDataInstance.PlayerFOV.ToString("0.00");
+        FOVInputField.text = settingsDataManager.SettingsDataInstance.PlayerFOV.ToString("0");
 
         ZoomFOVSlider.value = settingsDataManager.SettingsDataInstance.ZoomFOV;
-        ZoomFOVInputField.text = settingsDataManager.SettingsDataInstance.ZoomFOV.ToString("0.00");
+        ZoomFOVInputField.text = settingsDataManager.SettingsDataInstance.ZoomFOV.ToString("0");
 
         settingsDataManager.ApplyAllSettings();
     }
@@ -172,23 +169,23 @@ public class OptionsMenu : MonoBehaviour
 
     public void CheckFOVInputValue(string inputValue)
     {
-        FOVInputField.text = settingsDataManager.ClampFOVValue(float.Parse(inputValue)).ToString("0.00");
+        FOVInputField.text = settingsDataManager.ClampFOVValue(float.Parse(inputValue)).ToString("0");
     }
 
     public void CheckZoomFOVInputValue(string inputValue)
     {
-        ZoomFOVInputField.text = settingsDataManager.ClampZoomFOVValue(float.Parse(inputValue)).ToString("0.00");
+        ZoomFOVInputField.text = settingsDataManager.ClampZoomFOVValue(float.Parse(inputValue)).ToString("0");
     }
 
     public void ChangeFOVInputField(float value)
     {
-        FOVInputField.text = value.ToString("0.00");
+        FOVInputField.text = value.ToString("0");
         settingsDataManager.SetFOV(value);
     }
 
     public void ChangeZoomFOVInputField(float value)
     {
-        ZoomFOVInputField.text = value.ToString("0.00");
+        ZoomFOVInputField.text = value.ToString("0");
         settingsDataManager.SetZoomFOV(value);
     }
 

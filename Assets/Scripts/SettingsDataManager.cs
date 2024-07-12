@@ -17,7 +17,6 @@ public class SettingsData
     public float MusicVolume { get; internal set; }
     public float SfxVolume { get; internal set; }
     public int QualityPresetIndex { get; internal set; }
-    public int ResolutionPresetIndex { get; internal set; }
     public int DisplayModeIndex { get; internal set; }
 
     /// <summary>
@@ -33,7 +32,7 @@ public class SettingsData
     public SettingsData(
         float sensitivityScaleVal, float playerFOV, float zoomFOV,
         float masterVolumeVal, float musicVolumeVal, float sfxVolumeVal,
-        int qualityPresetIndexVal, int resolutionPresetIndexVal, int displayModeIndexVal)
+        int qualityPresetIndexVal, int displayModeIndex)
     {
         SensitivityScale = sensitivityScaleVal;
         PlayerFOV = playerFOV;
@@ -42,8 +41,7 @@ public class SettingsData
         MusicVolume = musicVolumeVal;
         SfxVolume = sfxVolumeVal;
         QualityPresetIndex = qualityPresetIndexVal;
-        ResolutionPresetIndex = resolutionPresetIndexVal;
-        DisplayModeIndex = displayModeIndexVal;
+        DisplayModeIndex = displayModeIndex;
     }
 
     /// <summary>
@@ -58,16 +56,46 @@ public class SettingsData
         MusicVolume = 1.0f;
         SfxVolume = 1.0f;
         QualityPresetIndex = 0;
-        ResolutionPresetIndex = 0;
-        DisplayModeIndex = 0;
     }
 
-    public string FormatDataToJSON()
+    public SettingsData(SettingsDataStruct settingsData)
     {
-        return $"{{\"SensitivityScale\":{SensitivityScale},\"PlayerFOV\":{PlayerFOV},\"ZoomFOV\":{ZoomFOV}," +
-            $"\"MasterVolume\":{MasterVolume},\"MusicVolume\":{MusicVolume},\"SfxVolume\":{SfxVolume}," +
-            $"\"QualityPresetIndex\":{QualityPresetIndex},\"ResolutionPresetIndex\":{ResolutionPresetIndex},\"DisplayModeIndex\":{DisplayModeIndex}}}";
+        SensitivityScale = settingsData.SensitivityScale;
+        PlayerFOV = settingsData.PlayerFOV;
+        ZoomFOV = settingsData.ZoomFOV;
+        MasterVolume = settingsData.MasterVolume;
+        MusicVolume = settingsData.MusicVolume;
+        SfxVolume = settingsData.SfxVolume;
+        QualityPresetIndex = settingsData.QualityPresetIndex;
+        DisplayModeIndex = settingsData.DisplayModeIndex;
     }
+
+    public SettingsDataStruct ToDataStruct()
+    {
+        return new()
+        {
+            SensitivityScale = SensitivityScale,
+            PlayerFOV = PlayerFOV,
+            ZoomFOV = ZoomFOV,
+            MasterVolume = MasterVolume,
+            MusicVolume = MusicVolume,
+            SfxVolume = SfxVolume,
+            QualityPresetIndex = QualityPresetIndex,
+            DisplayModeIndex = DisplayModeIndex
+        };
+    }
+}
+
+public struct SettingsDataStruct
+{
+    public float SensitivityScale;
+    public float PlayerFOV;
+    public float ZoomFOV;
+    public float MasterVolume;
+    public float MusicVolume;
+    public float SfxVolume;
+    public int QualityPresetIndex;
+    public int DisplayModeIndex;
 }
 
 public class SettingsDataManager : MonoBehaviour
@@ -77,10 +105,14 @@ public class SettingsDataManager : MonoBehaviour
     private const string FileName = "/Settings.json";
 
     private static string FilePath;
+
+
     #region Graphic variables
     public Resolution[] Resolutions { get; private set; }
     public string[] QualityNames { get; private set; }
     #endregion
+
+    
     #region Audio variables
     private const string audioGroupMaster = "masterVolume";
     private const string audioGroupMusic = "musicVolume";
@@ -92,6 +124,8 @@ public class SettingsDataManager : MonoBehaviour
     [SerializeField]
     private AudioMixer mainAudioMixer;
     #endregion
+
+
     #region Gameplay variables
 
     [Header("Sensitivity Limits")]
@@ -159,7 +193,7 @@ public class SettingsDataManager : MonoBehaviour
         try
         {
             string jsonData = File.ReadAllText(FilePath);
-            SettingsDataInstance = JsonUtility.FromJson<SettingsData>(jsonData);
+            SettingsDataInstance = new SettingsData(JsonUtility.FromJson<SettingsDataStruct>(jsonData));
             Debug.Log("Settings data loaded");
         }
         catch
@@ -171,7 +205,7 @@ public class SettingsDataManager : MonoBehaviour
 
     private void CreateDefaultFile()
     {
-        string jsonData = JsonUtility.ToJson(SettingsDataInstance);
+        string jsonData = JsonUtility.ToJson(SettingsDataInstance.ToDataStruct());
         File.WriteAllText(FilePath, jsonData);
     }
 
@@ -182,7 +216,6 @@ public class SettingsDataManager : MonoBehaviour
 
     public void ApplyAllSettings()
     {
-        SetResolutionLevel(SettingsDataInstance.ResolutionPresetIndex);
         SetDisplayMode(SettingsDataInstance.DisplayModeIndex);
         SetQualityLevel(SettingsDataInstance.QualityPresetIndex);
         SetMasterVolume(SettingsDataInstance.MasterVolume);
@@ -190,6 +223,8 @@ public class SettingsDataManager : MonoBehaviour
         SetSFXVolume(SettingsDataInstance.SfxVolume);
     }
     #endregion
+
+
     #region Audio methods
     private float LinearToLogarithmicVolume(float volume)
     {
@@ -214,6 +249,8 @@ public class SettingsDataManager : MonoBehaviour
         mainAudioMixer.SetFloat(audioGroupSFX, LinearToLogarithmicVolume(SettingsDataInstance.SfxVolume) + maxVolumeSFX);
     }
     #endregion
+
+
     #region Graphic methods
     public void SetQualityLevel(int index)
     {
@@ -223,18 +260,19 @@ public class SettingsDataManager : MonoBehaviour
 
     public void SetResolutionLevel(int index)
     {
-        SettingsDataInstance.ResolutionPresetIndex = Math.Clamp(index, 0, Resolutions.Length - 1);
         var resolution = Resolutions[index];
         Screen.SetResolution(resolution.width, resolution.height, true);
     }
 
     public void SetDisplayMode(int index)
     {
-        // Constant value 3, because of dropdowns children in the editor.
+        // A constant 3 because of the dropdown's children.
         SettingsDataInstance.DisplayModeIndex = Math.Clamp(index, 0, 3);
         Screen.fullScreenMode = (FullScreenMode)index;
     }
     #endregion
+
+
     #region Gameplay methods
     public float ClampSensValue(float value)
     {
@@ -252,7 +290,7 @@ public class SettingsDataManager : MonoBehaviour
 
     public float ClampZoomFOVValue(float value)
     {
-        return Mathf.Clamp(value, LowerSensLimit, UpperSensLimit);
+        return Mathf.Clamp(value, LowerZoomFOVLimit, UpperZoomFOVLimit);
     }
 
     public void SetFOV(float fov)

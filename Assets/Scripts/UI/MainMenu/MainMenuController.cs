@@ -121,18 +121,13 @@ public class MainMenuController : MonoBehaviour
             LoadingScreen.ResetCounter();
 
 
-            if (firstInputJoined.IsMouseAndKeyboard) EnableVisibleMouse();
-            else
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
+            if (firstInputJoined.IsMouseAndKeyboard) ShowMouse();
+            else HideMouse();
         }
         else
         {
             // First time in menu, play intro video.
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            HideMouse();
             introVideo.started += StopFirstFrame;
             playerInputManagerController.onPlayerInputJoined += ShowSkipText;
             defaultMenu.SetActive(false);
@@ -189,7 +184,7 @@ public class MainMenuController : MonoBehaviour
     private void EndIntro()
     {
         sun.Restart();
-        if (firstInputJoined.IsMouseAndKeyboard) EnableVisibleMouse();
+        if (firstInputJoined.IsMouseAndKeyboard) ShowMouse();
         playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
         skipIntroText.gameObject.SetActive(false);
         introVideo.gameObject.SetActive(false);
@@ -318,10 +313,16 @@ public class MainMenuController : MonoBehaviour
         levelSelectManager.SetPlayerInput(inputManager);
     }
 
-    private void EnableVisibleMouse()
+    private void ShowMouse()
     {
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+    }
+
+    private void HideMouse()
+    {
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void PlayUISelectAudio(InputAction.CallbackContext ctx)
