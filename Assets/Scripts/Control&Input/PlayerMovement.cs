@@ -180,7 +180,7 @@ public class PlayerMovement : MonoBehaviour
         localGunHolderHeight = gunHolder.transform.localPosition.y;
         playerCamera = inputManager.PlayerCamera;
         SetFOVFromSettings();
-        sensScale = SettingsInfo.Singleton.settings.sensScale;
+        sensScale = SettingsDataManager.Singleton.SettingsDataInstance.SensitivityScale;
 
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += ResetZoom;
@@ -200,9 +200,9 @@ public class PlayerMovement : MonoBehaviour
     {
         if (playerCamera != null)
         {
-            startingFov = SettingsInfo.Singleton.settings.playerFOV;
-            playerCamera.fieldOfView = SettingsInfo.Singleton.settings.playerFOV;
-            ZoomFov = SettingsInfo.Singleton.settings.zoomFOV;
+            startingFov = SettingsDataManager.Singleton.SettingsDataInstance.PlayerFOV;
+            playerCamera.fieldOfView = startingFov;
+            ZoomFov = SettingsDataManager.Singleton.SettingsDataInstance.ZoomFOV;
         }
     }
 

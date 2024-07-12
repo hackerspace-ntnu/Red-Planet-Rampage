@@ -4,10 +4,16 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class SelectButtonHover : MonoBehaviour, IPointerEnterHandler
+public class SelectUIElementHover : MonoBehaviour, IPointerEnterHandler
 {
     public void OnPointerEnter(PointerEventData eventData)
     {
+        StartCoroutine(WaitSelect());
+    }
+
+    private IEnumerator WaitSelect()
+    {
+        yield return null;
         EventSystem.current.SetSelectedGameObject(gameObject);
     }
 }

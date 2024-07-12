@@ -54,51 +54,51 @@ public class OptionsMenu : MonoBehaviour
 
     #endregion
 
-    [SerializeField]
-    private SettingsInfo settingsInfo;
+    private SettingsDataManager settingsDataManager;
 
     private void Start()
     {
+        settingsDataManager = SettingsDataManager.Singleton;
+
         CheckResolutions();
         CheckQuality();
 
-        settingsInfo = SettingsInfo.Singleton;
-        sensitivitySlider.minValue = settingsInfo.lowerSensLimit;
-        sensitivitySlider.maxValue = settingsInfo.upperSensLimit;
+        sensitivitySlider.minValue = settingsDataManager.LowerSensLimit;
+        sensitivitySlider.maxValue = settingsDataManager.UpperSensLimit;
 
-        FOVSlider.minValue = settingsInfo.lowerFOVLimit;
-        FOVSlider.maxValue = settingsInfo.upperFOVLimit;
+        FOVSlider.minValue = settingsDataManager.LowerFOVLimit;
+        FOVSlider.maxValue = settingsDataManager.UpperFOVLimit;
 
-        ZoomFOVSlider.minValue = settingsInfo.lowerZoomFOVLimit;
-        ZoomFOVSlider.maxValue = settingsInfo.upperZoomFOVLimit;
+        ZoomFOVSlider.minValue = settingsDataManager.LowerZoomFOVLimit;
+        ZoomFOVSlider.maxValue = settingsDataManager.UpperZoomFOVLimit;
 
         SetOptionItems();
     }
 
     private void SetOptionItems()
     {
-        resolutionDropdown.value = settingsInfo.settings.resolutionPresetIndex;
+        resolutionDropdown.value = settingsDataManager.SettingsDataInstance.ResolutionPresetIndex;
 
-        fullscreenTypeDropdown.value = settingsInfo.settings.resolutionPresetIndex;
+        fullscreenTypeDropdown.value = settingsDataManager.SettingsDataInstance.DisplayModeIndex;
 
-        qualityDropdown.value = settingsInfo.settings.qualityPresetIndex;
+        qualityDropdown.value = settingsDataManager.SettingsDataInstance.QualityPresetIndex;
 
-        masterVolumeSlider.value = settingsInfo.settings.masterVolume;
+        masterVolumeSlider.value = settingsDataManager.SettingsDataInstance.MasterVolume;
 
-        musicVolumeSlider.value = settingsInfo.settings.musicVolume;
+        musicVolumeSlider.value = settingsDataManager.SettingsDataInstance.MusicVolume;
 
-        sfxVolumeSlider.value = settingsInfo.settings.sfxVolume;
+        sfxVolumeSlider.value = settingsDataManager.SettingsDataInstance.SfxVolume;
 
-        sensitivitySlider.value = settingsInfo.settings.sensScale;
-        sensitivityInputField.text = settingsInfo.settings.sensScale.ToString("0.00");
+        sensitivitySlider.value = settingsDataManager.SettingsDataInstance.SensitivityScale;
+        sensitivityInputField.text = settingsDataManager.SettingsDataInstance.SensitivityScale.ToString("0.00");
 
-        FOVSlider.value = settingsInfo.settings.playerFOV;
-        FOVInputField.text = settingsInfo.settings.playerFOV.ToString("0.00");
+        FOVSlider.value = settingsDataManager.SettingsDataInstance.PlayerFOV;
+        FOVInputField.text = settingsDataManager.SettingsDataInstance.PlayerFOV.ToString("0.00");
 
-        ZoomFOVSlider.value = settingsInfo.settings.zoomFOV;
-        ZoomFOVInputField.text = settingsInfo.settings.zoomFOV.ToString("0.00");
+        ZoomFOVSlider.value = settingsDataManager.SettingsDataInstance.ZoomFOV;
+        ZoomFOVInputField.text = settingsDataManager.SettingsDataInstance.ZoomFOV.ToString("0.00");
 
-        settingsInfo.ApplyAllSettings();
+        settingsDataManager.ApplyAllSettings();
     }
 
     /// <summary>
@@ -106,7 +106,7 @@ public class OptionsMenu : MonoBehaviour
     /// </summary>
     private void CheckResolutions()
     {
-        Resolution[] resolutions = settingsInfo.resolutions;
+        Resolution[] resolutions = settingsDataManager.Resolutions;
         resolutionDropdown.AddOptions(resolutions.Select(r => $"{r.width} x {r.height}").ToList());
         resolutionDropdown.value = System.Array.FindIndex(resolutions, r => r.width == Screen.currentResolution.width && r.height == Screen.currentResolution.height);
         resolutionDropdown.RefreshShownValue();
@@ -115,7 +115,7 @@ public class OptionsMenu : MonoBehaviour
     private void CheckQuality()
     {
         // We invert this list so the dropdown goes from high to low quality.
-        string[] qualityNames = settingsInfo.qualityNames;
+        string[] qualityNames = settingsDataManager.QualityNames;
         qualityDropdown.AddOptions(qualityNames.Reverse().ToList());
         qualityDropdown.value = QualitySettings.GetQualityLevel() - qualityNames.Length - 1;
         qualityDropdown.RefreshShownValue();
@@ -123,86 +123,86 @@ public class OptionsMenu : MonoBehaviour
 
     public void SetMasterVolume(float volume)
     {
-        settingsInfo.SetMasterVolume(volume);
+        settingsDataManager.SetMasterVolume(volume);
     }
 
     public void SetMusicVolume(float volume)
     {
-        settingsInfo.SetMusicVolume(volume);
+        settingsDataManager.SetMusicVolume(volume);
         
     }
 
     public void SetSFXVolume(float volume)
     {
-        settingsInfo.SetSFXVolume(volume);
+        settingsDataManager.SetSFXVolume(volume);
     }
 
     public void SetQualityLevel(int qualityPresetIndex)
     {
-        settingsInfo.SetQualityLevel(qualityPresetIndex);
+        settingsDataManager.SetQualityLevel(qualityPresetIndex);
     }
 
     public void SetResolution(int dropdownIndex)
     {
-        settingsInfo.SetResolutionLevel(dropdownIndex);
+        settingsDataManager.SetResolutionLevel(dropdownIndex);
     }
 
     public void SetDisplayMode(int displayMode)
     {
-        settingsInfo.SetDisplayMode(displayMode);
+        settingsDataManager.SetDisplayMode(displayMode);
     }
 
     public void CheckSensInputValue(string inputValue)
     {
-        sensitivityInputField.text = settingsInfo.ClampSensValue(float.Parse(inputValue)).ToString("0.00");
+        sensitivityInputField.text = settingsDataManager.ClampSensValue(float.Parse(inputValue)).ToString("0.00");
     }
 
     public void ChangeSensInputField(float value)
     {
         sensitivityInputField.text = value.ToString("0.00");
-        settingsInfo.SetSensMultiplier(value);
+        settingsDataManager.SetSensMultiplier(value);
     }
 
     public void ChangeSensSliderValue(string inputValue)
     {
-        float value = settingsInfo.ClampSensValue(float.Parse(inputValue));
+        float value = settingsDataManager.ClampSensValue(float.Parse(inputValue));
         sensitivitySlider.value = value;
-        settingsInfo.SetSensMultiplier(value);
+        settingsDataManager.SetSensMultiplier(value);
     }
 
     public void CheckFOVInputValue(string inputValue)
     {
-        FOVInputField.text = settingsInfo.ClampFOVValue(float.Parse(inputValue)).ToString("0.00");
+        FOVInputField.text = settingsDataManager.ClampFOVValue(float.Parse(inputValue)).ToString("0.00");
     }
 
     public void CheckZoomFOVInputValue(string inputValue)
     {
-        ZoomFOVInputField.text = settingsInfo.ClampZoomFOVValue(float.Parse(inputValue)).ToString("0.00");
+        ZoomFOVInputField.text = settingsDataManager.ClampZoomFOVValue(float.Parse(inputValue)).ToString("0.00");
     }
 
     public void ChangeFOVInputField(float value)
     {
         FOVInputField.text = value.ToString("0.00");
-        settingsInfo.SetFOV(value);
+        settingsDataManager.SetFOV(value);
     }
 
     public void ChangeZoomFOVInputField(float value)
     {
         ZoomFOVInputField.text = value.ToString("0.00");
-        settingsInfo.SetZoomFOV(value);
+        settingsDataManager.SetZoomFOV(value);
     }
 
     public void ChangeFOVSliderValue(string inputValue)
     {
-        float value = settingsInfo.ClampFOVValue(float.Parse(inputValue));
+        float value = settingsDataManager.ClampFOVValue(float.Parse(inputValue));
         FOVSlider.value = value;
-        settingsInfo.SetFOV(value);
+        settingsDataManager.SetFOV(value);
     }
 
     public void ChangeZoomFOVSliderValue(string inputValue)
     {
-        float value = settingsInfo.ClampZoomFOVValue(float.Parse(inputValue));
+        float value = settingsDataManager.ClampZoomFOVValue(float.Parse(inputValue));
         ZoomFOVSlider.value = value;
-        settingsInfo.SetZoomFOV(value);
+        settingsDataManager.SetZoomFOV(value);
     }
 }

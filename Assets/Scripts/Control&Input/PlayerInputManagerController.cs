@@ -1,6 +1,7 @@
 using Mirror;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -107,10 +108,12 @@ public class PlayerInputManagerController : MonoBehaviour
     /// <param name="mapNameOrId">Name of the inputMap you want to change to</param>
     public void ChangeInputMaps(string mapNameOrId)
     {
+        Cursor.visible = LocalPlayerInputs.Any(i => i.IsMouseAndKeyboard) && mapNameOrId.Equals("Menu");
+        Cursor.lockState = Cursor.visible ? CursorLockMode.None : CursorLockMode.Locked;
+
         LocalPlayerInputs.ForEach(playerInput =>
         {
             ChangeInputMapForPlayer(mapNameOrId, playerInput);
-            Cursor.visible = playerInput.IsMouseAndKeyboard && mapNameOrId.Equals("Menu");
 
             // Free the playerInputs from their mortail coils (Player prefab or similar assets)
             var previousParent = playerInput.transform.parent;

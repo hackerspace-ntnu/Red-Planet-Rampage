@@ -81,9 +81,6 @@ public class MainMenuController : MonoBehaviour
 
     private LobbyType lobbyType;
 
-    [SerializeField]
-    private SettingsInfo settingsInfo;
-
     private InputManager firstInputJoined;
 
     private void Awake()
@@ -95,6 +92,9 @@ public class MainMenuController : MonoBehaviour
 
     private void Start()
     {
+        // Set inactive since it blocks the ui elements for tabs.
+        EventLog.Singleton.transform.GetChild(0).gameObject.SetActive(false);
+
         aiButtonOriginalPosition = aIButton.transform.localPosition;
         PlayerInputManagerController.Singleton.MatchHasAI = false;
         audioSource = GetComponent<AudioSource>();
@@ -391,6 +391,7 @@ public class MainMenuController : MonoBehaviour
 
     public void StartTrainingMode()
     {
+        EventLog.Singleton.transform.GetChild(0).gameObject.SetActive(false);
         PlayerInputManagerController.Singleton.RemoveJoinListener();
         Peer2PeerTransport.StartTrainingMode();
         playerSelectManager.UpdateLobby();
@@ -418,6 +419,8 @@ public class MainMenuController : MonoBehaviour
 
     public void StartLobby()
     {
+        EventLog.Singleton.transform.GetChild(0).gameObject.SetActive(true);
+
         if (!SteamManager.IsSteamActive)
         {
             NetworkManager.singleton.StartHost();
