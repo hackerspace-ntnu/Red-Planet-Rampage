@@ -221,7 +221,7 @@ public class PlayerManager : NetworkBehaviour
         playerIK.enabled = false;
         // TODO display guns falling to the floor
         if (gunController)
-            gunController.gameObject.SetActive(false);
+            gunController.enabled = false;
         GunHolder.gameObject.SetActive(false);
 
         if (inputManager)
@@ -254,7 +254,11 @@ public class PlayerManager : NetworkBehaviour
         healthController.enabled = true;
         playerIK.enabled = true;
         if (gunController)
-            gunController.gameObject.SetActive(true);
+        {
+            gunController.enabled = false;
+            gunController.Reset();
+            gunController.Reload(1);
+        }
         GunHolder.gameObject.SetActive(true);
 
         if (inputManager)
@@ -284,8 +288,6 @@ public class PlayerManager : NetworkBehaviour
         GetComponent<PlayerMovement>().SetInitialRotation(spawnpoint.rotation.eulerAngles.y);
 
         hudController.DisplayHUD();
-
-        SetPlayerInput(inputManager);
 
         StartCoroutine(SetTransformAfterRespawn(spawnpoint));
     }

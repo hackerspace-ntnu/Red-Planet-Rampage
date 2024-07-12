@@ -102,6 +102,12 @@ public class GunController : NetworkBehaviour
         localGunZOffset = transform.localPosition.z;
     }
 
+    public void Reset()
+    {
+        stats.Ammo = stats.MagazineSize;
+        isFiring = false;
+    }
+
     private void OnDestroy()
     {
         if (!barrelAnimator)
