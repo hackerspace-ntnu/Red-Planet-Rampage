@@ -287,7 +287,7 @@ public class MatchController : NetworkBehaviour
     {
         globalHUDController.DisplayWinScreen(winner);
 
-        // TODO extract to achievement class
+        // TODO extract to achievement class?
         var isNotCustomGamemode = MatchRules.Current.GameMode is not GameModeVariant.Custom;
         var winnerIsLocalPlayer = Peer2PeerTransport.PlayerDetails.Any(p => p.id == winner.id && p.type is PlayerType.Local);
         if (isNotCustomGamemode && winnerIsLocalPlayer)
@@ -300,6 +300,11 @@ public class MatchController : NetworkBehaviour
                 _ => AchievementType.None,
             });
         }
+
+        var isWinnerInAllRoundsAndHasNotDied =
+            rounds.All(r => r.Winner == winner.id && !r.Kills.Values.Any(k => k.Contains(winner.id)));
+        if (isNotCustomGamemode && winnerIsLocalPlayer && isWinnerInAllRoundsAndHasNotDied)
+            SteamManager.Singleton.UnlockAchievement(AchievementType.CogAndBoltTinkering);
 
         yield return new WaitForSecondsRealtime(matchEndDelay);
 
