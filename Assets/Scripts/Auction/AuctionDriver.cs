@@ -16,12 +16,22 @@ public class AuctionDriver : NetworkBehaviour
 {
     [SerializeField]
     private float biddingBeginDelay = 2f;
+    private bool isAuctionStart = false;
 
     [SerializeField]
     private BiddingPlatform[] biddingPlatforms;
     [HideInInspector]
     public BiddingPlatform[] BiddingPlatforms => biddingPlatforms;
     private RandomisedAuctionStage[] availableAuctionStages;
+
+    [SerializeField]
+    private Transform yieldPosition;
+    public Vector3 YieldPosition => yieldPosition.position;
+    private List<PlayerManager> yieldingPlayers = new();
+    public int YieldingPlayerCount => yieldingPlayers.Count;
+    
+    public delegate void AuctionEvent();
+    public AuctionEvent OnYieldChange;
 
     [SerializeField]
     private Auctioneer auctioneer;
@@ -115,6 +125,73 @@ public class AuctionDriver : NetworkBehaviour
     {
         yield return new WaitForSeconds(biddingBeginDelay);
         cameraAnimator.SetTrigger("start");
+        isAuctionStart = true;
+    }
+
+    [Server]
+    public void StopAuctionEarly()
+    {
+        biddingPlatforms.ToList().ForEach(platform => platform.ForceEndAuction());
+    }
+
+    public void AddYieldingPlayer(PlayerManager player)
+    {
+        if (yieldingPlayers.Contains(player))
+            return;
+
+        yieldingPlayers.Add(player);
+        OnYieldChange?.Invoke();
+
+
+        if (isAuctionStart && IsAuctionYielded())
+            StartCoroutine(nameof(WaitAndTryAuctionEnd));
+        else
+            StopCoroutine(nameof(WaitAndTryAuctionEnd));
+            
+    }
+
+    private bool IsAuctionYielded()
+    {
+        if (yieldingPlayers.Count == Peer2PeerTransport.NumPlayers)
+            return true;
+
+        var relevantPlatforms = biddingPlatforms.Where(platform => platform.IsActive);
+        bool isAnyContesting = playersInAuction.Except(yieldingPlayers)
+            .Where(player =>
+                relevantPlatforms.Where(platform =>
+                    platform.CanBid(player.identity)
+                    && platform.LeadingBidder != player.id)
+                .Any())
+            .Any();
+
+        return !isAnyContesting;
+    }
+
+    public bool IsPlayerYielding(PlayerManager player)
+    {
+        return yieldingPlayers.Contains(player);
+    }
+
+    private IEnumerator WaitAndTryAuctionEnd()
+    {
+        var yieldZones = FindObjectsOfType<YieldZone>().ToList();
+        yieldZones.ForEach(sign => sign.SetRemainingTimeText(3));
+        yield return new WaitForSeconds(1f);
+        yieldZones.ForEach(sign => sign.SetRemainingTimeText(2));
+        yield return new WaitForSeconds(1f);
+        yieldZones.ForEach(sign => sign.SetRemainingTimeText(1));
+        yield return new WaitForSeconds(1f);
+        if (IsAuctionYielded() && isServer)
+            StopAuctionEarly();
+    }
+
+    public void RemoveYieldingPlayer(PlayerManager player)
+    {
+        if (!yieldingPlayers.Remove(player))
+            return;
+
+        StopCoroutine(nameof(WaitAndTryAuctionEnd));
+        OnYieldChange?.Invoke();
     }
 
     public void ScreenShake()

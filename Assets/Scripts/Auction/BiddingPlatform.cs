@@ -138,7 +138,7 @@ public class BiddingPlatform : NetworkBehaviour
         CmdPlaceBid(playerIdentity.id);
     }
 
-    private bool CanBid(PlayerIdentity bidder)
+    public bool CanBid(PlayerIdentity bidder)
     {
         bool isLeadingPlayerAndCanIncrement = bidder.id == leadingBidder && bidder.Chips > 0;
         bool bidderHasEnoughChips = bidder.Chips > chips;
@@ -276,6 +276,15 @@ public class BiddingPlatform : NetworkBehaviour
 
         if (chips >= 15 && player.identity.Chips == 0 && Peer2PeerTransport.LocalPlayerInstances.Any(p => p.id == playerID))
             SteamManager.Singleton.UnlockAchievement(AchievementType.AllIn);
+    }
+
+    [ClientRpc]
+    public void ForceEndAuction()
+    {
+        if (!isActive)
+            return;
+        auctionTimer.StopTimer();
+        EndAuction();
     }
 
     public void SetItem(Item item)
