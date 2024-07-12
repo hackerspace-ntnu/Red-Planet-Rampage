@@ -111,14 +111,17 @@ public class SettingsDataManager : MonoBehaviour
     public string[] QualityNames { get; private set; }
     #endregion
 
-    
+
     #region Audio variables
     private const string audioGroupMaster = "masterVolume";
     private const string audioGroupMusic = "musicVolume";
     private const string audioGroupSFX = "sfxVolume";
 
-    private float maxVolumeMusic;
-    private float maxVolumeSFX;
+    // Adjust these based on volume.
+    // TODO determine why Awake() is called multiple times here smh
+    private const float maxVolumeMaster = 0;
+    private const float maxVolumeMusic = -4;
+    private const float maxVolumeSFX = 0;
 
     [SerializeField]
     private AudioMixer mainAudioMixer;
@@ -145,19 +148,6 @@ public class SettingsDataManager : MonoBehaviour
 
     private void Awake()
     {
-        Resolutions = Screen.resolutions.Reverse().ToArray();
-        QualityNames = QualitySettings.names;
-
-        SettingsDataInstance = new();
-
-        mainAudioMixer.GetFloat(audioGroupMusic, out float musicVolume);
-        maxVolumeMusic = musicVolume;
-        mainAudioMixer.GetFloat(audioGroupSFX, out float sfxVolume);
-        maxVolumeSFX = sfxVolume;
-    }
-
-    void Start()
-    {
         #region Singleton boilerplate
 
         if (Singleton != null)
@@ -175,6 +165,18 @@ public class SettingsDataManager : MonoBehaviour
 
         #endregion Singleton boilerplate
 
+        Resolutions = Screen.resolutions.Reverse().ToArray();
+        QualityNames = QualitySettings.names;
+
+        SettingsDataInstance = new();
+
+        DontDestroyOnLoad(gameObject);
+
+        LoadOrCreateFile();
+    }
+
+    private void LoadOrCreateFile()
+    {
         FilePath = Application.persistentDataPath + FileName;
 
         if (!File.Exists(FilePath))
@@ -183,9 +185,8 @@ public class SettingsDataManager : MonoBehaviour
         }
         LoadSettingsFile();
         ApplyAllSettings();
-
-        DontDestroyOnLoad(gameObject);  
     }
+
     #region Save methods
     private void LoadSettingsFile()
     {
@@ -233,7 +234,7 @@ public class SettingsDataManager : MonoBehaviour
     public void SetMasterVolume(float volume)
     {
         SettingsDataInstance.MasterVolume = Mathf.Clamp(volume, 0f, 1f);
-        mainAudioMixer.SetFloat(audioGroupMaster, LinearToLogarithmicVolume(SettingsDataInstance.MasterVolume));
+        mainAudioMixer.SetFloat(audioGroupMaster, LinearToLogarithmicVolume(SettingsDataInstance.MasterVolume) + maxVolumeMaster);
     }
 
     public void SetMusicVolume(float volume)
