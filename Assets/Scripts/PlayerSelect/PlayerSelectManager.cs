@@ -95,7 +95,7 @@ public class PlayerSelectManager : MonoBehaviour
         playerModels[index].GetComponentInChildren<SkinnedMeshRenderer>().material.color = player.color; // Set player model color
         playerModels[index].SetActive(true); // Show corresponding player model
         playerModels[index].transform.LookAt(new Vector3(playerSelectCam.transform.position.x, playerModels[index].transform.position.y, playerSelectCam.transform.position.z)); // Orient player model to look at camera
-        nameTags[index].text = player.PlayerNameWithIndex();
+        nameTags[index].text = Peer2PeerTransport.PlayerNameWithIndex(player);
         nameTags[index].enabled = true;
         joinText[index].enabled = false;
     }

@@ -199,11 +199,11 @@ public class PlayerIdentity : MonoBehaviour
         this.extension = extension;
     }
 
-    public void UpdateFromDetails(PlayerDetails playerDetails)
+    public void UpdateFromDetails(PlayerDetails playerDetails, string name)
     {
         id = playerDetails.id;
 
-        playerName = playerDetails.PlayerNameWithIndex();
+        playerName = name;
         color = playerDetails.color;
 
         Chips = playerDetails.chips;

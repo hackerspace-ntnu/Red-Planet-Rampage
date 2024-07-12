@@ -27,14 +27,6 @@ public struct PlayerDetails
     public string body;
     public string barrel;
     public string extension;
-
-    public string PlayerNameWithIndex()
-    {
-        var mySteamID = steamID;
-        if (Peer2PeerTransport.PlayerDetails.Count(p => p.steamID == mySteamID) > 1)
-            return $"{name} {localInputID + 1}";
-        return name;
-    }
 }
 
 public struct PlayerConnectedMessage : NetworkMessage
@@ -142,6 +134,8 @@ public class Peer2PeerTransport : NetworkManager
     private const int BiddingPlayerPrefabIndexOffset = 1;
     private const int AIFPSPlayerPrefabIndex = 2;
     private const int TrainingPlayerPrefabIndex = 4;
+
+    private const int NetworkPlayerLayer = 3;
 
     private PlayerFactory playerFactory;
     private static Transform[] spawnPoints;
@@ -707,8 +701,8 @@ public class Peer2PeerTransport : NetworkManager
 
     #endregion
 
+    #region Spawn FPS players
 
-    #region Spawn players
 
     private void SpawnPlayer(NetworkConnectionToClient connection, SpawnPlayerMessage message, int prefabIndexOffset = 0)
     {
@@ -760,20 +754,24 @@ public class Peer2PeerTransport : NetworkManager
 
     private void InitializeFPSPlayer(InitializePlayerMessage message)
     {
-        StartCoroutine(WaitAndInitializePlayer(message, false));
+        StartCoroutine(WaitAndInitializeFPSPlayer(message));
     }
 
-    private void OnSpawnBiddingPlayer(NetworkConnectionToClient connection, SpawnPlayerMessage message)
+    // TODO move this somewhere else?
+    public static string PlayerNameWithIndex(PlayerDetails playerDetails)
     {
-        SpawnPlayer(connection, message, BiddingPlayerPrefabIndexOffset);
+        var playerName = playerDetails.name;
+        if (players.Values.Count(p => p.steamID == playerDetails.steamID) > 1)
+            playerName = $"{playerName} {playerDetails.localInputID + 1}";
+        return playerName;
     }
 
-    private void InitializeBiddingPlayer(InitializePlayerMessage message)
+    private void UpdateIdentityFromDetails(PlayerIdentity identity, PlayerDetails playerDetails)
     {
-        StartCoroutine(WaitAndInitializePlayer(message, true));
+        identity.UpdateFromDetails(playerDetails, PlayerNameWithIndex(playerDetails));
     }
 
-    private IEnumerator WaitAndInitializePlayer(InitializePlayerMessage message, bool isBidding = false)
+    private IEnumerator WaitAndInitializeFPSPlayer(InitializePlayerMessage message)
     {
         // Wait until player object is spawned
         PlayerManager player = null;
@@ -796,7 +794,205 @@ public class Peer2PeerTransport : NetworkManager
             yield break;
         }
 
-        PlayerFactory.InitializePlayer(message, player, playerDetails, isBidding);
+        var playerManager = player.GetComponent<PlayerManager>();
+
+        player.transform.position = message.position;
+        player.transform.rotation = message.rotation;
+
+        var cameraOffset = player.transform.Find("CameraOffset");
+        playerManager.GetComponent<AmmoBoxCollector>().enabled = true;
+
+        if (playerDetails.type is PlayerType.Local)
+        {
+            Debug.Log($"Spawning local player {playerDetails.id}");
+            var input = PlayerInputManagerController.Singleton.LocalPlayerInputs[playerDetails.localInputID];
+
+            // Reset camera transform (it may have been kerfluffled by the spectator cam thingy)
+            input.transform.localPosition = Vector3.zero;
+            input.transform.localRotation = Quaternion.identity;
+            input.PlayerCamera.transform.localRotation = Quaternion.identity;
+            input.PlayerCamera.transform.localPosition = Vector3.zero;
+
+            // Make playerInput child of player it's attached to
+            input.transform.parent = player.transform;
+            // Set received playerInput (and most importantly its camera) at an offset from player's position
+            input.transform.localPosition = cameraOffset.localPosition;
+            input.transform.rotation = player.transform.rotation;
+
+            // Enable Camera
+            input.PlayerCamera.enabled = true;
+            input.PlayerCamera.orthographic = false;
+
+            playerManager.HUDController.gameObject.SetActive(true);
+            var movement = player.GetComponent<PlayerMovement>();
+
+            // The identity sits on the input in this case, so edit that
+            var identity = input.GetComponent<PlayerIdentity>();
+            UpdateIdentityFromDetails(identity, playerDetails);
+
+            // Update player's movement script with which playerInput it should attach listeners to
+            playerManager.SetPlayerInput(input);
+            var gunHolder = input.transform.GetChild(0);
+            playerManager.SetGun(gunHolder);
+
+            // Set unique layer for player
+            playerManager.SetLayer(input.playerInput.playerIndex);
+            movement.SetInitialRotation(message.rotation.eulerAngles.y * Mathf.Deg2Rad);
+
+            if (GunFactory.TryGetGunAchievement(playerManager.identity.Body, playerManager.identity.Barrel,
+                    playerManager.identity.Extension, out var achievement))
+                SteamManager.Singleton.UnlockAchievement(achievement);
+        }
+        else if (playerDetails.type is PlayerType.AI && NetworkServer.active)
+        {
+            Debug.Log($"Spawning AI player {playerDetails.id}");
+            AIManager manager = player.GetComponent<AIManager>();
+            manager.SetLayer(NetworkPlayerLayer);
+            UpdateIdentityFromDetails(playerManager.identity, playerDetails);
+            manager.SetIdentity(playerManager.identity);
+            manager.GetComponent<AIMovement>().SetInitialRotation(message.rotation.eulerAngles.y * Mathf.Deg2Rad);
+        }
+        else
+        {
+            Debug.Log($"Spawning network player {playerDetails.id}");
+
+            UpdateIdentityFromDetails(playerManager.identity, playerDetails);
+
+            // TODO do some other version of disabling HUD completely
+            Destroy(playerManager.HUDController);
+
+            // Disable physics
+            playerManager.GetComponent<Rigidbody>().isKinematic = true;
+
+            // Create display gun structure
+            var gunHolderParent = new GameObject("DisplayGunParent").transform;
+            gunHolderParent.parent = player.transform;
+            gunHolderParent.position = cameraOffset.position;
+            gunHolderParent.rotation = player.transform.rotation;
+            var gunHolder = new GameObject("DisplayGunHolder").transform;
+            gunHolder.parent = gunHolderParent.transform;
+            gunHolder.localPosition = Vector3.zero;
+            gunHolder.localRotation = Quaternion.identity;
+            playerManager.SetLayer(NetworkPlayerLayer);
+            // Can't initialize quite like the AIs because of where the GunController network behaviour is located :(
+            playerManager.SetGun(gunHolder);
+        }
+
+        playerManager.ApplyIdentity();
+
+        // This ensures that behaviours on the gun have identities.
+        // SHOULD be safe to initialize them here as this is at roughly the same point on all clients
+        player.GetComponent<NetworkIdentity>().InitializeNetworkBehaviours();
+
+        if (MatchController.Singleton)
+        {
+            MatchController.Singleton.RegisterPlayer(playerManager);
+        }
+
+        playerInstances[player.id] = player;
+    }
+
+    #endregion
+
+    #region Bidding spawning
+
+    private void OnSpawnBiddingPlayer(NetworkConnectionToClient connection, SpawnPlayerMessage message)
+    {
+        SpawnPlayer(connection, message, BiddingPlayerPrefabIndexOffset);
+    }
+
+    private void InitializeBiddingPlayer(InitializePlayerMessage message)
+    {
+        StartCoroutine(WaitAndInitializeBiddingPlayer(message));
+    }
+
+    private IEnumerator WaitAndInitializeBiddingPlayer(InitializePlayerMessage message)
+    {
+        // Wait until players must've been spawned
+        PlayerManager player = null;
+        while (player == null)
+        {
+            player = FindObjectsOfType<PlayerManager>()
+               .FirstOrDefault(p => p.id == message.id);
+            yield return null;
+        }
+
+        if (!player)
+        {
+            Debug.LogError($"Could not find player object for id {message.id}");
+            yield break;
+        }
+
+        if (!players.TryGetValue(message.id, out var playerDetails))
+        {
+            Debug.LogError($"Could not find player details for id {message.id}");
+            yield break;
+        }
+
+        var playerManager = player.GetComponent<PlayerManager>();
+
+        player.transform.position = message.position;
+        player.transform.rotation = message.rotation;
+
+        var cameraOffset = player.transform.Find("CameraOffset");
+        playerManager.GetComponent<AmmoBoxCollector>().enabled = true;
+
+        if (playerDetails.type is PlayerType.Local)
+        {
+            Debug.Log($"Spawning local player {playerDetails.id}");
+            var input = PlayerInputManagerController.Singleton.LocalPlayerInputs[playerDetails.localInputID];
+
+            // Reset camera transform (ensuring we don't mess up in weapon building)
+            input.transform.localPosition = Vector3.zero;
+            input.transform.localRotation = Quaternion.identity;
+            input.PlayerCamera.transform.localRotation = Quaternion.identity;
+            input.PlayerCamera.transform.localPosition = Vector3.zero;
+
+            // Make playerInput child of player it's attached to
+            input.transform.parent = player.transform;
+            // Set received playerInput (and most importantly its camera) at an offset from player's position
+            input.transform.localPosition = cameraOffset.localPosition;
+            input.transform.rotation = player.transform.rotation;
+
+            // Disable Camera
+            input.PlayerCamera.enabled = false;
+
+            // Update player's movement script with which playerInput it should attach listeners to
+            playerManager.SetPlayerInput(input);
+            player.GetComponent<HealthController>().enabled = false;
+
+            // The identity sits on the input in this case, so edit that
+            var identity = input.GetComponent<PlayerIdentity>();
+            UpdateIdentityFromDetails(identity, playerDetails);
+        }
+        else if (playerDetails.type is PlayerType.AI && NetworkServer.active)
+        {
+            Debug.Log($"Spawning AI player {playerDetails.id}");
+            AIManager manager = player.GetComponent<AIManager>();
+            manager.SetLayer(NetworkPlayerLayer);
+            UpdateIdentityFromDetails(playerManager.identity, playerDetails);
+            manager.SetIdentity(manager.identity);
+        }
+        else
+        {
+            Debug.Log($"Spawning network player {playerDetails.id}");
+
+            UpdateIdentityFromDetails(playerManager.identity, playerDetails);
+
+            // Disable physics
+            playerManager.GetComponent<Rigidbody>().isKinematic = true;
+        }
+
+        playerManager.ApplyIdentity();
+
+        // This ensures that behaviours on the gun have identities.
+        // SHOULD be safe to initialize them here as this is at roughly the same point on all clients
+        player.GetComponent<NetworkIdentity>().InitializeNetworkBehaviours();
+
+        if (MatchController.Singleton)
+        {
+            MatchController.Singleton.RegisterPlayer(playerManager);
+        }
 
         playerInstances[player.id] = player;
     }
