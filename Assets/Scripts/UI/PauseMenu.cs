@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Mirror;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -38,6 +39,9 @@ public class PauseMenu : MonoBehaviour
         panel.gameObject.SetActive(true);
         EventSystem.current.SetSelectedGameObject(buttonToFocus.gameObject);
 
+        //Cursor.visible = PlayerInputManagerController.Singleton.LocalPlayerInputs.Any(i => i.IsMouseAndKeyboard);
+        //Cursor.lockState = Cursor.visible ? CursorLockMode.None : CursorLockMode.Locked;
+
         foreach (var player in Peer2PeerTransport.LocalPlayerInstances)
         {
             PlayerInputManagerController.Singleton.ChangeInputMapForPlayer("Menu", player.inputManager);
@@ -56,6 +60,11 @@ public class PauseMenu : MonoBehaviour
 
     public void Continue()
     {
+        // Todo: Make mouse visible and interact with buttons.
+        // To achieve this the globalHUD needs to assign it's canvas to the player's camera.
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+
         panel.gameObject.SetActive(false);
 
         var inputMap = SceneManager.GetActiveScene().name == Scenes.Bidding ? "Bidding" : "FPS";

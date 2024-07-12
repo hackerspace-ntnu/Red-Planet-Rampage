@@ -1,5 +1,8 @@
+using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 
 public class InputManager : MonoBehaviour
 {
@@ -60,8 +63,8 @@ public class InputManager : MonoBehaviour
     void Start()
     {
         playerInput = GetComponent<PlayerInput>();
-        AddListeners();
         DontDestroyOnLoad(gameObject);
+        AddListeners();
     }
 
     void OnDestroy()
@@ -100,11 +103,9 @@ public class InputManager : MonoBehaviour
         playerInput.actions["Look"].performed += Look;
         playerInput.actions["Look"].canceled += Look;
 
-        // Imprison mouse
         if (playerInput.currentControlScheme == "MouseAndKeyboard")
         {
             isMouseAndKeyboard = true;
-            Cursor.lockState = CursorLockMode.Locked;
         }
 
         AddExtraListeners();
@@ -187,7 +188,6 @@ public class InputManager : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
         }
     }
-
     #region OnEvent Functions
     private void AnyKey(InputAction.CallbackContext ctx)
     {

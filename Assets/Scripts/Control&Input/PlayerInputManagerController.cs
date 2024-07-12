@@ -1,5 +1,7 @@
 using Mirror;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -54,7 +56,8 @@ public class PlayerInputManagerController : MonoBehaviour
         #endregion Singleton boilerplate
         PlayerInputManager = PlayerInputManager.instance;
         DontDestroyOnLoad(gameObject);
-        Cursor.visible = false;
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 
     public void RemoveJoinListener()
@@ -84,7 +87,7 @@ public class PlayerInputManagerController : MonoBehaviour
         inputManager.PlayerCamera.enabled = false;
         LocalPlayerInputs.Add(inputManager);
         onPlayerInputJoined?.Invoke(inputManager);
-        // TODO: Make cursor visible if mouseandkeyboard input joims when our buttons can be clicked by a mouse..
+        // TODO: Make cursor visible if mouseandkeyboard input joins when our buttons can be clicked by a mouse..
 
         if (NetworkManager.singleton.isNetworkActive)
             NetworkClient.Send(new PlayerConnectedMessage(LocalPlayerInputs.Count - 1, SteamManager.Singleton.SteamID.m_SteamID));

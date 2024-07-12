@@ -36,7 +36,7 @@ public class Telescope : GunExtension
         var playerMovement = gunController.Player.GetComponent<PlayerMovement>();
         originalZoomFov = playerMovement.ZoomFov;
         originalZoomSpeed = playerMovement.LookSpeedZoom;
-        playerMovement.ZoomFov = overrideZoomFov;
+        playerMovement.ZoomFov = originalZoomFov * 0.3f;
         playerMovement.LookSpeedZoom = overrideZoomSpeed;
 
         gunController.Player.inputManager.onZoomPerformed += OnZoom;

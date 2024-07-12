@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -45,6 +46,8 @@ public class MainMenuController : MonoBehaviour
     [SerializeField]
     private GameObject mapSelectMenu;
     [SerializeField]
+    private OptionsMenu optionsMenu;
+    [SerializeField]
     private LevelSelectManager levelSelectManager;
     [SerializeField]
     private PlayerSelectManager playerSelectManager;
@@ -78,6 +81,8 @@ public class MainMenuController : MonoBehaviour
 
     private LobbyType lobbyType;
 
+    private InputManager firstInputJoined;
+
     private void Awake()
     {
         if (!FindAnyObjectByType<PlayerInputManagerController>())
@@ -87,6 +92,9 @@ public class MainMenuController : MonoBehaviour
 
     private void Start()
     {
+        // Set inactive since it blocks the ui elements for tabs.
+        EventLog.Singleton.transform.GetChild(0).gameObject.SetActive(false);
+
         aiButtonOriginalPosition = aIButton.transform.localPosition;
         PlayerInputManagerController.Singleton.MatchHasAI = false;
         audioSource = GetComponent<AudioSource>();
@@ -111,10 +119,15 @@ public class MainMenuController : MonoBehaviour
             mainMenuCamera.SetActive(true);
             // Reset loading screen
             LoadingScreen.ResetCounter();
+
+
+            if (firstInputJoined.IsMouseAndKeyboard) ShowMouse();
+            else HideMouse();
         }
         else
         {
             // First time in menu, play intro video.
+            HideMouse();
             introVideo.started += StopFirstFrame;
             playerInputManagerController.onPlayerInputJoined += ShowSkipText;
             defaultMenu.SetActive(false);
@@ -171,6 +184,7 @@ public class MainMenuController : MonoBehaviour
     private void EndIntro()
     {
         sun.Restart();
+        if (firstInputJoined.IsMouseAndKeyboard) ShowMouse();
         playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
         skipIntroText.gameObject.SetActive(false);
         introVideo.gameObject.SetActive(false);
@@ -203,6 +217,21 @@ public class MainMenuController : MonoBehaviour
     {
         yield return null;
         target?.Select();
+    }
+
+    public void DeselectControl()
+    {
+        if (EventSystem.current != null)
+        {
+            // I find no better way to deselect game objects. This is mainly used so you don't have to click twice in tabs.
+            StartCoroutine(WaitUnselect());
+        }
+    }
+
+    private IEnumerator WaitUnselect()
+    {
+        yield return null;
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     /// <summary>
@@ -264,6 +293,9 @@ public class MainMenuController : MonoBehaviour
     {
         playerInputs.Add(inputManager);
 
+        if (firstInputJoined == null)
+            firstInputJoined = inputManager;
+
         bool canPlay = playerInputs.Count > 1;
         var colors = startButton.colors;
         colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
@@ -279,6 +311,18 @@ public class MainMenuController : MonoBehaviour
         galleryMenu.SetPlayerInput(inputManager);
         creditsMenu.SetPlayerInput(inputManager);
         levelSelectManager.SetPlayerInput(inputManager);
+    }
+
+    private void ShowMouse()
+    {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+    }
+
+    private void HideMouse()
+    {
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void PlayUISelectAudio(InputAction.CallbackContext ctx)
@@ -348,6 +392,7 @@ public class MainMenuController : MonoBehaviour
 
     public void StartTrainingMode()
     {
+        EventLog.Singleton.transform.GetChild(0).gameObject.SetActive(false);
         PlayerInputManagerController.Singleton.RemoveJoinListener();
         Peer2PeerTransport.StartTrainingMode();
         playerSelectManager.UpdateLobby();
@@ -375,6 +420,8 @@ public class MainMenuController : MonoBehaviour
 
     public void StartLobby()
     {
+        EventLog.Singleton.transform.GetChild(0).gameObject.SetActive(true);
+
         if (!SteamManager.IsSteamActive)
         {
             NetworkManager.singleton.StartHost();
