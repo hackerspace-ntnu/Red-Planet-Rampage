@@ -89,6 +89,10 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
+    protected GunController gunController;
+    public GunController GunController => gunController;
+
+    protected HealthController healthController;
 
     [Header("Physics")]
 
@@ -102,6 +106,8 @@ public class PlayerManager : NetworkBehaviour
     [SerializeField]
     private float deathKnockbackForceMultiplier = 10;
 
+    [Header("Auction")]
+
     private BiddingPlatform selectedBiddingPlatform;
     public BiddingPlatform SelectedBiddingPlatform
     {
@@ -112,11 +118,6 @@ public class PlayerManager : NetworkBehaviour
             onSelectedBiddingPlatformChange?.Invoke(value);
         }
     }
-
-    protected GunController gunController;
-    public GunController GunController => gunController;
-
-    protected HealthController healthController;
 
     [Header("Hit sounds")]
 

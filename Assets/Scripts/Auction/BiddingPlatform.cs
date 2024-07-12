@@ -137,7 +137,7 @@ public class BiddingPlatform : NetworkBehaviour
         CmdPlaceBid(playerIdentity.id);
     }
 
-    private bool CanBid(PlayerIdentity bidder)
+    public bool CanBid(PlayerIdentity bidder)
     {
         bool isLeadingPlayerAndCanIncrement = bidder.id == leadingBidder && bidder.Chips > 0;
         bool bidderHasEnoughChips = bidder.Chips > chips;
@@ -272,6 +272,15 @@ public class BiddingPlatform : NetworkBehaviour
         }
         Debug.Log($"Rewarding {item.displayName} to {player.identity.ToColorString()}");
         player.identity.PerformTransaction(item);
+    }
+
+    [ClientRpc]
+    public void ForceEndAuction()
+    {
+        if (!isActive)
+            return;
+        auctionTimer.StopTimer();
+        EndAuction();
     }
 
     public void SetItem(Item item)

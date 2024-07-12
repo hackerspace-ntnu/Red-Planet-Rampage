@@ -71,6 +71,13 @@ public class BiddingAI : BiddingPlayer
         if (!currentDestination)
             return;
 
+        // AI should yield
+        if (priorities[currentDestination] == -1)
+        {
+            agent.SetDestination(AuctionDriver.Singleton.YieldPosition);
+            return;
+        }
+
         var isAlreadyInTheLead = currentDestination.LeadingBidder == playerManager.id;
         if (isAlreadyInTheLead)
             return;

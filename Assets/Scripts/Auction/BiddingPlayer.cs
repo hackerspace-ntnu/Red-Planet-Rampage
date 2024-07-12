@@ -34,6 +34,7 @@ public class BiddingPlayer : NetworkBehaviour
         playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
         playerManager.onSelectedBiddingPlatformChange += ToggleDither;
         InstantiateMaterials();
+        AuctionDriver.Singleton.OnYieldChange += UpdateYieldStatus;
     }
 
     protected void InstantiateMaterials()
@@ -133,6 +134,11 @@ public class BiddingPlayer : NetworkBehaviour
         chipText.color = playerManager.identity.HasMaxChips ? maxChipColor : Color.black;
     }
 
+    private void UpdateYieldStatus()
+    {
+        signMesh.gameObject.SetActive(!AuctionDriver.Singleton.IsPlayerYielding(playerManager));
+    }
+
     private void FixedUpdate()
     {
         if (LeanTween.isTweening(signMesh.gameObject))
@@ -145,6 +151,7 @@ public class BiddingPlayer : NetworkBehaviour
     {
         if (!playerManager)
             return;
+        AuctionDriver.Singleton.OnYieldChange -= UpdateYieldStatus;
         playerManager.onSelectedBiddingPlatformChange -= ToggleDither;
         if (playerManager.inputManager)
         {
