@@ -39,6 +39,7 @@ public enum AchievementType
     AllIn,
     Clutch,
     MatchPoint,
+    CogAndBoltTinkering,
 }
 
 public class Lobby
@@ -205,6 +206,7 @@ public class SteamManager : MonoBehaviour
         { AchievementType.SitThroughCredits, "ACHIEVEMENT_CREDITS" },
         { AchievementType.Clutch, "ACHIEVEMENT_CLUTCH" },
         { AchievementType.MatchPoint, "ACHIEVEMENT_MATCH_POINT" },
+        { AchievementType.CogAndBoltTinkering, "ACHIEVEMENT_CBT" },
     };
 
     public void UnlockAchievement(SecretCombinationType type)
