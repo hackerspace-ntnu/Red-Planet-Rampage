@@ -114,7 +114,7 @@ public class OptionsMenu : MonoBehaviour
         // We invert this list so the dropdown goes from high to low quality.
         string[] qualityNames = settingsDataManager.QualityNames;
         qualityDropdown.AddOptions(qualityNames.Reverse().ToList());
-        qualityDropdown.value = QualitySettings.GetQualityLevel() - qualityNames.Length - 1;
+        qualityDropdown.value = settingsDataManager.SettingsDataInstance.QualityPresetIndex;
         qualityDropdown.RefreshShownValue();
     }
 

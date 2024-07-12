@@ -27,12 +27,11 @@ public class SettingsData
     /// <param name="musicVolumeVal"></param>
     /// <param name="sfxVolumeVal"></param>
     /// <param name="qualityPresetIndexVal"></param>
-    /// <param name="resolutionPresetIndexVal"></param>
     /// <param name="displayModeIndexVal"></param>
     public SettingsData(
         float sensitivityScaleVal, float playerFOV, float zoomFOV,
         float masterVolumeVal, float musicVolumeVal, float sfxVolumeVal,
-        int qualityPresetIndexVal, int displayModeIndex)
+        int qualityPresetIndexVal, int displayModeIndexVal)
     {
         SensitivityScale = sensitivityScaleVal;
         PlayerFOV = playerFOV;
@@ -41,7 +40,7 @@ public class SettingsData
         MusicVolume = musicVolumeVal;
         SfxVolume = sfxVolumeVal;
         QualityPresetIndex = qualityPresetIndexVal;
-        DisplayModeIndex = displayModeIndex;
+        DisplayModeIndex = displayModeIndexVal;
     }
 
     /// <summary>
