@@ -39,6 +39,8 @@ public class OrbitCamera : MonoBehaviour
     private int targetIndex = 0;
     private PlayerManager player;
 
+    private Coroutine trackingRoutine;
+
     private void Start()
     {
         player = GetComponent<PlayerManager>();
@@ -62,23 +64,39 @@ public class OrbitCamera : MonoBehaviour
         if (!MatchController.Singleton.IsRoundInProgress)
             return;
         otherPlayers = MatchController.Singleton.Players.Where(p => p != GetComponent<PlayerManager>()).ToArray();
-        StartCoroutine(WaitAndStopTrackingRagdoll());
+        trackingRoutine = StartCoroutine(WaitAndStopTrackingRagdoll());
+    }
+
+    public void Deactivate()
+    {
+        StopTracking();
+        StopCoroutine(trackingRoutine);
     }
 
     private IEnumerator WaitAndStopTrackingRagdoll()
     {
-        yield return new WaitForSeconds(3f);
-        player.HUDController.DisplaySpectateHint();
         InputManager.onSelect += SwitchTarget;
         InputManager.onFirePerformed += SwitchTarget;
+        // TODO remove
+        InputManager.onZoomPerformed += Respawn;
+
         yield return new WaitForSeconds(3f);
-        var isStillOnPlayer = target == player.AiAimSpot;
+        player.HUDController.DisplaySpectateHint();
+
+        yield return new WaitForSeconds(3f);
+        var isStillOnPlayer = isTracking && target == player.AiAimSpot;
         if (isStillOnPlayer)
         {
             StopTracking();
             // Will focus on next player next time
             targetIndex = 1;
         }
+    }
+
+    // TODO remove
+    private void Respawn(InputAction.CallbackContext ctx)
+    {
+        player.Respawn(FindObjectOfType<PlayerFactory>().GetRandomSpawnpoints().First());
     }
 
     private void SwitchTarget(InputAction.CallbackContext ctx)
@@ -110,6 +128,10 @@ public class OrbitCamera : MonoBehaviour
     {
         if (!camera)
             return;
+        InputManager.onSelect -= SwitchTarget;
+        InputManager.onFirePerformed -= SwitchTarget;
+        // TODO remove
+        InputManager.onZoomPerformed -= Respawn;
         isTracking = false;
         camera.enabled = false;
         ResetCamera();

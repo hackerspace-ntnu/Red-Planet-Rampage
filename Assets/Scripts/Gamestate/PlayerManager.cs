@@ -238,6 +238,45 @@ public class PlayerManager : NetworkBehaviour
         ragdollController.EnableRagdoll(force);
     }
 
+    public virtual void Respawn(Transform spawnpoint)
+    {
+        Debug.Log("RESPAWNING????");
+
+        isAlive = true;
+        aimAssistCollider.SetActive(true);
+        aiTargetCollider.gameObject.SetActive(true);
+        if (playerShadow)
+            playerShadow.gameObject.SetActive(true);
+
+        // Disable components
+        GetComponent<PlayerMovement>().enabled = true;
+        // TODO give back health
+        healthController.enabled = true;
+        playerIK.enabled = true;
+        if (gunController)
+            gunController.gameObject.SetActive(true);
+        GunHolder.gameObject.SetActive(true);
+
+        if (inputManager)
+        {
+            var orbitCamera = GetComponent<OrbitCamera>();
+            orbitCamera.Deactivate();
+        }
+
+        // TODO: Make accurate hitbox forces for the different limbs of the player
+        var ragdollController = GetComponent<RagdollController>();
+        ragdollController.DisableRagdoll();
+
+
+        // post orbit and ragdoll reset
+        inputManager.PlayerCamera.enabled = true;
+
+        transform.position = spawnpoint.position;
+        transform.rotation = spawnpoint.rotation;
+        GetComponent<Rigidbody>().position = spawnpoint.position;
+        GetComponent<PlayerMovement>().SetInitialRotation(spawnpoint.rotation.eulerAngles.y);
+    }
+
     /// <summary>
     /// Function for setting a playerInput, adding movement related listeners to it
     /// and performing other necessary operations that require playerInput/-Identity.

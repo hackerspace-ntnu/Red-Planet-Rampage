@@ -23,29 +23,42 @@ public class RagdollController : MonoBehaviour
 
     public void EnableRagdoll(Vector3 knockbackForce)
     {
-        animatorToDisable.enabled = false;
+        ToggleRagdoll(true);
+
+        rigidbodyToPush.AddForce(knockbackForce, ForceMode.Impulse);
+    }
+
+    public void DisableRagdoll()
+    {
+        ToggleRagdoll(false);
+    }
+
+    public void ToggleRagdoll(bool shouldEnable = true)
+    {
+        animatorToDisable.enabled = !shouldEnable;
 
         foreach (var collider in collidersToDisable)
         {
-            collider.enabled = false;
+            collider.enabled = !shouldEnable;
         }
         foreach (var collider in collidersToEnable)
         {
-            collider.enabled = true;
-            collider.isTrigger = false;
+            collider.enabled = shouldEnable;
+            collider.isTrigger = !shouldEnable;
         }
         foreach (var rigidbody in rigidbodiesToDisable)
         {
-            rigidbody.isKinematic = true;
-            rigidbody.useGravity = false;
-            rigidbody.AddForce(-rigidbody.GetAccumulatedForce());
+            rigidbody.isKinematic = shouldEnable;
+            rigidbody.useGravity = !shouldEnable;
+            if (shouldEnable)
+                rigidbody.AddForce(-rigidbody.GetAccumulatedForce());
         }
         foreach (var rigidbody in rigidbodiesToEnable)
         {
-            rigidbody.isKinematic = false;
-            rigidbody.useGravity = true;
+            rigidbody.isKinematic = !shouldEnable;
+            rigidbody.useGravity = shouldEnable;
+            if (!shouldEnable)
+                rigidbody.AddForce(-rigidbody.GetAccumulatedForce());
         }
-
-        rigidbodyToPush.AddForce(knockbackForce, ForceMode.Impulse);
     }
 }
