@@ -15,6 +15,9 @@ public class GlobalHUDController : MonoBehaviour
 
     private void Start()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         // Places the roundTimer at appropriate place on split screen
         if (PlayerInputManagerController.Singleton.LocalPlayerInputs.Count > 2)
         {

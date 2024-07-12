@@ -49,7 +49,7 @@ public class SettingsData
     public SettingsData()
     {
         SensitivityScale = 1.0f;
-        PlayerFOV = 60f;
+        PlayerFOV = 90f;
         ZoomFOV = 30f;
         MasterVolume = 1.0f;
         MusicVolume = 1.0f;

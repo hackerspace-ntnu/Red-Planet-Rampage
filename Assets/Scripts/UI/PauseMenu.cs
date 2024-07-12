@@ -62,8 +62,8 @@ public class PauseMenu : MonoBehaviour
     {
         // Todo: Make mouse visible and interact with buttons.
         // To achieve this the globalHUD needs to assign it's canvas to the player's camera.
-        //Cursor.visible = false;
-        //Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
 
         panel.gameObject.SetActive(false);
 

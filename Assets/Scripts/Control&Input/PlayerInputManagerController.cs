@@ -108,9 +108,6 @@ public class PlayerInputManagerController : MonoBehaviour
     /// <param name="mapNameOrId">Name of the inputMap you want to change to</param>
     public void ChangeInputMaps(string mapNameOrId)
     {
-        Cursor.visible = LocalPlayerInputs.Any(i => i.IsMouseAndKeyboard) && mapNameOrId.Equals("Menu");
-        Cursor.lockState = Cursor.visible ? CursorLockMode.None : CursorLockMode.Locked;
-
         LocalPlayerInputs.ForEach(playerInput =>
         {
             ChangeInputMapForPlayer(mapNameOrId, playerInput);
