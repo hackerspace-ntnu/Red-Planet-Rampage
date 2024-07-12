@@ -15,6 +15,7 @@ public class GlobalHUDController : MonoBehaviour
 
     private void Start()
     {
+        // Imprison mouse muhahahaha
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
