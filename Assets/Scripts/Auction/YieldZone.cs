@@ -15,6 +15,10 @@ public class YieldZone : NetworkBehaviour
     private void Start()
     {
         SetYieldText();
+    }
+
+    public void Subscribe()
+    {
         AuctionDriver.Singleton.OnYieldChange += SetYieldText;
     }
 
@@ -47,5 +51,7 @@ public class YieldZone : NetworkBehaviour
     private void OnDestroy()
     {
         AuctionDriver.Singleton.OnYieldChange -= SetYieldText;
+        yieldText.text = "YIELD";
+        yieldInfoText.text = $"0/{Peer2PeerTransport.NumPlayers}";
     }
 }
