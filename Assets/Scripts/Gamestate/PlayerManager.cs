@@ -228,9 +228,7 @@ public class PlayerManager : NetworkBehaviour
         if (inputManager)
         {
             var orbitCamera = GetComponent<OrbitCamera>();
-            orbitCamera.Camera = inputManager.PlayerCamera;
-            orbitCamera.InputManager = inputManager;
-            orbitCamera.Activate();
+            orbitCamera.Activate(inputManager);
         }
 
         // TODO: Make accurate hitbox forces for the different limbs of the player

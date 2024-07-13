@@ -14,20 +14,10 @@ public class OrbitCamera : MonoBehaviour
     [SerializeField] private float collisionOffset = .3f;
     [SerializeField] private float lookSensitivity = 5;
 
-    public InputManager InputManager;
+    private InputManager input;
 
     private Transform cameraTransform;
     private new Camera camera;
-
-    public Camera Camera
-    {
-        set
-        {
-            camera = value;
-            camera.cullingMask = cullingMask | (1 << (12 + player.LayerIndex));
-            cameraTransform = value.transform;
-        }
-    }
 
     private Transform target;
 
@@ -56,11 +46,17 @@ public class OrbitCamera : MonoBehaviour
     }
 
 
-    public void Activate()
+    public void Activate(InputManager input)
     {
-        StartTracking(player);
-        if (!MatchController.Singleton.IsRoundInProgress)
+        if (MatchController.Singleton.IsShowingScoreboards)
             return;
+
+        this.input = input;
+        camera = input.PlayerCamera;
+        camera.cullingMask = cullingMask | (1 << (12 + player.LayerIndex));
+        cameraTransform = camera.transform;
+
+        StartTracking(player);
         otherPlayers = MatchController.Singleton.Players.Where(p => p != GetComponent<PlayerManager>()).ToArray();
         StartCoroutine(WaitAndStopTrackingRagdoll());
     }
@@ -69,8 +65,8 @@ public class OrbitCamera : MonoBehaviour
     {
         yield return new WaitForSeconds(3f);
         player.HUDController.DisplaySpectateHint();
-        InputManager.onSelect += SwitchTarget;
-        InputManager.onFirePerformed += SwitchTarget;
+        input.onSelect += SwitchTarget;
+        input.onFirePerformed += SwitchTarget;
         yield return new WaitForSeconds(3f);
         var isStillOnPlayer = target == player.AiAimSpot;
         if (isStillOnPlayer)
@@ -83,7 +79,7 @@ public class OrbitCamera : MonoBehaviour
 
     private void SwitchTarget(InputAction.CallbackContext ctx)
     {
-        if (!MatchController.Singleton.IsRoundInProgress)
+        if (MatchController.Singleton.IsShowingScoreboards)
             return;
 
         // 0 is a special index, and the remainder is i+1 so we can safely subtract.
@@ -97,7 +93,7 @@ public class OrbitCamera : MonoBehaviour
 
     private void StartTracking(PlayerManager nextTarget)
     {
-        if (!cameraTransform || !InputManager)
+        if (!cameraTransform || !input || MatchController.Singleton.IsShowingScoreboards)
             return;
         isTracking = true;
         camera.enabled = true;
@@ -120,14 +116,14 @@ public class OrbitCamera : MonoBehaviour
         cameraTransform.position = Vector3.zero;
         cameraTransform.localPosition = Vector3.zero;
         cameraTransform.rotation = Quaternion.identity;
-        InputManager.transform.rotation = Quaternion.identity;
+        input.transform.rotation = Quaternion.identity;
     }
 
     private void UpdateAngles()
     {
-        var lookInput = InputManager.IsMouseAndKeyboard
-            ? InputManager.lookInput
-            : InputManager.lookInput * Time.deltaTime;
+        var lookInput = input.IsMouseAndKeyboard
+            ? input.lookInput
+            : input.lookInput * Time.deltaTime;
         aimAngle += lookInput * lookSensitivity; // TODO idk set this properly
         aimAngle = aimAngle.ClampedLookAngles();
     }
