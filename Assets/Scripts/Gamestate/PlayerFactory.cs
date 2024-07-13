@@ -43,7 +43,11 @@ public class PlayerFactory : MonoBehaviour
         var playerList = new List<PlayerManager>();
         for (int i = 0; i < playerInputManagerController.LocalPlayerInputs.Count; i++)
         {
-            playerList.Add(instantiate(playerInputManagerController.LocalPlayerInputs[i], shuffledSpawnPoints[i % spawnPoints.Length]));
+            var input = playerInputManagerController.LocalPlayerInputs[i];
+            // Note that accessing the PauseMenu instance this way is fine here
+            // since we're in an auction and the instance will be set by this point.
+            input.onExit += PauseMenu.Current.Open;
+            playerList.Add(instantiate(input, shuffledSpawnPoints[i % spawnPoints.Length]));
         }
         for (int i = playerInputManagerController.LocalPlayerInputs.Count; i < playerInputManagerController.LocalPlayerInputs.Count + aiPlayerCount; i++)
         {
