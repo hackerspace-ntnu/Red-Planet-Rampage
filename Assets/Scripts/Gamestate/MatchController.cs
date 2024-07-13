@@ -57,6 +57,10 @@ public class MatchController : NetworkBehaviour
     private bool isRoundInProgress = false;
     public bool IsRoundInProgress => isRoundInProgress;
 
+    private bool isShowingScoreboards = false;
+    public bool IsShowingScoreboards => isShowingScoreboards;
+
+
     private void Awake()
     {
         #region Singleton boilerplate
@@ -213,6 +217,7 @@ public class MatchController : NetworkBehaviour
     {
         // Delay first so we can see who killed who
         yield return new WaitForSeconds(delayBeforeRoundResults);
+        isShowingScoreboards = true;
         // Scoreboard subscribes here
         onRoundEnd?.Invoke();
     }
