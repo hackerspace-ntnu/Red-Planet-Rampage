@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using Mirror;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -39,11 +36,14 @@ public class PauseMenu : MonoBehaviour
         panel.gameObject.SetActive(true);
         EventSystem.current.SetSelectedGameObject(buttonToFocus.gameObject);
 
+        // TODO: Make mouse visible and interact with buttons.
+        // To achieve this the globalHUD needs to assign it's canvas to the player's camera.
         //Cursor.visible = PlayerInputManagerController.Singleton.LocalPlayerInputs.Any(i => i.IsMouseAndKeyboard);
         //Cursor.lockState = Cursor.visible ? CursorLockMode.None : CursorLockMode.Locked;
 
         foreach (var player in Peer2PeerTransport.LocalPlayerInstances)
         {
+            player.inputManager.BackupListeners();
             PlayerInputManagerController.Singleton.ChangeInputMapForPlayer("Menu", player.inputManager);
             var playerMovement = player.GetComponent<PlayerMovement>();
             playerMovement.CanMove = false;
@@ -51,7 +51,6 @@ public class PauseMenu : MonoBehaviour
             playerMovement.ResetZoom();
             player.inputManager.onExit += Continue;
             player.inputManager.onCancel += Continue;
-            // player.inputManager.GetComponent<PlayerInput>().uiInputModule = panel.
         }
     }
 
@@ -60,8 +59,6 @@ public class PauseMenu : MonoBehaviour
 
     public void Continue()
     {
-        // Todo: Make mouse visible and interact with buttons.
-        // To achieve this the globalHUD needs to assign it's canvas to the player's camera.
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
@@ -71,11 +68,10 @@ public class PauseMenu : MonoBehaviour
         foreach (var player in Peer2PeerTransport.LocalPlayerInstances)
         {
             PlayerInputManagerController.Singleton.ChangeInputMapForPlayer(inputMap, player.inputManager);
-            player.ReassignPlayerInput(player.inputManager);
+            player.inputManager.RestoreListeners();
             var playerMovement = player.GetComponent<PlayerMovement>();
             playerMovement.CanMove = true;
             playerMovement.CanLook = true;
-            player.inputManager.onExit += Open;
         }
     }
 

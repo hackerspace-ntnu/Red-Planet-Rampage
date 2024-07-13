@@ -1,14 +1,35 @@
-using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.UI;
+
+public delegate void InputEvent(InputAction.CallbackContext ctx);
+
+internal class ListenerBackup
+{
+    // General
+    public InputEvent onMovePerformed;
+    public InputEvent onMoveCanceled;
+    // Menu-related
+    public InputEvent onSelect;
+    public InputEvent onCancel;
+    public InputEvent onExit;
+    public InputEvent onLeftTab;
+    public InputEvent onRightTab;
+    public InputEvent onAnyKey;
+    // FPS-related
+    public InputEvent onInteract;
+    public InputEvent onFirePerformed;
+    public InputEvent onFireCanceled;
+    public InputEvent onCrouchPerformed;
+    public InputEvent onCrouchCanceled;
+    public InputEvent onZoomPerformed;
+    public InputEvent onZoomCanceled;
+    public InputEvent onLookPerformed;
+    public InputEvent onLookCanceled;
+}
 
 public class InputManager : MonoBehaviour
 {
     public PlayerInput playerInput;
-
-    public delegate void InputEvent(InputAction.CallbackContext ctx);
 
     /// <summary>
     /// Subscribe to these delegates to listen to input events.
@@ -33,6 +54,8 @@ public class InputManager : MonoBehaviour
     public InputEvent onZoomCanceled;
     private InputEvent onLookPerformed;
     private InputEvent onLookCanceled;
+
+    private ListenerBackup backup;
 
     /// <summary>
     /// This vector is set to the current move input.
@@ -181,13 +204,58 @@ public class InputManager : MonoBehaviour
         onLookPerformed = null;
         onLookCanceled = null;
         onInteract = null;
-
-        // Free the mouse
-        if (isMouseAndKeyboard)
-        {
-            Cursor.lockState = CursorLockMode.None;
-        }
     }
+
+    /// <summary>
+    /// Store a backup of each delegate's invocation list.
+    /// Restore when desired.
+    /// </summary>
+    public void BackupListeners()
+    {
+        backup = new()
+        {
+            onSelect = onSelect,
+            onCancel = onCancel,
+            onExit = onExit,
+            onMovePerformed = onMovePerformed,
+            onMoveCanceled = onMoveCanceled,
+            onLeftTab = onLeftTab,
+            onRightTab = onRightTab,
+            onFirePerformed = onFirePerformed,
+            onFireCanceled = onFireCanceled,
+            onCrouchPerformed = onCrouchPerformed,
+            onCrouchCanceled = onCrouchCanceled,
+            onZoomPerformed = onZoomPerformed,
+            onZoomCanceled = onZoomCanceled,
+            onLookPerformed = onLookPerformed,
+            onLookCanceled = onLookCanceled,
+            onInteract = onInteract,
+        };
+    }
+
+    /// <summary>
+    /// Restore the invocation lists of each delegate.
+    /// </summary>
+    public void RestoreListeners()
+    {
+        onSelect = backup.onSelect;
+        onCancel = backup.onCancel;
+        onExit = backup.onExit;
+        onMovePerformed = backup.onMovePerformed;
+        onMoveCanceled = backup.onMoveCanceled;
+        onLeftTab = backup.onLeftTab;
+        onRightTab = backup.onRightTab;
+        onFirePerformed = backup.onFirePerformed;
+        onFireCanceled = backup.onFireCanceled;
+        onCrouchPerformed = backup.onCrouchPerformed;
+        onCrouchCanceled = backup.onCrouchCanceled;
+        onZoomPerformed = backup.onZoomPerformed;
+        onZoomCanceled = backup.onZoomCanceled;
+        onLookPerformed = backup.onLookPerformed;
+        onLookCanceled = backup.onLookCanceled;
+        onInteract = backup.onInteract;
+    }
+
     #region OnEvent Functions
     private void AnyKey(InputAction.CallbackContext ctx)
     {
