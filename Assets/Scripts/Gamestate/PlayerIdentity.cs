@@ -214,9 +214,5 @@ public class PlayerIdentity : MonoBehaviour
 
     public override string ToString() => playerName;
 
-#if UNITY_EDITOR
     public string ToColorString() => $"<color=#{color.ToHexString()}>{playerName}</color>";
-#else
-    public string ToColorString() => playerName;
-#endif
 }
