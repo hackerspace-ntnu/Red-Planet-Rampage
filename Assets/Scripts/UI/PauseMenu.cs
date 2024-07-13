@@ -13,12 +13,18 @@ public class PauseMenu : MonoBehaviour
     [SerializeField]
     private Button buttonToFocus;
 
+    /// <summary>
+    /// Set in Start so not quite a singleton.
+    /// </summary>
+    public static PauseMenu Current { get; private set; }
+
     private void Start()
     {
         foreach (var input in PlayerInputManagerController.Singleton.LocalPlayerInputs)
         {
             input.onExit += Open;
         }
+        Current = this;
     }
 
     private void OnDestroy()
@@ -31,7 +37,8 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
-    private void Open(InputAction.CallbackContext ctx)
+
+    public void Open(InputAction.CallbackContext ctx)
     {
         panel.gameObject.SetActive(true);
         EventSystem.current.SetSelectedGameObject(buttonToFocus.gameObject);
