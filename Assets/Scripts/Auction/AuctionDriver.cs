@@ -23,7 +23,8 @@ public class AuctionDriver : NetworkBehaviour
     [HideInInspector]
     public BiddingPlatform[] BiddingPlatforms => biddingPlatforms;
     private RandomisedAuctionStage[] availableAuctionStages;
-
+    [SerializeField]
+    private YieldZone[] yieldZones;
     [SerializeField]
     private Transform yieldPosition;
     public Vector3 YieldPosition => yieldPosition.position;
@@ -103,6 +104,7 @@ public class AuctionDriver : NetworkBehaviour
 
         playerFactory = GetComponent<PlayerFactory>();
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());
+        yieldZones.ToList().ForEach(zone => zone.Subscribe());
 
         StartCoroutine(WaitAndStartCameraAnimation());
         StartCoroutine(PopulatePlatforms());
