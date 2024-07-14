@@ -839,7 +839,8 @@ public class Peer2PeerTransport : NetworkManager
             playerManager.SetLayer(input.playerInput.playerIndex);
             movement.SetInitialRotation(message.rotation.eulerAngles.y * Mathf.Deg2Rad);
 
-            if (GunFactory.TryGetGunAchievement(playerManager.identity.Body, playerManager.identity.Barrel,
+            if (MatchRules.Current.StartingWeapon.Type is StartingWeaponType.Standard &&
+                GunFactory.TryGetGunAchievement(playerManager.identity.Body, playerManager.identity.Barrel,
                     playerManager.identity.Extension, out var achievement))
                 SteamManager.Singleton.UnlockAchievement(achievement);
         }
