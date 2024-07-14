@@ -78,6 +78,7 @@ public class AuctionDriver : NetworkBehaviour
         Singleton = this;
 
         #endregion Singleton boilerplate
+        yieldingPlayers = new();
     }
 
     // Stages
@@ -245,6 +246,7 @@ public class AuctionDriver : NetworkBehaviour
 
     private void EndAuction(BiddingPlatform biddingPlatform)
     {
+        yieldingPlayers = new();
         if (isServer)
             StartCoroutine(WaitAndSwitchToItemSelect());
     }

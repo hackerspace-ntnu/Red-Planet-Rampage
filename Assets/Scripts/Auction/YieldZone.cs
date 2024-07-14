@@ -5,7 +5,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class YieldZone : NetworkBehaviour
+public class YieldZone : MonoBehaviour
 {
     [SerializeField]
     private TMP_Text yieldText;
@@ -14,7 +14,8 @@ public class YieldZone : NetworkBehaviour
 
     private void Start()
     {
-        SetYieldText();
+        yieldText.text = "YIELD";
+        yieldInfoText.text = $"0/{Peer2PeerTransport.NumPlayers}";
     }
 
     public void Subscribe()
