@@ -20,7 +20,12 @@ public class BiddingAI : BiddingPlayer
     private int platformsEvaluated = 0;
     private bool shouldEvaluate = true;
 
-    void Start()
+    private int budget;
+    private int availableChips;
+
+    private PlayerIdentity identity;
+
+    private void Start()
     {
         GetComponent<PlayerIK>().RightHandIKTarget = signTarget;
         agent.updateRotation = false;
@@ -36,9 +41,12 @@ public class BiddingAI : BiddingPlayer
 
     public void SetIdentity(PlayerIdentity identity)
     {
+        this.identity = identity;
         chipText.text = "<sprite name=\"chip\">" + identity.Chips.ToString();
         identity.onChipChange += UpdateChipStatus;
         chipText.color = playerManager.identity.HasMaxChips ? Color.red : Color.black;
+        availableChips = identity.Chips;
+        budget = DetermineBudget(availableChips);
     }
 
     private IEnumerator WaitAndEvaluate()
@@ -58,7 +66,7 @@ public class BiddingAI : BiddingPlayer
 
         var isNotActive = !platform.IsActive;
         var isTooExpensive = platform.chips >= playerManager.identity.Chips;
-        if (isNotActive || isTooExpensive)
+        if (isNotActive || isTooExpensive || !IsWithinBudget(platform.chips))
             priorities[platform] = -1;
     }
 
@@ -72,7 +80,9 @@ public class BiddingAI : BiddingPlayer
             return;
 
         // AI should yield
-        if (priorities[currentDestination] == -1)
+        var spentChips = availableChips - identity.Chips;
+        var isOverBudget = spentChips >= budget;
+        if (priorities[currentDestination] == -1 || isOverBudget)
         {
             agent.SetDestination(AuctionDriver.Singleton.YieldPosition);
             return;
@@ -117,6 +127,39 @@ public class BiddingAI : BiddingPlayer
         shouldEvaluate = false;
     }
 
+    private int DetermineBudget(int availableChips)
+    {
+        // Irrelevant for non-chip gamemodes
+        var isFirstToXChips = MatchRules.Current.MatchWinCondition is { WinCondition: MatchWinConditionType.Chips, StopCondition: MatchStopConditionType.FirstToX };
+        if (!isFirstToXChips)
+            return availableChips;
+
+        var numBodiesBought = identity.Bodies.Count - 1;
+        var numBarrelsBought = identity.Barrels.Count - 1;
+        var numExtensionsBought = identity.Extensions.Count;
+        var numPartsOfCompleteSet = Mathf.Min(1, numBodiesBought) + Mathf.Min(1, numBarrelsBought) + Mathf.Min(1, numExtensionsBought);
+
+        var budgetFactor = 1f;
+        if (numPartsOfCompleteSet > 3)
+            budgetFactor = .15f;
+        else if (numPartsOfCompleteSet > 2)
+            budgetFactor = .2f;
+        else if (numPartsOfCompleteSet > 1)
+            budgetFactor = .75f;
+
+        var budget = Mathf.FloorToInt(budgetFactor * availableChips);
+        Debug.Log($"{identity.ToColorString()} has {numPartsOfCompleteSet} parts and will spend {budget}/{availableChips}");
+        return budget;
+
+    }
+
+    private bool IsWithinBudget(int currentBid)
+    {
+        var spentChips = availableChips - identity.Chips;
+        var spentChipsIfBought = currentBid + 1 + spentChips;
+        return spentChipsIfBought <= budget;
+    }
+
     private void AnimateBid()
     {
         if (LeanTween.isTweening(signMesh.gameObject) || !currentPlatform)
@@ -130,6 +173,9 @@ public class BiddingAI : BiddingPlayer
     private void OnBiddingPlatformChange(BiddingPlatform platform)
     {
         if (!platform || !currentDestination || platform != currentDestination || platform.LeadingBidder == playerManager.id || platform != playerManager.SelectedBiddingPlatform)
+            return;
+
+        if (!IsWithinBudget(platform.chips))
             return;
 
         AnimateBid();
