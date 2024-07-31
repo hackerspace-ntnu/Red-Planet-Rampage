@@ -1,12 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(HealthController))]
-public class TrumpetBot : MonoBehaviour
+public class InstrumentBot : MonoBehaviour
 {
     [SerializeField]
     private Animator animator;
+
+    [SerializeField]
+    private string onHitStateName;
+
+    [SerializeField]
+    private float distortionDuration = 2;
 
     private HealthController healthController;
 
@@ -14,7 +18,6 @@ public class TrumpetBot : MonoBehaviour
     {
         healthController = GetComponent<HealthController>();
         healthController.onDamageTaken += OnHit;
-
     }
 
     private void OnDestroy()
@@ -24,7 +27,7 @@ public class TrumpetBot : MonoBehaviour
 
     private void OnHit(HealthController healthController, float damage, DamageInfo info)
     {
-        animator.SetTrigger("Hit");
-        // TODO how to clear trigger??? it just works???
+        animator.Play(onHitStateName, -1, 0);
+        MusicTrackManager.Singleton.Distort(distortionDuration);
     }
 }
