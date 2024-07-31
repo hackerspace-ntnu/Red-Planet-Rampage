@@ -34,6 +34,8 @@ public class MusicTrackManager : MonoBehaviour
 
     [SerializeField] private double fadeInDuration = 3;
 
+    [SerializeField] private AnimationCurve distortionCurve;
+
     private MusicTrack track;
     public float BeatsPerMinute => track ? track.BeatsPerMinute : 100;
     public float BeatsPerBar => track ? track.BeatsPerBar : 4;
@@ -271,6 +273,28 @@ public class MusicTrackManager : MonoBehaviour
         AssignPlayedLayers(track);
         yield return FadeIn();
         isFadingOutPreviousTrack = false;
+    }
+
+    private Coroutine distortionRoutine;
+
+    public void Distort(float duration)
+    {
+        if (distortionRoutine != null)
+            StopCoroutine(distortionRoutine);
+        distortionRoutine = StartCoroutine(DistortRoutine(duration));
+    }
+
+    private IEnumerator DistortRoutine(float duration)
+    {
+        var startTime = Time.time;
+
+        while (Time.time - startTime < duration)
+        {
+            mixer.SetFloat("musicPitch", distortionCurve.Evaluate((Time.time - startTime) / duration));
+            yield return null;
+        }
+
+        mixer.SetFloat("musicPitch", 1);
     }
 
     private IEnumerator WaitThenSwitchToLoop(MusicTrack track, double waitTime)
