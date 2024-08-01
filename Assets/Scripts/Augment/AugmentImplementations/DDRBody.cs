@@ -57,7 +57,6 @@ public class DDRBody : GunBody
     int textAnimatorTween;
 
     private float secondsPerUnitHeight;
-    private float musicPace;
 
     private AudioSource audioSource;
 
@@ -67,7 +66,7 @@ public class DDRBody : GunBody
         ddrMaterial = meshRenderer.materials[screenMaterialIndex];
         precisionText.enabled = false;
 
-        musicPace = 60f / MusicTrackManager.Singleton.BeatsPerMinute;
+        var musicPace = MusicTrackManager.Singleton.SecondsPerBeat;
         var secondsPerArrow = MusicTrackManager.Singleton.BeatsPerBar * musicPace;
         secondsPerUnitHeight = secondsPerArrow / (targetHeight - startHeight);
 

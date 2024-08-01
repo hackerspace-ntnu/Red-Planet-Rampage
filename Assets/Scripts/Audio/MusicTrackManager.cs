@@ -39,6 +39,7 @@ public class MusicTrackManager : MonoBehaviour
     private MusicTrack track;
     public float BeatsPerMinute => track ? track.BeatsPerMinute : 100;
     public float BeatsPerBar => track ? track.BeatsPerBar : 4;
+    public float SecondsPerBeat => 60f / BeatsPerMinute;
 
     private float exponentialReductionFactor = 20;
 
