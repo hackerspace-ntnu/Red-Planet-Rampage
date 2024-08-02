@@ -17,7 +17,7 @@ public class RenderTextureActions
 
         byte[] bytes;
         bytes = tex.EncodeToPNG();
-        
+
         string path = AssetDatabase.GetAssetPath(rt) + ".png";
         System.IO.File.WriteAllBytes(path, bytes);
         AssetDatabase.ImportAsset(path);
