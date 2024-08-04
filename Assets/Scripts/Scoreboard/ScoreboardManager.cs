@@ -103,8 +103,7 @@ public class ScoreboardManager : MonoBehaviour
     public IEnumerator ShowMatchResults()
     {
         // Animate the after battle scene
-        Camera.main.transform.parent = transform;
-        Camera.main.GetComponent<Animator>().SetTrigger("ScoreboardZoom");
+        Camera.main.GetComponent<ArenaCamera>().PlayScoreboardAnimation();
 
         for (int i = 0; i < scoreboards.Count; i++)
         {

@@ -34,6 +34,15 @@ public class MatchController : NetworkBehaviour
     private GlobalHUDController globalHUDController;
     public GlobalHUDController GlobalHUD => globalHUDController;
 
+    [SerializeField]
+    private GameObject victoryScenery;
+
+    [SerializeField]
+    private GameObject victorModel;
+
+    [SerializeField]
+    private GameObject[] loserModels;
+
     private string? currentMapName;
 
     private Dictionary<uint, PlayerManager> playerById = new();
@@ -50,6 +59,9 @@ public class MatchController : NetworkBehaviour
     public Round LastRound => rounds.LastOrDefault();
 
     public int RoundCount { get => rounds.Count(); }
+
+    private static PlayerIdentity? winner;
+    public static PlayerIdentity? Winner => winner;
 
     private bool isAuction = false;
     public bool IsAuction => isAuction;
@@ -96,6 +108,8 @@ public class MatchController : NetworkBehaviour
         var mainLight = GameObject.FindGameObjectsWithTag("MainLight")[0];
         RenderSettings.skybox.SetVector("_SunDirection", mainLight.transform.forward);
         RenderSettings.skybox.SetFloat("_MaxGradientTreshold", 0.25f);
+
+        victoryScenery.SetActive(false);
 
         GlobalHUD.RoundTimer.enabled = false;
         StartNextRound();
@@ -256,11 +270,12 @@ public class MatchController : NetworkBehaviour
         Debug.Log($"Current winner {currentWinner.identity.ToColorString()} has {WinsForPlayer(currentWinner)} wins.");
 
         var winnerId = MatchRules.Current.DetermineWinner(rounds, currentWinner.id);
-        if (!playerById.TryGetValue(winnerId, out var winner))
+        if (!playerById.TryGetValue(winnerId, out var winningPlayer))
             return false;
 
         // We have a winner!
-        StartCoroutine(DisplayWinScreenAndRestart(winner.identity));
+        winner = winningPlayer.identity;
+        DisplayWinScreen();
         // Remember stats from this match.
         PersistentInfo.SavePersistentData();
         return true;
@@ -288,13 +303,38 @@ public class MatchController : NetworkBehaviour
         return collectableChips.RandomElement().transform;
     }
 
-    private IEnumerator DisplayWinScreenAndRestart(PlayerIdentity winner)
+    private void DisplayWinScreen()
     {
-        globalHUDController.DisplayWinScreen(winner);
+        MusicTrackManager.Singleton.SwitchTo(MusicType.VictoryFanfare);
+        victoryScenery.SetActive(true);
 
+        victorModel.GetComponentInChildren<SkinnedMeshRenderer>().material.color = winner!.color;
+        var loserColors = PlayerInputManagerController.Singleton.PlayerColors.Where(c => c != winner!.color).ToArray().ShuffledCopy();
+        foreach (var loser in loserModels.Zip(loserColors, (model, color) => (model, color)))
+            loser.model.GetComponentInChildren<SkinnedMeshRenderer>().material.color = loser.color;
+
+        Camera.main.GetComponent<ArenaCamera>().PlayVictoryAnimation(winner);
+    }
+
+    public void WaitAndRestartAfterWinScreen()
+    {
+        StartCoroutine(WaitAndRestartAfterWinScreenRoutine());
+    }
+
+    private IEnumerator WaitAndRestartAfterWinScreenRoutine()
+    {
+        UnlockVictoryAchievements();
+
+        yield return new WaitForSecondsRealtime(matchEndDelay);
+
+        ReturnToMainMenu();
+    }
+
+    private void UnlockVictoryAchievements()
+    {
         // TODO extract to achievement class?
         var isNotCustomGamemode = MatchRules.Current.GameMode is not GameModeVariant.Custom;
-        var winnerIsLocalPlayer = Peer2PeerTransport.PlayerDetails.Any(p => p.id == winner.id && p.type is PlayerType.Local);
+        var winnerIsLocalPlayer = Peer2PeerTransport.PlayerDetails.Any(p => p.id == winner!.id && p.type is PlayerType.Local);
         if (isNotCustomGamemode && winnerIsLocalPlayer)
         {
             SteamManager.Singleton.UnlockAchievement(MatchRules.Current.GameMode switch
@@ -307,18 +347,15 @@ public class MatchController : NetworkBehaviour
         }
 
         var isWinnerInAllRoundsAndHasNotDied =
-            rounds.All(r => r.Winner == winner.id && !r.Kills.Values.Any(k => k.Contains(winner.id)));
+            rounds.All(r => r.Winner == winner!.id && !r.Kills.Values.Any(k => k.Contains(winner!.id)));
         if (isNotCustomGamemode && winnerIsLocalPlayer && isWinnerInAllRoundsAndHasNotDied)
             SteamManager.Singleton.UnlockAchievement(AchievementType.CogAndBoltTinkering);
-
-        yield return new WaitForSecondsRealtime(matchEndDelay);
-
-        ReturnToMainMenu();
     }
 
     public static void ResetMatch()
     {
         rounds = new List<Round>();
+        winner = null;
     }
 
     private void ReturnToMainMenu()
