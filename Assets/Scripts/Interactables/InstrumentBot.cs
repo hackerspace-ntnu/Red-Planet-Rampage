@@ -22,7 +22,8 @@ public class InstrumentBot : MonoBehaviour
 
     private void OnDestroy()
     {
-        healthController.onDamageTaken -= OnHit;
+        if (healthController)
+            healthController.onDamageTaken -= OnHit;
     }
 
     private void OnHit(HealthController healthController, float damage, DamageInfo info)

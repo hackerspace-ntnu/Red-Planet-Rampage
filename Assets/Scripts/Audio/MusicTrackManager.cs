@@ -7,7 +7,7 @@ using CollectionExtensions;
 public enum MusicType
 {
     Menu,
-    ConstructionFanfare,
+    VictoryFanfare,
     Battle,
     Bidding,
 }
@@ -48,7 +48,7 @@ public class MusicTrackManager : MonoBehaviour
 
     [SerializeField] private MusicTrack[] battleThemes;
 
-    [SerializeField] private MusicTrack constructionFanfare;
+    [SerializeField] private MusicTrack victoryFanfare;
 
     private double trackStartTime;
     public double TimeSinceTrackStart => AudioSettings.dspTime - trackStartTime;
@@ -93,28 +93,19 @@ public class MusicTrackManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    private MusicTrack GetTrack(MusicType type)
-    {
-        switch (type)
+    private MusicTrack GetTrack(MusicType type) =>
+        type switch
         {
-            case MusicType.Battle:
-                return battleThemes.RandomElement();
-            case MusicType.ConstructionFanfare:
-                return constructionFanfare;
-            case MusicType.Bidding:
-                return biddingTheme;
-            case MusicType.Menu:
-            default:
-                return menuTheme;
-        }
-    }
+            MusicType.Battle => battleThemes.RandomElement(),
+            MusicType.VictoryFanfare => victoryFanfare,
+            MusicType.Bidding => biddingTheme,
+            _ => menuTheme,
+        };
 
     private void SwapLayers()
     {
         // Swap references
-        var temp = layers;
-        layers = backupLayers;
-        backupLayers = temp;
+        (backupLayers, layers) = (layers, backupLayers);
 
         // Swap which layers are audible
         for (int i = 0; i < layers.Count(); i++)
@@ -123,6 +114,8 @@ public class MusicTrackManager : MonoBehaviour
             {
                 // Enable layers that are part of the track
                 layers[i].volume = track.EnabledLayers[i] ? 1 : 0;
+                // Only loop tracks that should loop
+                layers[i].loop = track.ShouldLoop;
             }
 
             // Disable and reset all backup layers

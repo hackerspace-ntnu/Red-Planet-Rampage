@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "MusicTrack", menuName = "Audio/New Music Track")]
@@ -18,6 +19,10 @@ public class MusicTrack : ScriptableObject
     [SerializeField]
     private float beatsPerBar;
     public float BeatsPerBar => beatsPerBar;
+
+    [SerializeField]
+    private bool shouldLoop = true;
+    public bool ShouldLoop => shouldLoop;
 
     [SerializeField]
     private bool[] enabledLayers;
