@@ -75,7 +75,8 @@ public class BulletController : ProjectileController
     {
         trailPositionBuffer.Buffer?.Release();
         trail = newTrail;
-        trail.SetFloat("Size", stats.ProjectileScale);
+        if (trail && stats)
+            trail.SetFloat("Size", stats.ProjectileScale);
     }
 
     protected override void OnInitialize(GunStats gunstats)
