@@ -10,6 +10,7 @@ public enum MusicType
     VictoryFanfare,
     Battle,
     Bidding,
+    Tutorial,
 }
 
 public enum FadeMode
@@ -43,6 +44,8 @@ public class MusicTrackManager : MonoBehaviour
     private float exponentialReductionFactor = 20;
 
     [SerializeField] private MusicTrack menuTheme;
+
+    [SerializeField] private MusicTrack tutorialTheme;
 
     [SerializeField] private MusicTrack biddingTheme;
 
@@ -99,6 +102,7 @@ public class MusicTrackManager : MonoBehaviour
             MusicType.Battle => battleThemes.RandomElement(),
             MusicType.VictoryFanfare => victoryFanfare,
             MusicType.Bidding => biddingTheme,
+            MusicType.Tutorial => tutorialTheme,
             _ => menuTheme,
         };
 
