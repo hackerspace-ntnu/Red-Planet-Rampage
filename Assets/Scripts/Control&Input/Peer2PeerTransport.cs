@@ -343,6 +343,7 @@ public class Peer2PeerTransport : NetworkManager
         while (FindObjectsByType<PlayerManager>(FindObjectsSortMode.None).Count() < players.Count)
             yield return new WaitForEndOfFrame();
         LoadingScreen.Singleton.Hide();
+        MusicTrackManager.Singleton.SwitchTo(MusicType.Tutorial);
     }
 
     // TODO custom method for leaving training mode :)
