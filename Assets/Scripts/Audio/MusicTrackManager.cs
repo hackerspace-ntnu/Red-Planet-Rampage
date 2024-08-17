@@ -112,12 +112,12 @@ public class MusicTrackManager : MonoBehaviour
         (backupLayers, layers) = (layers, backupLayers);
 
         // Swap which layers are audible
-        for (int i = 0; i < layers.Count(); i++)
+        for (int i = 0; i < layers.Length; i++)
         {
-            if (i < track.Layers.Count())
+            if (i < track.Layers.Length)
             {
-                // Enable layers that are part of the track
-                layers[i].volume = track.EnabledLayers[i] ? 1 : 0;
+                // Don't enable intense layers until requested
+                layers[i].volume = track.Layers[i].StartingVolume();
                 // Only loop tracks that should loop
                 layers[i].loop = track.ShouldLoop;
             }
@@ -131,13 +131,12 @@ public class MusicTrackManager : MonoBehaviour
     // Should only be used in Start()
     private void AssignPlayedLayers(MusicTrack track, bool loopStart = false)
     {
-        AudioClip[] trackLayers = loopStart ? track.LoopLayers : track.Layers;
-        for (int i = 0; i < layers.Count(); i++)
+        for (int i = 0; i < layers.Length; i++)
         {
-            if (i < trackLayers.Count())
+            if (i < track.Layers.Length)
             {
-                layers[i].clip = trackLayers[i];
-                if (!loopStart) layers[i].volume = track.EnabledLayers[i] ? 1 : 0;
+                layers[i].clip = track.Layers[i].audio;
+                if (!loopStart) layers[i].volume = track.Layers[i].StartingVolume();
             }
             else
             {
@@ -154,15 +153,12 @@ public class MusicTrackManager : MonoBehaviour
     {
         shouldSwap = true;
         nextSwapTime = time;
-        AudioClip[] trackLayers = loopStart ? track.LoopLayers : track.Layers;
-        for (int i = 0; i < layers.Count(); i++)
+        for (int i = 0; i < layers.Length; i++)
         {
             backupLayers[i].volume = 0;
-            if (i < trackLayers.Count())
+            if (i < track.Layers.Length)
             {
-                // TODO set looping or nah
-                backupLayers[i].clip = trackLayers[i];
-                // TODO set looping or nah
+                backupLayers[i].clip = loopStart ? track.Layers[i].loopAudio : track.Layers[i].audio;
                 backupLayers[i].PlayScheduled(time);
             }
             else
@@ -196,7 +192,7 @@ public class MusicTrackManager : MonoBehaviour
         isPlaying = true;
         track = GetTrack(type);
         double offset = 0;
-        var hasLoopLayers = track.LoopLayers.Length > 0;
+        var hasLoopLayers = track.Layers.First().loopAudio != null;
 
         switch (fadeMode)
         {
@@ -216,7 +212,7 @@ public class MusicTrackManager : MonoBehaviour
         if (trackSwitchingRoutine != null) StopCoroutine(trackSwitchingRoutine);
         if (hasLoopLayers)
         {
-            trackSwitchingRoutine = StartCoroutine(WaitThenSwitchToLoop(track, offset + track.Layers.First().length));
+            trackSwitchingRoutine = StartCoroutine(WaitThenSwitchToLoop(track, offset + track.Layers.First().audio.length));
         }
     }
 
@@ -287,6 +283,7 @@ public class MusicTrackManager : MonoBehaviour
 
         while (Time.time - startTime < duration)
         {
+            // TODO use layer type to switch off only *some*, and have pitch for each layer aaaa
             mixer.SetFloat("musicPitch", distortionCurve.Evaluate((Time.time - startTime) / duration));
             yield return null;
         }
