@@ -16,8 +16,11 @@ MonoBehaviour:
   composer: Tore Bergebakken
   beatsPerMinute: 150
   beatsPerBar: 4
-  enabledLayers: 01
+  shouldLoop: 1
   layers:
-  - {fileID: 8300000, guid: 8bb1577b65974e56d96eacad4407cee8, type: 3}
-  loopLayers:
-  - {fileID: 8300000, guid: 6c8b156273f8a3605baa2caaf77094c1, type: 3}
+  - type: 0
+    audio: {fileID: 8300000, guid: 80e8ec6863f33c749888cf72b5d54854, type: 3}
+    loopAudio: {fileID: 8300000, guid: e4a3bc7cd7c9bdb4d802b75e8fe86cc8, type: 3}
+  - type: 1
+    audio: {fileID: 8300000, guid: 0d9da1e3506859d46ab0405b2de552ce, type: 3}
+    loopAudio: {fileID: 8300000, guid: c0c3d17f1c9e4e049b2ba67ace315112, type: 3}

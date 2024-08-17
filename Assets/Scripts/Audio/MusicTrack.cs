@@ -1,5 +1,23 @@
-using Unity.VisualScripting;
+using System;
 using UnityEngine;
+
+public enum MusicLayerType
+{
+    Backing,
+    Brass,
+    Intense,
+}
+
+[Serializable]
+public struct MusicLayer
+{
+    public MusicLayerType type;
+    public AudioClip audio;
+    public AudioClip loopAudio;
+
+    public float StartingVolume() =>
+        type is not MusicLayerType.Intense ? 1 : 0;
+}
 
 [CreateAssetMenu(fileName = "MusicTrack", menuName = "Audio/New Music Track")]
 public class MusicTrack : ScriptableObject
@@ -25,14 +43,6 @@ public class MusicTrack : ScriptableObject
     public bool ShouldLoop => shouldLoop;
 
     [SerializeField]
-    private bool[] enabledLayers;
-    public bool[] EnabledLayers => enabledLayers;
-
-    [SerializeField]
-    private AudioClip[] layers;
-    public AudioClip[] Layers => layers;
-
-    [SerializeField]
-    private AudioClip[] loopLayers;
-    public AudioClip[] LoopLayers => loopLayers;
+    private MusicLayer[] layers;
+    public MusicLayer[] Layers => layers;
 }
