@@ -277,14 +277,21 @@ public class SettingsDataManager : MonoBehaviour
     public void SetResolutionLevel(int index)
     {
         var resolution = Resolutions[index];
-        Screen.SetResolution(resolution.width, resolution.height, true);
+        // Avoid changing resolution if it is set to the same already.
+        // May cause glitchy-looking behaviour if we don't.
+        if (!(Screen.currentResolution.width == resolution.width && Screen.currentResolution.height == resolution.height))
+            Screen.SetResolution(resolution.width, resolution.height, true);
     }
 
     public void SetDisplayMode(int index)
     {
         // A constant 3 because of the dropdown's children.
         SettingsDataInstance.DisplayModeIndex = Math.Clamp(index, 0, 3);
-        Screen.fullScreenMode = (FullScreenMode)index;
+        var mode = (FullScreenMode)index;
+        // Avoid changing fullscreen mode if it is set to the same already.
+        // Causes glitchy-looking behaviour if we don't.
+        if (Screen.fullScreenMode != mode)
+            Screen.fullScreenMode = mode;
     }
     #endregion
 
