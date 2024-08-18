@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -142,6 +143,8 @@ public class SettingsDataManager : MonoBehaviour
 
     public SettingsData SettingsDataInstance;
 
+    private static bool isAlreadyLoaded = false;
+
     private void Awake()
     {
         #region Singleton boilerplate
@@ -173,6 +176,9 @@ public class SettingsDataManager : MonoBehaviour
 
     private void LoadOrCreateFile()
     {
+        if (isAlreadyLoaded)
+            return;
+
         FilePath = Application.persistentDataPath + FileName;
 
         if (!File.Exists(FilePath))
@@ -181,6 +187,8 @@ public class SettingsDataManager : MonoBehaviour
         }
         LoadSettingsFile();
         ApplyAllSettings();
+        StartCoroutine(MakeSureVolumeIsCorrectOnLaunch());
+        isAlreadyLoaded = true;
     }
 
     #region Save methods
@@ -214,6 +222,18 @@ public class SettingsDataManager : MonoBehaviour
     {
         SetDisplayMode(SettingsDataInstance.DisplayModeIndex);
         SetQualityLevel(SettingsDataInstance.QualityPresetIndex);
+        SetMasterVolume(SettingsDataInstance.MasterVolume);
+        SetMusicVolume(SettingsDataInstance.MusicVolume);
+        SetSFXVolume(SettingsDataInstance.SfxVolume);
+    }
+
+    /// <summary>
+    /// Yes, this seems necessary.
+    /// Unity just keeps its default volume levels if you don't set them *after* the first frame.
+    /// </summary>
+    private IEnumerator MakeSureVolumeIsCorrectOnLaunch()
+    {
+        yield return null;
         SetMasterVolume(SettingsDataInstance.MasterVolume);
         SetMusicVolume(SettingsDataInstance.MusicVolume);
         SetSFXVolume(SettingsDataInstance.SfxVolume);
