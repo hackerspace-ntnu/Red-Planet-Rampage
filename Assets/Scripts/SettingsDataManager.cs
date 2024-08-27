@@ -143,8 +143,6 @@ public class SettingsDataManager : MonoBehaviour
 
     public SettingsData SettingsDataInstance;
 
-    private static bool isAlreadyLoaded = false;
-
     private void Awake()
     {
         #region Singleton boilerplate
@@ -176,8 +174,9 @@ public class SettingsDataManager : MonoBehaviour
 
     private void LoadOrCreateFile()
     {
-        if (isAlreadyLoaded)
-            return;
+        // TODO For some reason the settings will be loaded (and *need* to be loaded)
+        //      every single time Mirror flings you back to the main menu.
+        //      We may want to investigate why.
 
         FilePath = Application.persistentDataPath + FileName;
 
@@ -188,7 +187,6 @@ public class SettingsDataManager : MonoBehaviour
         LoadSettingsFile();
         ApplyAllSettings();
         StartCoroutine(MakeSureVolumeIsCorrectOnLaunch());
-        isAlreadyLoaded = true;
     }
 
     #region Save methods
