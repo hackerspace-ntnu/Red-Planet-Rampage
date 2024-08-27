@@ -184,7 +184,7 @@ public class AuctionDriver : NetworkBehaviour
         yield return new WaitForSeconds(1f);
         yieldZones.ForEach(sign => sign.SetRemainingTimeText(1));
         yield return new WaitForSeconds(1f);
-        if (IsAuctionYielded() && isServer)
+        if (IsAuctionYielded())
             StopAuctionEarly();
     }
 
