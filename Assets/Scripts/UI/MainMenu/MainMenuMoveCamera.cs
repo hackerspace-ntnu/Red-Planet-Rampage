@@ -15,8 +15,17 @@ public class MainMenuMoveCamera : MonoBehaviour
     private Transform initialPosition;
     [SerializeField]
     private Transform secondPosition;
+    [SerializeField]
+    private Transform cachePosition;
+
+    private Vector3 initialMainCameraPosition;
 
     private bool inLevelSelect;
+
+    private void Start()
+    {
+        initialMainCameraPosition = mainMenuCamera.transform.localPosition;
+    }
 
     public void MoveToOptions()
     {
@@ -55,5 +64,17 @@ public class MainMenuMoveCamera : MonoBehaviour
         inLevelSelect = true;
         LeanTween.sequence().append(LeanTween.moveLocal(playerSelectCamera.gameObject, secondPosition.localPosition, 1).setEaseInOutExpo());
         LeanTween.sequence().append(LeanTween.rotateX(playerSelectCamera.gameObject, 90f, 1).setEaseInOutExpo());
+    }
+
+    public void MoveToCache()
+    {
+        LeanTween.sequence().append(LeanTween.rotateY(mainMenuCamera.gameObject, -120, cameraSpeed).setEaseInOutQuart());
+        LeanTween.sequence().append(LeanTween.moveLocal(mainMenuCamera.gameObject, cachePosition.localPosition, 1).setEaseInOutQuart());
+    }
+
+    public void MoveFromCache()
+    {
+        LeanTween.sequence().append(LeanTween.rotateY(mainMenuCamera.gameObject, 120, cameraSpeed).setEaseInOutQuart());
+        LeanTween.sequence().append(LeanTween.moveLocal(mainMenuCamera.gameObject, initialMainCameraPosition, 1).setEaseInOutQuart());
     }
 }
