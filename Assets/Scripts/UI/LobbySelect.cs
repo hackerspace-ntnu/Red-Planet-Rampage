@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class LobbySelect : MonoBehaviour
+public class LobbySelect : DescriptionMenu
 {
     [SerializeField]
     private Button queueButton;
@@ -13,10 +13,6 @@ public class LobbySelect : MonoBehaviour
     private Button friendsButton;
     [SerializeField]
     private Selectable localButton;
-    [SerializeField]
-    private TMP_Text title;
-    [SerializeField]
-    private TMP_Text description;
     [SerializeField]
     private MainMenuController mainMenuController;
 
@@ -27,15 +23,6 @@ public class LobbySelect : MonoBehaviour
         if (!isOnline)
             StartCoroutine(WaitAndSelectButton());
         SetOnlineButtonStates(isOnline);
-    }
-    public void SetTitle(string text)
-    {
-        title.text = text;
-    }
-
-    public void SetDescription(string text)
-    {
-        description.text = text;
     }
 
     private void SetOnlineButtonStates(bool enabled)
