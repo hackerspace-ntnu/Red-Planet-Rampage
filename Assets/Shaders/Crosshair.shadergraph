@@ -11,6 +11,9 @@
         },
         {
             "m_Id": "39003c110ecc4efeb92e0a4f81adf62c"
+        },
+        {
+            "m_Id": "187b92def2fb4ca685fae44d6a779b0d"
         }
     ],
     "m_Keywords": [],
@@ -62,6 +65,9 @@
         },
         {
             "m_Id": "20d6ebc89b914b0c83d3f8b1fe771ce0"
+        },
+        {
+            "m_Id": "69ee95579277414b976cc4f92ccee9b9"
         }
     ],
     "m_GroupDatas": [],
@@ -135,6 +141,20 @@
                     "m_Id": "20687ec0ab1046e4b00ce3f68092cee5"
                 },
                 "m_SlotId": 0
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "69ee95579277414b976cc4f92ccee9b9"
+                },
+                "m_SlotId": 0
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "ef5bd6ae10c045938b52ca9c8926f784"
+                },
+                "m_SlotId": 4
             }
         },
         {
@@ -398,6 +418,49 @@
 }
 
 {
+    "m_SGVersion": 1,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
+    "m_ObjectId": "187b92def2fb4ca685fae44d6a779b0d",
+    "m_Guid": {
+        "m_GuidSerialized": "6591cd6f-f50c-4106-ab48-fb325aae5d86"
+    },
+    "m_Name": "HitMarkerRadius",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "HitMarkerRadius",
+    "m_DefaultReferenceName": "_HitMarkerRadius",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": 0.0,
+    "m_FloatType": 0,
+    "m_RangeValues": {
+        "x": 0.0,
+        "y": 1.0
+    }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "1884236d1166428caab304ddc7d5033f",
+    "m_Id": 4,
+    "m_DisplayName": "HitMarkerRadius",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "HitMarkerRadius",
+    "m_StageCapability": 3,
+    "m_Value": 0.0,
+    "m_DefaultValue": 0.0,
+    "m_Labels": []
+}
+
+{
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.DynamicValueMaterialSlot",
     "m_ObjectId": "194a705046b64931a090f181ed7c4e88",
@@ -546,10 +609,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -258.3999938964844,
-            "y": 171.1999969482422,
-            "width": 208.0,
-            "height": 301.60003662109377
+            "x": -130.3999481201172,
+            "y": 220.79998779296876,
+            "width": 130.40000915527345,
+            "height": 117.60000610351563
         }
     },
     "m_Slots": [
@@ -569,7 +632,7 @@
         "x"
     ],
     "m_Precision": 0,
-    "m_PreviewExpanded": true,
+    "m_PreviewExpanded": false,
     "m_DismissedVersion": 0,
     "m_PreviewMode": 0,
     "m_CustomColors": {
@@ -929,6 +992,42 @@
     "m_RangeValues": {
         "x": 0.0,
         "y": 1.0
+    }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.PropertyNode",
+    "m_ObjectId": "69ee95579277414b976cc4f92ccee9b9",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "Property",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": -1315.199951171875,
+            "y": 680.0,
+            "width": 162.39990234375,
+            "height": 33.60003662109375
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "d6b4d29cc5614f9ea88c973e85d9c9b7"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_Property": {
+        "m_Id": "187b92def2fb4ca685fae44d6a779b0d"
     }
 }
 
@@ -1352,6 +1451,9 @@
         },
         {
             "m_Id": "39003c110ecc4efeb92e0a4f81adf62c"
+        },
+        {
+            "m_Id": "187b92def2fb4ca685fae44d6a779b0d"
         }
     ]
 }
@@ -1561,6 +1663,21 @@
 {
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "d6b4d29cc5614f9ea88c973e85d9c9b7",
+    "m_Id": 0,
+    "m_DisplayName": "HitMarkerRadius",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 3,
+    "m_Value": 0.0,
+    "m_DefaultValue": 0.0,
+    "m_Labels": []
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "e2672f8b754c4d17a492c20e5fb36d03",
     "m_Id": 0,
     "m_DisplayName": "Alpha",
@@ -1639,6 +1756,9 @@
         },
         {
             "m_Id": "a979b08289834e069512937ffd2faf6c"
+        },
+        {
+            "m_Id": "1884236d1166428caab304ddc7d5033f"
         },
         {
             "m_Id": "1fe619ab1c344729b4f4c7f0eb3fade3"

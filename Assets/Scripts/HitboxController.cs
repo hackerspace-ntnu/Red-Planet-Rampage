@@ -13,5 +13,9 @@ public class HitboxController : MonoBehaviour
         if (!health.enabled)
             return;
         health?.DealDamage(info);
+
+        if (info.sourcePlayer != null)
+            if (info.sourcePlayer.HUDController != null)
+                info.sourcePlayer.HUDController.DamageAnimation();
     }
 }

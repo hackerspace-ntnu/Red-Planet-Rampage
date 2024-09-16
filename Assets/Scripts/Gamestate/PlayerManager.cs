@@ -490,7 +490,7 @@ public class PlayerManager : NetworkBehaviour
             gunController.onFireEnd += UpdateHudFire;
             gunController.onReload += UpdateHudReload;
             UpdateHudCrosshair(gunController.stats);
-            gunController.projectile.OnHitboxCollision += hudController.HitmarkAnimation;
+            gunController.projectile.OnHitboxCollision += hudController.HitAnimation;
         }
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
         if (gunController.RightHandTarget)
