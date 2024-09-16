@@ -409,6 +409,11 @@ public class PlayerManager : NetworkBehaviour
         hudController.UpdateOnReload(ammo / magazine);
     }
 
+    private void UpdateHudCrosshair(GunStats stats)
+    {
+        HUDController.UpdateOnInitialize(stats.CrosshairRadius.Value());
+    }
+
     private void TryPlaceBid(InputAction.CallbackContext ctx)
     {
         if (!selectedBiddingPlatform) return;
@@ -484,6 +489,7 @@ public class PlayerManager : NetworkBehaviour
             gunController.onFireEnd += ScreenShake;
             gunController.onFireEnd += UpdateHudFire;
             gunController.onReload += UpdateHudReload;
+            UpdateHudCrosshair(gunController.stats);
             gunController.projectile.OnHitboxCollision += hudController.HitmarkAnimation;
         }
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;

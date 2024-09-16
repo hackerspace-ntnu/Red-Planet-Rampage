@@ -33,7 +33,8 @@ public class PlayerHUDController : MonoBehaviour
     private SpriteRenderer ammoBar;
 
     [SerializeField]
-    private RectTransform crosshair;
+    private Image crosshair;
+    private Material crosshairMaterial;
 
     private Material ammoCapacityMaterial;
 
@@ -105,13 +106,18 @@ public class PlayerHUDController : MonoBehaviour
     private const float lineVelocityDampeningX = 0.25f;
     // Dampen how much vertical velocity should influence center of speedlines
     private const float lineVelocityDampeningY = 0.1f;
-    private Vector3 defaultCrosshairScale;
+    private float crosshairCrossScale = 1.0f;
 
     [SerializeField]
     private RectTransform scopeZoom;
     private int scopeTween;
     private int hitMarkTween;
 
+    private void Awake()
+    {
+        crosshairMaterial = Instantiate(crosshair.material);
+        crosshair.material = crosshairMaterial;
+    }
 
     void Start()
     {
@@ -127,8 +133,6 @@ public class PlayerHUDController : MonoBehaviour
         ammoCapacityMaterial = Instantiate(ammoBar.material);
         ammoBar.material = ammoCapacityMaterial;
         ammoCapacityMaterial.SetFloat("_Arc2", 0);
-
-        defaultCrosshairScale = crosshair.localScale;
 
         originalChipY = chipBox.anchoredPosition.y;
         if (!MatchController.Singleton || PlayerInputManagerController.Singleton.LocalPlayerInputs.Count() == 1)
@@ -320,7 +324,7 @@ public class PlayerHUDController : MonoBehaviour
         var halfWidth = hud.sizeDelta.x / 2;
         var halfHeight = hud.sizeDelta.y / 2;
 
-        crosshair.anchoredPosition = (new Vector2(halfWidth * x, halfHeight * y));
+        crosshair.rectTransform.anchoredPosition = (new Vector2(halfWidth * x, halfHeight * y));
     }
 
     public void HitmarkAnimation(HitboxController other, ref ProjectileState state)
@@ -328,8 +332,18 @@ public class PlayerHUDController : MonoBehaviour
         if (LeanTween.isTweening(hitMarkTween))
         {
             LeanTween.cancel(hitMarkTween);
-            crosshair.localScale = defaultCrosshairScale;
+            SetCrossScale(crosshairCrossScale);
         }
-        hitMarkTween = crosshair.LeanScale(new Vector3(1.5f, 1.5f, 1.5f), 0.2f).setEasePunch().id;
+        hitMarkTween = LeanTween.value(crosshair.gameObject, SetCrossScale, crosshairCrossScale, 5f, 0.2f).setEasePunch().id;
+    }
+
+    private void SetCrossScale(float scale)
+    {
+        crosshairMaterial.SetFloat("_CrossSize", scale);
+    }
+
+    public void UpdateOnInitialize(float radius)
+    {
+        crosshairMaterial.SetFloat("_Radius", radius == 0f ? 1f : 1f/radius);
     }
 }
