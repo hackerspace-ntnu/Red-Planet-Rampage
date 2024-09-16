@@ -111,6 +111,7 @@ public class PlayerHUDController : MonoBehaviour
     [SerializeField]
     private RectTransform scopeZoom;
     private int scopeTween;
+    private int hitTween;
     private int hitMarkTween;
 
     private void Awake()
@@ -327,19 +328,34 @@ public class PlayerHUDController : MonoBehaviour
         crosshair.rectTransform.anchoredPosition = (new Vector2(halfWidth * x, halfHeight * y));
     }
 
-    public void HitmarkAnimation(HitboxController other, ref ProjectileState state)
+    public void HitAnimation(HitboxController other, ref ProjectileState state)
+    {
+        if (LeanTween.isTweening(hitTween))
+        {
+            LeanTween.cancel(hitTween);
+            SetCrossScale(crosshairCrossScale);
+        }
+        hitTween = LeanTween.value(crosshair.gameObject, SetCrossScale, crosshairCrossScale, 2.5f, 0.4f).setEasePunch().id;
+    }
+
+    public void DamageAnimation()
     {
         if (LeanTween.isTweening(hitMarkTween))
         {
             LeanTween.cancel(hitMarkTween);
-            SetCrossScale(crosshairCrossScale);
+            SetHitScale(0f);
         }
-        hitMarkTween = LeanTween.value(crosshair.gameObject, SetCrossScale, crosshairCrossScale, 5f, 0.2f).setEasePunch().id;
+        hitMarkTween = LeanTween.value(crosshair.gameObject, SetHitScale, 0f, 1.5f, 0.2f).setEasePunch().id;
     }
 
     private void SetCrossScale(float scale)
     {
         crosshairMaterial.SetFloat("_CrossSize", scale);
+    }
+
+    private void SetHitScale(float scale)
+    {
+        crosshairMaterial.SetFloat("_HitMarkerRadius", scale);
     }
 
     public void UpdateOnInitialize(float radius)

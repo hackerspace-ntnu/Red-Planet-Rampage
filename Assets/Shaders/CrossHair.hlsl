@@ -12,13 +12,19 @@ float sdCross_float( in float2 p, in float2 b, float r )
     return sign(k)*length(max(w,0.0)) + r;
 }
 
+float sdRoundedX_float( float2 p, float w, float r )
+{
+    p = abs(p);
+    return max(length(p-min(p.x+p.y,w)*0.5) - r, -1. * (length(p) - 0.5));
+}
+
 float crossSDF_float(float2 pos)
 {
     return abs(sdCross_float(pos, float2(0.5, 0.1), 0.1))-0.05;
 }
 
 
-void CrossHair_float(float2 UV, float crossSize, float circleRadius, out float Distance)
+void CrossHair_float(float2 UV, float crossSize, float circleRadius, float hitMarkerRadius, out float Distance)
 {
-	Distance = min(sphereSDF_float(UV * 2.5 * circleRadius), crossSDF_float(UV * crossSize));
+	Distance = min(min(sphereSDF_float(UV * 2.5 * circleRadius), crossSDF_float(UV * crossSize)), sdRoundedX_float(UV, hitMarkerRadius, 0.1));
 }
