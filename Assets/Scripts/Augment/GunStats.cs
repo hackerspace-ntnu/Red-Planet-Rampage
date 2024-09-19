@@ -151,6 +151,13 @@ public class GunStats : ScriptableObject
     [SerializeField]
     private ModifiableFloat screenShakeFactor = new ModifiableFloat(1f);
     public ModifiableFloat ScreenShakeFactor => screenShakeFactor;
+    public enum CrossHairModes
+    {
+        Default,
+        Shotgun,
+        Hat,
+    }
+    public CrossHairModes CrossHairMode { get; set; }
     [SerializeField]
     private ModifiableFloat crosshairRadius = new ModifiableFloat(1f);
     public ModifiableFloat CrosshairRadius => crosshairRadius;
