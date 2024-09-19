@@ -86,8 +86,9 @@ public class PlayerInputManagerController : MonoBehaviour
         var inputManager = playerInput.GetComponent<InputManager>();
         inputManager.PlayerCamera.enabled = false;
         LocalPlayerInputs.Add(inputManager);
+        if (playerInput.currentControlScheme == "MouseAndKeyboard")
+           inputManager.SetMouseAndKeyboard();
         onPlayerInputJoined?.Invoke(inputManager);
-        // TODO: Make cursor visible if mouseandkeyboard input joins when our buttons can be clicked by a mouse..
 
         if (NetworkManager.singleton.isNetworkActive)
             NetworkClient.Send(new PlayerConnectedMessage(LocalPlayerInputs.Count - 1, SteamManager.Singleton.SteamID.m_SteamID));

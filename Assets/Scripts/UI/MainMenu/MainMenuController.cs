@@ -184,7 +184,8 @@ public class MainMenuController : MonoBehaviour
     private void EndIntro()
     {
         sun.Restart();
-        if (firstInputJoined.IsMouseAndKeyboard) ShowMouse();
+        if (firstInputJoined != null)
+            if(firstInputJoined.IsMouseAndKeyboard) ShowMouse();
         playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
         skipIntroText.gameObject.SetActive(false);
         introVideo.gameObject.SetActive(false);
@@ -294,7 +295,10 @@ public class MainMenuController : MonoBehaviour
         playerInputs.Add(inputManager);
 
         if (firstInputJoined == null)
+        {
             firstInputJoined = inputManager;
+            if (firstInputJoined.IsMouseAndKeyboard && !introVideo.isActiveAndEnabled) ShowMouse();
+        }
 
         bool canPlay = playerInputs.Count > 1;
         var colors = startButton.colors;

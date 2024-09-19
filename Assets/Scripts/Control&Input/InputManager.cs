@@ -95,6 +95,11 @@ public class InputManager : MonoBehaviour
         RemoveListeners();
     }
 
+    public void SetMouseAndKeyboard()
+    {
+        isMouseAndKeyboard = true;
+    }
+
     public void AddListeners()
     {
         // Update moveInput
@@ -125,11 +130,6 @@ public class InputManager : MonoBehaviour
         playerInput.actions["ZoomToggle"].canceled += ZoomToggle;
         playerInput.actions["Look"].performed += Look;
         playerInput.actions["Look"].canceled += Look;
-
-        if (playerInput.currentControlScheme == "MouseAndKeyboard")
-        {
-            isMouseAndKeyboard = true;
-        }
 
         AddExtraListeners();
     }
