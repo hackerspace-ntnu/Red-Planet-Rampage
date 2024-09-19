@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using System.Linq;
 using TMPro;
 using UnityEngine.Serialization;
+using static GunStats;
+using System;
 
 public class PlayerHUDController : MonoBehaviour
 {
@@ -345,7 +347,7 @@ public class PlayerHUDController : MonoBehaviour
             LeanTween.cancel(hitMarkTween);
             SetHitScale(0f);
         }
-        hitMarkTween = LeanTween.value(crosshair.gameObject, SetHitScale, 0f, 1.5f, 0.2f).setEasePunch().id;
+        hitMarkTween = LeanTween.value(crosshair.gameObject, SetHitScale, 0f, 1.5f, 0.4f).setEasePunch().id;
     }
 
     private void SetCrossScale(float scale)
@@ -358,8 +360,15 @@ public class PlayerHUDController : MonoBehaviour
         crosshairMaterial.SetFloat("_HitMarkerRadius", scale);
     }
 
-    public void UpdateOnInitialize(float radius)
+    public void UpdateOnInitialize(GunStats stats)
     {
-        crosshairMaterial.SetFloat("_Radius", radius == 0f ? 1f : 1f/radius);
+        crosshairMaterial.SetFloat("_Radius", stats.CrosshairRadius.Value() == 0f ? 0f : 1f/stats.CrosshairRadius.Value());
+
+        // Has to be done this way as enum keywords in reality are a set of boolean keywords...
+        foreach (CrossHairModes mode in Enum.GetValues(typeof(CrossHairModes)))
+            if (mode != stats.CrossHairMode)
+                crosshairMaterial.DisableKeyword("_MODE_" + mode.ToString().ToUpper());
+            else
+                crosshairMaterial.EnableKeyword("_MODE_" + mode.ToString().ToUpper());
     }
 }

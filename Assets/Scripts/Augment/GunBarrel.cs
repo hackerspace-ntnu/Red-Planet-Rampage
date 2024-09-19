@@ -1,9 +1,12 @@
 using UnityEngine;
 using UnityEngine.VFX;
+using static GunStats;
 
 [RequireComponent(typeof(ProjectileController))]
 public class GunBarrel : Augment
 {
+    [SerializeField]
+    private CrossHairModes crossHairMode;
     // Where to attach extensions
     public Transform[] attachmentPoints;
 
@@ -15,9 +18,15 @@ public class GunBarrel : Augment
 
     private GunController gunController;
 
-    private void Start()
+    private void Awake()
     {
         gunController = transform.parent.GetComponent<GunController>();
+        if (gunController)
+            gunController.stats.CrossHairMode = crossHairMode;
+    }
+
+    private void Start()
+    {
         if (!gunController)
             return;
 

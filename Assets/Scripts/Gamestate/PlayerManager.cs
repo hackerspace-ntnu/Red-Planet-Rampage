@@ -411,7 +411,7 @@ public class PlayerManager : NetworkBehaviour
 
     private void UpdateHudCrosshair(GunStats stats)
     {
-        HUDController.UpdateOnInitialize(stats.CrosshairRadius.Value());
+        HUDController.UpdateOnInitialize(stats);
     }
 
     private void TryPlaceBid(InputAction.CallbackContext ctx)

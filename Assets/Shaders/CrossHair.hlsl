@@ -23,7 +23,6 @@ float crossSDF_float(float2 pos)
     return abs(sdCross_float(pos, float2(0.5, 0.1), 0.1))-0.05;
 }
 
-
 void CrossHair_float(float2 UV, float crossSize, float circleRadius, float hitMarkerRadius, out float Distance)
 {
 	Distance = min(min(sphereSDF_float(UV * 2.5 * circleRadius), crossSDF_float(UV * crossSize)), sdRoundedX_float(UV, hitMarkerRadius, 0.1));
