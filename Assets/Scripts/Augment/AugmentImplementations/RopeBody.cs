@@ -1,10 +1,7 @@
-using Mirror;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using Unity.Mathematics;
+using Mirror;
+using Org.BouncyCastle.Asn1.Misc;
 using UnityEngine;
-using UnityEngine.VFX;
 
 public class RopeBody : GunBody
 {
@@ -48,6 +45,8 @@ public class RopeBody : GunBody
     private bool isThrowing = false;
     private bool canThrow = true;
     private float oldLength = 0f;
+
+    private int throwTween;
 
     public override void Start()
     {
@@ -97,7 +96,7 @@ public class RopeBody : GunBody
         int controlPointCount = Mathf.RoundToInt(Mathf.Max(rope.CollisionPoints.Count - 1f, 0f));
         gunController.stats.Ammo = 0;
         plugPop.Play(audioSource);
-        float timePerPoint = (rope.RopeLength / rope.CollisionPoints.Count) * 0.05f;
+        float timePerPoint = rope.RopeLength / rope.CollisionPoints.Count * 0.05f;
         if (controlPointCount < 2)
         {
             AnimateLastVertex();
@@ -111,7 +110,7 @@ public class RopeBody : GunBody
                 if (rope.CollisionPoints.Count > 1)
                     rope.CollisionPoints.RemoveAt(0);
                 if (rope.CollisionPoints.Count < 2)
-                { 
+                {
                     rope.CollisionCheckActive = true;
                     AnimateLastVertex();
                 }
@@ -141,38 +140,108 @@ public class RopeBody : GunBody
     }
 
     // Called by animator
+    // TODO Add some sanity checks once this game reaches popularity 😔
     public void ActivateWire()
     {
-        if (!plugAnchor)
+        if (!plugAnchor || !isOwned)
             return;
+
         if (Physics.Raycast(gunController.Player.inputManager.transform.position, gunController.Player.inputManager.transform.forward, out RaycastHit hit, ropeLength, ignoreLayer))
         {
-            plugAnchor.transform.position = gunController.Player.transform.position;
-            plugAnchor.transform.forward = hit.normal;
-            rope.enabled = true;
-            canThrow = false;
-            LeanTween.value(gameObject, UpdateRope, 0f, ropeLength, 0.02f * ropeLength);
-            plugAnchor.gameObject.LeanMove(hit.point, 0.02f * hit.distance)
+            StartThrowingWire(gunController.Player.transform.position, hit.normal);
+            ThrowWireCmd(gunController.Player.transform.position, hit.point, hit.normal, hit.distance);
+
+            if (LeanTween.isTweening(throwTween))
+                LeanTween.cancel(throwTween);
+            throwTween = plugAnchor.gameObject.LeanMove(hit.point, 0.02f * hit.distance)
                 .setOnComplete(() =>
                 {
-                    rope.ResetRope(plugAnchor.WireOrigin);
-                    isThrowing = false;
-                    isWired = true;
-                    plugAnchor.SetPulseStrength(0.85f);
-                    gunController.stats.Ammo = gunController.stats.MagazineSize;
-                });
-            rope.ResetRope(plugAnchor.WireOrigin);
-            plugAnchor.gameObject.SetActive(true);
+                    PlaceWireCmd(hit.point, hit.normal);
+                    AfterPlaceWire();
+                }).id;
         }
         else
         {
-            plugAnchor.SetPulseStrength(0);
-            plugAnchor.transform.position = gunController.Player.transform.position;
-            plugAnchor.transform.forward = gunController.Player.inputManager.transform.forward;
-            rope.enabled = true;
-            plugAnchor.gameObject.SetActive(true);
-            AnimateFullPullBack();
+            DeactivateWireCmd();
+            DeactivateWire();
         }
+    }
+
+    private void StartThrowingWire(Vector3 position, Vector3 direction)
+    {
+        plugAnchor.transform.position = position;
+        plugAnchor.transform.forward = direction;
+        rope.enabled = true;
+        canThrow = false;
+        LeanTween.value(gameObject, UpdateRope, 0f, ropeLength, 0.02f * ropeLength);
+        rope.ResetRope(plugAnchor.WireOrigin);
+        plugAnchor.gameObject.SetActive(true);
+    }
+
+    [Command]
+    private void ThrowWireCmd(Vector3 position, Vector3 target, Vector3 direction, float distance)
+    {
+        ThrowWireRpc(position, target, direction, distance);
+    }
+
+    [ClientRpc(includeOwner = false)]
+    private void ThrowWireRpc(Vector3 position, Vector3 target, Vector3 direction, float distance)
+    {
+        StartThrowingWire(position, direction);
+
+        if (LeanTween.isTweening(throwTween))
+            LeanTween.cancel(throwTween);
+        throwTween = plugAnchor.gameObject.LeanMove(target, 0.02f * distance).id;
+    }
+
+    [Command]
+    private void PlaceWireCmd(Vector3 position, Vector3 normal)
+    {
+        PlaceWireRpc(position, normal);
+    }
+
+    [ClientRpc(includeOwner = false)]
+    private void PlaceWireRpc(Vector3 position, Vector3 normal)
+    {
+        plugAnchor.transform.position = position;
+        plugAnchor.transform.forward = normal;
+        if (LeanTween.isTweening(throwTween))
+            LeanTween.cancel(throwTween);
+        AfterPlaceWire();
+    }
+
+    private void AfterPlaceWire()
+    {
+        rope.ResetRope(plugAnchor.WireOrigin);
+        isThrowing = false;
+        isWired = true;
+        plugAnchor.SetPulseStrength(0.85f);
+        gunController.stats.Ammo = gunController.stats.MagazineSize;
+    }
+
+    [Command]
+    private void DeactivateWireCmd()
+    {
+        DeactivateWireRpc();
+    }
+
+    [ClientRpc(includeOwner = false)]
+    private void DeactivateWireRpc()
+    {
+        DeactivateWire();
+    }
+
+    private void DeactivateWire()
+    {
+        plugAnchor.SetPulseStrength(0);
+        plugAnchor.transform.position = gunController.Player.transform.position;
+        if (gunController.Player.inputManager)
+            plugAnchor.transform.forward = gunController.Player.inputManager.transform.forward;
+        else
+            plugAnchor.transform.forward = gunController.Player.GunHolder.transform.forward;
+        rope.enabled = true;
+        plugAnchor.gameObject.SetActive(true);
+        AnimateFullPullBack();
     }
 
     public void PlayThrowAudio()
@@ -184,7 +253,9 @@ public class RopeBody : GunBody
     {
         LeanTween.value(gameObject, UpdateRope, 0f, ropeLength, 0.02f * ropeLength);
 
-        plugAnchor.gameObject.LeanMove(gunController.Player.inputManager.transform.position + gunController.Player.inputManager.transform.forward * ropeLength, 0.02f * ropeLength)
+        var targetTransform = gunController.Player.inputManager?.transform ?? gunController.Player.GunHolder.transform;
+
+        plugAnchor.gameObject.LeanMove(targetTransform.position + targetTransform.forward * ropeLength, 0.02f * ropeLength)
             .setOnComplete(() =>
             {
                 retractingWire.Play(audioSource);
@@ -209,11 +280,11 @@ public class RopeBody : GunBody
         LeanTween.value(gameObject, SetPullbackValue, 1f, 0f, 0.01f * ropeLength)
             .setOnComplete(() =>
             {
-                    rope.enabled = false;
-                    isThrowing = false;
-                    plugAnchor.gameObject.SetActive(false);
-                    canThrow = true;
-                    rope.CollisionCheckActive = true;
+                rope.enabled = false;
+                isThrowing = false;
+                plugAnchor.gameObject.SetActive(false);
+                canThrow = true;
+                rope.CollisionCheckActive = true;
             });
     }
 

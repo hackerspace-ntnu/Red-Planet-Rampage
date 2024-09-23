@@ -1,6 +1,7 @@
+using Mirror;
 using UnityEngine;
 
-public class GunBody : MonoBehaviour
+public class GunBody : NetworkBehaviour
 {
     [SerializeField]
     private GunStats stats;
