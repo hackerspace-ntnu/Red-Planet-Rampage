@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 724901531376534733}
   m_Layer: 0
   m_Name: MovingPunchingBagRack
-  m_TagString: Untagged
+  m_TagString: metal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -117,7 +117,7 @@ Transform:
   - {fileID: 1621361140838592767}
   - {fileID: 6472192113901413572}
   m_Father: {fileID: 0}
-  m_RootOrder: 15
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1964601282469176312
 MonoBehaviour:
@@ -131,10 +131,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb340f72f7467764ab2b1a9e79bde3bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   routepoints:
   - {fileID: 0}
   - {fileID: 0}
-  moveSpeed: 2
+  maxSpeed: 5
+  minSpeed: 2
+  accelerationDistance: 2
+  rotor: {fileID: 0}
 --- !u!65 &6517426855109034607
 BoxCollider:
   m_ObjectHideFlags: 0

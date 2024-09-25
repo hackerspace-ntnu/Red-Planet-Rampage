@@ -26,6 +26,7 @@ public enum SecretCombinationType
     BigIron,
     Nuke,
     MadHatter,
+    PointNClick,
 }
 
 public enum AchievementType
@@ -194,6 +195,7 @@ public class SteamManager : MonoBehaviour
         { SecretCombinationType.BigIron, "WEAPON_BIG_IRON" },
         { SecretCombinationType.Nuke, "WEAPON_NUKE" },
         { SecretCombinationType.MadHatter, "WEAPON_MAD_HATTER" },
+        { SecretCombinationType.PointNClick, "WEAPON_POINT_CLICK" },
     };
 
     private readonly Dictionary<AchievementType, string> achievementNames = new()
