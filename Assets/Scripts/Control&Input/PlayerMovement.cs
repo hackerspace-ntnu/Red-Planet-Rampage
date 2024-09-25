@@ -117,6 +117,9 @@ public class PlayerMovement : MonoBehaviour
     protected Animator animator;
     public Animator Animator => animator;
 
+    private Collider ground;
+    public Collider Ground => ground;
+
     private GameObject gunHolder;
 
     private const float MarsGravity = 3.7f;
@@ -349,7 +352,9 @@ public class PlayerMovement : MonoBehaviour
     /// <returns>Whether or not the player is in the air</returns>
     private bool IsInAir()
     {
-        return !Physics.BoxCast(hitbox.bounds.center, new Vector3(.5f, .5f, .2f), Vector3.down, Quaternion.identity, 0.5f + airThreshold, groundCheckMask); ;
+        bool isAir = !Physics.BoxCast(hitbox.bounds.center, new Vector3(.5f, .5f, .2f), Vector3.down, out RaycastHit hit, Quaternion.identity, 0.5f + airThreshold, groundCheckMask);
+        ground = isAir ? null : hit.collider;
+        return isAir;
     }
 
 
