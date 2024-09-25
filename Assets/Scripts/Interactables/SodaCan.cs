@@ -30,6 +30,12 @@ public class SodaCan : MonoBehaviour
     private ExplosionController explosion;
 
     [SerializeField]
+    private AudioSource audioSource;
+
+    [SerializeField]
+    private AudioGroup sprayNoise;
+
+    [SerializeField]
     private Renderer mesh;
 
     private HealthController healthController;
@@ -81,12 +87,16 @@ public class SodaCan : MonoBehaviour
         state = SodaCanState.Flying;
         sprayEffect.SendEvent(VisualEffectAsset.PlayEventID);
         sprayEffect.SetBool("IsSpraying", true);
+        audioSource.loop = true;
+        sprayNoise.PlayExclusively(audioSource);
     }
 
     private void StopFlying()
     {
         state = SodaCanState.Emptied;
         sprayEffect.SetBool("IsSpraying", false);
+        audioSource.loop = false;
+        audioSource.Stop();
     }
 
     private void FixedUpdate()

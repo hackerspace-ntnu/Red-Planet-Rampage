@@ -59,6 +59,8 @@ MonoBehaviour:
   timeSpentFlying: 10
   sprayEffect: {fileID: 443343156016952106}
   explosion: {fileID: 3590230029954673581}
+  audioSource: {fileID: 3179586820888703256}
+  sprayNoise: {fileID: 11400000, guid: cb524168a86183940a86feab09f730d8, type: 2}
   mesh: {fileID: 2997704316376001849}
 --- !u!114 &5598940461500466729
 MonoBehaviour:
@@ -603,8 +605,8 @@ AudioSource:
   Spatialize: 0
   SpatializePostEffects: 0
   Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
+  DopplerLevel: 5
+  MinDistance: 3
   MaxDistance: 500
   Pan2D: 0
   rolloffMode: 0
