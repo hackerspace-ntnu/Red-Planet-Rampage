@@ -8,7 +8,7 @@ public class HitboxController : MonoBehaviour
 
     public HealthController health;
 
-    public void DamageCollider(DamageInfo info)
+    public virtual void DamageCollider(DamageInfo info)
     {
         if (!health.enabled)
             return;
