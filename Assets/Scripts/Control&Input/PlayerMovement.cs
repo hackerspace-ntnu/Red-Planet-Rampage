@@ -112,6 +112,7 @@ public class PlayerMovement : MonoBehaviour
     private JumpState jumpState = JumpState.Normal;
 
     private bool isCrouching = false;
+    public bool IsCrouching => isCrouching;
 
     [SerializeField]
     protected Animator animator;

@@ -64,7 +64,7 @@ public class ExplosionController : MonoBehaviour
             vfx.SendEvent(VisualEffectAsset.PlayEventID);
         });
         soundEffect.Play(audioSource);
-        var targets = Physics.SphereCastAll(transform.position, radius, Vector3.up, 0.01f, hitBoxLayers);
+        var targets = Physics.SphereCastAll(transform.position, radius, Vector3.up, 0.01f, hitBoxLayers).OrderBy( hit => hit.distance).ToArray();
         var hits = new List<(RaycastHit, float)>(targets.Length);
         foreach (var target in targets)
         {
