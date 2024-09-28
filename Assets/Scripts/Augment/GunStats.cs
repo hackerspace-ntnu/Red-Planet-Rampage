@@ -132,7 +132,7 @@ public class GunStats : ScriptableObject
 
     [SerializeField]
     [Tooltip("How much damage a critical hit does, should be >= 1")]
-    private ModifiableFloat criticalMultiplier = new ModifiableFloat(2f);
+    private ModifiableFloat criticalMultiplier = new ModifiableFloat(1.5f);
     /// <summary>
     /// How much damage a critical hit does, should be >= 1
     /// </summary>

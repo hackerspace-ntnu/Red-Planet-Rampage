@@ -340,6 +340,7 @@ public class PlayerHUDController : MonoBehaviour
         hitTween = LeanTween.value(crosshair.gameObject, SetCrossScale, crosshairCrossScale, 2.5f, 0.4f).setEasePunch().id;
     }
 
+    // TODO better name for this method?
     public void DamageAnimation()
     {
         if (LeanTween.isTweening(hitMarkTween))
@@ -362,7 +363,7 @@ public class PlayerHUDController : MonoBehaviour
 
     public void UpdateOnInitialize(GunStats stats)
     {
-        crosshairMaterial.SetFloat("_Radius", stats.CrosshairRadius.Value() == 0f ? 0f : 1f/stats.CrosshairRadius.Value());
+        crosshairMaterial.SetFloat("_Radius", stats.CrosshairRadius.Value() == 0f ? 0f : 1f / stats.CrosshairRadius.Value());
 
         // Has to be done this way as enum keywords in reality are a set of boolean keywords...
         foreach (CrossHairModes mode in Enum.GetValues(typeof(CrossHairModes)))

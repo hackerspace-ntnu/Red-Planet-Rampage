@@ -116,22 +116,20 @@ public class BulletController : ProjectileController
         {
             Quaternion randomSpread = Quaternion.Lerp(Quaternion.identity, random.Rotation(), stats.ProjectileSpread);
 
-            projectile = new()
+            projectile = new(stats)
             {
                 // TODO: Possibly standardize this better
                 shotID = currentShotID,
                 active = true,
                 distanceTraveled = 0f,
-                damage = stats.ProjectileDamage,
                 position = output,
                 oldPosition = output,
                 direction = randomSpread * direction,
                 maxDistance = maxDistance,
                 rotation = randomSpread * rotation,
-                initializationTime = Time.fixedTime,
                 speedFactor = stats.ProjectileSpeedFactor,
                 gravity = stats.ProjectileGravityModifier * 9.81f,
-                size = Mathf.Max(0, (stats.ProjectileScale - 1)*.1f),
+                size = Mathf.Max(0, (stats.ProjectileScale - 1) * .1f),
             };
 
             projectile.additionalProperties.Clear();

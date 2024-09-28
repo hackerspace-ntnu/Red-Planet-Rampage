@@ -68,17 +68,15 @@ public class LazurController : ProjectileController
     [ClientRpc]
     private void RpcFireProjectile(Vector3 output, Vector3 direction)
     {
-        projectile = new()
+        projectile = new(stats)
         {
             shotID = currentShotID,
             active = true,
             distanceTraveled = 0f,
-            damage = stats.ProjectileDamage,
             position = output,
             oldPosition = output,
             direction = direction,
             maxDistance = MaxDistance,
-            initializationTime = Time.fixedTime,
             size = stats.ProjectileSize * stats.ProjectileScale
         };
         projectile.additionalProperties.Clear();
