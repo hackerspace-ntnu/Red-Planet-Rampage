@@ -23,12 +23,11 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
 
     [Range(0f, 180f)][SerializeField] private float angleVariation = 180f;
 
-    private const int allGunsAndPlayersMask = (1 << 3) | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
+    private const int allHitboxesAndGunsAndPlayersMask = (1 << 3) | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
     private void Awake()
     {
-        // TODO adjust amount?
-        decalPool = new ObjectPool<DecalProjector>(decal);
+        decalPool = new ObjectPool<DecalProjector>(decal, 70);
     }
 
     public void Attach(ProjectileController projectile)
@@ -57,16 +56,13 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
 
     private void OnHit(RaycastHit target, ref ProjectileState state)
     {
-        // Soda cans are tiny and flail around, making them unsuitable for placing bullet holes on
-        // TODO Add some way of determining which *other* objects to avoid placing decals on
-        if (target.collider.TryGetComponent<SodaCan>(out var _))
+        // Avoid placing decals on players or their guns, as that leads to the heebie-jeebies
+        if (((1 << target.collider.gameObject.layer) & allHitboxesAndGunsAndPlayersMask) > 0)
             return;
-        // Also avoid placing decals on players, as that leads to the heebie-jeebies
-        if ((target.collider.gameObject.layer & allGunsAndPlayersMask) > 0)
-            return;
-        if (target.collider.TryGetComponent<HitboxController>(out var hitbox))
-            if (hitbox.health && hitbox.health.TryGetComponent<PlayerManager>(out var _))
-                return;
+        // Avoid decals on other objects that are marked as unsuitable for placing bullet holes on
+        // TODO add this check back if you have need for this tag!
+        //if (target.collider.gameObject.CompareTag("NoDecal"))
+        //    return;
 
         var spawnedDecal = decalPool.Get();
 
