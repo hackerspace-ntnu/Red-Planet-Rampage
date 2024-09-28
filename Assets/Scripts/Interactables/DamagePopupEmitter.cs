@@ -23,7 +23,7 @@ public class DamagePopupEmitter : MonoBehaviour
         if (!info.sourcePlayer)
             return;
         var horizontalAxis = Vector3.Cross(info.force.normalized, Vector3.up);
-        var position = info.position + Vector3.up * Random.Range(.3f, .5f) + horizontalAxis * Random.Range(-.2f, .2f);
+        var position = info.position + Vector3.up * Random.Range(.5f, .8f) + horizontalAxis * Random.Range(-.2f, .2f);
         var popup = Instantiate(damagePopup, position, Quaternion.identity);
 
         // Real players can only see their own damage numbers, all players can see AI damage numbers
