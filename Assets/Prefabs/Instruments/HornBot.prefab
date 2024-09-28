@@ -4840,6 +4840,7 @@ GameObject:
   - component: {fileID: 8868363343944456005}
   - component: {fileID: 1971387790537994735}
   - component: {fileID: 530666400925580073}
+  - component: {fileID: 853836667993946443}
   m_Layer: 0
   m_Name: HornBot
   m_TagString: Untagged
@@ -4895,6 +4896,19 @@ MonoBehaviour:
   animator: {fileID: 7299591235659827003}
   onHitStateName: Crying
   distortionDuration: 1
+--- !u!114 &853836667993946443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3883888824238649637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8df77ee5e94e96a21a1c251683e0d3a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damagePopup: {fileID: 3456343568974069144, guid: 216963e07a2087cc99a5e9c4e6b0454e, type: 3}
 --- !u!1 &6207350715758141611
 GameObject:
   m_ObjectHideFlags: 0
@@ -10222,7 +10236,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 819cc9d108cf99f4eae1397824403dbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isCritical: 0
+  isCritical: 1
   health: {fileID: 1971387790537994735}
 --- !u!1 &6839379924694454171 stripped
 GameObject:

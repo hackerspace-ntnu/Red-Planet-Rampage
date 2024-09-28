@@ -34,5 +34,6 @@ public class DamagePopupEmitter : MonoBehaviour
 
         popup.Camera = info.sourcePlayer.GunHolder.transform;
         popup.Damage = damage;
+        popup.IsCritical = info.isCritical;
     }
 }

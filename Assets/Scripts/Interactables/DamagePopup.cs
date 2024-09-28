@@ -6,6 +6,24 @@ public class DamagePopup : MonoBehaviour
     [SerializeField]
     private TMP_Text label;
 
+    [SerializeField]
+    private float lowDamage = 20;
+
+    [SerializeField]
+    private float highDamage = 80;
+
+    [SerializeField]
+    private Color normalLowColor;
+
+    [SerializeField]
+    private Color normalHighColor;
+
+    [SerializeField]
+    private Color criticalLowColor;
+
+    [SerializeField]
+    private Color criticalHighColor;
+
     public Transform Camera { get; set; }
 
     public float Damage
@@ -20,8 +38,13 @@ public class DamagePopup : MonoBehaviour
         }
     }
 
+    // TODO make more flashy if crit!
+    public bool IsCritical { get; set; }
+
     private void Start()
     {
+        label.color = DetermineColor();
+
         var scale = transform.lossyScale;
         LeanTween.sequence()
             .append(LeanTween.scale(gameObject, scale * 2f, .4f).setEasePunch())
@@ -29,6 +52,12 @@ public class DamagePopup : MonoBehaviour
             .append(LeanTween.scale(gameObject, Vector3.zero, .2f).setEaseOutQuad()
             .setOnComplete(() => Destroy(gameObject)));
     }
+
+    private Color DetermineColor() =>
+        IsCritical
+            ? Color.Lerp(criticalLowColor, criticalHighColor, (Damage - lowDamage) / highDamage)
+            : Color.Lerp(normalLowColor, normalHighColor, (Damage - lowDamage) / highDamage);
+
 
     private void Update()
     {
