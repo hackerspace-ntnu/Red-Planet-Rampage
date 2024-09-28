@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class HitboxController : MonoBehaviour
@@ -10,9 +8,16 @@ public class HitboxController : MonoBehaviour
 
     public virtual void DamageCollider(DamageInfo info)
     {
-        if (!health.enabled)
+        if (health == null || !health.enabled)
             return;
-        health?.DealDamage(info);
+
+        if (isCritical && info.criticalHitMultiplier > 1.01f)
+        {
+            info.isCritical = true;
+            info.damage *= info.criticalHitMultiplier;
+        }
+
+        health.DealDamage(info);
 
         if (info.sourcePlayer != null)
             if (info.sourcePlayer.HUDController != null)

@@ -18,18 +18,23 @@ public struct DamageInfo
 
     public float damage;
 
+    public float criticalHitMultiplier;
+
+    public bool isCritical;
+
     public Vector3 position;
 
     public Vector3 force;
 
     public DamageType damageType;
 
-    public DamageInfo(PlayerManager source, float damage, Vector3 position, Vector3 force, DamageType damageType)
+    public DamageInfo(PlayerManager source, float damage, Vector3 position, Vector3 force, DamageType damageType, float criticalHitMultiplier = 1.2f)
     {
         this.sourcePlayer = source;
         this.damage = damage;
+        this.criticalHitMultiplier = criticalHitMultiplier;
+        this.isCritical = false;
 
-        // Todo, re-implement this with actual damage position and force
         this.position = position;
         this.force = force;
         this.damageType = damageType;
@@ -39,6 +44,8 @@ public struct DamageInfo
     {
         sourcePlayer = source;
         damage = info.damage;
+        criticalHitMultiplier = info.criticalHitMultiplier;
+        isCritical = info.isCritical;
         damageType = info.damageType;
         position = info.position;
         force = info.force;
@@ -77,6 +84,10 @@ public struct NetworkDamageInfo
 
     public float damage;
 
+    public float criticalHitMultiplier;
+
+    public bool isCritical;
+
     public Vector3 position;
 
     public Vector3 force;
@@ -87,15 +98,19 @@ public struct NetworkDamageInfo
     {
         sourcePlayer = source;
         damage = info.damage;
+        criticalHitMultiplier = info.criticalHitMultiplier;
+        isCritical = info.isCritical;
         damageType = info.damageType;
         position = info.position;
         force = info.force;
     }
 
-    public NetworkDamageInfo(uint source, float damage, Vector3 position, Vector3 force, DamageType damageType)
+    public NetworkDamageInfo(uint source, float damage, Vector3 position, Vector3 force, DamageType damageType, float criticalHitMultiplier = 1.2f)
     {
         this.sourcePlayer = source;
         this.damage = damage;
+        this.criticalHitMultiplier = criticalHitMultiplier;
+        this.isCritical = false;
         this.damageType = damageType;
         this.position = position;
         this.force = force;
@@ -119,7 +134,7 @@ public class ProjectileDamageController : MonoBehaviour, ProjectileModifier
 
     private void DamageHitbox(HitboxController controller, ref ProjectileState state)
     {
-        var info = new DamageInfo(player, state.damage, state.position, state.direction, state.damageType);
+        var info = new DamageInfo(player, state.damage, state.position, state.direction, state.damageType, state.criticalHitMultiplier);
         if (controller.health && !state.hitHealthControllers.Contains(controller.health))
         {
             state.hitHealthControllers.Add(controller.health);

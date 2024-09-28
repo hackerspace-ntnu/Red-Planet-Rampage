@@ -52,6 +52,7 @@ public class ProjectileState
 
     public float damage = 0f;
     public DamageType damageType = DamageType.Weapon;
+    public float criticalHitMultiplier = 1.2f;
 
     public float size = 0f;
 
@@ -73,8 +74,23 @@ public class ProjectileState
 
         speedFactor = stats.ProjectileSpeedFactor;
         gravity = stats.ProjectileGravityModifier * 9.81f;
+
         damage = stats.ProjectileDamage;
+        criticalHitMultiplier = stats.CriticalMultiplier;
     }
+
+    public ProjectileState(GunStats stats)
+    {
+        initializationTime = Time.fixedTime;
+        lastUpdateTime = Time.fixedTime;
+
+        speedFactor = stats.ProjectileSpeedFactor;
+        gravity = stats.ProjectileGravityModifier * 9.81f;
+
+        damage = stats.ProjectileDamage;
+        criticalHitMultiplier = stats.CriticalMultiplier;
+    }
+
     public ProjectileState() { }
 }
 

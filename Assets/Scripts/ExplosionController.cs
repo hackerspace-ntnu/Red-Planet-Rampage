@@ -43,7 +43,8 @@ public class ExplosionController : MonoBehaviour
     public void Init()
     {
         visualEffects = GetComponentsInChildren<VisualEffect>().ToList();
-        visualEffects.ForEach(vfx => {
+        visualEffects.ForEach(vfx =>
+        {
             vfx.enabled = false;
             vfx.SetFloat("Size", radius / 6f);
         });
@@ -58,13 +59,13 @@ public class ExplosionController : MonoBehaviour
 
     public List<(RaycastHit hit, float damage)> Explode(PlayerManager sourcePlayer)
     {
-        visualEffects.ForEach(vfx => 
+        visualEffects.ForEach(vfx =>
         {
             vfx.enabled = true;
             vfx.SendEvent(VisualEffectAsset.PlayEventID);
         });
         soundEffect.Play(audioSource);
-        var targets = Physics.SphereCastAll(transform.position, radius, Vector3.up, 0.01f, hitBoxLayers).OrderBy( hit => hit.distance).ToArray();
+        var targets = Physics.SphereCastAll(transform.position, radius, Vector3.up, 0.01f, hitBoxLayers).OrderBy(hit => hit.distance).ToArray();
         var hits = new List<(RaycastHit, float)>(targets.Length);
         foreach (var target in targets)
         {
@@ -93,7 +94,7 @@ public class ExplosionController : MonoBehaviour
         {
             hitHealthControllers.Add(hitbox.health);
             scaledDamage = Mathf.Max(1, damage * damageCurve.Evaluate(Vector3.Distance(target.transform.position, transform.position) / radius));
-            hitbox.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage, target.transform.position, (target.transform.position - transform.position).normalized, DamageType.Explosion));
+            hitbox.DamageCollider(new DamageInfo(sourcePlayer, scaledDamage, target.transform.position, (target.transform.position - transform.position).normalized, DamageType.Explosion, 1));
         }
 
         if (hasHealth && hitbox.health.TryGetComponent<Rigidbody>(out var rigidbody))
