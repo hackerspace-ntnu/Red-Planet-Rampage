@@ -38,7 +38,6 @@ public class DamagePopup : MonoBehaviour
         }
     }
 
-    // TODO make more flashy if crit!
     public bool IsCritical { get; set; }
 
     private void Start()
@@ -47,8 +46,9 @@ public class DamagePopup : MonoBehaviour
 
         var scale = transform.lossyScale;
         LeanTween.sequence()
+            .append(LeanTween.moveY(gameObject, transform.position.y + 1f, .2f).setEaseInOutExpo())
             .append(LeanTween.scale(gameObject, scale * 2f, .4f).setEasePunch())
-            .insert(LeanTween.moveY(gameObject, transform.position.y + 1f, 1).setEaseInOutExpo())
+            .insert(LeanTween.moveY(gameObject, transform.position.y + 2f, 1).setEaseInOutExpo())
             .append(LeanTween.scale(gameObject, Vector3.zero, .2f).setEaseOutQuad()
             .setOnComplete(() => Destroy(gameObject)));
     }
