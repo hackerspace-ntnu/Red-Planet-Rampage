@@ -31,7 +31,7 @@ public class PlayerFactory : MonoBehaviour
 
     public void InstantiatePlayerSelectItems()
     {
-        playerInputManagerController.ChangeInputMaps("Menu");
+        playerInputManagerController.ChangeInputMaps("MenuSelect");
         InstantiateInputsOnSpawnpoints(InstantiateItemSelectPlayer);
     }
 
