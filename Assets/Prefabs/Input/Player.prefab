@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4693557610844660152}
   - component: {fileID: 8692423856261334150}
   - component: {fileID: 4961168887133630009}
+  - component: {fileID: 1433872047507736054}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -89,9 +90,6 @@ MonoBehaviour:
   - {fileID: 5451690850857455061}
   playerIK: {fileID: 142658303258642700}
   deathKnockbackForceMultiplier: 150
-  hitSounds: {fileID: 11400000, guid: 90b0dc5583765d64f81545c255b0fa3a, type: 2}
-  criticalHitSounds: {fileID: 11400000, guid: d7372b5565cc3cc4786a3684cf085ac1, type: 2}
-  extraHitSounds: {fileID: 11400000, guid: c5daa2802fa89a54986d53f2fc13cb8f, type: 2}
   jumpSounds: {fileID: 11400000, guid: 4dd848facbacd2a46a109bfbf8743e61, type: 2}
   leapSounds: {fileID: 11400000, guid: a2274363ca9cb9041ba85a73663965d6, type: 2}
 --- !u!114 &71015680234268069
@@ -454,6 +452,21 @@ MonoBehaviour:
   minRadius: 1
   collisionOffset: 0.3
   lookSensitivity: 5
+--- !u!114 &1433872047507736054
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71015680234268067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ab6cb311f3dfd74daebeaf9640705b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitSounds: {fileID: 11400000, guid: 90b0dc5583765d64f81545c255b0fa3a, type: 2}
+  criticalHitSounds: {fileID: 11400000, guid: d7372b5565cc3cc4786a3684cf085ac1, type: 2}
+  extraHitSounds: {fileID: 11400000, guid: c5daa2802fa89a54986d53f2fc13cb8f, type: 2}
 --- !u!1 &345906872987025452
 GameObject:
   m_ObjectHideFlags: 0

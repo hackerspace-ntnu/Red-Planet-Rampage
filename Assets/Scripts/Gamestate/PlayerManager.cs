@@ -119,18 +119,9 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
-    [Header("Hit sounds")]
+    [Header("Movement sounds")]
 
     protected AudioSource audioSource;
-
-    [SerializeField]
-    private AudioGroup hitSounds;
-
-    [SerializeField]
-    private AudioGroup criticalHitSounds;
-
-    [SerializeField]
-    private AudioGroup extraHitSounds;
 
     [SerializeField]
     private AudioGroup jumpSounds;
@@ -183,11 +174,10 @@ public class PlayerManager : NetworkBehaviour
             gunController.transform.parent.localRotation = Quaternion.AngleAxis(yAngle * Mathf.Rad2Deg, Vector3.left);
     }
 
-    void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
+    private void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
         if (hudController)
             hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
-        PlayOnHit(info);
         if (info.sourcePlayer != this)
         {
             lastPlayerThatHitMe = info.sourcePlayer;
@@ -542,23 +532,4 @@ public class PlayerManager : NetworkBehaviour
     }
 
     public new string ToString() => identity.ToString();
-
-    protected void PlayOnHit(DamageInfo damage)
-    {
-        if (damage.isCritical)
-        {
-            criticalHitSounds.Play(audioSource);
-        }
-        else
-        {
-            if (Random.Range(0, 10000) > 5)
-            {
-                hitSounds.Play(audioSource);
-            }
-            else
-            {
-                extraHitSounds.Play(audioSource);
-            }
-        }
-    }
 }
