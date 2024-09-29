@@ -11,7 +11,7 @@ public class AudioGroup : ScriptableObject
 
     [SerializeField]
     private AudioClip[] sounds;
-    
+
 #if UNITY_EDITOR
     [MinMax(-10, 10), ContextMenuItem("Preview/Low Pitch", "PreviewLowPitch"), ContextMenuItem("Preview/High Pitch", "PreviewHighPitch")]
 #endif
@@ -29,6 +29,9 @@ public class AudioGroup : ScriptableObject
 
     [SerializeField]
     private bool is3D = true;
+
+    [SerializeField]
+    private bool shouldPlayInSplitscreen = true;
 
     private void Modulate(AudioSource source)
     {
@@ -50,12 +53,16 @@ public class AudioGroup : ScriptableObject
     public void Play(AudioSource source)
     {
         Modulate(source);
+        if (!shouldPlayInSplitscreen && source.spatialBlend == 0)
+            return;
         source.PlayOneShot(sounds.RandomElement());
     }
-    
+
     public void PlayExclusively(AudioSource source)
     {
         Modulate(source);
+        if (!shouldPlayInSplitscreen && source.spatialBlend == 0)
+            return;
         source.clip = sounds.RandomElement();
         source.Play();
     }
@@ -63,6 +70,8 @@ public class AudioGroup : ScriptableObject
     public void PlayDelayed(AudioSource source, float delay)
     {
         Modulate(source);
+        if (!shouldPlayInSplitscreen && source.spatialBlend == 0)
+            return;
         source.clip = sounds.RandomElement();
         source.PlayDelayed(delay);
     }
