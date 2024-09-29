@@ -33,8 +33,8 @@ public class RubberSniper : GunExtension
             return;
         gunController.onFireStart -= Aim;
         gunController.onFire -= Aim;
-        gunController.Player.HUDController.MoveCrosshair(0f, 0f);
-
+        if (gunController.Player.HUDController)
+            gunController.Player.HUDController.MoveCrosshair(0f, 0f);
     }
 
     private void Aim(GunStats stats)

@@ -143,6 +143,7 @@ public class Round
         if (killer == victim)
             return;
 
+        killer.onKill?.Invoke(killer, victim, info);
         kills[killer.id].Add(victim.id);
         PersistentInfo.RegisterKill(killer.identity);
 

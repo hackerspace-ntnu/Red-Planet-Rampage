@@ -44,6 +44,7 @@ public class PlayerManager : NetworkBehaviour
     public delegate void HitEvent(PlayerManager killer, PlayerManager victim, DamageInfo info);
 
     public HitEvent onDeath;
+    public HitEvent onKill;
 
     protected PlayerManager lastPlayerThatHitMe;
 
@@ -286,6 +287,13 @@ public class PlayerManager : NetworkBehaviour
     {
         // Set player color
         meshBase.ToList().ForEach(mesh => mesh.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color);
+
+        var voicePlayer = GetComponent<VoicePlayer>();
+        voicePlayer.Voice = PlayerInputManagerController.Singleton.VoiceForColor(identity.color);
+        var isLocalPlayer = Peer2PeerTransport.PlayerDetails.FirstOrDefault(p => p.id == id).type is PlayerType.Local;
+        if (isLocalPlayer)
+            voicePlayer.Turn2D();
+
         if (playerIK.TryGetComponent<BiddingPlayer>(out var biddingPlayer))
         {
             // TODO refactor identity subscriptions

@@ -28,6 +28,10 @@ public class PlayerInputManagerController : MonoBehaviour
     public Color[] AIColors => aiColors;
 
     [SerializeField]
+    private Voice[] playerVoices;
+    public Voice[] PlayerVoices => playerVoices;
+
+    [SerializeField]
     private string[] playerNames;
 
     public delegate void JoinEvent(InputManager inputManager);
@@ -87,7 +91,7 @@ public class PlayerInputManagerController : MonoBehaviour
         inputManager.PlayerCamera.enabled = false;
         LocalPlayerInputs.Add(inputManager);
         if (playerInput.currentControlScheme == "MouseAndKeyboard")
-           inputManager.SetMouseAndKeyboard();
+            inputManager.SetMouseAndKeyboard();
         onPlayerInputJoined?.Invoke(inputManager);
 
         if (NetworkManager.singleton.isNetworkActive)
@@ -133,4 +137,12 @@ public class PlayerInputManagerController : MonoBehaviour
         playerInput.RemoveListeners();
         playerInput.AddListeners();
     }
+
+    public Voice VoiceForColor(Color color) =>
+        color == aiColors[0]
+            ? playerVoices.Last()
+            : playerColors
+                .Zip(playerVoices, (c, voice) => (c, voice))
+                .FirstOrDefault(pair => pair.c == color)
+                .voice;
 }
