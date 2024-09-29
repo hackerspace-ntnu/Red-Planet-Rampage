@@ -33,6 +33,17 @@ public class AudioGroup : ScriptableObject
     [SerializeField]
     private bool shouldPlayInSplitscreen = true;
 
+    public AudioGroup To2D() =>
+        new()
+        {
+            is3D = false,
+            sounds = sounds,
+            semitoneRange = semitoneRange,
+            volumeRange = volumeRange,
+            continuousPitchBend = continuousPitchBend,
+            shouldPlayInSplitscreen = shouldPlayInSplitscreen,
+        };
+
     private void Modulate(AudioSource source)
     {
         // Range has override for ints, so we need to force the endpoints to be floats in order to achieve a continuous scale.
