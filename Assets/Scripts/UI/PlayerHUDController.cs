@@ -335,28 +335,38 @@ public class PlayerHUDController : MonoBehaviour
         if (LeanTween.isTweening(hitTween))
         {
             LeanTween.cancel(hitTween);
-            SetCrossScale(crosshairCrossScale);
+            SetCrosshairScale(crosshairCrossScale);
         }
-        hitTween = LeanTween.value(crosshair.gameObject, SetCrossScale, crosshairCrossScale, 2.5f, 0.4f).setEasePunch().id;
+        hitTween = LeanTween.value(crosshair.gameObject, SetCrosshairScale, crosshairCrossScale, 2.5f, 0.4f).setEasePunch().id;
     }
 
     // TODO better name for this method?
-    public void DamageAnimation()
+    public void DamageAnimation(DamageInfo damage)
     {
         if (LeanTween.isTweening(hitMarkTween))
         {
             LeanTween.cancel(hitMarkTween);
-            SetHitScale(0f);
+            SetHitmarkScale(0f);
+            SetCrosshairCrit(false);
         }
-        hitMarkTween = LeanTween.value(crosshair.gameObject, SetHitScale, 0f, 1.5f, 0.4f).setEasePunch().id;
+        SetCrosshairCrit(damage.isCritical);
+        hitMarkTween = LeanTween
+            .value(crosshair.gameObject, SetHitmarkScale, 0f, 1.5f, 0.4f)
+            .setEasePunch()
+            .setOnComplete(() => SetCrosshairCrit(false)).id;
     }
 
-    private void SetCrossScale(float scale)
+    private void SetCrosshairCrit(bool isCritical)
+    {
+        crosshairMaterial.SetInteger("_IsCritical", isCritical ? 1 : 0);
+    }
+
+    private void SetCrosshairScale(float scale)
     {
         crosshairMaterial.SetFloat("_CrossSize", scale);
     }
 
-    private void SetHitScale(float scale)
+    private void SetHitmarkScale(float scale)
     {
         crosshairMaterial.SetFloat("_HitMarkerRadius", scale);
     }

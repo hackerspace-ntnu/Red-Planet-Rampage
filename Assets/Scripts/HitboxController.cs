@@ -21,6 +21,6 @@ public class HitboxController : MonoBehaviour
 
         if (info.sourcePlayer != null)
             if (info.sourcePlayer.HUDController != null)
-                info.sourcePlayer.HUDController.DamageAnimation();
+                info.sourcePlayer.HUDController.DamageAnimation(info);
     }
 }
