@@ -140,7 +140,7 @@ public class AIManager : PlayerManager
         {
             lastPlayerThatHitMe = info.sourcePlayer;
         }
-        PlayOnHit();
+        PlayOnHit(info);
         if (info.damageType != DamageType.Explosion)
             return;
         StartCoroutine(WaitAndToggleAgent());

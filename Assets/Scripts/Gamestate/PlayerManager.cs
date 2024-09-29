@@ -127,6 +127,9 @@ public class PlayerManager : NetworkBehaviour
     private AudioGroup hitSounds;
 
     [SerializeField]
+    private AudioGroup criticalHitSounds;
+
+    [SerializeField]
     private AudioGroup extraHitSounds;
 
     [SerializeField]
@@ -184,7 +187,7 @@ public class PlayerManager : NetworkBehaviour
     {
         if (hudController)
             hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
-        PlayOnHit();
+        PlayOnHit(info);
         if (info.sourcePlayer != this)
         {
             lastPlayerThatHitMe = info.sourcePlayer;
@@ -540,15 +543,22 @@ public class PlayerManager : NetworkBehaviour
 
     public new string ToString() => identity.ToString();
 
-    protected void PlayOnHit()
+    protected void PlayOnHit(DamageInfo damage)
     {
-        if (Random.Range(0, 100000) > 5)
+        if (damage.isCritical)
         {
-            hitSounds.Play(audioSource);
+            criticalHitSounds.Play(audioSource);
         }
         else
         {
-            extraHitSounds.Play(audioSource);
+            if (Random.Range(0, 10000) > 5)
+            {
+                hitSounds.Play(audioSource);
+            }
+            else
+            {
+                extraHitSounds.Play(audioSource);
+            }
         }
     }
 }
