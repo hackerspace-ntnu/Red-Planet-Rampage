@@ -515,11 +515,20 @@ public class PlayerManager : NetworkBehaviour
         {
             Destroy(gunController.transform.GetChild(i).gameObject);
         }
+        // gunController.RemoveListeners();
+        var gunAnimations = GunOrigin.GetComponentsInChildren<AugmentAnimator>(includeInactive: true);
+        // Unsubscribe animations (very important)
+        foreach (var animation in gunAnimations)
+        {
+            gunController.onFireStart -= animation.OnFire;
+            gunController.onReload -= animation.OnReload;
+        }
         Destroy(gunController.gameObject);
         for (int i = GunOrigin.transform.childCount - 1; i >= 0; i--)
         {
             Destroy(GunOrigin.transform.GetChild(i).gameObject);
         }
+        // GunOrigin.GetComponent<GunController>().RemoveListeners();
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)

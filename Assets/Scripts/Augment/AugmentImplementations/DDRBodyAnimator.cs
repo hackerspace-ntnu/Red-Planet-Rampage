@@ -7,6 +7,8 @@ public class DDRBodyAnimator : AugmentAnimator
     private Animator animator;
     public override void OnFire(GunStats stats)
     {
+        if (DoWeNeedToEscape())
+            return;
         animator.SetTrigger("Vibrate");
     }
 
@@ -19,6 +21,8 @@ public class DDRBodyAnimator : AugmentAnimator
 
     public override void OnReload(GunStats stats)
     {
+        if (DoWeNeedToEscape())
+            return;
         animator.SetTrigger("Vibrate");
     }
 }
