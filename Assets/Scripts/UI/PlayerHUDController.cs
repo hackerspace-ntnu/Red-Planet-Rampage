@@ -358,7 +358,7 @@ public class PlayerHUDController : MonoBehaviour
 
     private void SetCrosshairCrit(bool isCritical)
     {
-        crosshairMaterial.SetInteger("_IsCritical", isCritical ? 1 : 0);
+        crosshairMaterial.SetFloat("_IsCritical", isCritical ? 1 : 0);
     }
 
     private void SetCrosshairScale(float scale)
