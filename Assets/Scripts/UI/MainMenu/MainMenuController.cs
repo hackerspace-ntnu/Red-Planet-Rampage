@@ -300,10 +300,6 @@ public class MainMenuController : MonoBehaviour
             if (firstInputJoined.IsMouseAndKeyboard && !introVideo.isActiveAndEnabled) ShowMouse();
         }
 
-        bool canPlay = playerInputs.Count > 1;
-        var colors = startButton.colors;
-        colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
-        startButton.colors = colors;
         inputManager.onMovePerformed += PlayUISelectAudio;
         inputManager.onSelect += PlayChooseAudio;
 
