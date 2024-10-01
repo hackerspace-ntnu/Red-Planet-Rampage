@@ -177,7 +177,7 @@ public class GunController : NetworkBehaviour
         RpcFire(rotation);
     }
 
-    [ClientRpc]
+    [ClientRpc(includeOwner = false)]
     private void RpcFire(Quaternion rotation)
     {
         try
@@ -200,7 +200,7 @@ public class GunController : NetworkBehaviour
         RpcFireWithNoAmmo();
     }
 
-    [ClientRpc]
+    [ClientRpc(includeOwner = false)]
     private void RpcFireWithNoAmmo()
     {
         try
@@ -219,6 +219,8 @@ public class GunController : NetworkBehaviour
         if (stats.Ammo <= 0)
         {
             CmdFireWithNoAmmo();
+            // Handle this immediately yourself
+            onFireNoAmmo?.Invoke(stats);
             return;
         }
 
@@ -226,12 +228,16 @@ public class GunController : NetworkBehaviour
         {
             onFireStart?.Invoke(stats);
             AimAtTarget();
+            // Tell server to fire
             CmdFire(projectile.projectileRotation);
+            // but fire immediately yourself!
+            ActuallyFire();
         }
         catch (Exception e)
         {
             // Hopefully recoverable error. Firing has had lots of bugs before,
             // hopefully we avoid displaying them in their gruesome nature to the user this way.
+            Debug.LogError("Failed to fire gun on owner's client!");
             Debug.LogError(e);
         }
     }
