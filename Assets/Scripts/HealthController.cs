@@ -1,3 +1,4 @@
+using System;
 using Mirror;
 using UnityEngine;
 
@@ -40,18 +41,34 @@ public class HealthController : NetworkBehaviour
         }
         else if (isServer)
         {
-            Debug.Log($"Dealing {info.damage} from {info.sourcePlayer.identity.playerName} on server");
-            var networkInfo = new NetworkDamageInfo(info.sourcePlayer.id, info);
-            DealDamageRpc(networkInfo);
+            try
+            {
+                Debug.Log($"Dealing {info.damage} from {info.sourcePlayer.identity.playerName} on server");
+                var networkInfo = new NetworkDamageInfo(info.sourcePlayer.id, info);
+                DealDamageRpc(networkInfo);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Failed to deal damage from server!");
+                Debug.LogError(e);
+            }
         }
     }
 
     [ClientRpc]
     private void DealDamageRpc(NetworkDamageInfo networkInfo)
     {
-        var source = Peer2PeerTransport.PlayerInstanceByID[networkInfo.sourcePlayer];
-        var info = new DamageInfo(source, networkInfo);
-        ActuallyDealDamage(info);
+        try
+        {
+            var source = Peer2PeerTransport.PlayerInstanceByID[networkInfo.sourcePlayer];
+            var info = new DamageInfo(source, networkInfo);
+            ActuallyDealDamage(info);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Failed to deal damage on client!");
+            Debug.LogError(e);
+        }
     }
 
     private void ActuallyDealDamage(DamageInfo info)
