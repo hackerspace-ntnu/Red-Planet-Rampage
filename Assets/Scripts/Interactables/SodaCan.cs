@@ -9,6 +9,9 @@ enum SodaCanState
     Emptied,
 }
 
+[RequireComponent(typeof(AudioSource))]
+[RequireComponent(typeof(HealthController))]
+[RequireComponent(typeof(Rigidbody))]
 public class SodaCan : MonoBehaviour
 {
     [SerializeField]
@@ -29,7 +32,6 @@ public class SodaCan : MonoBehaviour
     [SerializeField]
     private ExplosionController explosion;
 
-    [SerializeField]
     private AudioSource audioSource;
 
     [SerializeField]
@@ -47,6 +49,7 @@ public class SodaCan : MonoBehaviour
 
     private void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         body = GetComponent<Rigidbody>();
         healthController = GetComponent<HealthController>();
         healthController.onDeath += OnDeath;
