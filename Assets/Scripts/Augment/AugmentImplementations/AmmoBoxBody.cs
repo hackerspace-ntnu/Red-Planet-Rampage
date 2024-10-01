@@ -14,6 +14,10 @@ public class AmmoBoxBody : GunBody
     private PlayerHand playerHandLeft;
     [SerializeField]
     private PlayerHand playerHandRight;
+    [SerializeField]
+    private AudioSource audioSource;
+    [SerializeField]
+    private AudioGroup noAmmo;
 
     public override void Start()
     {
@@ -28,6 +32,7 @@ public class AmmoBoxBody : GunBody
         playerHandRight.gameObject.SetActive(true);
         playerHandLeft.SetPlayer(gunController.Player);
         playerHandLeft.gameObject.SetActive(true);
+        gunController.onFireNoAmmo += NoAmmoAudio;
     }
 
     private void OnDestroy()
@@ -35,6 +40,12 @@ public class AmmoBoxBody : GunBody
         if (!gunController)
             return;
         gunController.onFireStart -= Reload;
+        gunController.onFireNoAmmo -= NoAmmoAudio;
+    }
+
+    private void NoAmmoAudio(GunStats _)
+    {
+        noAmmo.Play(audioSource);
     }
 
     private IEnumerator SetClosestAmmoBox()

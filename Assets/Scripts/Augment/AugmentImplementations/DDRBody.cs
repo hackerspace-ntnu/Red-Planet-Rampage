@@ -60,6 +60,8 @@ public class DDRBody : GunBody
     private float musicPace;
 
     private AudioSource audioSource;
+    [SerializeField]
+    private AudioGroup noAmmo;
 
     public override void Start()
     {
@@ -103,6 +105,7 @@ public class DDRBody : GunBody
             playerHandRight.gameObject.SetActive(true);
 
             audioSource = GetComponent<AudioSource>();
+            gunController.onFireNoAmmo += NoAmmoAudio;
         }
 
     }
@@ -147,6 +150,11 @@ public class DDRBody : GunBody
     private void Fire(InputAction.CallbackContext ctx)
     {
         animator.OnFire(gunController.stats);
+    }
+
+    private void NoAmmoAudio(GunStats _)
+    {
+        noAmmo.Play(audioSource);
     }
 
     private void ArrowSelect(InputAction.CallbackContext ctx)
@@ -229,5 +237,6 @@ public class DDRBody : GunBody
 
         gunController.Player.inputManager.onFirePerformed -= Fire;
         gunController.Player.inputManager.onMovePerformed -= ArrowSelect;
+        gunController.onFireNoAmmo -= NoAmmoAudio;
     }
 }

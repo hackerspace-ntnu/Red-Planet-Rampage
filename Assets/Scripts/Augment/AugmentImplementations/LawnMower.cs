@@ -46,6 +46,8 @@ public class LawnMower : GunBody
     private AudioSource audioSource;
     [SerializeField]
     private AudioGroup plopSounds;
+    [SerializeField]
+    private AudioGroup noAmmo;
 
     public override void Start()
     {
@@ -70,6 +72,7 @@ public class LawnMower : GunBody
         handAnimator = GetComponent<Animator>();
         LineHoldingPoint = playerHandLeft.HoldingPoint;
         handString.gameObject.SetActive(true);
+        gunController.onFireNoAmmo += NoAmmoAudio;
 
         if (gunController.Player.GunOrigin.TryGetComponent(out GunController gunControllerDisplay))
             gunControllerDisplay.GetComponentInChildren<LawnMower>().LineHoldingPoint = gunController.Player.PlayerIK.LeftHandIKTransform;
@@ -79,6 +82,11 @@ public class LawnMower : GunBody
     {
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd -= DisableLine;
+        if (!gunController)
+            return;
+        gunController.onFireStart -= Fire;
+        gunController.onFireEnd -= FireEnd;
+        gunController.onFireNoAmmo += NoAmmoAudio;
     }
 
     private void LateUpdate()
@@ -125,6 +133,11 @@ public class LawnMower : GunBody
     private void FireEnd(GunStats stats)
     {
         if (success) Reload(stats);
+    }
+
+    private void NoAmmoAudio(GunStats _)
+    {
+        noAmmo.Play(audioSource);
     }
 
     protected override void Reload(GunStats stats)

@@ -38,6 +38,8 @@ public class SolarBody : GunBody
     private AudioGroup chargeUp;
     [SerializeField]
     private AudioGroup chargeDown;
+    [SerializeField]
+    private AudioGroup noAmmo;
 
     public override void Start()
     {
@@ -57,6 +59,7 @@ public class SolarBody : GunBody
         playerHandLeft.SetPlayer(gunController.Player);
         playerHandLeft.gameObject.SetActive(true);
         audioSource = GetComponent<AudioSource>();
+        gunController.onFireNoAmmo += NoAmmoAudio;
     }
 
 
@@ -89,6 +92,11 @@ public class SolarBody : GunBody
         solarPanelMaterial.SetFloat("_EmissionStrength", strength);
     }
 
+    private void NoAmmoAudio(GunStats _)
+    {
+        noAmmo.Play(audioSource);
+    }
+
     private void FixedUpdate()
     {
         if (!gunController)
@@ -107,5 +115,12 @@ public class SolarBody : GunBody
             SetEmissionStrength(0);
             solarPanelMaterial.SetFloat("_On", 0);
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (!gunController)
+            return;
+        gunController.onFireNoAmmo -= NoAmmoAudio;
     }
 }

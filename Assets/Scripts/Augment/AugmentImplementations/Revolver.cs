@@ -17,6 +17,8 @@ public class Revolver : GunBody
     private AudioGroup bonkStrong;
     [SerializeField]
     private AudioGroup bulletDrop;
+    [SerializeField]
+    private AudioGroup noAmmo;
 
     private GunBarrel barrel;
     private GunExtension extension;
@@ -34,6 +36,7 @@ public class Revolver : GunBody
         playerHandLeft.SetPlayer(gunController.Player);
         playerHandRight.SetPlayer(gunController.Player);
         playerHandRight.gameObject.SetActive(true);
+        gunController.onFireNoAmmo += NoAmmoAudio;
     }
 
     protected override void Reload(GunStats stats)
@@ -57,6 +60,11 @@ public class Revolver : GunBody
     public void TriggerSteam()
     {
         steamParticles.Play();
+    }
+
+    private void NoAmmoAudio(GunStats _)
+    {
+        noAmmo.Play(audioSource);
     }
 
     public void PlayWeakBonk()
@@ -92,6 +100,14 @@ public class Revolver : GunBody
         if (extension)
             extension.transform.SetParent(gunController.transform, true);
         gunController.Reload(reloadEfficiencyPercentage);
+    }
+
+    private void OnDestroy()
+    {
+        if (!gunController)
+            return;
+        gunController.onFireEnd -= Reload;
+        gunController.onFireNoAmmo -= NoAmmoAudio;
     }
 
 }

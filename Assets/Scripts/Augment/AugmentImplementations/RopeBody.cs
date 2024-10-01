@@ -340,6 +340,9 @@ public class RopeBody : GunBody
             return;
         plugAnchor.Health.onDeath -= RemoveRope;
         Destroy(plugAnchor);
+        if (!gunController)
+            return;
+        gunController.onFireNoAmmo -= TryThrowPlug;
     }
 
 }
