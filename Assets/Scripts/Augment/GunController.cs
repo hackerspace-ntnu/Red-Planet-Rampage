@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Mirror;
 using UnityEngine;
@@ -179,10 +180,18 @@ public class GunController : NetworkBehaviour
     [ClientRpc]
     private void RpcFire(Quaternion rotation)
     {
-        onFireStart?.Invoke(stats);
-        projectile.projectileOutput = outputs[0];
-        projectile.projectileRotation = rotation;
-        ActuallyFire();
+        try
+        {
+            onFireStart?.Invoke(stats);
+            projectile.projectileOutput = outputs[0];
+            projectile.projectileRotation = rotation;
+            ActuallyFire();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Failed to fire gun!");
+            Debug.LogError(e);
+        }
     }
 
     [Command]
@@ -194,7 +203,15 @@ public class GunController : NetworkBehaviour
     [ClientRpc]
     private void RpcFireWithNoAmmo()
     {
-        onFireNoAmmo?.Invoke(stats);
+        try
+        {
+            onFireNoAmmo?.Invoke(stats);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Failed to fire gun w/o ammo!");
+            Debug.LogError(e);
+        }
     }
 
     private void FireGun()
@@ -211,7 +228,7 @@ public class GunController : NetworkBehaviour
             AimAtTarget();
             CmdFire(projectile.projectileRotation);
         }
-        catch (System.Exception e)
+        catch (Exception e)
         {
             // Hopefully recoverable error. Firing has had lots of bugs before,
             // hopefully we avoid displaying them in their gruesome nature to the user this way.
