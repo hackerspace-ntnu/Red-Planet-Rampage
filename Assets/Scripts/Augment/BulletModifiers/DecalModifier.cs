@@ -59,6 +59,10 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
         // Avoid placing decals on players or their guns, as that leads to the heebie-jeebies
         if (((1 << target.collider.gameObject.layer) & allHitboxesAndGunsAndPlayersMask) > 0)
             return;
+        // Specifically avoid players. This is still required, even with the layer check above.
+        if (target.collider.TryGetComponent<HitboxController>(out var hitbox))
+            if (hitbox.health && hitbox.health.TryGetComponent<PlayerManager>(out var _))
+                return;
         // Avoid decals on other objects that are marked as unsuitable for placing bullet holes on
         // TODO add this check back if you have need for this tag!
         //if (target.collider.gameObject.CompareTag("NoDecal"))
