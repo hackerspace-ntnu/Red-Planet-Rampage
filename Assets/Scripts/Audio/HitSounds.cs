@@ -31,6 +31,9 @@ public class HitSounds : MonoBehaviour
 
     private void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
+        if (!audioSource)
+            return;
+
         if (criticalHitSounds && info.isCritical)
         {
             criticalHitSounds.Play(audioSource);
