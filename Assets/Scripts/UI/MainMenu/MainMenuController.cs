@@ -92,9 +92,6 @@ public class MainMenuController : MonoBehaviour
 
     private void Start()
     {
-        // Set inactive since it blocks the ui elements for tabs.
-        EventLog.Singleton.transform.GetChild(0).gameObject.SetActive(false);
-
         aiButtonOriginalPosition = aIButton.transform.localPosition;
         PlayerInputManagerController.Singleton.MatchHasAI = false;
         audioSource = GetComponent<AudioSource>();
@@ -105,7 +102,12 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.PlayerInputManager.splitScreen = false;
         playerInputManagerController.onPlayerInputJoined += AddPlayer;
         if (SceneManager.GetActiveScene().name == "Menu")
+        {
+            // Set inactive since it blocks the ui elements for tabs.
+            EventLog.Singleton.transform.GetChild(0).gameObject.SetActive(false);
             ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived += UpdateStartButton;
+        }
+            
 
         if (playerInputManagerController.LocalPlayerInputs.Count > 0)
         {
