@@ -13,6 +13,7 @@ public class ClientLobby : MonoBehaviour
     private int joinedPlayers = 0;
     private void Start()
     {
+        EventLog.Singleton.transform.GetChild(0).gameObject.SetActive(true);
         environmentCamera.position = lobbyPosition.position;
         ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived += AddPlayer;
     }
