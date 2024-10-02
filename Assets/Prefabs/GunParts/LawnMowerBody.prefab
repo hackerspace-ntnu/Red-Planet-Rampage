@@ -171,6 +171,7 @@ GameObject:
   - component: {fileID: 2789145164633129729}
   - component: {fileID: 1204770057262295902}
   - component: {fileID: 7305627768738334198}
+  - component: {fileID: 4556993648120115421}
   m_Layer: 0
   m_Name: LawnMowerBody
   m_TagString: Untagged
@@ -238,7 +239,6 @@ MonoBehaviour:
   mowerScreenMaterialIndex: 1
   mowerScreen: {fileID: 2100000, guid: ba0e56975e31013409abfe9b36e7aa35, type: 2}
   plopSounds: {fileID: 11400000, guid: e3cc9c8a794f4f94bb6e134c61b5a645, type: 2}
-  noAmmo: {fileID: 11400000, guid: 67c2cbbe3dcaef54ca6f0ac3f987ad8e, type: 2}
 --- !u!95 &2789145164633129729
 Animator:
   serializedVersion: 5
@@ -372,6 +372,20 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &4556993648120115421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809122596642359082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4895f37d7fcbf340a4d6f21f6be5518, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSource: {fileID: 7305627768738334198}
+  noAmmo: {fileID: 11400000, guid: 67c2cbbe3dcaef54ca6f0ac3f987ad8e, type: 2}
 --- !u!1 &2037390768082544009
 GameObject:
   m_ObjectHideFlags: 0

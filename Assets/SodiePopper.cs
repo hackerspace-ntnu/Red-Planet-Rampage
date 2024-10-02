@@ -53,8 +53,7 @@ public class SodiePopper : GunBody
 
     [SerializeField]
     private AudioGroup slosh;
-    [SerializeField]
-    private AudioGroup noAmmo;
+
     public override void Start()
     {
         gunController = transform.parent?.GetComponent<GunController>();
@@ -71,12 +70,6 @@ public class SodiePopper : GunBody
         playerBody = gunController.Player.GetComponent<PlayerMovement>().Body;
         playerHandRight.SetPlayer(gunController.Player);
         playerHandRight.gameObject.SetActive(true);
-        gunController.onFireNoAmmo += NoAmmoAudio;
-    }
-
-    private void NoAmmoAudio(GunStats _)
-    {
-        noAmmo.Play(audioSource);
     }
 
     private void Update()
@@ -118,12 +111,5 @@ public class SodiePopper : GunBody
             lastPlayerDiff = playerDiff;
         }
         offsetTarget.position = lastPos;
-    }
-
-    private void OnDestroy()
-    {
-        if (!gunController)
-            return;
-        gunController.onFireNoAmmo -= NoAmmoAudio;
     }
 }

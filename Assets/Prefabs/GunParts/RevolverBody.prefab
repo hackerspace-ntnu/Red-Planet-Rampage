@@ -5330,6 +5330,7 @@ GameObject:
   - component: {fileID: 5886082362856684746}
   - component: {fileID: 3857694734235012439}
   - component: {fileID: 5962317126789803814}
+  - component: {fileID: 7069106018582099162}
   m_Layer: 0
   m_Name: RevolverBody
   m_TagString: Untagged
@@ -5385,7 +5386,6 @@ MonoBehaviour:
   bonkWeak: {fileID: 11400000, guid: d7bc77e35e457f74a8ec062583ef335e, type: 2}
   bonkStrong: {fileID: 11400000, guid: 853a0ba196c8b5c4fb48ccc426a60990, type: 2}
   bulletDrop: {fileID: 11400000, guid: 6cb9aecceff300e4481c3c5b856f6217, type: 2}
-  noAmmo: {fileID: 11400000, guid: 67c2cbbe3dcaef54ca6f0ac3f987ad8e, type: 2}
 --- !u!95 &5886082362856684746
 Animator:
   serializedVersion: 5
@@ -5525,6 +5525,20 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &7069106018582099162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6604547189345139607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4895f37d7fcbf340a4d6f21f6be5518, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSource: {fileID: 5962317126789803814}
+  noAmmo: {fileID: 11400000, guid: 67c2cbbe3dcaef54ca6f0ac3f987ad8e, type: 2}
 --- !u!1 &6830956434835172052
 GameObject:
   m_ObjectHideFlags: 0
