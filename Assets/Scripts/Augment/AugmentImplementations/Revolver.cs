@@ -23,6 +23,8 @@ public class Revolver : GunBody
     private GunBarrel barrel;
     private GunExtension extension;
 
+    private bool isReloadInProgress = false;
+
     public override void Start()
     {
         audioSource = GetComponent<AudioSource>();
@@ -41,18 +43,18 @@ public class Revolver : GunBody
 
     protected override void Reload(GunStats stats)
     {
-        if (gunController.stats.Ammo >= 1)
+        if (gunController.stats.Ammo > 0 || isReloadInProgress)
             return;
 
         barrel = gunController.gameObject.GetComponentInChildren<GunBarrel>();
         if (barrel)
             barrel.transform.SetParent(attachmentSite, true);
 
-
         extension = gunController.gameObject.GetComponentInChildren<GunExtension>();
         if (extension)
             extension.transform.SetParent(attachmentSite, true);
 
+        isReloadInProgress = true;
         animator.SetTrigger("Reload");
         gunController.onReload?.Invoke(stats);
     }
@@ -100,6 +102,7 @@ public class Revolver : GunBody
         if (extension)
             extension.transform.SetParent(gunController.transform, true);
         gunController.Reload(reloadEfficiencyPercentage);
+        isReloadInProgress = false;
     }
 
     private void OnDestroy()
