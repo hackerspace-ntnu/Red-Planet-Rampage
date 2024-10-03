@@ -974,6 +974,7 @@ public class Peer2PeerTransport : NetworkManager
             manager.SetLayer(NetworkPlayerLayer);
             UpdateIdentityFromDetails(playerManager.identity, playerDetails);
             manager.SetIdentity(manager.identity);
+            manager.GetComponent<Rigidbody>().isKinematic = true;
         }
         else
         {
