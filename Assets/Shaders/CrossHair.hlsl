@@ -1,6 +1,6 @@
 float sphereSDF_float(float2 pos)
 {
-    return abs(length(pos) - 1.)-0.05;
+    return abs(length(pos) - 1.)-0.02;
 }
 
 float sdCross_float( in float2 p, in float2 b, float r ) 
@@ -9,7 +9,7 @@ float sdCross_float( in float2 p, in float2 b, float r )
     float2  q = p - b;
     float k = max(q.y,q.x);
     float2  w = (k>0.0) ? q : float2(b.y-p.x,-k);
-    return sign(k)*length(max(w,0.0)) + r;
+    return sign(k)*length(max(w*0.6,0.0)) + r;
 }
 
 float sdRoundedX_float( float2 p, float w, float r )

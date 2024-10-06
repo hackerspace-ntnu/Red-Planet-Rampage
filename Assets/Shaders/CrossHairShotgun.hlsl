@@ -37,5 +37,5 @@ float shotgun_float(float2 pos)
 
 void CrossHairShotgun_float(float2 UV, float crossSize, float circleRadius, float hitMarkerRadius, out float Distance)
 {
-	Distance = min(min(shotgun_float(UV * circleRadius), crossSDFShotgun_float(UV * crossSize, 1.)), sdRoundedXShotgun_float(UV, hitMarkerRadius, 0.1));
+	Distance = min(min(shotgun_float(UV * circleRadius), crossSDFShotgun_float(UV * crossSize, 0.6)), sdRoundedXShotgun_float(UV, hitMarkerRadius, 0.1));
 }
