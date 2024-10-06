@@ -1,8 +1,10 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Random = UnityEngine.Random;
 
-[System.Serializable]
+[Serializable]
 public struct Precision
 {
     public float range;
@@ -11,13 +13,15 @@ public struct Precision
     public float awardFactor;
     public AudioGroup audio;
 }
+
 public enum ArrowDirection
 {
-    NORTH,
     EAST,
+    NORTH,
+    WEST,
     SOUTH,
-    WEST
 }
+
 public class DDRBody : GunBody
 {
     [SerializeField]
@@ -40,8 +44,9 @@ public class DDRBody : GunBody
 
     private float arrowHeight = 0;
     private ArrowDirection arrowDirection = ArrowDirection.NORTH;
+    private ArrowDirection inputDirection = ArrowDirection.NORTH;
 
-    private const float screenHeight = 3.5f;
+    private const float screenHeight = 4f;
     private const float errorMarginInput = 0.1f;
 
     private const float targetHeight = 3;
@@ -51,15 +56,20 @@ public class DDRBody : GunBody
     [SerializeField]
     private Precision[] precisionsGoodToBad;
 
-    int arrowMoverTween;
-    int screenFlasherTween;
-    int screenPulseAnimatorTween;
-    int textAnimatorTween;
+    private int arrowMoverTween;
+    private int screenFlasherTween;
+    private int screenPulseAnimatorTween;
+    private int textAnimatorTween;
+    private int targetArrowScaleTween;
+    private int inputArrowScaleTween;
+    private int targetArrowRotationTween;
+    private int inputArrowRotationTween;
 
     private float secondsPerUnitHeight;
     private float musicPace;
 
     private AudioSource audioSource;
+    private InputManager inputManager;
 
     public override void Start()
     {
@@ -77,17 +87,19 @@ public class DDRBody : GunBody
 
         if (gunController.Player)
         {
-            gunController.Player.inputManager.onFirePerformed += Fire;
-            gunController.Player.inputManager.onMovePerformed += ArrowSelect;
+            inputManager = gunController.Player.inputManager;
+            inputManager.onFirePerformed += Fire;
+            inputManager.onMovePerformed += ArrowSelect;
 
             var delay = (float)(MusicTrackManager.Singleton.IsfadingOutPreviousTrack
                 ? MusicTrackManager.Singleton.TrackOffset
                 : secondsPerArrow - (MusicTrackManager.Singleton.TimeSinceTrackStart % secondsPerArrow));
 
+            PickNewTargetDirection();
+
             arrowMoverTween = LeanTween.value(gameObject, SetArrowHeigth, startHeight, screenHeight, secondsPerUnitHeight * (screenHeight - startHeight))
                 .setDelay(delay)
-                .setRepeat(-1)
-                .setOnComplete(ResetArrow).id;
+                .setRepeat(-1).id;
 
             screenPulseAnimatorTween = LeanTween.value(gameObject, SetBackgroundZoom, 0.5f, 1.5f, musicPace)
                 .setDelay(delay)
@@ -104,7 +116,13 @@ public class DDRBody : GunBody
 
             audioSource = GetComponent<AudioSource>();
         }
+    }
 
+    private void Update()
+    {
+        if (!inputManager)
+            return;
+        UpdateInputArrow();
     }
 
     protected override void Reload(GunStats stats)
@@ -151,41 +169,64 @@ public class DDRBody : GunBody
 
     private void ArrowSelect(InputAction.CallbackContext ctx)
     {
-        if (arrowHeight < lowestCheckHeight)
-            return;
+        AnimateInputArrowScale(1.5f);
 
         switch (arrowDirection)
         {
             case ArrowDirection.NORTH:
-                if (!(gunController.Player.inputManager.moveInput.y > 1 - errorMarginInput))
+                if (!(inputManager.moveInput.y > 1 - errorMarginInput))
                     return;
                 break;
             case ArrowDirection.EAST:
-                if (!(gunController.Player.inputManager.moveInput.x > 1 - errorMarginInput))
+                if (!(inputManager.moveInput.x > 1 - errorMarginInput))
                     return;
                 break;
             case ArrowDirection.SOUTH:
-                if (!(gunController.Player.inputManager.moveInput.y < -1 + errorMarginInput))
+                if (!(inputManager.moveInput.y < -1 + errorMarginInput))
                     return;
                 break;
             case ArrowDirection.WEST:
-                if (!(gunController.Player.inputManager.moveInput.x < -1 + errorMarginInput))
+                if (!(inputManager.moveInput.x < -1 + errorMarginInput))
                     return;
                 break;
         }
 
+        if (arrowHeight < lowestCheckHeight)
+        {
+            AnimateTargetArrowScale(1.5f);
+            return;
+        }
+
+        AnimateTargetArrowScale(1.8f);
+
         Reload(gunController.stats);
         ResetAndStartArrowTween();
+    }
+
+    private void UpdateInputArrow()
+    {
+        var oldDirection = inputDirection;
+
+        if (inputManager.moveInput.y > 1 - errorMarginInput)
+            inputDirection = ArrowDirection.NORTH;
+        else if (inputManager.moveInput.x > 1 - errorMarginInput)
+            inputDirection = ArrowDirection.EAST;
+        else if (inputManager.moveInput.y < -1 + errorMarginInput)
+            inputDirection = ArrowDirection.SOUTH;
+        else if (inputManager.moveInput.x < -1 + errorMarginInput)
+            inputDirection = ArrowDirection.WEST;
+
+        if (oldDirection != inputDirection)
+            AnimateInputArrowRotation(oldDirection, inputDirection);
     }
 
     private void ResetAndStartArrowTween()
     {
         if (LeanTween.isTweening(arrowMoverTween))
             LeanTween.cancel(arrowMoverTween);
-        ResetArrow();
+        PickNewTargetDirection();
         arrowMoverTween = LeanTween.value(gameObject, SetArrowHeigth, arrowHeight, screenHeight, secondsPerUnitHeight * (screenHeight - arrowHeight))
-            .setRepeat(-1)
-            .setOnComplete(ResetArrow).id;
+            .setRepeat(-1).id;
     }
 
     private void SetArrowHeigth(float heigth)
@@ -204,30 +245,94 @@ public class DDRBody : GunBody
         ddrMaterial.SetVector("_BackgroundZoom", new Vector4(zoom, zoom, 0, 0));
     }
 
+    private void AnimateTargetArrowScale(float to)
+    {
+        if (LeanTween.isTweening(targetArrowScaleTween))
+            LeanTween.cancel(targetArrowScaleTween);
+        targetArrowScaleTween = LeanTween.value(gameObject, SetTargetArrowScale, 1, to - 1, .3f).setEasePunch().id;
+    }
+
+    private void AnimateInputArrowScale(float to)
+    {
+        if (LeanTween.isTweening(inputArrowScaleTween))
+            LeanTween.cancel(inputArrowScaleTween);
+        inputArrowScaleTween = LeanTween.value(gameObject, SetInputArrowScale, 1, to - 1, .3f).setEasePunch().id;
+    }
+
+    private void SetTargetArrowScale(float scale)
+    {
+        ddrMaterial.SetFloat("_TargetScale", scale);
+    }
+
+    private void SetInputArrowScale(float scale)
+    {
+        ddrMaterial.SetFloat("_InputScale", scale);
+    }
+
+    private void AnimateTargetArrowRotation(ArrowDirection from, ArrowDirection to)
+    {
+        targetArrowRotationTween = AnimateArrowRotation(targetArrowRotationTween, SetTargetArrowRotation, from, to);
+    }
+
+    private void AnimateInputArrowRotation(ArrowDirection from, ArrowDirection to)
+    {
+        inputArrowRotationTween = AnimateArrowRotation(inputArrowRotationTween, SetInputArrowRotation, from, to);
+    }
+
+    private int AnimateArrowRotation(int tween, Action<float> setter, ArrowDirection from, ArrowDirection to)
+    {
+        if (LeanTween.isTweening(tween))
+            LeanTween.cancel(tween);
+
+        var fromDegrees = ArrowDirectionToDegrees((int)from);
+        var toDegrees = ArrowDirectionToDegrees((int)to);
+
+        // Ensure reasonable transition when wrapping around
+        if (from == ArrowDirection.EAST && to == ArrowDirection.SOUTH)
+        {
+            fromDegrees = 360;
+        }
+        else if (from == ArrowDirection.SOUTH && to == ArrowDirection.EAST)
+        {
+            fromDegrees = -90;
+        }
+
+        return LeanTween.value(gameObject, setter, fromDegrees, toDegrees, .2f).id;
+    }
+
+    private void SetTargetArrowRotation(float degrees)
+    {
+        ddrMaterial.SetFloat("_TargetRotationDegrees", degrees);
+    }
+
+    private void SetInputArrowRotation(float degrees)
+    {
+        ddrMaterial.SetFloat("_InputRotationDegrees", degrees);
+    }
+
     private float ArrowDirectionToDegrees(int direction)
     {
-        // Default orientation (0 degrees) = 12 O' clock
+        // Default orientation (0 degrees) = 3 O' clock
         return direction * 90;
     }
 
-    private void ResetArrow()
+    private void PickNewTargetDirection()
     {
         // Should be 0 when the arrow passes the top of the screen
         // and -0.5 when the arrow hits the mark
         // and less than -0.5 when the arrow was too early
         arrowHeight = arrowHeight - targetHeight - Mathf.Abs(startHeight);
+        var oldDirection = arrowDirection;
         arrowDirection = (ArrowDirection)Random.Range(0, 4);
-        ddrMaterial.SetFloat("_ArrowRotationDegrees", ArrowDirectionToDegrees((int)arrowDirection));
+        AnimateTargetArrowRotation(oldDirection, arrowDirection);
     }
 
     private void OnDestroy()
     {
-        if (!gunController)
-            return;
-        if (!gunController.Player)
+        if (!inputManager)
             return;
 
-        gunController.Player.inputManager.onFirePerformed -= Fire;
-        gunController.Player.inputManager.onMovePerformed -= ArrowSelect;
+        inputManager.onFirePerformed -= Fire;
+        inputManager.onMovePerformed -= ArrowSelect;
     }
 }

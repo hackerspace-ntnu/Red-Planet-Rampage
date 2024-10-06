@@ -17,5 +17,8 @@ namespace VectorExtensions
             var x = (angles.x + Mathf.PI) % (2 * Mathf.PI) - Mathf.PI;
             return new Vector2(x, y);
         }
+
+        public static float MaxAbsComponent(this Vector2 vector) =>
+            Mathf.Max(Mathf.Abs(vector.x), Mathf.Abs(vector.y));
     }
 }
