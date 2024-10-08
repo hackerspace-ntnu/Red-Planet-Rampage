@@ -15,6 +15,7 @@ public class SettingsData
     public float SfxVolume { get; internal set; }
     public int QualityPresetIndex { get; internal set; }
     public int DisplayModeIndex { get; internal set; }
+    public float CrosshairSize { get; internal set; }
 
     /// <summary>
     /// Constructor initialized with given parameter values.
@@ -25,10 +26,11 @@ public class SettingsData
     /// <param name="sfxVolumeVal"></param>
     /// <param name="qualityPresetIndexVal"></param>
     /// <param name="displayModeIndexVal"></param>
+    /// <param name="CrosshairSize"></param>
     public SettingsData(
         float sensitivityScaleVal, float playerFOV, float zoomFOV,
         float masterVolumeVal, float musicVolumeVal, float sfxVolumeVal,
-        int qualityPresetIndexVal, int displayModeIndexVal)
+        int qualityPresetIndexVal, int displayModeIndexVal, float crosshairSize)
     {
         SensitivityScale = sensitivityScaleVal;
         PlayerFOV = playerFOV;
@@ -38,20 +40,30 @@ public class SettingsData
         SfxVolume = sfxVolumeVal;
         QualityPresetIndex = qualityPresetIndexVal;
         DisplayModeIndex = displayModeIndexVal;
+        CrosshairSize = crosshairSize;
     }
 
+    const float defualtSensitivityScale = 1f;
+    const float defualtPlayerFOV = 90f;
+    const float defualtZoomFOV = 30f;
+    const float defualtMasterVolume = 1.0f;
+    const float defualtMusicVolume = 1.0f;
+    const float defualtSfxVolume = 1.0f;
+    const int defualtQualityPresetIndex = 0;
+    const float defualtCrosshairSize = 1f;
     /// <summary>
     /// Default constructor for SettingsData. Set with default values.
     /// </summary>
     public SettingsData()
     {
-        SensitivityScale = 1.0f;
-        PlayerFOV = 90f;
-        ZoomFOV = 30f;
-        MasterVolume = 1.0f;
-        MusicVolume = 1.0f;
-        SfxVolume = 1.0f;
-        QualityPresetIndex = 0;
+        SensitivityScale = defualtSensitivityScale;
+        PlayerFOV = defualtPlayerFOV;
+        ZoomFOV = defualtZoomFOV;
+        MasterVolume = defualtMasterVolume;
+        MusicVolume = defualtMusicVolume;
+        SfxVolume = defualtSfxVolume;
+        QualityPresetIndex = defualtQualityPresetIndex;
+        CrosshairSize = defualtCrosshairSize;
     }
 
     public SettingsData(SettingsDataStruct settingsData)
@@ -64,6 +76,9 @@ public class SettingsData
         SfxVolume = settingsData.SfxVolume;
         QualityPresetIndex = settingsData.QualityPresetIndex;
         DisplayModeIndex = settingsData.DisplayModeIndex;
+        // Settings added after this needs to be backwards compatible with players who saved old setttings
+        // This can be achieved by checking for larger than 0
+        CrosshairSize = settingsData.CrosshairSize > 0 ? settingsData.CrosshairSize : defualtCrosshairSize;
     }
 
     public SettingsDataStruct ToDataStruct()
@@ -77,7 +92,8 @@ public class SettingsData
             MusicVolume = MusicVolume,
             SfxVolume = SfxVolume,
             QualityPresetIndex = QualityPresetIndex,
-            DisplayModeIndex = DisplayModeIndex
+            DisplayModeIndex = DisplayModeIndex,
+            CrosshairSize = CrosshairSize
         };
     }
 }
@@ -92,6 +108,7 @@ public struct SettingsDataStruct
     public float SfxVolume;
     public int QualityPresetIndex;
     public int DisplayModeIndex;
+    public float CrosshairSize;
 }
 
 public class SettingsDataManager : MonoBehaviour
@@ -139,6 +156,9 @@ public class SettingsDataManager : MonoBehaviour
     public float LowerZoomFOVLimit = 20f;
     public float UpperZoomFOVLimit = 50f;
 
+    [Header("Crosshair Limits")]
+    public float LowerCrosshairLimit = 0.01f;
+    public float UpperCrosshairLimit = 3f;
     #endregion
 
     public SettingsData SettingsDataInstance;
@@ -322,6 +342,14 @@ public class SettingsDataManager : MonoBehaviour
     public void SetZoomFOV(float zoomFOV)
     {
         SettingsDataInstance.ZoomFOV = Mathf.Clamp(zoomFOV, 1f, 179f);
+    }
+    public float ClampCrosshairSize(float scale)
+    {
+        return Mathf.Clamp(scale, LowerCrosshairLimit, UpperCrosshairLimit);
+    }
+    public void SetCrosshairSize(float scale)
+    {
+        SettingsDataInstance.CrosshairSize = Mathf.Clamp(scale, LowerCrosshairLimit, UpperCrosshairLimit);
     }
     #endregion
 }
