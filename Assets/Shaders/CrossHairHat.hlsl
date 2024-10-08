@@ -59,5 +59,5 @@ float hat_float(float2 pos)
 
 void CrossHairHat_float(float2 UV, float crossSize, float circleRadius, float hitMarkerRadius, out float Distance)
 {
-	Distance = min(min(hat_float(UV * circleRadius + float2(0., 0.05)), crossSDFHat_float(UV * crossSize, 0.6)), sdRoundedXHat_float(UV, hitMarkerRadius, 0.1));
+	Distance = min(min(hat_float(UV * circleRadius * crossSize + float2(0., 0.05)), crossSDFHat_float(UV*2., 0.6)), sdRoundedXHat_float(UV, hitMarkerRadius, 0.1));
 }

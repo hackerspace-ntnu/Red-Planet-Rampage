@@ -157,6 +157,8 @@ public class PlayerHUDController : MonoBehaviour
         healthBarScaleX = healthBar.transform.localScale.x;
         healthBar.color = healthMax;
         healthTextPosition = healthText.transform.localPosition;
+
+        crosshair.rectTransform.sizeDelta *= SettingsDataManager.Singleton.SettingsDataInstance.CrosshairSize;
     }
 
     public void SetSpeedLines(Vector3 velocity)

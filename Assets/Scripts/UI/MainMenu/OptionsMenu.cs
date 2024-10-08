@@ -19,6 +19,10 @@ public class OptionsMenu : MonoBehaviour
 
     [SerializeField]
     private TMP_Dropdown qualityDropdown;
+    [SerializeField]
+    private Slider CrosshairSlider;
+    [SerializeField]
+    private TMP_InputField CrosshairInputField;
 
     #endregion
     #region Audio Variables
@@ -69,6 +73,9 @@ public class OptionsMenu : MonoBehaviour
         ZoomFOVSlider.minValue = settingsDataManager.LowerZoomFOVLimit;
         ZoomFOVSlider.maxValue = settingsDataManager.UpperZoomFOVLimit;
 
+        CrosshairSlider.minValue = settingsDataManager.LowerCrosshairLimit;
+        CrosshairSlider.maxValue = settingsDataManager.UpperCrosshairLimit;
+
         SetOptionItems();
     }
 
@@ -94,6 +101,9 @@ public class OptionsMenu : MonoBehaviour
 
         ZoomFOVSlider.value = settingsDataManager.SettingsDataInstance.ZoomFOV;
         ZoomFOVInputField.text = settingsDataManager.SettingsDataInstance.ZoomFOV.ToString("0");
+
+        CrosshairSlider.value = settingsDataManager.SettingsDataInstance.CrosshairSize;
+        CrosshairInputField.text = settingsDataManager.SettingsDataInstance.CrosshairSize.ToString("0.00");
 
         settingsDataManager.ApplyAllSettings();
     }
@@ -201,5 +211,23 @@ public class OptionsMenu : MonoBehaviour
         float value = settingsDataManager.ClampZoomFOVValue(float.Parse(inputValue));
         ZoomFOVSlider.value = value;
         settingsDataManager.SetZoomFOV(value);
+    }
+
+    public void ChangeCrosshairInputField(float value)
+    {
+        CrosshairInputField.text = value.ToString("0.00");
+        settingsDataManager.SetCrosshairSize(value);
+    }
+
+    public void CheckCrosshairInputValue(string inputValue)
+    {
+        CrosshairInputField.text = settingsDataManager.ClampCrosshairSize(float.Parse(inputValue)).ToString("0.00");
+    }
+
+    public void ChangeCrosshairSliderValue(string inputValue)
+    {
+        float value = settingsDataManager.ClampCrosshairSize(float.Parse(inputValue));
+        CrosshairSlider.value = value;
+        settingsDataManager.SetCrosshairSize(value);
     }
 }
