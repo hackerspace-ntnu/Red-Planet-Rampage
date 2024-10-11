@@ -20,5 +20,8 @@ namespace VectorExtensions
 
         public static float MaxAbsComponent(this Vector2 vector) =>
             Mathf.Max(Mathf.Abs(vector.x), Mathf.Abs(vector.y));
+
+        public static Vector2 xz(this Vector3 vector) =>
+            new Vector2(vector.x, vector.z);
     }
 }
