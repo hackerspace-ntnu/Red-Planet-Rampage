@@ -104,6 +104,16 @@ public class AIManager : PlayerManager
             ShootingTarget = null;
     }
 
+    private void HandleExplodedBarrel(HealthController health, float damage, DamageInfo info)
+    {
+        health.onDeath -= HandleExplodedBarrel;
+        if (!IsAlive)
+            return;
+
+        if (ShootingTarget == health.transform)
+            ShootingTarget = null;
+    }
+
     public override void SetLayer(int playerIndex)
     {
         int playerLayer = LayerMask.NameToLayer("Player " + playerIndex);
@@ -260,9 +270,22 @@ public class AIManager : PlayerManager
         }
         else
         {
+            // TODO do not default to shooting target??? what's this for?
             aiMovement.Target = ShootingTarget;
             var isStrafeDistance = closestDistance < 10f;
             aiMovement.enabled = isStrafeDistance;
+
+            if (ShootingTarget != null)
+            {
+                var closestExplodingBarrel = ExplodingBarrel.GetViableExplodingBarrel(ShootingTarget.position);
+                var isBarrelSafeToShoot = closestExplodingBarrel
+                    && Vector3.Distance(closestExplodingBarrel.transform.position, transform.position) > closestExplodingBarrel.Radius + 1;
+                if (isBarrelSafeToShoot)
+                {
+                    ShootingTarget = closestExplodingBarrel.transform;
+                    closestExplodingBarrel.GetComponent<HealthController>().onDeath += HandleExplodedBarrel;
+                }
+            }
         }
 
         if (!DestinationTarget)
@@ -286,7 +309,6 @@ public class AIManager : PlayerManager
         {
             aiMovement.enabled = true;
         }
-
     }
 
     private Transform FindClosestPlayer(out float closestDistance)
@@ -308,7 +330,6 @@ public class AIManager : PlayerManager
 
                 closestDistance = hitDistance;
                 closestPlayer = player.AiTarget.transform;
-                ShootingTarget = player.AiAimSpot;
                 continue;
             }
 

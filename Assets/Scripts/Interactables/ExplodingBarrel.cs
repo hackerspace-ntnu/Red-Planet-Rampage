@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Linq;
+using CollectionExtensions;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.VFX;
@@ -21,15 +23,33 @@ public class ExplodingBarrel : MonoBehaviour
 
     private bool isAlive = true;
 
+    private static readonly List<ExplodingBarrel> barrels = new();
+
+    public float Radius => explosion.Radius;
+
     private void Start()
     {
         healthController = GetComponent<HealthController>();
         healthController.onDeath += Explode;
+        barrels.Add(this);
     }
 
     private void OnDestroy()
     {
         if (healthController) healthController.onDeath -= Explode;
+        if (barrels.Contains(this)) barrels.Remove(this);
+    }
+
+    public static ExplodingBarrel GetViableExplodingBarrel(Vector3 from)
+    {
+        if (barrels.Count == 0)
+            return null;
+
+        return barrels
+            .Select(barrel => new { barrel, distance = Vector3.Distance(from, barrel.transform.position) })
+            .Where(pair => pair.distance < pair.barrel.explosion.Radius + 1)
+            .MinBy(pair => pair.distance)
+            ?.barrel;
     }
 
 
@@ -44,6 +64,7 @@ public class ExplodingBarrel : MonoBehaviour
         LeaveMark();
         Destroy(gameObject, 4);
         isAlive = false;
+        barrels.Remove(this);
     }
 
     private void LeaveMark()
