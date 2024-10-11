@@ -48,6 +48,7 @@ public class AIManager : PlayerManager
     private delegate void NavMeshEvent();
     private NavMeshEvent onLinkStart;
     private NavMeshEvent onLinkEnd;
+    private AmmoBoxCollector ammoBoxCollector;
 
     private void Start()
     {
@@ -58,6 +59,7 @@ public class AIManager : PlayerManager
         colliderBox = GetComponent<Collider>();
         colliderBox.isTrigger = true;
         aiMovement = GetComponent<AIMovement>();
+        ammoBoxCollector = GetComponent<AmmoBoxCollector>();
         healthController = GetComponent<HealthController>();
         agent.autoTraverseOffMeshLink = false;
         onLinkStart += AnimateJump;
@@ -135,7 +137,7 @@ public class AIManager : PlayerManager
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
         if (gunController.RightHandTarget)
             playerIK.RightHandIKTarget = gunController.RightHandTarget;
-        GetComponent<AmmoBoxCollector>().CheckForAmmoBoxBodyAgain();
+        ammoBoxCollector.CheckForAmmoBoxBodyAgain();
     }
 
     private bool IsDisabledItem(Item item)
@@ -208,32 +210,20 @@ public class AIManager : PlayerManager
     private void FindPlayers()
     {
         Transform closestPlayer = null;
-        float closestDistance = ignoreAwareRadius;
-        foreach (var player in TrackedPlayers)
-        {
-            var targetDirection = player.AiTarget.transform.position - transform.position;
-            var hitDistance = targetDirection.magnitude;
-            var playerDistance = (player.transform.position - transform.position).magnitude;
-            // Is the player nearby?
-            if (playerDistance > ignoreAwareRadius)
-                continue;
-            if (playerDistance > autoAwareRadius)
-            {
-                // Is the tracked player in front of me? (viewable)
-                if (Vector3.Dot(transform.forward, targetDirection) < 0)
-                    continue;
-                // Is there a line of sight to a tracked player?
-                if (Physics.Raycast(transform.position, targetDirection, hitDistance - 0.1f, ignoreMask))
-                    continue;
-                // Is there another tracked player who is closer?
-                if (hitDistance > closestDistance)
-                    continue;
-            }
+        var closestDistance = ignoreAwareRadius;
 
-            closestPlayer = player.AiTarget.transform;
-            closestDistance = hitDistance;
-            DestinationTarget = closestPlayer;
-            ShootingTarget = player.AiAimSpot;
+        // TODO the ammo box stuff!
+        var hasAmmoBoxBody = ammoBoxCollector.CanReload;
+        var isOutOfAmmo = gunController && gunController.stats.Ammo < 1;
+        if (hasAmmoBoxBody && isOutOfAmmo)
+        {
+            var ammoBox = AmmoBox.GetClosestAmmoBox(transform.position);
+            if (ammoBox)
+                DestinationTarget = ammoBox.transform;
+        }
+        else
+        {
+            closestPlayer = FindClosestPlayer(out closestDistance);
         }
 
         if (closestPlayer == null)
@@ -274,6 +264,56 @@ public class AIManager : PlayerManager
             aiMovement.enabled = true;
         }
 
+    }
+
+    private Transform FindClosestPlayer(out float closestDistance)
+    {
+        Transform closestPlayer = null;
+        closestDistance = ignoreAwareRadius;
+
+        var areOnlyAiPlayersLeft = trackedPlayers.All(p => Peer2PeerTransport.PlayerDetails.Any(pd => p.id == pd.id && pd.type is PlayerType.AI));
+
+        foreach (var player in TrackedPlayers)
+        {
+            var targetDirection = player.AiTarget.transform.position - transform.position;
+            var hitDistance = targetDirection.magnitude;
+
+            if (areOnlyAiPlayersLeft)
+            {
+                if (hitDistance > closestDistance)
+                    continue;
+
+                closestDistance = hitDistance;
+                closestPlayer = player.AiTarget.transform;
+                ShootingTarget = player.AiAimSpot;
+                continue;
+            }
+
+            var playerDistance = (player.transform.position - transform.position).magnitude;
+
+            // Is the player nearby?
+            if (playerDistance > ignoreAwareRadius)
+                continue;
+            if (playerDistance > autoAwareRadius)
+            {
+                // Is the tracked player in front of me? (viewable)
+                if (Vector3.Dot(transform.forward, targetDirection) < 0)
+                    continue;
+                // Is there a line of sight to a tracked player?
+                if (Physics.Raycast(transform.position, targetDirection, hitDistance - 0.1f, ignoreMask))
+                    continue;
+                // Is there another tracked player who is closer?
+                if (hitDistance > closestDistance)
+                    continue;
+            }
+
+            closestPlayer = player.AiTarget.transform;
+            closestDistance = hitDistance;
+            DestinationTarget = closestPlayer;
+            ShootingTarget = player.AiAimSpot;
+        }
+
+        return closestPlayer;
     }
 
     private void AnimateJump()
