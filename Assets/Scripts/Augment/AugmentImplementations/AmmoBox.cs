@@ -6,6 +6,7 @@ using UnityEngine.VFX;
 
 public class AmmoBox : MonoBehaviour
 {
+    [SerializeField] private bool ignoredByAI = false;
     [SerializeField] private float respawnTime = 30;
     [SerializeField] private GameObject boxModel;
     [SerializeField] private VisualEffect effect;
@@ -43,11 +44,17 @@ public class AmmoBox : MonoBehaviour
         ammoBoxes.Remove(this);
     }
 
-    public static AmmoBox GetClosestAmmoBox(Vector3 from)
+    public static AmmoBox GetClosestAmmoBox(Vector3 from) =>
+        GetClosestAmmoBox(ammoBoxes, from);
+
+    public static AmmoBox GetClosestAmmoBoxForAI(Vector3 from) =>
+        GetClosestAmmoBox(ammoBoxes.Where(b => !b.ignoredByAI).ToList(), from);
+
+    private static AmmoBox GetClosestAmmoBox(List<AmmoBox> boxes, Vector3 from)
     {
-        if (ammoBoxes.Count == 0)
+        if (boxes.Count == 0)
             return null;
-        return ammoBoxes.Aggregate(
+        return boxes.Aggregate(
             (ammoBox, next) =>
             Vector3.Distance(from, next.transform.position) < Vector3.Distance(from, ammoBox.transform.position) ? next : ammoBox);
     }
@@ -61,7 +68,13 @@ public class AmmoBox : MonoBehaviour
         ammoBoxes.Add(this);
     }
 
-    private void OnTriggerStay(Collider intruder)
+    private void OnTriggerEnter(Collider intruder) =>
+        HandleCollision(intruder);
+
+    private void OnTriggerStay(Collider intruder) =>
+        HandleCollision(intruder);
+
+    private void HandleCollision(Collider intruder)
     {
         if (!intruder.gameObject.TryGetComponent<AmmoBoxCollector>(out var collector))
             return;
@@ -77,5 +90,8 @@ public class AmmoBox : MonoBehaviour
         effect.enabled = false;
         ammoBoxes.Remove(this);
         StartCoroutine(RespawnAfterTimeout());
+
+        if (intruder.gameObject.TryGetComponent<AIManager>(out var ai))
+            ai.DestinationTarget = null;
     }
 }

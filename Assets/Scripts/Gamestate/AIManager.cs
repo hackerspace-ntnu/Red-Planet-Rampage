@@ -48,6 +48,8 @@ public class AIManager : PlayerManager
     private delegate void NavMeshEvent();
     private NavMeshEvent onLinkStart;
     private NavMeshEvent onLinkEnd;
+    private AmmoBoxCollector ammoBoxCollector;
+    private Coroutine airDisablingRoutine;
 
     private void Start()
     {
@@ -58,6 +60,7 @@ public class AIManager : PlayerManager
         colliderBox = GetComponent<Collider>();
         colliderBox.isTrigger = true;
         aiMovement = GetComponent<AIMovement>();
+        ammoBoxCollector = GetComponent<AmmoBoxCollector>();
         healthController = GetComponent<HealthController>();
         agent.autoTraverseOffMeshLink = false;
         onLinkStart += AnimateJump;
@@ -135,7 +138,7 @@ public class AIManager : PlayerManager
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
         if (gunController.RightHandTarget)
             playerIK.RightHandIKTarget = gunController.RightHandTarget;
-        GetComponent<AmmoBoxCollector>().CheckForAmmoBoxBodyAgain();
+        ammoBoxCollector.CheckForAmmoBoxBodyAgain();
     }
 
     private bool IsDisabledItem(Item item)
@@ -154,22 +157,33 @@ public class AIManager : PlayerManager
         }
         if (info.damageType != DamageType.Explosion)
             return;
-        StartCoroutine(WaitAndToggleAgent());
+
+        if (airDisablingRoutine != null)
+            StopCoroutine(airDisablingRoutine);
+        airDisablingRoutine = StartCoroutine(WaitAndToggleAgent());
     }
 
-    public IEnumerator WaitAndToggleAgent()
+    private void DisableAgent()
     {
         agent.enabled = false;
         body.isKinematic = false;
         colliderBox.isTrigger = false;
+    }
 
-        yield return new WaitForSeconds(0.25f);
-        while (aiMovement.StateIsAir)
-            yield return null;
-
+    private void EnableAgent()
+    {
         body.isKinematic = true;
         agent.enabled = true;
         colliderBox.isTrigger = true;
+    }
+
+    public IEnumerator WaitAndToggleAgent()
+    {
+        DisableAgent();
+        yield return new WaitForSeconds(0.25f);
+        while (aiMovement.StateIsAir)
+            yield return null;
+        EnableAgent();
     }
 
     protected override void OnDeath(HealthController healthController, float damage, DamageInfo info)
@@ -199,50 +213,49 @@ public class AIManager : PlayerManager
     {
         if (!IsAlive)
             yield break;
-        if (!aiMovement || !aiMovement.enabled)
+
+        var hasAmmoBoxBody = ammoBoxCollector.CanReload;
+        var isOutOfAmmo = gunController && gunController.stats.Ammo < 1;
+        var isInAir = aiMovement.enabled && aiMovement.StateIsAir;
+        if (hasAmmoBoxBody && isOutOfAmmo && !isInAir)
+        {
+            var ammoBox = AmmoBox.GetClosestAmmoBoxForAI(transform.position);
+            if (ammoBox)
+                DestinationTarget = ammoBox.transform;
+            else
+                DestinationTarget = MatchController.Singleton.GetRandomActiveChip();
+
+            if (airDisablingRoutine != null)
+                StopCoroutine(airDisablingRoutine);
+
+            ShootingTarget = null;
+
+            EnableAgent();
+            aiMovement.enabled = false;
+            agent.stoppingDistance = itemStoppingDistance;
+            agent.SetDestination(DestinationTarget.position);
+        }
+        else if (!aiMovement || !aiMovement.enabled)
+        {
             FindPlayers();
-        yield return new WaitForSeconds(3f);
+        }
+
+        // TODO should have a random offset per AI here
+        yield return new WaitForSeconds(1f);
+
         StartCoroutine(LookForTargets());
     }
 
     private void FindPlayers()
     {
-        Transform closestPlayer = null;
-        float closestDistance = ignoreAwareRadius;
-        foreach (var player in TrackedPlayers)
-        {
-            var targetDirection = player.AiTarget.transform.position - transform.position;
-            var hitDistance = targetDirection.magnitude;
-            var playerDistance = (player.transform.position - transform.position).magnitude;
-            // Is the player nearby?
-            if (playerDistance > ignoreAwareRadius)
-                continue;
-            if (playerDistance > autoAwareRadius)
-            {
-                // Is the tracked player in front of me? (viewable)
-                if (Vector3.Dot(transform.forward, targetDirection) < 0)
-                    continue;
-                // Is there a line of sight to a tracked player?
-                if (Physics.Raycast(transform.position, targetDirection, hitDistance - 0.1f, ignoreMask))
-                    continue;
-                // Is there another tracked player who is closer?
-                if (hitDistance > closestDistance)
-                    continue;
-            }
-
-            closestPlayer = player.AiTarget.transform;
-            closestDistance = hitDistance;
-            DestinationTarget = closestPlayer;
-            ShootingTarget = player.AiAimSpot;
-        }
+        var closestPlayer = FindClosestPlayer(out var closestDistance);
 
         if (closestPlayer == null)
         {
             ShootingTarget = null;
             if (DestinationTarget == null || !DestinationTarget || (!DestinationTarget.gameObject.GetComponent<PlayerManager>() && !DestinationTarget.gameObject.activeInHierarchy))
             {
-                var target = MatchController.Singleton.GetRandomActiveChip();
-                DestinationTarget = target;
+                DestinationTarget = MatchController.Singleton.GetRandomActiveChip();
             }
         }
         else
@@ -274,6 +287,56 @@ public class AIManager : PlayerManager
             aiMovement.enabled = true;
         }
 
+    }
+
+    private Transform FindClosestPlayer(out float closestDistance)
+    {
+        Transform closestPlayer = null;
+        closestDistance = ignoreAwareRadius;
+
+        var areOnlyAiPlayersLeft = trackedPlayers.All(p => Peer2PeerTransport.PlayerDetails.Any(pd => p.id == pd.id && pd.type is PlayerType.AI));
+
+        foreach (var player in TrackedPlayers)
+        {
+            var targetDirection = player.AiTarget.transform.position - transform.position;
+            var hitDistance = targetDirection.magnitude;
+
+            if (areOnlyAiPlayersLeft)
+            {
+                if (hitDistance > closestDistance)
+                    continue;
+
+                closestDistance = hitDistance;
+                closestPlayer = player.AiTarget.transform;
+                ShootingTarget = player.AiAimSpot;
+                continue;
+            }
+
+            var playerDistance = (player.transform.position - transform.position).magnitude;
+
+            // Is the player nearby?
+            if (playerDistance > ignoreAwareRadius)
+                continue;
+            if (playerDistance > autoAwareRadius)
+            {
+                // Is the tracked player in front of me? (viewable)
+                if (Vector3.Dot(transform.forward, targetDirection) < 0)
+                    continue;
+                // Is there a line of sight to a tracked player?
+                if (Physics.Raycast(transform.position, targetDirection, hitDistance - 0.1f, ignoreMask))
+                    continue;
+                // Is there another tracked player who is closer?
+                if (hitDistance > closestDistance)
+                    continue;
+            }
+
+            closestPlayer = player.AiTarget.transform;
+            closestDistance = hitDistance;
+            DestinationTarget = closestPlayer;
+            ShootingTarget = player.AiAimSpot;
+        }
+
+        return closestPlayer;
     }
 
     private void AnimateJump()
