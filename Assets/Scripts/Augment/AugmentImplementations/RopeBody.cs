@@ -146,7 +146,11 @@ public class RopeBody : GunBody
         if (!plugAnchor || !isOwned)
             return;
 
-        if (Physics.Raycast(gunController.Player.inputManager.transform.position, gunController.Player.inputManager.transform.forward, out RaycastHit hit, ropeLength, ignoreLayer))
+        var aimTransform = gunController.Player.inputManager
+            ? gunController.Player.inputManager.transform
+            : gunController.Player.GunHolder.transform;
+
+        if (Physics.Raycast(aimTransform.position, aimTransform.forward, out RaycastHit hit, ropeLength, ignoreLayer))
         {
             StartThrowingWire(gunController.Player.transform.position, hit.normal);
             ThrowWireCmd(gunController.Player.transform.position, hit.point, hit.normal, hit.distance);
