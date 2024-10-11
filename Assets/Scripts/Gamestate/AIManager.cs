@@ -148,6 +148,9 @@ public class AIManager : PlayerManager
         if (info.sourcePlayer != this)
         {
             lastPlayerThatHitMe = info.sourcePlayer;
+            // Immediately target this player
+            // TODO gate this between difficulty
+            ShootingTarget = info.sourcePlayer.AiAimSpot;
         }
         if (info.damageType != DamageType.Explosion)
             return;
@@ -270,7 +273,6 @@ public class AIManager : PlayerManager
 
     }
 
-
     private void AnimateJump()
     {
         animator.SetBool("Crouching", true);
@@ -307,6 +309,9 @@ public class AIManager : PlayerManager
 
     private void Update()
     {
+        if (!IsAlive)
+            return;
+
 #if UNITY_EDITOR
         foreach (var player in TrackedPlayers)
         {
