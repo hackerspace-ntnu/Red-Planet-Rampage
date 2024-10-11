@@ -254,6 +254,9 @@ public class AIManager : PlayerManager
 
         if (!DestinationTarget)
         {
+            // TODO handle having no target better?
+            if (trackedPlayers.Count == 0)
+                return;
             var player = TrackedPlayers.RandomElement();
             DestinationTarget = player.AiTarget;
             ShootingTarget = player.AiAimSpot;
