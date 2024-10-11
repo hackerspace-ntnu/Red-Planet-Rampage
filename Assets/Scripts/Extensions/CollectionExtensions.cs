@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using RandomExtensions;
+using System.Collections;
 
 namespace CollectionExtensions
 {
@@ -121,6 +122,32 @@ namespace CollectionExtensions
             }
 
             return maxValue;
+        }
+
+        public static T MinBy<T, By>(this IEnumerable<T> values, System.Func<T, By> selector)
+        where By : System.IComparable<By>
+        {
+            By min = default;
+            T minValue = default;
+            bool hasValue = false;
+
+            foreach (var value in values)
+            {
+                var comparable = selector(value);
+                if (!hasValue)
+                {
+                    min = comparable;
+                    minValue = value;
+                }
+
+                if (comparable.CompareTo(min) < 0)
+                {
+                    min = comparable;
+                    minValue = value;
+                }
+            }
+
+            return minValue;
         }
     }
 }

@@ -240,6 +240,16 @@ public class AIManager : PlayerManager
             aiMovement.Target = ShootingTarget;
             var isStrafeDistance = closestDistance < 10f;
             aiMovement.enabled = isStrafeDistance;
+
+            var closestExplodingBarrel = ExplodingBarrel.GetViableExplodingBarrel(ShootingTarget.position);
+            var isBarrelSafeToShoot = closestExplodingBarrel
+                && Vector3.Distance(closestExplodingBarrel.transform.position, transform.position) > closestExplodingBarrel.Radius + 1;
+            if (isBarrelSafeToShoot)
+            {
+                Debug.Log($"Found exploding barrel at {closestExplodingBarrel.transform.position} >:)", closestExplodingBarrel);
+                // TODO respond to the barrel actually exploding?
+                ShootingTarget = closestExplodingBarrel.transform;
+            }
         }
 
         if (!DestinationTarget)
