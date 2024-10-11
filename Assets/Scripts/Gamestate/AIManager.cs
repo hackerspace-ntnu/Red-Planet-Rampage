@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
+using VectorExtensions;
 
 public class AIManager : PlayerManager
 {
@@ -304,7 +305,7 @@ public class AIManager : PlayerManager
         onLinkEnd?.Invoke();
     }
 
-    void Update()
+    private void Update()
     {
 #if UNITY_EDITOR
         foreach (var player in TrackedPlayers)
@@ -314,6 +315,10 @@ public class AIManager : PlayerManager
 #endif
         if (ShootingTarget)
         {
+            // Face in target direction
+            var horizontalDirection = (ShootingTarget.position.xz() - transform.position.xz()).normalized;
+            transform.forward = new Vector3(horizontalDirection.x, 0, horizontalDirection.y);
+            // Point gun
             GunOrigin.LookAt(ShootingTarget.position, transform.up);
             Fire();
         }
