@@ -81,6 +81,13 @@ public class RopeBody : GunBody
         if (!isWired || isThrowing || canThrow)
             return;
 
+        if (!gunController.Player.inputManager)
+        {
+            // AIs should always break the rope, unless we want weird issues
+            RemoveRope();
+            return;
+        }
+
         playerBody.AddForce(-(playerBody.position - rope.CurrentAnchor).normalized * pullForce, ForceMode.Acceleration);
         if (rope.RopeLength > ropeLength + 4f || (movement.StateIsAir && rope.RopeLength > ropeLength + 1f))
             RemoveRope();
@@ -146,7 +153,15 @@ public class RopeBody : GunBody
         if (!plugAnchor || !isOwned)
             return;
 
-        if (Physics.Raycast(gunController.Player.inputManager.transform.position, gunController.Player.inputManager.transform.forward, out RaycastHit hit, ropeLength, ignoreLayer))
+        var position = gunController.Player.inputManager
+            ? gunController.Player.inputManager.transform.position
+            : gunController.Player.GunHolder.transform.position;
+
+        var direction = gunController.Player.inputManager
+            ? gunController.Player.inputManager.transform.forward
+            : Vector3.down;
+
+        if (Physics.Raycast(position, direction, out RaycastHit hit, ropeLength, ignoreLayer))
         {
             StartThrowingWire(gunController.Player.transform.position, hit.normal);
             ThrowWireCmd(gunController.Player.transform.position, hit.point, hit.normal, hit.distance);
