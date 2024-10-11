@@ -74,6 +74,12 @@ public class AIManager : PlayerManager
         healthController.onDamageTaken -= OnDamageTaken;
         healthController.onDeath -= OnDeath;
         TrackedPlayers.ForEach(player => player.onDeath -= RemovePlayer);
+
+        if (!gunController)
+            return;
+
+        gunController.onFireStart -= UpdateAimTarget;
+        gunController.onFire -= UpdateAimTarget;
     }
 
     public void SetIdentity(PlayerIdentity identity)
@@ -90,6 +96,8 @@ public class AIManager : PlayerManager
     {
         TrackedPlayers.Remove(victim);
         victim.onDeath -= RemovePlayer;
+        if (ShootingTarget == victim.AiAimSpot)
+            ShootingTarget = null;
     }
 
     public override void SetLayer(int playerIndex)
@@ -176,6 +184,7 @@ public class AIManager : PlayerManager
             + new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f))
                 * (transform.position - ShootingTarget.position).magnitude * 0.1f;
     }
+
     public void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -339,5 +348,12 @@ public class AIManager : PlayerManager
         gunController.triggerHeld = true;
         gunController.triggerPressed = true;
         StartCoroutine(UnpressTrigger());
+    }
+
+    private IEnumerator UnpressTrigger()
+    {
+        yield return new WaitForFixedUpdate();
+        gunController.triggerHeld = false;
+        gunController.triggerPressed = false;
     }
 }
