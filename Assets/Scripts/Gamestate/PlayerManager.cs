@@ -421,7 +421,7 @@ public class PlayerManager : NetworkBehaviour
         selectedBiddingPlatform.PlaceBid(identity);
     }
 
-    protected IEnumerator UnpressTrigger()
+    private IEnumerator UnpressTrigger()
     {
         yield return new WaitForFixedUpdate();
         gunController.triggerPressed = false;
