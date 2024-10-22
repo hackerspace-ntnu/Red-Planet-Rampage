@@ -180,6 +180,7 @@ public class AIManager : PlayerManager
         agent.enabled = false;
         body.isKinematic = false;
         colliderBox.isTrigger = false;
+        aiMovement.enabled = true;
     }
 
     private void EnableAgent()
@@ -187,6 +188,7 @@ public class AIManager : PlayerManager
         body.isKinematic = true;
         agent.enabled = true;
         colliderBox.isTrigger = true;
+        aiMovement.enabled = false;
     }
 
     public IEnumerator WaitAndToggleAgent()
@@ -243,7 +245,6 @@ public class AIManager : PlayerManager
             ShootingTarget = null;
 
             EnableAgent();
-            aiMovement.enabled = false;
             agent.stoppingDistance = itemStoppingDistance;
             agent.SetDestination(DestinationTarget.position);
         }
