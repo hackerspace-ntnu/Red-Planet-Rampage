@@ -102,6 +102,8 @@ public class AIManager : PlayerManager
         victim.onDeath -= RemovePlayer;
         if (ShootingTarget == victim.AiAimSpot)
             ShootingTarget = null;
+        if (DestinationTarget == victim.AiTarget)
+            DestinationTarget = null;
     }
 
     private void HandleExplodedBarrel(HealthController health, float damage, DamageInfo info)
