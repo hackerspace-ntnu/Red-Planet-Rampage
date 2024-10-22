@@ -327,12 +327,14 @@ public class AIManager : PlayerManager
 
             if (areOnlyAiPlayersLeft)
             {
-                if (hitDistance > closestDistance)
+                // Unless we already shoot at someone or are further away
+                if (ShootingTarget || hitDistance > closestDistance)
                     continue;
 
+                // Set sail for this player
                 closestDistance = hitDistance;
                 closestPlayer = player.AiTarget.transform;
-                continue;
+                DestinationTarget = closestPlayer;
             }
 
             var playerDistance = (player.transform.position - transform.position).magnitude;
