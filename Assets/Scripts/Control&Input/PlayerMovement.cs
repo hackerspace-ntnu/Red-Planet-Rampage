@@ -351,7 +351,7 @@ public class PlayerMovement : MonoBehaviour
     /// No, this does not work if the cast start at the bottom.
     /// </summary>
     /// <returns>Whether or not the player is in the air</returns>
-    private bool IsInAir()
+    protected virtual bool IsInAir()
     {
         bool isAir = !Physics.BoxCast(hitbox.bounds.center, new Vector3(.5f, .5f, .2f), Vector3.down, out RaycastHit hit, Quaternion.identity, 0.5f + airThreshold, groundCheckMask);
         ground = isAir ? null : hit.collider;
@@ -444,7 +444,7 @@ public class PlayerMovement : MonoBehaviour
         if (!CanLook)
             return;
         var lookSpeedFactor = inputManager.ZoomActive
-            ? inputManager.IsMouseAndKeyboard ? LookSpeedZoom * mouseZoomSpeedFactor: LookSpeedZoom
+            ? inputManager.IsMouseAndKeyboard ? LookSpeedZoom * mouseZoomSpeedFactor : LookSpeedZoom
             : lookSpeed;
         var lookInput = inputManager.IsMouseAndKeyboard
             ? inputManager.lookInput
@@ -475,7 +475,7 @@ public class PlayerMovement : MonoBehaviour
     /// More accurate ground detection for use in stepping up edges. Uses raycast to check for ground directly beneath the player.
     /// </summary>
     /// <returns>true if player is touching the ground, false if not touching ground </returns>
-    private bool FindSteppingGround()
+    protected bool FindSteppingGround()
     {
         RaycastHit hitGround;
         if (Physics.Raycast(playerRoot.position, Vector3.down, out hitGround, 0.01f))

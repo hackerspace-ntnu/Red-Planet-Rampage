@@ -30,6 +30,11 @@ public class AIMovement : PlayerMovement
         }
     }
 
+    protected override bool IsInAir()
+    {
+        return !FindSteppingGround();
+    }
+
     protected override void FixedUpdate()
     {
         var direction = -transform.forward;
