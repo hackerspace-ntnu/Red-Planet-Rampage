@@ -7,16 +7,22 @@ public class FiringSound : MonoBehaviour
     private AudioGroup firingSound;
 
     private AudioSource audioSource;
+    private ProjectileController projectile;
 
     private void Start()
     {
         audioSource = GetComponent<AudioSource>();
-        var projectile = GetComponent<ProjectileController>();
-        projectile.OnProjectileInit += (ref ProjectileState state, GunStats stats) => PlaySound(firingSound);
+        projectile = GetComponent<ProjectileController>();
+        projectile.OnProjectileInit += PlaySound;
     }
 
-    private void PlaySound(AudioGroup sound)
+    private void OnDestroy()
     {
-        sound.Play(audioSource);
+        projectile.OnProjectileInit -= PlaySound;
+    }
+
+    private void PlaySound(ref ProjectileState state, GunStats stats)
+    {
+        firingSound.Play(audioSource);
     }
 }
