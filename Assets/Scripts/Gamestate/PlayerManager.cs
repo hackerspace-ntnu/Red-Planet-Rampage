@@ -487,7 +487,7 @@ public class PlayerManager : NetworkBehaviour
         {
             gunController.onFireStart += UpdateAimTarget;
             gunController.onFire += UpdateAimTarget;
-            gunController.onFireEnd += ScreenShake;
+            gunController.onFire += ScreenShake;
             gunController.onFireEnd += UpdateHudFire;
             gunController.onReload += UpdateHudReload;
             UpdateHudCrosshair(gunController.stats);
