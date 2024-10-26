@@ -7,15 +7,9 @@ public class LazurFiringAnimator : AugmentAnimator
 
     public AnimationEvent OnChargeStart;
 
-    public override void OnInitialize(GunStats stats)
-    {
-        return;
-    }
+    public override void OnInitialize(GunStats stats) { }
 
-    public override void OnReload(GunStats stats)
-    {
-        return;
-    }
+    public override void OnReload(GunStats stats) { }
 
     public void PlayChargeUpSound()
     {
@@ -24,8 +18,12 @@ public class LazurFiringAnimator : AugmentAnimator
 
     public void ShootLazer()
     {
-        this.OnShotFiredAnimation?.Invoke();
-        this.OnAnimationEnd?.Invoke();
+        OnShotFiredAnimation?.Invoke();
+    }
+
+    public void EndFiring()
+    {
+        OnAnimationEnd?.Invoke();
     }
 
     public override void OnFire(GunStats stats)
