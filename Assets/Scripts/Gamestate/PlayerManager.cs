@@ -476,6 +476,15 @@ public class PlayerManager : NetworkBehaviour
     public virtual void SetGun(Transform offset)
     {
         var hadGunBefore = gunController != null;
+        if (hadGunBefore && inputManager)
+        {
+            gunController.onFireStart -= UpdateAimTarget;
+            gunController.onFire -= UpdateAimTarget;
+            gunController.onFire -= ScreenShake;
+            gunController.onFireEnd -= UpdateHudFire;
+            gunController.onReload -= UpdateHudReload;
+            gunController.projectile.OnHitboxCollision -= hudController.HitAnimation;
+        }
         overrideAimTarget = false;
         var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity.Extension, this, offset);
         // Set specific local transform
