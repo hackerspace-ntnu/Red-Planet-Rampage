@@ -477,10 +477,15 @@ public class PlayerMovement : MonoBehaviour
     /// <returns>true if player is touching the ground, false if not touching ground </returns>
     protected bool FindSteppingGround()
     {
+        return IsGroundedAccurate() && state is GroundState.Grounded;
+    }
+
+    protected bool IsGroundedAccurate()
+    {
         RaycastHit hitGround;
         if (Physics.Raycast(playerRoot.position, Vector3.down, out hitGround, 0.01f))
         {
-            if (hitGround.normal.y > 0.0001f && state == GroundState.Grounded)
+            if (hitGround.normal.y > 0.0001f)
             {
                 return true;
             }

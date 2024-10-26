@@ -230,7 +230,7 @@ public class AIManager : PlayerManager
 
         var hasAmmoBoxBody = ammoBoxCollector.CanReload;
         var isOutOfAmmo = gunController && gunController.stats.Ammo < 1;
-        var isInAir = aiMovement.enabled && aiMovement.StateIsAir;
+        var isInAir = aiMovement.IsInAirRightNow();
         if (hasAmmoBoxBody && isOutOfAmmo && !isInAir)
         {
             var ammoBox = AmmoBox.GetClosestAmmoBoxForAI(transform.position);
@@ -248,7 +248,12 @@ public class AIManager : PlayerManager
             agent.stoppingDistance = itemStoppingDistance;
             agent.SetDestination(DestinationTarget.position);
         }
-        else if (!aiMovement || !aiMovement.enabled)
+        else if (!aiMovement.enabled && isInAir)
+        {
+            Debug.Log("DISABLING AGENT NOW");
+            DisableAgent();
+        }
+        else
         {
             FindPlayers();
         }

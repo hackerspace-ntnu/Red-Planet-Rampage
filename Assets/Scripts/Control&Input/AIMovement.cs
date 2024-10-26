@@ -32,7 +32,13 @@ public class AIMovement : PlayerMovement
 
     protected override bool IsInAir()
     {
-        return !FindSteppingGround();
+        // TODO using stepping ground thing here doesn't really work...
+        return base.IsInAir();
+    }
+
+    public bool IsInAirRightNow()
+    {
+        return !IsGroundedAccurate();
     }
 
     protected override void FixedUpdate()
