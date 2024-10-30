@@ -414,9 +414,10 @@ public class AIManager : PlayerManager
         {
             // Face in target direction
             var horizontalDirection = (ShootingTarget.position.xz() - transform.position.xz()).normalized;
-            transform.forward = new Vector3(horizontalDirection.x, 0, horizontalDirection.y);
+            var targetDirection = new Vector3(horizontalDirection.x, 0, horizontalDirection.y);
+            transform.forward = Vector3.Slerp(transform.forward, targetDirection, .7f);
             // Point gun
-            GunOrigin.LookAt(ShootingTarget.position, transform.up);
+            GunOrigin.LookAt(transform.position + transform.forward * 10f, transform.up);
             Fire();
         }
         if (!DestinationTarget || !agent.enabled)
