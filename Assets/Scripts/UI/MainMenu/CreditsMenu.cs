@@ -17,6 +17,8 @@ public class CreditsMenu : MonoBehaviour
     private int tween;
     private int initialTopPadding;
 
+    private InputManager inputManager;
+
     private void OnEnable()
     {
         StartCoroutine(StartAnimation());
@@ -56,14 +58,23 @@ public class CreditsMenu : MonoBehaviour
 
     public void SetPlayerInput(InputManager inputManager)
     {
+        this.inputManager = inputManager;
         inputManager.onCancel += Back;
         inputManager.onSelect += Back;
+        inputManager.onClick += Back;
     }
 
     private void Back(InputAction.CallbackContext ctx)
     {
         if (!gameObject.activeInHierarchy)
             return;
+
+        if (inputManager)
+        {
+            inputManager.onCancel -= Back;
+            inputManager.onSelect -= Back;
+            inputManager.onClick -= Back;
+        }
 
         StopAnimation();
         mainMenuController.ReturnToMainMenu();

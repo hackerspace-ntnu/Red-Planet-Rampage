@@ -10,6 +10,7 @@ internal class ListenerBackup
     public InputEvent onMoveCanceled;
     // Menu-related
     public InputEvent onSelect;
+    public InputEvent onClick;
     public InputEvent onCancel;
     public InputEvent onExit;
     public InputEvent onLeftTab;
@@ -39,6 +40,7 @@ public class InputManager : MonoBehaviour
     public InputEvent onMoveCanceled;
     // Menu-related
     public InputEvent onSelect;
+    public InputEvent onClick;
     public InputEvent onCancel;
     public InputEvent onExit;
     public InputEvent onLeftTab;
@@ -111,6 +113,7 @@ public class InputManager : MonoBehaviour
         // Subscribe delegates to inputs
         playerInput.actions["Join"].performed += AnyKey;
         playerInput.actions["Select"].performed += Select;
+        playerInput.actions["Click"].performed += Click;
         playerInput.actions["Cancel"].performed += Cancel;
         playerInput.actions["Exit"].performed += Exit;
         playerInput.actions["Move"].performed += Move;
@@ -189,6 +192,7 @@ public class InputManager : MonoBehaviour
     {
         // Abusing that empty delegate bodies are defined as null to remove all invocation lists.
         onSelect = null;
+        onClick = null;
         onCancel = null;
         onExit = null;
         onMovePerformed = null;
@@ -215,6 +219,7 @@ public class InputManager : MonoBehaviour
         backup = new()
         {
             onSelect = onSelect,
+            onClick = onClick,
             onCancel = onCancel,
             onExit = onExit,
             onMovePerformed = onMovePerformed,
@@ -265,6 +270,11 @@ public class InputManager : MonoBehaviour
     private void Select(InputAction.CallbackContext ctx)
     {
         onSelect?.Invoke(ctx);
+    }
+
+    private void Click(InputAction.CallbackContext ctx)
+    {
+        onClick?.Invoke(ctx);
     }
 
     private void Cancel(InputAction.CallbackContext ctx)

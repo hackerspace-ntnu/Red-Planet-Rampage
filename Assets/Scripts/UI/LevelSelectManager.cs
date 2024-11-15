@@ -89,6 +89,7 @@ public class LevelSelectManager : MonoBehaviour
     {
         this.input = input;
         input.onSelect += HandleCardClick;
+        input.onClick += HandleCardClick;
     }
 
     private void SetupButtonNavigation(UnityEngine.UI.Button button, int index, int totalCount)
@@ -126,7 +127,9 @@ public class LevelSelectManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (input)
-            input.onSelect -= HandleCardClick;
+        if (!input)
+            return;
+        input.onSelect -= HandleCardClick;
+        input.onClick -= HandleCardClick;
     }
 }

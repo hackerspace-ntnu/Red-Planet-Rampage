@@ -107,7 +107,7 @@ public class MainMenuController : MonoBehaviour
             EventLog.Singleton.transform.GetChild(0).gameObject.SetActive(false);
             ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived += UpdateStartButton;
         }
-            
+
 
         if (playerInputManagerController.LocalPlayerInputs.Count > 0)
         {
@@ -187,7 +187,7 @@ public class MainMenuController : MonoBehaviour
     {
         sun.Restart();
         if (firstInputJoined != null)
-            if(firstInputJoined.IsMouseAndKeyboard) ShowMouse();
+            if (firstInputJoined.IsMouseAndKeyboard) ShowMouse();
         playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
         skipIntroText.gameObject.SetActive(false);
         introVideo.gameObject.SetActive(false);
@@ -308,6 +308,7 @@ public class MainMenuController : MonoBehaviour
         startButton.colors = colors;
         inputManager.onMovePerformed += PlayUISelectAudio;
         inputManager.onSelect += PlayChooseAudio;
+        inputManager.onClick += PlayChooseAudio;
 
         foreach (TabGroup t in tabGroups)
         {
