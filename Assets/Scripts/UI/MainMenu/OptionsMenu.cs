@@ -1,7 +1,6 @@
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Audio;
 using UnityEngine.UI;
 
 public class OptionsMenu : MonoBehaviour
@@ -136,7 +135,7 @@ public class OptionsMenu : MonoBehaviour
     public void SetMusicVolume(float volume)
     {
         settingsDataManager.SetMusicVolume(volume);
-        
+
     }
 
     public void SetSFXVolume(float volume)
