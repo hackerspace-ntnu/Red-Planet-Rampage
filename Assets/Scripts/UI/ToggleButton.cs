@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,24 +17,34 @@ public class ToggleButton : MonoBehaviour
     {
         button = GetComponent<Selectable>();
         checkText.enabled = isToggled;
-        highlightPopup.enabled = false;
+        if (highlightPopup)
+            highlightPopup.enabled = false;
     }
 
     public void OnHighlight()
     {
-        if (isToggled)
+        if (isToggled && highlightPopup)
             highlightPopup.enabled = true;
     }
 
     public void OnRemoveHighlight()
     {
-        highlightPopup.enabled = isToggled;
+        if (highlightPopup)
+            highlightPopup.enabled = isToggled;
     }
 
     public void Toggle()
     {
         isToggled = !isToggled;
-        if (isToggled)
+        if (isToggled && highlightPopup)
+            highlightPopup.enabled = true;
+        checkText.enabled = isToggled;
+    }
+
+    public void SetIsToggled(bool value)
+    {
+        isToggled = value;
+        if (isToggled && highlightPopup)
             highlightPopup.enabled = true;
         checkText.enabled = isToggled;
     }

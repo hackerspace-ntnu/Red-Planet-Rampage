@@ -51,6 +51,10 @@ public class OptionsMenu : MonoBehaviour
     private Slider FOVSlider;
     [SerializeField]
     private Slider ZoomFOVSlider;
+    [SerializeField]
+    private ToggleButton invertXButton;
+    [SerializeField]
+    private ToggleButton invertYButton;
 
     #endregion
 
@@ -82,27 +86,30 @@ public class OptionsMenu : MonoBehaviour
     {
         resolutionDropdown.value = System.Array.FindIndex(settingsDataManager.Resolutions, r => r.width == Screen.currentResolution.width && r.height == Screen.currentResolution.height);
 
-        fullscreenTypeDropdown.value = settingsDataManager.SettingsDataInstance.DisplayModeIndex;
+        fullscreenTypeDropdown.value = settingsDataManager.Data.DisplayModeIndex;
 
-        qualityDropdown.value = settingsDataManager.SettingsDataInstance.QualityPresetIndex;
+        qualityDropdown.value = settingsDataManager.Data.QualityPresetIndex;
 
-        masterVolumeSlider.value = settingsDataManager.SettingsDataInstance.MasterVolume;
+        masterVolumeSlider.value = settingsDataManager.Data.MasterVolume;
 
-        musicVolumeSlider.value = settingsDataManager.SettingsDataInstance.MusicVolume;
+        musicVolumeSlider.value = settingsDataManager.Data.MusicVolume;
 
-        sfxVolumeSlider.value = settingsDataManager.SettingsDataInstance.SfxVolume;
+        sfxVolumeSlider.value = settingsDataManager.Data.SfxVolume;
 
-        sensitivitySlider.value = settingsDataManager.SettingsDataInstance.SensitivityScale;
-        sensitivityInputField.text = settingsDataManager.SettingsDataInstance.SensitivityScale.ToString("0.00");
+        sensitivitySlider.value = settingsDataManager.Data.SensitivityScale;
+        sensitivityInputField.text = settingsDataManager.Data.SensitivityScale.ToString("0.00");
 
-        FOVSlider.value = settingsDataManager.SettingsDataInstance.PlayerFOV;
-        FOVInputField.text = settingsDataManager.SettingsDataInstance.PlayerFOV.ToString("0");
+        FOVSlider.value = settingsDataManager.Data.PlayerFOV;
+        FOVInputField.text = settingsDataManager.Data.PlayerFOV.ToString("0");
 
-        ZoomFOVSlider.value = settingsDataManager.SettingsDataInstance.ZoomFOV;
-        ZoomFOVInputField.text = settingsDataManager.SettingsDataInstance.ZoomFOV.ToString("0");
+        ZoomFOVSlider.value = settingsDataManager.Data.ZoomFOV;
+        ZoomFOVInputField.text = settingsDataManager.Data.ZoomFOV.ToString("0");
 
-        CrosshairSlider.value = settingsDataManager.SettingsDataInstance.CrosshairSize;
-        CrosshairInputField.text = settingsDataManager.SettingsDataInstance.CrosshairSize.ToString("0.00");
+        CrosshairSlider.value = settingsDataManager.Data.CrosshairSize;
+        CrosshairInputField.text = settingsDataManager.Data.CrosshairSize.ToString("0.00");
+
+        invertXButton.SetIsToggled(settingsDataManager.Data.InvertX);
+        invertYButton.SetIsToggled(settingsDataManager.Data.InvertY);
 
         settingsDataManager.ApplyAllSettings();
     }
@@ -123,7 +130,7 @@ public class OptionsMenu : MonoBehaviour
         // We invert this list so the dropdown goes from high to low quality.
         string[] qualityNames = settingsDataManager.QualityNames;
         qualityDropdown.AddOptions(qualityNames.Reverse().ToList());
-        qualityDropdown.value = settingsDataManager.SettingsDataInstance.QualityPresetIndex;
+        qualityDropdown.value = settingsDataManager.Data.QualityPresetIndex;
         qualityDropdown.RefreshShownValue();
     }
 
@@ -229,4 +236,10 @@ public class OptionsMenu : MonoBehaviour
         CrosshairSlider.value = value;
         settingsDataManager.SetCrosshairSize(value);
     }
+
+    public void ToggleInvertX() =>
+        settingsDataManager.ToggleInvertX();
+
+    public void ToggleInvertY() =>
+        settingsDataManager.ToggleInvertY();
 }
