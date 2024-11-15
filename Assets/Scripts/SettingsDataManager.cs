@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.InputSystem;
 
 public class SettingsData
 {
@@ -47,7 +48,7 @@ public class SettingsData
     const float defualtPlayerFOV = 90f;
     const float defualtZoomFOV = 30f;
     const float defualtMasterVolume = 1.0f;
-    const float defualtMusicVolume = 1.0f;
+    const float defualtMusicVolume = 0.6f;
     const float defualtSfxVolume = 1.0f;
     const int defualtQualityPresetIndex = 0;
     const float defualtCrosshairSize = 1f;
@@ -115,9 +116,9 @@ public class SettingsDataManager : MonoBehaviour
 {
     public static SettingsDataManager Singleton { get; private set; }
 
-    private const string FileName = "/Settings.json";
+    private static string SettingsFilePath => $"{Application.persistentDataPath}/Settings.json";
+    private static string KeybindsFilePath => $"{Application.persistentDataPath}/Keybinds.json";
 
-    private static string FilePath;
 
 
     #region Graphic variables
@@ -161,7 +162,11 @@ public class SettingsDataManager : MonoBehaviour
     public float UpperCrosshairLimit = 3f;
     #endregion
 
-    public SettingsData SettingsDataInstance;
+    [Header("Keybinds")]
+    [SerializeField]
+    private InputActionAsset actions;
+
+    public SettingsData SettingsDataInstance = new();
 
     private void Awake()
     {
@@ -185,28 +190,35 @@ public class SettingsDataManager : MonoBehaviour
         Resolutions = Screen.resolutions.Reverse().ToArray();
         QualityNames = QualitySettings.names;
 
-        SettingsDataInstance = new();
-
         DontDestroyOnLoad(gameObject);
 
-        LoadOrCreateFile();
+        LoadOrCreateSettingsFile();
+        LoadKeybindsFile();
     }
 
-    private void LoadOrCreateFile()
+    private void LoadOrCreateSettingsFile()
     {
         // TODO For some reason the settings will be loaded (and *need* to be loaded)
         //      every single time Mirror flings you back to the main menu.
         //      We may want to investigate why.
 
-        FilePath = Application.persistentDataPath + FileName;
-
-        if (!File.Exists(FilePath))
+        if (!File.Exists(SettingsFilePath))
         {
-            CreateDefaultFile();
+            SaveSettingsFile();
         }
         LoadSettingsFile();
         ApplyAllSettings();
         StartCoroutine(MakeSureVolumeIsCorrectOnLaunch());
+    }
+
+    private void LoadKeybindsFile()
+    {
+        if (!File.Exists(KeybindsFilePath))
+            return;
+
+        var rebinds = File.ReadAllText(KeybindsFilePath);
+        if (!string.IsNullOrEmpty(rebinds))
+            actions.LoadBindingOverridesFromJson(rebinds);
     }
 
     #region Save methods
@@ -214,26 +226,34 @@ public class SettingsDataManager : MonoBehaviour
     {
         try
         {
-            string jsonData = File.ReadAllText(FilePath);
+            string jsonData = File.ReadAllText(SettingsFilePath);
             SettingsDataInstance = new SettingsData(JsonUtility.FromJson<SettingsDataStruct>(jsonData));
             Debug.Log("Settings data loaded");
         }
         catch
         {
             Debug.Log("Settings file corrupted or missing");
-            CreateDefaultFile();
+            SaveSettingsFile();
         }
     }
 
-    private void CreateDefaultFile()
+    private void SaveSettingsFile()
     {
         string jsonData = JsonUtility.ToJson(SettingsDataInstance.ToDataStruct());
-        File.WriteAllText(FilePath, jsonData);
+        File.WriteAllText(SettingsFilePath, jsonData);
+    }
+
+    private void SaveKeybindsFile()
+    {
+        var rebinds = actions.SaveBindingOverridesAsJson();
+        PlayerPrefs.SetString("rebinds", rebinds);
+        File.WriteAllText(KeybindsFilePath, rebinds);
     }
 
     public void SaveSettingsData()
     {
-        CreateDefaultFile();
+        SaveSettingsFile();
+        SaveKeybindsFile();
     }
 
     public void ApplyAllSettings()
