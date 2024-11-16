@@ -83,11 +83,12 @@ public class InputManager : MonoBehaviour
     public bool ZoomActive = false;
     public bool CrouchActive = false;
 
-    void Start()
+    public void Start()
     {
         playerInput = GetComponent<PlayerInput>();
         DontDestroyOnLoad(gameObject);
         AddListeners();
+        
     }
 
     void OnDestroy()
@@ -355,4 +356,6 @@ public class InputManager : MonoBehaviour
         onLookCanceled?.Invoke(ctx);
     }
     #endregion
+    
+    
 }
