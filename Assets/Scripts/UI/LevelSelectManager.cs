@@ -1,5 +1,6 @@
 using OperatorExtensions;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -10,13 +11,15 @@ public class LevelSelectManager : MonoBehaviour
     [SerializeField]
     private MainMenuController mainMenuController;
     [SerializeField]
-    private UnityEngine.UI.Button backButton;
+    private Button backButton;
     [SerializeField]
-    private UnityEngine.UI.Button startButton;
+    private Button startButton;
     [SerializeField]
     private GameObject parent;
     [SerializeField]
     private List<LevelCard> levelCards;
+    [SerializeField]
+    private List<LevelCard> editorOnlyLevelCards;
     [SerializeField]
     private float totalDegrees = 130f;
     [SerializeField]
@@ -32,23 +35,30 @@ public class LevelSelectManager : MonoBehaviour
     public void Start()
     {
         eventSystem = EventSystem.current;
+#if UNITY_EDITOR
+        var levelCount = levelCards.Count + editorOnlyLevelCards.Count;
+        var cards = levelCards.Union(editorOnlyLevelCards).ToList();
+#else
+        var levelCount = levelCards.Count;
+        var cards = levelCards;
+#endif
 
-        float angleBetween = totalDegrees / ((float)levelCards.Count + 1);
+        float angleBetween = totalDegrees / ((float)levelCount + 1);
         float startAngle = 180 - totalDegrees / 2;
 
-        for (int i = 0; i < levelCards.Count; i++)
+        for (int i = 0; i < levelCount; i++)
         {
             Vector3 offsetPosition = new Vector3(0f, 0f, 3f);
             Quaternion rotation = Quaternion.Euler(0f, startAngle + angleBetween * (i + 1), 0f);
 
             //Create new card parent to rotate independently of parent
-            GameObject newParent = new GameObject(levelCards[i].name + "Parent");
+            GameObject newParent = new GameObject(cards[i].name + "Parent");
             newParent.transform.SetParent(parent.transform);
             newParent.transform.position = parent.transform.position;
             newParent.transform.localScale = Vector3.one;
 
             //Instantiate levelcard and attatch to cardparent
-            GameObject levelCard = Instantiate(levelCards[i].LevelCardPrefab, newParent.transform.position, Quaternion.Euler(-90f, 180f, 180f), newParent.transform);
+            GameObject levelCard = Instantiate(cards[i].LevelCardPrefab, newParent.transform.position, Quaternion.Euler(-90f, 180f, 180f), newParent.transform);
             levelCard.transform.localPosition += new Vector3(newParent.transform.localPosition.x, newParent.transform.localPosition.y, newParent.transform.localPosition.z - 0.8f);
             newParent.transform.rotation = rotation;
 
@@ -75,12 +85,12 @@ public class LevelSelectManager : MonoBehaviour
             backButton.navigation = backNavigation;
         }
 
-        for (int i = 0; i < levelCards.Count; i++)
+        for (int i = 0; i < levelCount; i++)
         {
-            UnityEngine.UI.Button currentButton = instantiatedCards[i].GetComponent<UnityEngine.UI.Button>();
+            Button currentButton = instantiatedCards[i].GetComponent<UnityEngine.UI.Button>();
             if (currentButton != null)
             {
-                SetupButtonNavigation(currentButton, i, levelCards.Count);
+                SetupButtonNavigation(currentButton, i, levelCount);
             }
         }
     }
