@@ -126,6 +126,19 @@ public class MainMenuController : MonoBehaviour
             if (firstInputJoined.IsMouseAndKeyboard) ShowMouse();
             else HideMouse();
         }
+        else if (Application.isEditor)
+        {
+            // We are running from withing the editor, skip the video
+            TransferExistingInputs();
+            SelectControl(defaultButton);
+            introVideo.Stop();
+            introVideo.gameObject.SetActive(false);
+            introVideoFirstFrame.SetActive(false);
+            videoPlayerCamera.SetActive(false);
+            mainMenuCamera.SetActive(true);
+            // Reset loading screen
+            LoadingScreen.ResetCounter();
+        }
         else
         {
             // First time in menu, play intro video.
