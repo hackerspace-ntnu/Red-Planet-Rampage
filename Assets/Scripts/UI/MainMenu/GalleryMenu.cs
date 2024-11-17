@@ -57,7 +57,8 @@ public class GalleryMenu : MonoBehaviour
         maxPages = Mathf.CeilToInt((float)unlockedElements.Length / gridElements.Count);
 
         CreateTabs(maxPages);
-        PopulateGrid(0);
+        // TODO: Implement this properly for gallery v2.0
+        //PopulateGrid(0);
     }
 
     public void SetPlayerInput(InputManager inputManager)

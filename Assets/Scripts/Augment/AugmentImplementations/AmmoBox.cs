@@ -15,8 +15,8 @@ public class AmmoBox : MonoBehaviour
     private AudioGroup soundEffect;
     private AudioSource audioSource;
 
-    private Collider collider;
-    private MeshRenderer renderer;
+    private new Collider collider;
+    private new MeshRenderer renderer;
 
     private static readonly List<AmmoBox> ammoBoxes = new();
 

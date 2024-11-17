@@ -200,7 +200,7 @@ public class BulletController : ProjectileController
         {
             trailPositionBuffer.setValue(index, position);
         }
-        catch (IndexOutOfRangeException _)
+        catch (IndexOutOfRangeException)
         {
             Debug.LogWarning($"Index {index} is out of bounds in BulletController texture (max {vfxPositionsPerSample * collisionSamples * Mathf.CeilToInt(stats.ProjectilesPerShot)})");
         }
