@@ -9,7 +9,10 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
 {
     // Model to stick to target
     [SerializeField]
-    private GameObject stuckObject;
+    private StuckObject stuckObject;
+    // Should object be despawned after stuckLifeTime seconds?
+    [SerializeField]
+    private bool isDespawnedAfterTime = true;
     [SerializeField]
     private float stuckLifeTime = 5f;
     // Does stuck object trigger onHit?
@@ -26,7 +29,12 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
 
     private PlayerManager source;
 
-    private float scale = 1;
+    private Vector3 scale = Vector3.one;
+
+    private ObjectPool<StuckObject> stuckObjects;
+
+    public delegate void StickyModifierEvent(StuckObject stuckObject);
+    public StickyModifierEvent OnStuckToTarget;
 
     public Priority GetPriority()
     {
@@ -35,14 +43,18 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
 
     public void Attach(ProjectileController projectile)
     {
+        stuckObjects = new ObjectPool<StuckObject>(stuckObject);
         projectile.OnColliderHit += StickToTarget;
-        scale = projectile.stats.ProjectileScale;
+        scale = stuckObject.transform.localScale * projectile.stats.ProjectileScale;
         source = projectile.player;
     }
 
     public void Detach(ProjectileController projectile)
     {
         projectile.OnColliderHit -= StickToTarget;
+        OnStuckToTarget = null;
+        stuckObjects.Flush();
+        stuckObjects = null;
     }
 
     public void StickToTarget(RaycastHit hit, ref ProjectileState state)
@@ -50,11 +62,23 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
         if (!(affectedLayers == (affectedLayers | (1 << hit.collider.gameObject.layer))))
             return;
 
-        var stuck = Instantiate(stuckObject, hit.ClosestPoint(state.position), state.rotation);
-        stuck.transform.ParentUnscaled(hit.collider.transform);
-        stuck.transform.localScale = stuck.transform.localScale * scale;
+        var stuck = isDespawnedAfterTime ? 
+            stuckObjects.GetAndReturnLater(stuckLifeTime) 
+            : stuckObjects.Get();
+
+        stuck.transform.position = hit.ClosestPoint(state.oldPosition);
+        stuck.transform.localScale = scale;
+        stuck.transform.SetParent(hit.collider.transform, true);
+
+        OnStuckToTarget?.Invoke(stuck);
+
         if (stuck.TryGetComponent<ContinuousDamage>(out var continuousDamage))
             continuousDamage.source = source;
-        Destroy(stuck, stuckLifeTime);
+    }
+
+    private void OnDestroy()
+    {
+        stuckObjects.Flush();
+        stuckObjects = null;
     }
 }

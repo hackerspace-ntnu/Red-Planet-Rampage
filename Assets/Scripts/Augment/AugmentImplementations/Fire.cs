@@ -16,7 +16,7 @@ public class Fire : GunExtension
     [SerializeField]
     private GameObject fire;
     [SerializeField]
-    private GameObject stuckFirePrefab;
+    private StuckObject stuckFirePrefab;
     [SerializeField]
     private LayerMask trailLayers;
     private GunController gunController;
@@ -24,6 +24,7 @@ public class Fire : GunExtension
     [SerializeField]
     private AudioGroup lighterSound;
     private ProjectileType projectileType = ProjectileType.Hitscan;
+    private ObjectPool<StuckObject> stuckFirePool;
     [Header("HitscanProjectiles")]
     [SerializeField]
     private VisualEffect fireTrail;
@@ -35,6 +36,9 @@ public class Fire : GunExtension
     // texture used to update the vfx position and alive-state of particles, RGB is used for position A for alive/dead
     [SerializeField]
     private VFXTextureFormatter positionActiveBuffer;
+
+    [SerializeField]
+    private StickyProjectileModifier stickyModifier;
 
     private HashSet<ProjectileState> trackedProjectiles = new HashSet<ProjectileState>();
     // Used to keep track of the healthControllers currently burning
@@ -51,13 +55,14 @@ public class Fire : GunExtension
         gunController.onFireEnd += PlayShotAudio;
         gunController.projectile.OnProjectileInit += TrackProjectile;
         gunController.projectile.UpdateProjectileMovement += ApplyTrails;
-
+        stuckFirePool = new ObjectPool<StuckObject>(stuckFirePrefab);
         if (gunController.projectile is MeshProjectileController)
         {
             positionActiveBuffer.Initialize(maxProjectiles);
             fireTrailInstances.SetInt("MaxParticleCount", maxProjectiles);
             fireTrailInstances.SetGraphicsBuffer("Positions", positionActiveBuffer.Buffer);
             fireTrailInstances.SendEvent(VisualEffectAsset.PlayEventID);
+            stickyModifier.OnStuckToTarget += InitializeFlame;
             projectileType = ProjectileType.Mesh;
         }
         else if (gunController.projectile is BulletController)
@@ -129,9 +134,15 @@ public class Fire : GunExtension
                     if (hitbox.health && !hitHealthControllers.Contains(hitbox.health))
                     {
                         hitHealthControllers.Add(hitbox.health);
-                        GameObject flame = Instantiate(stuckFirePrefab, hitbox.transform);
+                        GameObject flame = stuckFirePool.Get().gameObject;
+                        flame.transform.SetParent(hitbox.transform, true);
+                        flame.transform.position = hitbox.transform.position;
                         if (flame.TryGetComponent<ContinuousDamage>(out var damage))
+                        {
                             damage.source = gunController.Player;
+                            damage.Initialize();
+                        }
+                            
                         StartCoroutine(WaitAndStopBurning(flame, hitbox.health));
                     }
             }
@@ -148,11 +159,26 @@ public class Fire : GunExtension
                 if (hitbox.health && !hitHealthControllers.Contains(hitbox.health))
                 {
                     hitHealthControllers.Add(hitbox.health);
-                    GameObject flame = Instantiate(stuckFirePrefab, hitbox.transform);
+                    var flame = stuckFirePool.Get().gameObject;
+                    flame.transform.SetParent (hitbox.transform, true);
+                    flame.transform.position = hitbox.transform.position;
                     if (flame.TryGetComponent<ContinuousDamage>(out var damage))
+                    {
                         damage.source = gunController.Player;
+                        damage.Initialize();
+                    }
+
                     StartCoroutine(WaitAndStopBurning(flame, hitbox.health));
                 }
+        }
+    }
+
+    private void InitializeFlame(StuckObject flame)
+    {
+        if (flame.TryGetComponent<ContinuousDamage>(out var damage))
+        {
+            damage.source = gunController.Player;
+            damage.Initialize();
         }
     }
 
@@ -179,6 +205,11 @@ public class Fire : GunExtension
         if (!gunController || !audioSource)
             return;
         lighterSound.Play(audioSource);
+    }
+
+    private void OnDestroy()
+    {
+        stuckFirePool.Flush();
     }
 
 #if UNITY_EDITOR

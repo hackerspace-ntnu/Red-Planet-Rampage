@@ -208,7 +208,7 @@ MonoBehaviour:
   midpoint: {fileID: 5704832397885290910}
   model: {fileID: 1979776678523386665}
   fire: {fileID: 7250958099768915120, guid: 8b742fbe3d30f044c914e269f5ae66fa, type: 3}
-  stuckFirePrefab: {fileID: 991165401608688981, guid: 8ee380ed606e8131da8eae09e78aef6b, type: 3}
+  stuckFirePrefab: {fileID: 5742571114628015837, guid: 8ee380ed606e8131da8eae09e78aef6b, type: 3}
   trailLayers:
     serializedVersion: 2
     m_Bits: 8
@@ -216,6 +216,7 @@ MonoBehaviour:
   fireTrail: {fileID: 1119212264029477965}
   fireTrailInstances: {fileID: 1382308675925352878}
   positionActiveBuffer: {fileID: 1141831215458723034}
+  stickyModifier: {fileID: 216606538572171217}
 --- !u!114 &216606538572171217
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -228,7 +229,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b0ba1bb34e28d142b759ea886c785ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stuckObject: {fileID: 7250958099768915120, guid: 8b742fbe3d30f044c914e269f5ae66fa, type: 3}
+  stuckObject: {fileID: 5742571114628015837, guid: 8ee380ed606e8131da8eae09e78aef6b, type: 3}
+  isDespawnedAfterTime: 1
   stuckLifeTime: 3
   triggerOnHit: 0
   onHitInterval: 1
@@ -721,6 +723,10 @@ PrefabInstance:
     - target: {fileID: 1356927743062251930, guid: 8b742fbe3d30f044c914e269f5ae66fa, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1533144068954559370, guid: 8b742fbe3d30f044c914e269f5ae66fa, type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.28
       objectReference: {fileID: 0}
     - target: {fileID: 7250958099768915120, guid: 8b742fbe3d30f044c914e269f5ae66fa, type: 3}
       propertyPath: m_Name

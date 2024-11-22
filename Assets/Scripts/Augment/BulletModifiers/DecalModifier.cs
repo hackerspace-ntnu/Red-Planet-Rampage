@@ -25,13 +25,9 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
 
     private const int allHitboxesAndGunsAndPlayersMask = (1 << 3) | (1 << 8) | (1 << 9) | (1 << 10) | (1 << 11) | (1 << 12) | (1 << 13) | (1 << 14) | (1 << 15);
 
-    private void Awake()
-    {
-        decalPool = new ObjectPool<DecalProjector>(decal, 70);
-    }
-
     public void Attach(ProjectileController projectile)
     {
+        decalPool = new ObjectPool<DecalProjector>(decal, 70);
         if (mode is MarkMode.ON_HIT or MarkMode.BOTH)
         {
             projectile.OnColliderHit += OnHit;
@@ -52,6 +48,8 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
         {
             projectile.OnRicochet -= OnHit;
         }
+        decalPool.Flush();
+        decalPool = null;
     }
 
     private void OnHit(RaycastHit target, ref ProjectileState state)
@@ -92,5 +90,11 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
         }
 
         return rotation;
+    }
+
+    private void OnDestroy()
+    {
+        decalPool.Flush();
+        decalPool = null;
     }
 }
