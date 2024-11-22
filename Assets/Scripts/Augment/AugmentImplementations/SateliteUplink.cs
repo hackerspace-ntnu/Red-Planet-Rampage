@@ -61,9 +61,6 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
 
         gunController.onFireStart += StartTracking;
 
-        garbagePool = new ObjectPool<FallingHazard>(PickTemplate, maxGarbagePresent);
-        targetingReticlePool = new ObjectPool<TargetingReticle>(targetingReticle, maxLaunchesPerShot);
-
         garbageParent = new GameObject().transform;
         garbageParent.gameObject.name = "TrashUplinkGarbageHolder";
 
@@ -115,6 +112,8 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
 
     public void Attach(ProjectileController projectile)
     {
+        garbagePool = new ObjectPool<FallingHazard>(PickTemplate, maxGarbagePresent);
+        targetingReticlePool = new ObjectPool<TargetingReticle>(targetingReticle, maxLaunchesPerShot);
         projectile.OnProjectileInit += Track;
         projectile.OnColliderHit += Target;
         projectile.OnRicochet += Target;
@@ -125,6 +124,10 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
         projectile.OnProjectileInit -= Track;
         projectile.OnColliderHit -= Target;
         projectile.OnRicochet += Target;
+        garbagePool.Flush();
+        garbagePool = null;
+        targetingReticlePool.Flush();
+        targetingReticlePool = null;
     }
 
     private void Track(ref ProjectileState state, GunStats stats)
@@ -194,5 +197,9 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
         if (!gunController)
             return;
         gunController.onFireStart -= StartTracking;
+        garbagePool.Flush();
+        garbagePool = null;
+        targetingReticlePool.Flush();
+        targetingReticlePool = null;
     }
 }

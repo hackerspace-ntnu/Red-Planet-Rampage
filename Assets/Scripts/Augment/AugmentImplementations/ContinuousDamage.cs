@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class ContinuousDamage : MonoBehaviour
@@ -18,15 +19,26 @@ public class ContinuousDamage : MonoBehaviour
 
     private HitboxController hitbox;
 
-    private void Start()
+    private void OnEnable()
+    {
+        if (!transform.parent)
+            return;
+        Initialize();
+    }
+
+    public void Initialize()
     {
         hitbox = transform.parent.GetComponent<HitboxController>();
         if (hitbox && hitbox.health)
             hitbox.health.onDeath += OnDeath;
-        if (durationSeconds > 0) 
-        {
-            Destroy(gameObject, durationSeconds);
-        }
+        if (durationSeconds > 0)
+            StartCoroutine(DelayedDisable());
+    }
+
+    private IEnumerator DelayedDisable()
+    {
+        yield return new WaitForSeconds(durationSeconds);
+        gameObject.SetActive(false);
     }
 
     private void OnDeath(HealthController healthController, float damage, DamageInfo info)
@@ -43,7 +55,7 @@ public class ContinuousDamage : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         if (hitbox && hitbox.health)
             hitbox.health.onDeath -= OnDeath;

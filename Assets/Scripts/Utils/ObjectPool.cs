@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ObjectPool<T> where T : MonoBehaviour
@@ -19,6 +20,17 @@ public class ObjectPool<T> where T : MonoBehaviour
         var holderInstance = new GameObject();
         holderInstance.name = "ObjectPoolHolder";
         parent = holderInstance.AddComponent<ObjectPoolHolder>();
+    }
+
+    /// <summary>
+    /// Free the memory and remove the holder objects from the scene hierarchy
+    /// </summary>
+    public void Flush()
+    {
+        pool.ForEach(gameObject => GameObject.Destroy(gameObject));
+        pool = null;
+        if (parent != null)
+            GameObject.Destroy(parent.gameObject);
     }
 
     /// <summary>
@@ -126,6 +138,8 @@ public class ObjectPool<T> where T : MonoBehaviour
         if (!instance)
             return;
         instance.gameObject.SetActive(false);
-        instance.transform.parent = parent.transform;
+        instance.transform.SetParent(parent.transform,true);
+        instance.transform.position = parent.transform.position;
+        instance.transform.rotation = parent.transform.rotation;
     }
 }
