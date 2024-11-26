@@ -78,6 +78,9 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
 
     private void OnDestroy()
     {
+        if (stuckObjects == null)
+            return;
+
         stuckObjects.Flush();
         stuckObjects = null;
     }
