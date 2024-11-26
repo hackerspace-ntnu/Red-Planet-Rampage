@@ -16,7 +16,7 @@ public class GunBarrel : Augment
     private VisualEffect muzzleFlash;
     public VisualEffect MuzzleFlash => muzzleFlash;
 
-    private GunController gunController;
+    protected GunController gunController;
 
     private void Awake()
     {

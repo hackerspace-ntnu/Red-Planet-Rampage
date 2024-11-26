@@ -142,4 +142,13 @@ public class ObjectPool<T> where T : MonoBehaviour
         instance.transform.position = parent.transform.position;
         instance.transform.rotation = parent.transform.rotation;
     }
+
+    /// <summary>
+    /// Returns all active instances back to the pool.
+    /// </summary>
+    public void ReturnAll()
+    {
+        foreach(var instance in pool)
+            Return(instance);
+    }
 }
