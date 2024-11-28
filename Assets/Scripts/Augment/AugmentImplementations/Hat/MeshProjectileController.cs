@@ -34,6 +34,8 @@ public class MeshProjectileController : ProjectileController
 
     private ProjectileState[] projectiles;
 
+    public Vector3[] ProjectilePositions => projectiles.Select(p => p.position).ToArray();
+
     private ProjectileState loadedProjectile;
 
     //index of last initialized state in array
@@ -100,6 +102,11 @@ public class MeshProjectileController : ProjectileController
     {
         if (authority)
             CmdFireProjectile(projectileOutput.position, projectileRotation * projectileOutput.forward, projectileRotation * projectileOutput.rotation);
+    }
+
+    public void ClearProjectiles()
+    {
+        projectiles.ToList().Clear();
     }
 
     [Command]

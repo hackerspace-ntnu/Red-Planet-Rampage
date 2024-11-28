@@ -9,7 +9,11 @@ public class DynamiteBarrel : GunBarrel
     private List<StickyDynamite> activeDynamites = new();
     [SerializeField]
     private StickyProjectileModifier stickyModifer;
-
+    [SerializeField]
+    private Mesh explodingBarrelMesh;
+    private bool isDetonatableEarly = false;
+    [SerializeField]
+    private MeshProjectileController meshProjectiles;
     void Start()
     {
         gunController = transform.parent.GetComponent<GunController>();
@@ -18,6 +22,14 @@ public class DynamiteBarrel : GunBarrel
 
         gunController.Player.onDeath += OnDeath;
         stickyModifer.OnStuckToTarget += AddDynamite;
+
+        // If bullets are large enough (enlarger), they should look like explosive barrels instead
+        if (Projectile.stats.ProjectileScale >= 3)
+            GetComponent<MeshProjectileController>().Vfx.SetMesh("Mesh", explodingBarrelMesh);
+
+        // If fire extension, dynamites should be able to explode while in air
+        //if (gunController.GetComponentInChildren<Fire>())
+        //    isDetonatableEarly = true;
 
         if (gunController.Player is AIManager)
         {
@@ -31,8 +43,13 @@ public class DynamiteBarrel : GunBarrel
 
     private void AddDynamite(StuckObject stuckObject)
     {
-        if (stuckObject is StickyDynamite)
-            activeDynamites.Add((StickyDynamite)stuckObject);
+        if (stuckObject is not StickyDynamite)
+            return;
+        var stuckDynamite = (StickyDynamite)stuckObject;
+        activeDynamites.Add(stuckDynamite);
+        if (Projectile.stats.ProjectileScale >= 3)
+            stuckDynamite.SetBarrel();
+        
     }
 
     // Letting the AIs also explode stuff every now and then
@@ -51,6 +68,10 @@ public class DynamiteBarrel : GunBarrel
     {
         activeDynamites.ForEach(dynamite => dynamite.Detonate(gunController.Player));
         activeDynamites.Clear();
+        if (!isDetonatableEarly)
+            return;
+        var explosivePositions = meshProjectiles.ProjectilePositions;
+        meshProjectiles.ClearProjectiles();
     }
 
     private void OnDeath(PlayerManager killer, PlayerManager victim, DamageInfo info)
