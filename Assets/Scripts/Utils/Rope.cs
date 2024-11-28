@@ -1,14 +1,15 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class Rope : MonoBehaviour
 {
-    public List<Vector3> CollisionPoints = new List<Vector3>();
+    const string NoTetherTag = "NotStatic";
+
+    public List<Vector3> CollisionPoints = new();
+
     [SerializeField]
     private Transform anchor;
-    public Transform Anchor 
+    public Transform Anchor
     {
         get
         {
@@ -29,20 +30,20 @@ public class Rope : MonoBehaviour
     public LineRenderer Line => line;
     private float accumulatedAnchorLength = 0f;
     public bool CollisionCheckActive = true;
-    public float RopeLength 
+    public float RopeLength
     {
         get
         {
             if (Target == null || CollisionPoints.Count < 1)
                 return accumulatedAnchorLength;
-            return accumulatedAnchorLength + Vector3.Distance(Target.position, CollisionPoints[CollisionPoints.Count - 1]);
+            return accumulatedAnchorLength + Vector3.Distance(Target.position, CollisionPoints[^1]);
         }
     }
     public Vector3 CurrentAnchor
     {
         get
         {
-            return CollisionPoints[CollisionPoints.Count - 1];
+            return CollisionPoints[^1];
         }
     }
 
@@ -55,8 +56,10 @@ public class Rope : MonoBehaviour
 
     public void ResetRope(Vector3 position)
     {
-        CollisionPoints = new List<Vector3>();
-        CollisionPoints.Add(position);
+        CollisionPoints = new List<Vector3>
+        {
+            position
+        };
         accumulatedAnchorLength = 0f;
     }
     public void ResetRope(Transform anchor)
@@ -89,7 +92,7 @@ public class Rope : MonoBehaviour
             return;
         }
 
-        if (Physics.Linecast(Target.position, CollisionPoints[CollisionPoints.Count - 1], out RaycastHit hitInfo, colliderLayers))
+        if (Physics.Linecast(Target.position, CollisionPoints[CollisionPoints.Count - 1], out RaycastHit hitInfo, colliderLayers) && !hitInfo.collider.gameObject.CompareTag(NoTetherTag))
         {
             if (CollisionPoints.Count > 1)
             {
@@ -98,7 +101,7 @@ public class Rope : MonoBehaviour
                     CollisionPoints.Add(hitInfo.point);
                     accumulatedAnchorLength = CollisionLength();
                 }
-                    
+
             }
             // First point, nothing to compare to
             else
@@ -106,19 +109,19 @@ public class Rope : MonoBehaviour
                 CollisionPoints.Add(hitInfo.point);
                 accumulatedAnchorLength = CollisionLength();
             }
-                
+
         }
         if (CollisionPoints.Count > 1)
         {
             // Extra failsafe in case rope gets stuck on corners
-            var previousAnchor = CollisionPoints[CollisionPoints.Count - 2];
-            var activeAnchor = CollisionPoints[CollisionPoints.Count - 1];      
+            var previousAnchor = CollisionPoints[^2];
+            var activeAnchor = CollisionPoints[^1];
             if (Vector3.Dot((activeAnchor - previousAnchor).normalized, (activeAnchor - Target.position).normalized) > 0.1f)
             {
                 CollisionPoints.RemoveAt(CollisionPoints.Count - 1);
                 accumulatedAnchorLength = CollisionLength();
             }
-            if (!Physics.Linecast(Target.position, previousAnchor, colliderLayers) && Vector3.Distance(Target.position, previousAnchor) < Vector3.Distance(Target.position, activeAnchor) )
+            if (!Physics.Linecast(Target.position, previousAnchor, colliderLayers) && Vector3.Distance(Target.position, previousAnchor) < Vector3.Distance(Target.position, activeAnchor))
             {
                 CollisionPoints.RemoveAt(CollisionPoints.Count - 1);
                 accumulatedAnchorLength = CollisionLength();
