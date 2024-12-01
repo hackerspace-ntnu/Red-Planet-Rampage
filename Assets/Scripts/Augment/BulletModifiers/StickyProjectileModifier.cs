@@ -15,6 +15,8 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
     private bool isDespawnedAfterTime = true;
     [SerializeField]
     private float stuckLifeTime = 5f;
+    [SerializeField]
+    private int maxObjects = 70;
     // Does stuck object trigger onHit?
     [SerializeField]
     private bool triggerOnHit = true;
@@ -43,7 +45,7 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
 
     public void Attach(ProjectileController projectile)
     {
-        stuckObjects = new ObjectPool<StuckObject>(stuckObject);
+        stuckObjects = new ObjectPool<StuckObject>(stuckObject, maxObjects);
         projectile.OnColliderHit += StickToTarget;
         scale = stuckObject.transform.localScale * projectile.stats.ProjectileScale;
         source = projectile.player;
@@ -64,7 +66,7 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
 
         var stuck = isDespawnedAfterTime ? 
             stuckObjects.GetAndReturnLater(stuckLifeTime) 
-            : stuckObjects.Get();
+                : stuckObjects.Get();
 
         stuck.transform.position = hit.ClosestPoint(state.oldPosition);
         stuck.transform.localScale = scale;
@@ -74,6 +76,17 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
 
         if (stuck.TryGetComponent<ContinuousDamage>(out var continuousDamage))
             continuousDamage.source = source;
+    }
+
+    public StuckObject InstantiateManual(Vector3 position)
+    {
+        var stuck = isDespawnedAfterTime ?
+        stuckObjects.GetAndReturnLater(stuckLifeTime)
+        : stuckObjects.Get();
+
+        stuck.transform.position = position;
+        stuck.transform.localScale = scale;
+        return stuck;
     }
 
     private void OnDestroy()

@@ -5,6 +5,7 @@ using RandomExtensions;
 using TMPro;
 using UnityEngine;
 using Mirror;
+using System.Linq;
 
 public class SateliteUplink : NetworkBehaviour, ProjectileModifier
 {
@@ -123,7 +124,7 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
     {
         projectile.OnProjectileInit -= Track;
         projectile.OnColliderHit -= Target;
-        projectile.OnRicochet += Target;
+        projectile.OnRicochet -= Target;
         garbagePool.Flush();
         garbagePool = null;
         targetingReticlePool.Flush();
@@ -153,6 +154,14 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
             Launch(hit.collider.transform.position);
         else
             Launch(hit.point);
+    }
+
+    public void TargetManual(IEnumerable<Vector3> positions)
+    {
+        if (!isReady)
+            return;
+        positions.ToList().ForEach(position => Launch(position));
+        RestartCooldown();
     }
 
     private void Launch(Vector3 target)

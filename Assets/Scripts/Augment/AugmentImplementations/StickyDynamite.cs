@@ -16,6 +16,23 @@ public class StickyDynamite : StuckObject
     private VisualEffect[] barrelSmoke;
     [SerializeField]
     private ExplosionController explosion;
+    public ExplosionController Explosion => explosion;
+
+    private void OnEnable()
+    {
+        ResetDynamite();
+    }
+
+    public void ResetDynamite()
+    {
+        explosion.StopAllCoroutines();
+        mesh.enabled = true;
+        smoke.enabled = true;
+        if (explosion.transform.parent)
+            explosion.transform.parent.gameObject.SetActive(true);
+        explosion.gameObject.SetActive(true);
+        explosion.Init();
+    }
 
     public void SetBarrel()
     {
@@ -31,7 +48,11 @@ public class StickyDynamite : StuckObject
         explosiveBarrel.enabled = false;
         smoke.enabled = false;
         barrelSmoke.ToList().ForEach(smoke => smoke.enabled = false);
-        explosion.Explode(sourcePlayer);
-        explosion.transform.parent.parent = null;
+        // Double check that dynamite hasn't been taken by the pool before exploding
+        if (explosion.gameObject.activeSelf)
+        {
+            explosion.Explode(sourcePlayer);
+            explosion.transform.parent.parent = null;
+        }
     }
 }

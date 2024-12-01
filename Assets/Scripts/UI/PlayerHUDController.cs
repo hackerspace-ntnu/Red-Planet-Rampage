@@ -109,12 +109,14 @@ public class PlayerHUDController : MonoBehaviour
     // Dampen how much vertical velocity should influence center of speedlines
     private const float lineVelocityDampeningY = 0.1f;
     private float crosshairCrossScale = 1.0f;
+    private float initialCrosshairRadius;
 
     [SerializeField]
     private RectTransform scopeZoom;
     private int scopeTween;
     private int hitTween;
     private int hitMarkTween;
+    private int crosshairRadiusTween;
 
     private void Awake()
     {
@@ -204,7 +206,7 @@ public class PlayerHUDController : MonoBehaviour
             .id;
     }
 
-    public void OnDamageTaken(float damage, float currentHealth, float maxHealth)
+    public void OnDamageTaken(float currentHealth, float maxHealth)
     {
         UpdateHealthBar(currentHealth, maxHealth);
         LeanTween.value(gameObject, UpdateDamageBorder, 0f, 1f, damageBorderFlashDuration);
@@ -308,6 +310,8 @@ public class PlayerHUDController : MonoBehaviour
         spectateHintText.gameObject.SetActive(false);
         ammoHud.parent.gameObject.SetActive(false);
         speedLines.gameObject.SetActive(false);
+        // Disable crosshair when spectating
+        crosshair.rectTransform.sizeDelta *= 0;
     }
 
     public void DisplaySpectateHint()
@@ -373,9 +377,27 @@ public class PlayerHUDController : MonoBehaviour
         crosshairMaterial.SetFloat("_HitMarkerRadius", scale);
     }
 
+    private void SetCrosshairRadius(float radius)
+    {
+        crosshairMaterial.SetFloat("_Radius", radius);
+    }
+
+    public void CrossHairDetonationAnimation()
+    {
+        if (LeanTween.isTweening(crosshairRadiusTween))
+        {
+            LeanTween.cancel(crosshairRadiusTween);
+            crosshairMaterial.SetFloat("_Radius", initialCrosshairRadius);
+        }
+        crosshairRadiusTween = LeanTween.value(crosshair.gameObject, SetCrosshairRadius, initialCrosshairRadius, 0f, 0.3f)
+            .setEaseOutQuint()
+            .setOnComplete(() => SetCrosshairRadius(initialCrosshairRadius)).id;
+    }
+
     public void UpdateOnInitialize(GunStats stats)
     {
-        crosshairMaterial.SetFloat("_Radius", stats.CrosshairRadius.Value() == 0f ? 0f : 1f / stats.CrosshairRadius.Value());
+        initialCrosshairRadius = stats.CrosshairRadius.Value() == 0f ? 0f : 1f / stats.CrosshairRadius.Value();
+        crosshairMaterial.SetFloat("_Radius", initialCrosshairRadius);
 
         // Has to be done this way as enum keywords in reality are a set of boolean keywords...
         foreach (CrossHairModes mode in Enum.GetValues(typeof(CrossHairModes)))

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -73,8 +75,24 @@ public class ExplosionController : MonoBehaviour
             if (shouldBeReturned)
                 hits.Add((target, scaledDamage));
         }
-        Destroy(gameObject, 4);
+        if (gameObject.activeSelf)
+            StartCoroutine(WaitAndDeactivate());
         return hits;
+    }
+
+    private IEnumerator WaitAndDeactivate()
+    {
+        yield return new WaitForSeconds(4);
+        if (transform.parent)
+            transform.parent.gameObject.SetActive(false);
+        else
+            gameObject.SetActive(false);
+    }
+
+    private void OnDisable()
+    {
+        visualEffects.ForEach(vfx => vfx.enabled = false);
+        StopAllCoroutines();
     }
 
     private void DealDamage(Collider target, PlayerManager sourcePlayer, out bool shouldBeReturned, out float scaledDamage)

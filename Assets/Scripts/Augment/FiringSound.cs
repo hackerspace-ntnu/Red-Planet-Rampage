@@ -18,7 +18,8 @@ public class FiringSound : MonoBehaviour
 
     private void OnDestroy()
     {
-        projectile.OnProjectileInit -= PlaySound;
+        if (projectile != null)
+            projectile.OnProjectileInit -= PlaySound;
     }
 
     private void PlaySound(ref ProjectileState state, GunStats stats)
