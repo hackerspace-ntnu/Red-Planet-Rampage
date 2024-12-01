@@ -34,7 +34,9 @@ public class MeshProjectileController : ProjectileController
 
     private ProjectileState[] projectiles;
 
-    public Vector3[] ProjectilePositions => projectiles.Select(p => p.position).ToArray();
+    public Vector3[] ProjectilePositions => 
+        projectiles.Where(p => p != null && p.active == true)
+            .Select(p => p.position).ToArray();
 
     private ProjectileState loadedProjectile;
 
@@ -106,7 +108,9 @@ public class MeshProjectileController : ProjectileController
 
     public void ClearProjectiles()
     {
-        projectiles.ToList().Clear();
+        for (int i = 0; i < maxProjectiles; i++)
+            if (projectiles[i] != null)
+                projectiles[i].active = false;
     }
 
     [Command]

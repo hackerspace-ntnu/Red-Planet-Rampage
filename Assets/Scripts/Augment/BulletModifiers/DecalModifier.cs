@@ -94,6 +94,8 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
 
     private void OnDestroy()
     {
+        if (decalPool == null)
+            return;
         decalPool.Flush();
         decalPool = null;
     }

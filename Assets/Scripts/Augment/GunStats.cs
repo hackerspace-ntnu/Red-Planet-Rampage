@@ -156,6 +156,7 @@ public class GunStats : ScriptableObject
         Default,
         Shotgun,
         Hat,
+        Dynamite,
     }
     public CrossHairModes CrossHairMode { get; set; }
     [SerializeField]

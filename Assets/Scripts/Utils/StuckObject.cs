@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// Interface component for objectpooling sticky projectiles.
-/// This is necessary because you can't refference GameObject as a Template type.
+/// This is necessary because you can't reference GameObject as a Template type.
 /// </summary>
 public class StuckObject : MonoBehaviour
 {

@@ -178,7 +178,11 @@ public class PlayerManager : NetworkBehaviour
     private void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
         if (hudController)
-            hudController.OnDamageTaken(damage, healthController.CurrentHealth, healthController.MaxHealth);
+            hudController.OnDamageTaken(healthController.CurrentHealth, healthController.MaxHealth);
+
+        if (info.damageType == DamageType.Explosion)
+            ScreenShake(info.damage * 0.005f);
+
         if (info.sourcePlayer != this)
         {
             lastPlayerThatHitMe = info.sourcePlayer;
@@ -444,6 +448,20 @@ public class PlayerManager : NetworkBehaviour
             inputManager.PlayerCamera.gameObject.transform.localPosition = Vector3.zero;
         }
         screenShakeTween = inputManager.PlayerCamera.gameObject.LeanMoveLocal(new Vector3(0.02f, 0.02f, 0f) * stats.ScreenShakeFactor, 0.1f).setEaseShake().id;
+    }
+
+    private void ScreenShake(float amount)
+    {
+        if (!inputManager)
+            return;
+        if (LeanTween.isTweening(screenShakeTween))
+        {
+            LeanTween.cancel(screenShakeTween);
+            inputManager.PlayerCamera.gameObject.transform.localPosition = Vector3.zero;
+        }
+        var viewDirection = inputManager.PlayerCamera.transform.up;
+        screenShakeTween = inputManager.PlayerCamera.gameObject
+            .LeanMoveLocal(viewDirection * amount, 0.2f).setEaseShake().id;
     }
 
     public virtual void SetLayer(int playerIndex)

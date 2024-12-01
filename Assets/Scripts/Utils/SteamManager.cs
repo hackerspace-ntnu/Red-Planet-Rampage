@@ -27,6 +27,9 @@ public enum SecretCombinationType
     Nuke,
     MadHatter,
     PointNClick,
+    UnpatientSploder,
+    BarrelImposter,
+    TacticalStrike,
 }
 
 public enum AchievementType
@@ -196,6 +199,9 @@ public class SteamManager : MonoBehaviour
         { SecretCombinationType.Nuke, "WEAPON_NUKE" },
         { SecretCombinationType.MadHatter, "WEAPON_MAD_HATTER" },
         { SecretCombinationType.PointNClick, "WEAPON_POINT_CLICK" },
+        { SecretCombinationType.UnpatientSploder, "WEAPON_UNPATIENT_SPLODER" },
+        { SecretCombinationType.BarrelImposter, "WEAPON_BARREL_IMPOSTER" },
+        { SecretCombinationType.TacticalStrike, "WEAPON_TACTICAL_STRIKE" },
     };
 
     private readonly Dictionary<AchievementType, string> achievementNames = new()

@@ -1,3 +1,4 @@
+using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,9 @@ public class DynamiteBarrel : GunBarrel
     private bool isDetonatableEarly = false;
     [SerializeField]
     private MeshProjectileController meshProjectiles;
+    private SateliteUplink sateliteUplink;
+
+
     void Start()
     {
         gunController = transform.parent.GetComponent<GunController>();
@@ -28,17 +32,20 @@ public class DynamiteBarrel : GunBarrel
             GetComponent<MeshProjectileController>().Vfx.SetMesh("Mesh", explodingBarrelMesh);
 
         // If fire extension, dynamites should be able to explode while in air
-        //if (gunController.GetComponentInChildren<Fire>())
-        //    isDetonatableEarly = true;
+        if (gunController.GetComponentInChildren<Fire>())
+            isDetonatableEarly = true;
+        else
+            sateliteUplink = gunController.GetComponentInChildren<SateliteUplink>();
 
         if (gunController.Player is AIManager)
         {
             StartCoroutine(TryDetonating());
             return;
-        }   
-
+        }
+        syncDirection = SyncDirection.ClientToServer;
         gunController.Player.GetComponent<PlayerMovement>().ResetZoom();
-        gunController.Player.inputManager.onZoomPerformed += OnZoom;
+        if (gunController.Player.inputManager)
+            gunController.Player.inputManager.onZoomPerformed += OnZoom;
     }
 
     private void AddDynamite(StuckObject stuckObject)
@@ -47,6 +54,7 @@ public class DynamiteBarrel : GunBarrel
             return;
         var stuckDynamite = (StickyDynamite)stuckObject;
         activeDynamites.Add(stuckDynamite);
+        stuckDynamite.ResetDynamite();
         if (Projectile.stats.ProjectileScale >= 3)
             stuckDynamite.SetBarrel();
         
@@ -66,12 +74,39 @@ public class DynamiteBarrel : GunBarrel
 
     private void OnZoom(InputAction.CallbackContext ctx)
     {
+        if (authority)
+            CmdDetonate();
+    }
+
+    [Command]
+    private void CmdDetonate()
+    {
+        RpcDetonate();
+    }
+
+    [ClientRpc]
+    private void RpcDetonate()
+    {
+        if (isDetonatableEarly)
+        {
+            var explosivePositions = meshProjectiles.ProjectilePositions;
+            explosivePositions.ToList().ForEach(position =>
+                {
+                    var dynamite = (StickyDynamite)stickyModifer.InstantiateManual(position);
+                    dynamite.Explosion.Init();
+                    activeDynamites.Add(dynamite);
+                });
+            meshProjectiles.ClearProjectiles();
+        }
+        else if (sateliteUplink)
+            sateliteUplink.TargetManual(activeDynamites
+                .Select(dynamite => dynamite.transform.position));
+
+        if (authority && activeDynamites.Count > 0 && gunController.Player.HUDController)
+            gunController.Player.HUDController.CrossHairDetonationAnimation();
+
         activeDynamites.ForEach(dynamite => dynamite.Detonate(gunController.Player));
         activeDynamites.Clear();
-        if (!isDetonatableEarly)
-            return;
-        var explosivePositions = meshProjectiles.ProjectilePositions;
-        meshProjectiles.ClearProjectiles();
     }
 
     private void OnDeath(PlayerManager killer, PlayerManager victim, DamageInfo info)
@@ -84,7 +119,7 @@ public class DynamiteBarrel : GunBarrel
 
         stickyModifer.OnStuckToTarget -= AddDynamite;
 
-        if (gunController.Player is not AIManager)
+        if (gunController.Player is not AIManager && gunController.Player.inputManager)
             gunController.Player.inputManager.onZoomPerformed -= OnZoom;
     }
 
@@ -98,7 +133,7 @@ public class DynamiteBarrel : GunBarrel
 
         stickyModifer.OnStuckToTarget -= AddDynamite;
 
-        if (gunController.Player is not AIManager)
+        if (gunController.Player is not AIManager && gunController.Player.inputManager)
             gunController.Player.inputManager.onZoomPerformed -= OnZoom;
     }
 }
