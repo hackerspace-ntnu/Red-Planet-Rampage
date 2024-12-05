@@ -48,7 +48,7 @@ public class PauseMenu : MonoBehaviour
         //Cursor.visible = PlayerInputManagerController.Singleton.LocalPlayerInputs.Any(i => i.IsMouseAndKeyboard);
         //Cursor.lockState = Cursor.visible ? CursorLockMode.None : CursorLockMode.Locked;
 
-        foreach (var player in Peer2PeerTransport.LocalPlayerInstances)
+        foreach (var player in RPRNetworkManager.LocalPlayerInstances)
         {
             player.inputManager.BackupListeners();
             PlayerInputManagerController.Singleton.ChangeInputMapForPlayer("Menu", player.inputManager);
@@ -72,7 +72,7 @@ public class PauseMenu : MonoBehaviour
         panel.gameObject.SetActive(false);
 
         var inputMap = SceneManager.GetActiveScene().name == Scenes.Bidding ? "Bidding" : "FPS";
-        foreach (var player in Peer2PeerTransport.LocalPlayerInstances)
+        foreach (var player in RPRNetworkManager.LocalPlayerInstances)
         {
             PlayerInputManagerController.Singleton.ChangeInputMapForPlayer(inputMap, player.inputManager);
             player.inputManager.RestoreListeners();

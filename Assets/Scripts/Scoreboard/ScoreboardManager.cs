@@ -146,7 +146,7 @@ public class ScoreboardManager : MonoBehaviour
         else
         {
             var isEveryoneReadyToWin =
-                Peer2PeerTransport.PlayerInstanceByID.Values.All(p => MatchController.Singleton.WinsForPlayer(p) == 2);
+                RPRNetworkManager.PlayerInstanceByID.Values.All(p => MatchController.Singleton.WinsForPlayer(p) == 2);
             if (MatchRules.Current.GameMode is GameModeVariant.ThreeStrikes && isEveryoneReadyToWin)
                 SteamManager.Singleton.UnlockAchievement(AchievementType.MatchPoint);
 
@@ -161,7 +161,7 @@ public class ScoreboardManager : MonoBehaviour
     private Rewards AssignAndDetermineRewards(PlayerManager player)
     {
         var lastRound = matchController.LastRound;
-        var playerDetails = Peer2PeerTransport.PlayerDetails.Where(p => p.id == player.id).SingleOrDefault();
+        var playerDetails = RPRNetworkManager.PlayerDetails.Where(p => p.id == player.id).SingleOrDefault();
         var result = new Rewards
         {
             savings = playerDetails.chips,

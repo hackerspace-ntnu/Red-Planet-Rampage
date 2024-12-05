@@ -294,7 +294,7 @@ public class PlayerManager : NetworkBehaviour
 
         var voicePlayer = GetComponent<VoicePlayer>();
         voicePlayer.Voice = PlayerInputManagerController.Singleton.VoiceForColor(identity.color);
-        var isLocalPlayer = Peer2PeerTransport.PlayerDetails.FirstOrDefault(p => p.id == id).type is PlayerType.Local;
+        var isLocalPlayer = RPRNetworkManager.PlayerDetails.FirstOrDefault(p => p.id == id).type is PlayerType.Local;
         if (isLocalPlayer)
             voicePlayer.Turn2D();
 

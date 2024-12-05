@@ -15,7 +15,7 @@ public class ClientLobby : MonoBehaviour
     {
         EventLog.Singleton.transform.GetChild(0).gameObject.SetActive(true);
         environmentCamera.position = lobbyPosition.position;
-        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived += AddPlayer;
+        ((RPRNetworkManager)NetworkManager.singleton).OnPlayerReceived += AddPlayer;
     }
 
     public void QuitLobby()
@@ -35,6 +35,6 @@ public class ClientLobby : MonoBehaviour
 
     private void OnDestroy()
     {
-        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived -= AddPlayer;
+        ((RPRNetworkManager)NetworkManager.singleton).OnPlayerReceived -= AddPlayer;
     }
 }

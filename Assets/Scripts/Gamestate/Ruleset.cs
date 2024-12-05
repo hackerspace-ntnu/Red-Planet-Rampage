@@ -286,12 +286,12 @@ public class Ruleset : ScriptableObject
         MatchWinCondition.WinCondition switch
         {
             MatchWinConditionType.Wins =>
-                Peer2PeerTransport.PlayerDetails.Where(p => rounds.Where(r => r.IsWinner(p.id)).Count() >= MatchWinCondition.AmountForStopCondition),
+                RPRNetworkManager.PlayerDetails.Where(p => rounds.Where(r => r.IsWinner(p.id)).Count() >= MatchWinCondition.AmountForStopCondition),
             MatchWinConditionType.Kills =>
-                Peer2PeerTransport.PlayerDetails.Where(p => rounds.Sum(r => r.KillCount(p.id)) >= MatchWinCondition.AmountForStopCondition),
+                RPRNetworkManager.PlayerDetails.Where(p => rounds.Sum(r => r.KillCount(p.id)) >= MatchWinCondition.AmountForStopCondition),
             MatchWinConditionType.Chips =>
-                Peer2PeerTransport.PlayerDetails.Where(p => Peer2PeerTransport.PlayerInstanceByID[p.id].identity.Chips >= MatchWinCondition.AmountForStopCondition),
-            _ => Peer2PeerTransport.PlayerDetails,
+                RPRNetworkManager.PlayerDetails.Where(p => RPRNetworkManager.PlayerInstanceByID[p.id].identity.Chips >= MatchWinCondition.AmountForStopCondition),
+            _ => RPRNetworkManager.PlayerDetails,
         };
 
     private IEnumerable<PlayerDetails> CandidatesForLastXRounds(List<Round> rounds)
@@ -300,12 +300,12 @@ public class Ruleset : ScriptableObject
         return MatchWinCondition.WinCondition switch
         {
             MatchWinConditionType.Wins =>
-                Peer2PeerTransport.PlayerDetails.Where(p => rounds.Where(r => r.IsWinner(p.id)).Count() == max),
+                RPRNetworkManager.PlayerDetails.Where(p => rounds.Where(r => r.IsWinner(p.id)).Count() == max),
             MatchWinConditionType.Kills =>
-                Peer2PeerTransport.PlayerDetails.Where(p => rounds.Sum(r => r.KillCount(p.id)) == max),
+                RPRNetworkManager.PlayerDetails.Where(p => rounds.Sum(r => r.KillCount(p.id)) == max),
             MatchWinConditionType.Chips =>
-                Peer2PeerTransport.PlayerDetails.Where(p => Peer2PeerTransport.PlayerInstanceByID[p.id].identity.Chips == max),
-            _ => Peer2PeerTransport.PlayerDetails,
+                RPRNetworkManager.PlayerDetails.Where(p => RPRNetworkManager.PlayerInstanceByID[p.id].identity.Chips == max),
+            _ => RPRNetworkManager.PlayerDetails,
         };
     }
 
@@ -313,11 +313,11 @@ public class Ruleset : ScriptableObject
         MatchWinCondition.WinCondition switch
         {
             MatchWinConditionType.Wins =>
-                Peer2PeerTransport.PlayerDetails.Max(p => rounds.Where(r => r.IsWinner(p.id)).Count()),
+                RPRNetworkManager.PlayerDetails.Max(p => rounds.Where(r => r.IsWinner(p.id)).Count()),
             MatchWinConditionType.Kills =>
-                Peer2PeerTransport.PlayerDetails.Max(p => rounds.Sum(r => r.KillCount(p.id))),
+                RPRNetworkManager.PlayerDetails.Max(p => rounds.Sum(r => r.KillCount(p.id))),
             MatchWinConditionType.Chips =>
-                Peer2PeerTransport.PlayerDetails.Max(p => Peer2PeerTransport.PlayerInstanceByID[p.id].identity.Chips),
+                RPRNetworkManager.PlayerDetails.Max(p => RPRNetworkManager.PlayerInstanceByID[p.id].identity.Chips),
             _ => 0
         };
     #endregion

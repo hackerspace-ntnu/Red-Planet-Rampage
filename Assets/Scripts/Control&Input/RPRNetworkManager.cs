@@ -128,7 +128,7 @@ public enum PlayerType
     Remote
 }
 
-public class Peer2PeerTransport : NetworkManager
+public class RPRNetworkManager : NetworkManager
 {
     private const int FPSPlayerPrefabIndex = 0;
     private const int BiddingPlayerPrefabIndexOffset = 1;

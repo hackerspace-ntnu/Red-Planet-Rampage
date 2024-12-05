@@ -319,7 +319,7 @@ public class AIManager : PlayerManager
         Transform closestPlayer = null;
         closestDistance = ignoreAwareRadius;
 
-        var areOnlyAiPlayersLeft = trackedPlayers.All(p => Peer2PeerTransport.PlayerDetails.Any(pd => p.id == pd.id && pd.type is PlayerType.AI));
+        var areOnlyAiPlayersLeft = trackedPlayers.All(p => RPRNetworkManager.PlayerDetails.Any(pd => p.id == pd.id && pd.type is PlayerType.AI));
 
         foreach (var player in TrackedPlayers)
         {

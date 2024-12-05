@@ -15,7 +15,7 @@ public class YieldZone : MonoBehaviour
     private void Start()
     {
         yieldText.text = "YIELD";
-        yieldInfoText.text = $"0/{Peer2PeerTransport.NumPlayers}";
+        yieldInfoText.text = $"0/{RPRNetworkManager.NumPlayers}";
     }
 
     public void Subscribe()
@@ -40,7 +40,7 @@ public class YieldZone : MonoBehaviour
     private void SetYieldText()
     {
         yieldText.text = "YIELD";
-        yieldInfoText.text = $"{AuctionDriver.Singleton.YieldingPlayerCount}/{Peer2PeerTransport.NumPlayers}";
+        yieldInfoText.text = $"{AuctionDriver.Singleton.YieldingPlayerCount}/{RPRNetworkManager.NumPlayers}";
     }
 
     public void SetRemainingTimeText(int time)
@@ -53,6 +53,6 @@ public class YieldZone : MonoBehaviour
     {
         AuctionDriver.Singleton.OnYieldChange -= SetYieldText;
         yieldText.text = "YIELD";
-        yieldInfoText.text = $"0/{Peer2PeerTransport.NumPlayers}";
+        yieldInfoText.text = $"0/{RPRNetworkManager.NumPlayers}";
     }
 }

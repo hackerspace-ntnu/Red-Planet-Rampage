@@ -60,7 +60,7 @@ public class HealthController : NetworkBehaviour
     {
         try
         {
-            var source = Peer2PeerTransport.PlayerInstanceByID[networkInfo.sourcePlayer];
+            var source = RPRNetworkManager.PlayerInstanceByID[networkInfo.sourcePlayer];
             var info = new DamageInfo(source, networkInfo);
             ActuallyDealDamage(info);
         }

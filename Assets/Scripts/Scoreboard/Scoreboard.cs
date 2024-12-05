@@ -190,7 +190,7 @@ public class Scoreboard : MonoBehaviour
             MatchWinConditionType.Kills => MatchController.Singleton.LastRound.KillCount(player),
             // Use player details as previous chip count, since the chip amount there is only set at round start
             MatchWinConditionType.Chips =>
-                player.identity.Chips - Peer2PeerTransport.PlayerDetails.Where(p => p.id == player.id).SingleOrDefault().chips,
+                player.identity.Chips - RPRNetworkManager.PlayerDetails.Where(p => p.id == player.id).SingleOrDefault().chips,
             _ => 0,
         };
 
@@ -209,7 +209,7 @@ public class Scoreboard : MonoBehaviour
         // Show hint below current score
         if (MatchRules.Current.MatchWinCondition.StopCondition == MatchStopConditionType.AfterXRounds)
         {
-            int maxScore = Peer2PeerTransport.PlayerInstanceByID.Values.Max(p => ScoreForPlayer(p));
+            int maxScore = RPRNetworkManager.PlayerInstanceByID.Values.Max(p => ScoreForPlayer(p));
             if (score >= maxScore)
                 hintText.text = "LEADER";
         }

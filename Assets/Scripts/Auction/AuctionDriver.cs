@@ -30,7 +30,7 @@ public class AuctionDriver : NetworkBehaviour
     public Vector3 YieldPosition => yieldPosition.position;
     private List<PlayerManager> yieldingPlayers = new();
     public int YieldingPlayerCount => yieldingPlayers.Count;
-    
+
     public delegate void AuctionEvent();
     public AuctionEvent OnYieldChange;
 
@@ -91,7 +91,7 @@ public class AuctionDriver : NetworkBehaviour
     private IEnumerator WaitAndStartAuction()
     {
         // TODO add a timeout to this kinda thing
-        while (FindObjectsOfType<PlayerManager>().Count() < Peer2PeerTransport.NumPlayers)
+        while (FindObjectsOfType<PlayerManager>().Count() < RPRNetworkManager.NumPlayers)
             yield return null;
 
         availableAuctionStages = MatchRules.Current.AuctionForRound(MatchController.Singleton.RoundCount) switch
@@ -150,12 +150,12 @@ public class AuctionDriver : NetworkBehaviour
             StartCoroutine(nameof(WaitAndTryAuctionEnd));
         else
             StopCoroutine(nameof(WaitAndTryAuctionEnd));
-            
+
     }
 
     private bool IsAuctionYielded()
     {
-        if (yieldingPlayers.Count == Peer2PeerTransport.NumPlayers)
+        if (yieldingPlayers.Count == RPRNetworkManager.NumPlayers)
             return true;
 
         var relevantPlatforms = biddingPlatforms.Where(platform => platform.IsActive);
@@ -256,7 +256,7 @@ public class AuctionDriver : NetworkBehaviour
         // Wait a couple o' frames so gun parts are sent to their respective players
         yield return null;
         yield return null;
-        Peer2PeerTransport.UpdatePlayerDetailsAfterAuction();
+        RPRNetworkManager.UpdatePlayerDetailsAfterAuction();
         RpcSwitchToItemSelect();
     }
 
