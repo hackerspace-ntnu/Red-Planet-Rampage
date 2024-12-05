@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 // TODO consider splitting this into match-specific state and general player metadata
+// TODO also consider sticking some of the metadata onto the playermanager/playeridentity component for ease of access...
 public struct PlayerDetails
 {
     public uint id;
@@ -41,85 +42,6 @@ public struct PlayerConnectedMessage : NetworkMessage
     public ulong steamID;
 }
 
-public struct PlayerLeftMessage : NetworkMessage
-{
-    public PlayerLeftMessage(uint id)
-    {
-        this.id = id;
-    }
-
-    public uint id;
-}
-
-public struct RulesetMessage : NetworkMessage
-{
-    public RulesetMessage(Ruleset ruleset)
-    {
-        this.ruleset = ruleset.ToNetworkRuleset();
-    }
-    public NetworkRuleset ruleset;
-}
-
-public struct InitialPlayerDetailsMessage : NetworkMessage
-{
-    public InitialPlayerDetailsMessage(PlayerDetails details)
-    {
-        this.details = details;
-    }
-    public PlayerDetails details;
-}
-
-public struct UpdatedPlayerDetailsMessage : NetworkMessage
-{
-    public UpdatedPlayerDetailsMessage(PlayerDetails details)
-    {
-        this.details = details;
-    }
-    public PlayerDetails details;
-}
-
-public struct UpdateLoadoutMessage : NetworkMessage
-{
-    public UpdateLoadoutMessage(uint id, string body, string barrel, string extension)
-    {
-        this.id = id;
-        this.body = body;
-        this.barrel = barrel;
-        this.extension = extension;
-    }
-    public uint id;
-    public string body;
-    public string barrel;
-    public string extension;
-}
-
-public struct StartMatchMessage : NetworkMessage { }
-
-public struct SpawnPlayerMessage : NetworkMessage
-{
-    public SpawnPlayerMessage(uint id, PlayerType type)
-    {
-        this.id = id;
-        this.type = type;
-    }
-
-    public uint id;
-    public PlayerType type;
-}
-
-public struct InitializePlayerMessage : NetworkMessage
-{
-    public InitializePlayerMessage(uint id, Vector3 position, Quaternion rotation)
-    {
-        this.id = id;
-        this.position = position;
-        this.rotation = rotation;
-    }
-
-    public uint id;
-    public Vector3 position;
-    public Quaternion rotation;
-}
 
 public enum PlayerType
 {
@@ -130,6 +52,92 @@ public enum PlayerType
 
 public class RPRNetworkManager : NetworkManager
 {
+    #region Messages
+    private struct PlayerLeftMessage : NetworkMessage
+    {
+        public PlayerLeftMessage(uint id)
+        {
+            this.id = id;
+        }
+
+        public uint id;
+    }
+
+    private struct RulesetMessage : NetworkMessage
+    {
+        public RulesetMessage(Ruleset ruleset)
+        {
+            this.ruleset = ruleset.ToNetworkRuleset();
+        }
+        public NetworkRuleset ruleset;
+    }
+
+    private struct InitialPlayerDetailsMessage : NetworkMessage
+    {
+        public InitialPlayerDetailsMessage(PlayerDetails details)
+        {
+            this.details = details;
+        }
+        public PlayerDetails details;
+    }
+
+    private struct UpdatedPlayerDetailsMessage : NetworkMessage
+    {
+        public UpdatedPlayerDetailsMessage(PlayerDetails details)
+        {
+            this.details = details;
+        }
+        public PlayerDetails details;
+    }
+
+    private struct UpdateLoadoutMessage : NetworkMessage
+    {
+        public UpdateLoadoutMessage(uint id, string body, string barrel, string extension)
+        {
+            this.id = id;
+            this.body = body;
+            this.barrel = barrel;
+            this.extension = extension;
+        }
+        public uint id;
+        public string body;
+        public string barrel;
+        public string extension;
+    }
+
+    private struct StartMatchMessage : NetworkMessage { }
+
+    private struct ClientReadyMessage : NetworkMessage { }
+
+    private struct AllClientsReadyMessage : NetworkMessage { }
+
+    private struct SpawnPlayerMessage : NetworkMessage
+    {
+        public SpawnPlayerMessage(uint id)
+        {
+            this.id = id;
+        }
+
+        public uint id;
+    }
+
+    private struct InitializePlayerMessage : NetworkMessage
+    {
+        public InitializePlayerMessage(uint id, Vector3 position, Quaternion rotation)
+        {
+            this.id = id;
+            this.position = position;
+            this.rotation = rotation;
+        }
+
+        public uint id;
+        public Vector3 position;
+        public Quaternion rotation;
+    }
+    #endregion;
+
+    #region State
+
     private const int FPSPlayerPrefabIndex = 0;
     private const int BiddingPlayerPrefabIndexOffset = 1;
     private const int AIFPSPlayerPrefabIndex = 2;
@@ -145,6 +153,8 @@ public class RPRNetworkManager : NetworkManager
 
     private static bool isInMatch;
     public static bool IsInMatch => isInMatch;
+
+    private static bool allClientsAreReady;
 
     private static Dictionary<uint, PlayerDetails> players = new();
     public static int NumPlayers => players.Count;
@@ -163,6 +173,7 @@ public class RPRNetworkManager : NetworkManager
     /// </summary>
     private static List<NetworkConnectionToClient> connections = new();
     private static Dictionary<int, List<uint>> playersForConnection = new();
+    private static Dictionary<int, bool> readinessForConnection = new();
     private static List<uint> connectedPlayers = new();
     public static ReadOnlyCollection<NetworkConnectionToClient> Connections;
 
@@ -177,9 +188,14 @@ public class RPRNetworkManager : NetworkManager
     public GamestateEvent OnMatchStart;
     public GamestateEvent OnMatchEnd;
 
+    #endregion
+
+    #region Initializing
+
     private void ResetState()
     {
         isInMatch = false;
+        allClientsAreReady = false;
         playerIndex = 0;
         players = new();
         playerInstances = new();
@@ -190,22 +206,24 @@ public class RPRNetworkManager : NetworkManager
         connections = new();
         connectedPlayers = new();
         playersForConnection = new();
+        readinessForConnection = new();
         Connections = new(connections);
     }
 
     public override void OnStartServer()
     {
         NetworkServer.RegisterHandler<PlayerConnectedMessage>(OnSpawnPlayerInput);
-        NetworkServer.RegisterHandler<UpdateLoadoutMessage>(OnReceiveUpdateLoadout);
+        NetworkServer.RegisterHandler<UpdateLoadoutMessage>(OnReceiveUpdatedLoadout);
+        NetworkServer.RegisterHandler<ClientReadyMessage>(OnClientReady);
 
         ResetState();
     }
 
-    #region Player joining 
 
     public override void OnClientConnect()
     {
         base.OnClientConnect();
+        NetworkClient.RegisterHandler<AllClientsReadyMessage>(OnAllClientsReady);
         NetworkClient.RegisterHandler<StartMatchMessage>(OnStartMatch);
         NetworkClient.RegisterHandler<PlayerLeftMessage>(OnPlayerLeft);
         NetworkClient.RegisterHandler<InitialPlayerDetailsMessage>(OnReceivePlayerDetails);
@@ -219,6 +237,10 @@ public class RPRNetworkManager : NetworkManager
 
         ResetState();
     }
+
+    #endregion
+
+    #region Disconnecting
 
     public override void OnServerDisconnect(NetworkConnectionToClient connection)
     {
@@ -291,6 +313,10 @@ public class RPRNetworkManager : NetworkManager
         OnPlayerRemoved?.Invoke(playerDetails);
     }
 
+    #endregion
+
+    #region Network startup
+
     public void JoinLobby(string address = "127.0.0.1")
     {
         if (NetworkServer.active)
@@ -346,6 +372,10 @@ public class RPRNetworkManager : NetworkManager
         MusicTrackManager.Singleton.SwitchTo(MusicType.Tutorial);
     }
 
+    #endregion
+
+    #region Match start
+
     // TODO custom method for leaving training mode :)
     // TODO handle leaving of match/lobby better
 
@@ -368,6 +398,10 @@ public class RPRNetworkManager : NetworkManager
             mainMenuController.DisableSceneSwitching();
         LoadingScreen.Singleton.Show(FindObjectsByType<Camera>(FindObjectsSortMode.None).Where(camera => camera.gameObject.activeInHierarchy && camera.enabled == true).First());
     }
+
+    #endregion
+
+    #region Joining
 
     private void RefuseConnection(NetworkConnectionToClient connection)
     {
@@ -631,7 +665,7 @@ public class RPRNetworkManager : NetworkManager
         }
     }
 
-    private void OnReceiveUpdateLoadout(NetworkConnectionToClient connection, UpdateLoadoutMessage message)
+    private void OnReceiveUpdatedLoadout(NetworkConnectionToClient connection, UpdateLoadoutMessage message)
     {
         if (!players.TryGetValue(message.id, out var playerDetails))
             return;
@@ -646,6 +680,7 @@ public class RPRNetworkManager : NetworkManager
 
     public override void OnClientChangeScene(string newSceneName, SceneOperation sceneOperation, bool customHandling)
     {
+        allClientsAreReady = false;
         var originalSceneName = SceneManager.GetActiveScene().name;
         switch (newSceneName)
         {
@@ -672,15 +707,40 @@ public class RPRNetworkManager : NetworkManager
         StartCoroutine(SendSpawnRequestsAfterSceneLoad(originalSceneName));
     }
 
+    #endregion
+
+    #region Start of round handshake
+
+    private void OnClientReady(NetworkConnectionToClient connection, ClientReadyMessage _)
+    {
+        readinessForConnection[connection.connectionId] = true;
+        if (Connections.All(c => readinessForConnection.TryGetValue(c.connectionId, out var isReady) && isReady))
+            NetworkServer.SendToAll(new AllClientsReadyMessage());
+    }
+
+    private void OnAllClientsReady(AllClientsReadyMessage _)
+    {
+        allClientsAreReady = true;
+    }
+
     private IEnumerator SendSpawnRequestsAfterSceneLoad(string originalSceneName)
     {
+        readinessForConnection = new();
+        allClientsAreReady = false;
+
         while (SceneManager.GetActiveScene().name == originalSceneName)
+            yield return null;
+
+        NetworkClient.Send(new ClientReadyMessage());
+
+        // Wait for ready msg from clients!
+        while (!allClientsAreReady)
             yield return null;
 
         // Spawn players for our inputs (and bots)
         foreach (var id in localPlayerIds)
         {
-            NetworkClient.Send(new SpawnPlayerMessage(id, PlayerType.Local));
+            NetworkClient.Send(new SpawnPlayerMessage(id));
         }
 
         if (!NetworkServer.active)
@@ -691,12 +751,12 @@ public class RPRNetworkManager : NetworkManager
         //      (perhaps you could call the spawn methods directly?)
         foreach (var p in players.Values.Where(p => p.type == PlayerType.AI))
         {
-            NetworkClient.Send(new SpawnPlayerMessage(p.id, PlayerType.AI));
+            NetworkClient.Send(new SpawnPlayerMessage(p.id));
         }
 
         foreach (var p in players.Values.Where(p => p.type is PlayerType.Remote && !connectedPlayers.Contains(p.id)))
         {
-            NetworkClient.Send(new SpawnPlayerMessage(p.id, PlayerType.Local));
+            NetworkClient.Send(new SpawnPlayerMessage(p.id));
         }
     }
 

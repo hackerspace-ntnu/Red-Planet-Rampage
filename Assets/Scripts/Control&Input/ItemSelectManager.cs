@@ -5,16 +5,12 @@ using System.Linq;
 using Mirror;
 using UnityEngine;
 
-internal struct ClientReadyMessage : NetworkMessage
-{
-}
-
-internal struct ClientNotReadyMessage : NetworkMessage
-{
-}
-
 public class ItemSelectManager : NetworkBehaviour
 {
+    private struct ClientReadyMessage : NetworkMessage { }
+
+    private struct ClientNotReadyMessage : NetworkMessage { }
+
     [SerializeField] private float graceTime = 1;
 
     private List<ItemSelectMenu> itemSelectMenus;
