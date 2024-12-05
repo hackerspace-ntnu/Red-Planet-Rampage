@@ -268,19 +268,19 @@ public class SteamManager : MonoBehaviour
         lobbyID = new CSteamID(callback.m_ulSteamIDLobby);
         SteamMatchmaking.SetLobbyData(lobbyID, hostkey, SteamUser.GetSteamID().ToString());
         SteamMatchmaking.SetLobbyData(lobbyID, Lobby.NameProperty, UserName);
-        SteamMatchmaking.SetLobbyData(lobbyID, Lobby.AvailableSlotsProperty, Peer2PeerTransport.NumAvailableSlots.ToString());
+        SteamMatchmaking.SetLobbyData(lobbyID, Lobby.AvailableSlotsProperty, RPRNetworkManager.NumAvailableSlots.ToString());
         SteamMatchmaking.SetLobbyData(lobbyID, Lobby.GameModeProperty, ((int)MatchRules.Singleton.Rules.GameMode).ToString());
         SteamMatchmaking.SetLobbyData(lobbyID, Lobby.GameVersionProperty, Application.version);
         // Update filterable information when necessary
-        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived += UpdateAvailableSlots;
-        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRemoved += UpdateAvailableSlots;
-        ((Peer2PeerTransport)NetworkManager.singleton).OnMatchStart += SetAsNotJoinable;
-        ((Peer2PeerTransport)NetworkManager.singleton).OnMatchEnd += SetAsJoinable;
+        ((RPRNetworkManager)NetworkManager.singleton).OnPlayerReceived += UpdateAvailableSlots;
+        ((RPRNetworkManager)NetworkManager.singleton).OnPlayerRemoved += UpdateAvailableSlots;
+        ((RPRNetworkManager)NetworkManager.singleton).OnMatchStart += SetAsNotJoinable;
+        ((RPRNetworkManager)NetworkManager.singleton).OnMatchEnd += SetAsJoinable;
     }
 
     private void UpdateAvailableSlots(PlayerDetails player)
     {
-        SteamMatchmaking.SetLobbyData(lobbyID, Lobby.AvailableSlotsProperty, Peer2PeerTransport.NumAvailableSlots.ToString());
+        SteamMatchmaking.SetLobbyData(lobbyID, Lobby.AvailableSlotsProperty, RPRNetworkManager.NumAvailableSlots.ToString());
     }
 
     // TODO We wanna do this differently for rejoining disconnected player
@@ -296,7 +296,7 @@ public class SteamManager : MonoBehaviour
 
     private void OnJoinRequest(GameLobbyJoinRequested_t callback)
     {
-        if (Peer2PeerTransport.NumPlayers >= Peer2PeerTransport.MaxPlayers || Peer2PeerTransport.IsInMatch)
+        if (RPRNetworkManager.NumPlayers >= RPRNetworkManager.MaxPlayers || RPRNetworkManager.IsInMatch)
             NetworkManager.singleton.StopClient();
         SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
     }
@@ -336,7 +336,7 @@ public class SteamManager : MonoBehaviour
         if (NetworkServer.active)
             return;
         // Only clients from here!
-        ((Peer2PeerTransport)NetworkManager.singleton).JoinLobby(SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey));
+        ((RPRNetworkManager)NetworkManager.singleton).JoinLobby(SteamMatchmaking.GetLobbyData(new CSteamID(callback.m_ulSteamIDLobby), hostkey));
     }
 
     private void OnLobbyUpdate(LobbyChatUpdate_t callback)
@@ -363,10 +363,10 @@ public class SteamManager : MonoBehaviour
 
         if (IsHosting)
         {
-            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived -= UpdateAvailableSlots;
-            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRemoved -= UpdateAvailableSlots;
-            ((Peer2PeerTransport)NetworkManager.singleton).OnMatchStart -= SetAsNotJoinable;
-            ((Peer2PeerTransport)NetworkManager.singleton).OnMatchEnd -= SetAsJoinable;
+            ((RPRNetworkManager)NetworkManager.singleton).OnPlayerReceived -= UpdateAvailableSlots;
+            ((RPRNetworkManager)NetworkManager.singleton).OnPlayerRemoved -= UpdateAvailableSlots;
+            ((RPRNetworkManager)NetworkManager.singleton).OnMatchStart -= SetAsNotJoinable;
+            ((RPRNetworkManager)NetworkManager.singleton).OnMatchEnd -= SetAsJoinable;
         }
 
         Debug.Log("Left steam lobby");

@@ -105,7 +105,7 @@ public class MainMenuController : MonoBehaviour
         {
             // Set inactive since it blocks the ui elements for tabs.
             EventLog.Singleton.transform.GetChild(0).gameObject.SetActive(false);
-            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived += UpdateStartButton;
+            ((RPRNetworkManager)NetworkManager.singleton).OnPlayerReceived += UpdateStartButton;
         }
 
 
@@ -202,7 +202,7 @@ public class MainMenuController : MonoBehaviour
         playerInputManagerController.onPlayerInputJoined -= AddPlayer;
         playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
         if (SceneManager.GetActiveScene().name == "Menu" && NetworkManager.singleton)
-            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived -= UpdateStartButton;
+            ((RPRNetworkManager)NetworkManager.singleton).OnPlayerReceived -= UpdateStartButton;
     }
 
     /// <summary>
@@ -276,7 +276,7 @@ public class MainMenuController : MonoBehaviour
     public void ChangeScene(string name)
     {
         PlayerInputManagerController.Singleton.RemoveJoinListener();
-        ((Peer2PeerTransport)NetworkManager.singleton).StartMatch(name);
+        ((RPRNetworkManager)NetworkManager.singleton).StartMatch(name);
     }
 
     /// <summary>
@@ -381,7 +381,7 @@ public class MainMenuController : MonoBehaviour
 
     private void SetStartButtonState()
     {
-        bool canPlay = playerInputManagerController.MatchHasAI || Peer2PeerTransport.NumPlayers > 1;
+        bool canPlay = playerInputManagerController.MatchHasAI || RPRNetworkManager.NumPlayers > 1;
         var colors = startButton.colors;
         colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
         startButton.colors = colors;
@@ -401,7 +401,7 @@ public class MainMenuController : MonoBehaviour
     {
         EventLog.Singleton.transform.GetChild(0).gameObject.SetActive(false);
         PlayerInputManagerController.Singleton.RemoveJoinListener();
-        Peer2PeerTransport.StartTrainingMode();
+        RPRNetworkManager.StartTrainingMode();
         playerSelectManager.UpdateLobby();
     }
 

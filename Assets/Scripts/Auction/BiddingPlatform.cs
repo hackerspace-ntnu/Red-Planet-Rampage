@@ -157,7 +157,7 @@ public class BiddingPlatform : NetworkBehaviour
         }
 
         // TODO verify that this player belongs to the source connection
-        if (!Peer2PeerTransport.PlayerInstanceByID.TryGetValue(playerID, out var player))
+        if (!RPRNetworkManager.PlayerInstanceByID.TryGetValue(playerID, out var player))
         {
             Debug.LogError($"Bidding platform received invalid player {playerID} from client!");
             return;
@@ -181,7 +181,7 @@ public class BiddingPlatform : NetworkBehaviour
     [ClientRpc]
     private void RpcAcceptBid(uint playerID)
     {
-        if (!Peer2PeerTransport.PlayerInstanceByID.TryGetValue(playerID, out var player))
+        if (!RPRNetworkManager.PlayerInstanceByID.TryGetValue(playerID, out var player))
         {
             Debug.LogError($"Bidding platform received invalid player {playerID} from server!");
             return;
@@ -261,7 +261,7 @@ public class BiddingPlatform : NetworkBehaviour
     [ClientRpc]
     private void RpcPerformTransaction(uint playerID, string itemID)
     {
-        if (!Peer2PeerTransport.PlayerInstanceByID.TryGetValue(playerID, out var player))
+        if (!RPRNetworkManager.PlayerInstanceByID.TryGetValue(playerID, out var player))
         {
             Debug.LogError($"Bidding platform received invalid player {playerID} from server!");
             return;
@@ -274,7 +274,7 @@ public class BiddingPlatform : NetworkBehaviour
         Debug.Log($"Rewarding {item.displayName} to {player.identity.ToColorString()}");
         player.identity.PerformTransaction(item);
 
-        if (chips >= 15 && player.identity.Chips == 0 && Peer2PeerTransport.LocalPlayerInstances.Any(p => p.id == playerID))
+        if (chips >= 15 && player.identity.Chips == 0 && RPRNetworkManager.LocalPlayerInstances.Any(p => p.id == playerID))
             SteamManager.Singleton.UnlockAchievement(AchievementType.AllIn);
     }
 

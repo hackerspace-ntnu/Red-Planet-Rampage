@@ -150,7 +150,7 @@ public class Round
         // TODO Add theoretical chips from win?
         var isFirstTo30Chips = MatchRules.Current.GameMode is GameModeVariant.FirstTo30Chips;
         var isAboutToReachChipLimit = victim.identity.Chips >= MatchRules.Current.MatchWinCondition.AmountForStopCondition;
-        var isKillerLocalPlayer = Peer2PeerTransport.LocalPlayerInstances.Any(p => p.id == killer.id);
+        var isKillerLocalPlayer = RPRNetworkManager.LocalPlayerInstances.Any(p => p.id == killer.id);
         if (isFirstTo30Chips && isAboutToReachChipLimit && isKillerLocalPlayer)
             SteamManager.Singleton.UnlockAchievement(AchievementType.Clutch);
     }

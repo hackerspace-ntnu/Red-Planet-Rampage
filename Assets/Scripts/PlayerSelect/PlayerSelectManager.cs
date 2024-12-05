@@ -51,23 +51,23 @@ public class PlayerSelectManager : MonoBehaviour
             animatorParameters.Add(parameter.name);
         }
 
-        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived += UpdateLobby;
-        ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRemoved += UpdateLobby;
+        ((RPRNetworkManager)NetworkManager.singleton).OnPlayerReceived += UpdateLobby;
+        ((RPRNetworkManager)NetworkManager.singleton).OnPlayerRemoved += UpdateLobby;
     }
 
     private void OnDestroy()
     {
         if (NetworkManager.singleton)
         {
-            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerReceived -= UpdateLobby;
-            ((Peer2PeerTransport)NetworkManager.singleton).OnPlayerRemoved -= UpdateLobby;
+            ((RPRNetworkManager)NetworkManager.singleton).OnPlayerReceived -= UpdateLobby;
+            ((RPRNetworkManager)NetworkManager.singleton).OnPlayerRemoved -= UpdateLobby;
         }
     }
 
     public void UpdateLobby()
     {
         var i = 0;
-        foreach (var player in Peer2PeerTransport.PlayerDetails)
+        foreach (var player in RPRNetworkManager.PlayerDetails)
         {
             SetupPlayerModel(player, i);
             i++;
@@ -95,7 +95,7 @@ public class PlayerSelectManager : MonoBehaviour
         playerModels[index].GetComponentInChildren<SkinnedMeshRenderer>().material.color = player.color; // Set player model color
         playerModels[index].SetActive(true); // Show corresponding player model
         playerModels[index].transform.LookAt(new Vector3(playerSelectCam.transform.position.x, playerModels[index].transform.position.y, playerSelectCam.transform.position.z)); // Orient player model to look at camera
-        nameTags[index].text = Peer2PeerTransport.PlayerNameWithIndex(player);
+        nameTags[index].text = RPRNetworkManager.PlayerNameWithIndex(player);
         nameTags[index].enabled = true;
         joinText[index].enabled = false;
     }

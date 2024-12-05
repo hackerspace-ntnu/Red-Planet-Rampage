@@ -168,10 +168,10 @@ public class MatchController : NetworkBehaviour
         // TODO add a timeout thingy for when one player doesn't join in time
         // TODO keep loading screen open while this while loop spins
         // Spin while waiting for players to spawn
-        while (players.Count < Peer2PeerTransport.NumPlayers)
+        while (players.Count < RPRNetworkManager.NumPlayers)
         {
 #if UNITY_EDITOR
-            Debug.Log($"{players.Count} of {Peer2PeerTransport.NumPlayers} players spawned");
+            Debug.Log($"{players.Count} of {RPRNetworkManager.NumPlayers} players spawned");
 #endif
             yield return null;
         }
@@ -261,7 +261,7 @@ public class MatchController : NetworkBehaviour
         var currentWinnerID = rounds.Last().Winner;
         if (currentWinnerID is null || !playerById.TryGetValue((uint)currentWinnerID, out var currentWinner)) { return false; }
 
-        if (Peer2PeerTransport.PlayerDetails.Any(p => p.id == currentWinnerID && p.type is PlayerType.Local))
+        if (RPRNetworkManager.PlayerDetails.Any(p => p.id == currentWinnerID && p.type is PlayerType.Local))
             SteamManager.Singleton.UnlockAchievement(AchievementType.WinARound);
 
         if (!MatchRules.Current.IsMatchOver(rounds, currentWinner.id))
@@ -334,7 +334,7 @@ public class MatchController : NetworkBehaviour
     {
         // TODO extract to achievement class?
         var isNotCustomGamemode = MatchRules.Current.GameMode is not GameModeVariant.Custom;
-        var winnerIsLocalPlayer = Peer2PeerTransport.PlayerDetails.Any(p => p.id == winner!.id && p.type is PlayerType.Local);
+        var winnerIsLocalPlayer = RPRNetworkManager.PlayerDetails.Any(p => p.id == winner!.id && p.type is PlayerType.Local);
         if (isNotCustomGamemode && winnerIsLocalPlayer)
         {
             SteamManager.Singleton.UnlockAchievement(MatchRules.Current.GameMode switch

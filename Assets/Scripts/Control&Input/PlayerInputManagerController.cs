@@ -15,7 +15,7 @@ public class PlayerInputManagerController : MonoBehaviour
     public int NumInputs => LocalPlayerInputs.Count;
 
     public List<NetworkConnectionToClient> NetworkClients = new List<NetworkConnectionToClient>();
-    public int PlayerCount => Peer2PeerTransport.NumPlayers;
+    public int PlayerCount => RPRNetworkManager.NumPlayers;
 
     public PlayerInputManager PlayerInputManager;
 
