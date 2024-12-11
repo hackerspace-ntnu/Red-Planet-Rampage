@@ -363,7 +363,7 @@ public class MainMenuController : MonoBehaviour
             LeanTween.cancel(aiButtonTween);
             aIButton.transform.localPosition = aiButtonOriginalPosition;
         }
-        aiButtonTween = aIButton.gameObject.LeanMoveLocal(aiButtonOriginalPosition * 1.05f, 0.3f).setEasePunch().id;
+        aiButtonTween = aIButton.gameObject.LeanMoveLocal(aiButtonOriginalPosition * 1.025f, 0.05f).setEasePunch().id;
     }
 
     public void ToggleAI()
