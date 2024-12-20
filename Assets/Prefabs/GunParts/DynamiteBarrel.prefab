@@ -218,7 +218,6 @@ MonoBehaviour:
   maxDistance: 100
   size: 0.2
   visualSize: 80
-  positionActiveBuffer: {fileID: 8650938505206629949}
   vfx: {fileID: 4760930060443997561}
   shouldRicochet: 0
   maxDistanceBeforeStuck: 100
@@ -470,7 +469,6 @@ GameObject:
   - component: {fileID: 2967889896682025547}
   - component: {fileID: 4760930060443997561}
   - component: {fileID: 8405669620604267145}
-  - component: {fileID: 8650938505206629949}
   m_Layer: 0
   m_Name: MeshProjectile
   m_TagString: Untagged
@@ -510,7 +508,10 @@ VisualEffect:
   m_ResourceVersion: 1
   m_PropertySheet:
     m_Float:
-      m_Array: []
+      m_Array:
+      - m_Value: 80
+        m_Name: Size
+        m_Overridden: 0
     m_Vector2f:
       m_Array: []
     m_Vector3f:
@@ -577,18 +578,6 @@ VFXRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &8650938505206629949
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7217800295554842199}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aec959625e8916744804da5d90a1d188, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &8918469779697146440
 GameObject:
   m_ObjectHideFlags: 0

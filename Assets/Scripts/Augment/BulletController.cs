@@ -23,7 +23,6 @@ public class BulletController : ProjectileController
 
     private const float baseSpeed = 50f;
 
-    [SerializeField]
     private VFXTextureFormatter trailPositionBuffer;
 
     [SerializeField]
@@ -52,7 +51,7 @@ public class BulletController : ProjectileController
     {
         collisionSamples = Mathf.CeilToInt(collisionSamplesPerUnit * maxDistance);
         var bulletsPerShot = Mathf.CeilToInt(stats.ProjectilesPerShot);
-        trailPositionBuffer.Initialize(vfxPositionsPerSample * collisionSamples * bulletsPerShot);
+        trailPositionBuffer = new(vfxPositionsPerSample * collisionSamples * bulletsPerShot);
         trail.SetGraphicsBuffer("Position", trailPositionBuffer.Buffer);
         trail.SetInt("StripLength", vfxPositionsPerSample * collisionSamples);
         trail.SetInt("TextureSize", vfxPositionsPerSample * collisionSamples * bulletsPerShot);
@@ -61,6 +60,12 @@ public class BulletController : ProjectileController
 
         if (isServer)
             RpcSeedRandom(random.Next());
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        trailPositionBuffer.Dispose();
     }
 
 

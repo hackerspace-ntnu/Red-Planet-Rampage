@@ -1,8 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VFXTextureFormatter : MonoBehaviour
+public class VFXTextureFormatter : IDisposable
 {
     private GraphicsBuffer buffer;
     // The float data buffer that is passed to VRAM when apply is performed
@@ -18,7 +19,7 @@ public class VFXTextureFormatter : MonoBehaviour
     /// Sets the buffer with current data.
     /// </summary>
     /// <param name="size">Size of the texture, typically the maximum number of particles or the number of patricles in each strip</param>
-    public void Initialize(int size)
+    public VFXTextureFormatter(int size)
     {
         data = new float[size * 4];
         buffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, size, sizeof(float) * 4);
@@ -106,7 +107,7 @@ public class VFXTextureFormatter : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
+    public void Dispose()
     {
         buffer?.Release();
     }

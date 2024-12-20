@@ -33,8 +33,7 @@ public class Fire : GunExtension
     private VisualEffect fireTrailInstances;
     private int maxProjectiles = 1000;
 
-    // texture used to update the vfx position and alive-state of particles, RGB is used for position A for alive/dead
-    [SerializeField]
+    // Texture used to update the vfx position and alive-state of particles, RGB is used for position A for alive/dead
     private VFXTextureFormatter positionActiveBuffer;
 
     [SerializeField]
@@ -58,7 +57,7 @@ public class Fire : GunExtension
         stuckFirePool = new ObjectPool<StuckObject>(stuckFirePrefab);
         if (gunController.projectile is MeshProjectileController)
         {
-            positionActiveBuffer.Initialize(maxProjectiles);
+            positionActiveBuffer = new(maxProjectiles);
             fireTrailInstances.SetInt("MaxParticleCount", maxProjectiles);
             fireTrailInstances.SetGraphicsBuffer("Positions", positionActiveBuffer.Buffer);
             fireTrailInstances.SendEvent(VisualEffectAsset.PlayEventID);
@@ -210,6 +209,7 @@ public class Fire : GunExtension
     private void OnDestroy()
     {
         stuckFirePool.Flush();
+        positionActiveBuffer.Dispose();
     }
 
 #if UNITY_EDITOR
