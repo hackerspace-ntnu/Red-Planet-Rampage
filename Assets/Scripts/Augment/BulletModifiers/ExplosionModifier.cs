@@ -5,6 +5,8 @@ using UnityEngine;
 /// </summary>
 public class ExplosionModifier : MonoBehaviour, ProjectileModifier
 {
+    public const string AreaDamagePropertyName = "AreaDamage";
+
     [SerializeField]
     private ExplosionController explosion;
 
@@ -28,6 +30,9 @@ public class ExplosionModifier : MonoBehaviour, ProjectileModifier
         var instance = Instantiate(explosion, state.position, Quaternion.identity);
         instance.Radius *= projectile.stats.ProjectileScale;
         instance.Init();
+
+        if (state.additionalProperties.TryGetValue(AreaDamagePropertyName, out var areaDamage))
+            instance.Damage = (float)areaDamage;
 
         var targets = instance.Explode(player);
 

@@ -3,7 +3,6 @@ using UnityEngine.VFX;
 using System.Linq;
 using UnityEngine.Serialization;
 using Mirror;
-using System.Runtime.InteropServices;
 using VectorExtensions;
 
 /// <summary>
@@ -32,6 +31,18 @@ public class MeshProjectileController : ProjectileController
 
     [SerializeField]
     private float visualSize = 80f;
+
+    [Tooltip("Rotation offset applied to all particles")]
+    [SerializeField]
+    private Quaternion visualRotation = Quaternion.identity;
+
+    [Tooltip("Check this box to avoid updating rotation as the projectile travels")]
+    [SerializeField]
+    private bool useOnlyInitialRotation = false;
+
+    [Tooltip("Check this box to avoid updating rotation at all")]
+    [SerializeField]
+    private bool disableRotation = false;
 
     private ProjectileState[] projectiles;
 
@@ -71,10 +82,14 @@ public class MeshProjectileController : ProjectileController
         projectiles = new ProjectileState[maxProjectiles];
 
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
+
         positionActiveBuffer = new(maxProjectiles);
-        rotationBuffer = new(maxProjectiles);
         vfx.SetGraphicsBuffer("Positions", positionActiveBuffer.Buffer);
-        vfx.SetGraphicsBuffer("Rotations", rotationBuffer.Buffer);
+        if (!disableRotation)
+        {
+            rotationBuffer = new(maxProjectiles);
+            vfx.SetGraphicsBuffer("Rotations", rotationBuffer.Buffer);
+        }
         vfx.SetInt("MaxParticleCount", maxProjectiles);
 
         if (!gunController || !gunController.Player)
@@ -85,8 +100,8 @@ public class MeshProjectileController : ProjectileController
     protected override void OnDestroy()
     {
         base.OnDestroy();
-        positionActiveBuffer.Dispose();
-        rotationBuffer.Dispose();
+        positionActiveBuffer?.Dispose();
+        rotationBuffer?.Dispose();
     }
 
     protected override void OnInitialize(GunStats gunstats)
@@ -168,11 +183,16 @@ public class MeshProjectileController : ProjectileController
                 // Sets initial position of the projectile
                 positionActiveBuffer.setValue(i, loadedProjectile.position);
                 positionActiveBuffer.setAlpha(i, 1f);
-                rotationBuffer.setValue(i, loadedProjectile.direction.ToEulerAngles());
 
                 // Neccessary to update the actual texture, so the vfx gets the new info
                 positionActiveBuffer.ApplyChanges();
-                rotationBuffer.ApplyChanges();
+
+                // Set initial rotation
+                if (!disableRotation)
+                {
+                    rotationBuffer.setValue(i, (visualRotation * loadedProjectile.direction).ToEulerAngles());
+                    rotationBuffer.ApplyChanges();
+                }
 
                 currentStateIndex = (currentStateIndex + 1) % maxProjectiles;
                 loadedProjectile = null;
@@ -195,12 +215,14 @@ public class MeshProjectileController : ProjectileController
             {
                 UpdateProjectile(state);
                 positionActiveBuffer.setValue(i, state.position);
-                rotationBuffer.setValue(i, state.direction.ToEulerAngles());
+                if (!useOnlyInitialRotation && !disableRotation)
+                    rotationBuffer.setValue(i, (visualRotation * state.direction).ToEulerAngles());
             }
             positionActiveBuffer.setAlpha(i, state != null && state.active ? 1f : 0f);
         }
         positionActiveBuffer.ApplyChanges();
-        rotationBuffer.ApplyChanges();
+        if (!useOnlyInitialRotation && !disableRotation)
+            rotationBuffer.ApplyChanges();
     }
 
     private void UpdateProjectile(ProjectileState state)

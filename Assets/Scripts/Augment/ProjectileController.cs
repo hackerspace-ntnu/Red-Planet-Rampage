@@ -132,9 +132,7 @@ public abstract class ProjectileController : NetworkBehaviour
     [HideInInspector]
     public Transform projectileOutput;
 
-    public Vector3 actualPosition;
-    public Vector3 actualDirection;
-
+    [HideInInspector]
     public Quaternion projectileRotation = Quaternion.identity;
 
     // Used for muzzle-flashes and other effects, is not where the projectile path actually starts
@@ -188,6 +186,8 @@ public abstract class ProjectileController : NetworkBehaviour
     public CollisionEvent OnRicochet;
 
     protected GunController gunController;
+
+    public GunController GunController => gunController;
 
     protected virtual void Awake()
     {

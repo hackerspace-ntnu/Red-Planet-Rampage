@@ -215,7 +215,6 @@ MonoBehaviour:
   lighterSound: {fileID: 11400000, guid: e00fd20c5a85e8d46be08afe2e4fe016, type: 2}
   fireTrail: {fileID: 1119212264029477965}
   fireTrailInstances: {fileID: 1382308675925352878}
-  positionActiveBuffer: {fileID: 1141831215458723034}
   stickyModifier: {fileID: 216606538572171217}
 --- !u!114 &216606538572171217
 MonoBehaviour:
@@ -232,6 +231,7 @@ MonoBehaviour:
   stuckObject: {fileID: 5742571114628015837, guid: 8ee380ed606e8131da8eae09e78aef6b, type: 3}
   isDespawnedAfterTime: 1
   stuckLifeTime: 3
+  maxObjects: 70
   triggerOnHit: 0
   onHitInterval: 1
   affectedLayers:
@@ -389,7 +389,6 @@ GameObject:
   - component: {fileID: 7774442288155003448}
   - component: {fileID: 1382308675925352878}
   - component: {fileID: 8585387827938568363}
-  - component: {fileID: 1141831215458723034}
   m_Layer: 0
   m_Name: FireTrailInstances
   m_TagString: Untagged
@@ -505,18 +504,6 @@ VFXRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &1141831215458723034
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7232486737550762651}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aec959625e8916744804da5d90a1d188, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &8797659438203753145
 GameObject:
   m_ObjectHideFlags: 0

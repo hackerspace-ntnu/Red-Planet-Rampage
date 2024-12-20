@@ -30,6 +30,8 @@ public enum SecretCombinationType
     UnpatientSploder,
     BarrelImposter,
     TacticalStrike,
+    CarCrash,
+    IlTempoMarcante,
 }
 
 public enum AchievementType
@@ -202,6 +204,8 @@ public class SteamManager : MonoBehaviour
         { SecretCombinationType.UnpatientSploder, "WEAPON_UNPATIENT_SPLODER" },
         { SecretCombinationType.BarrelImposter, "WEAPON_BARREL_IMPOSTER" },
         { SecretCombinationType.TacticalStrike, "WEAPON_TACTICAL_STRIKE" },
+        { SecretCombinationType.CarCrash, "WEAPON_CAR_CRASH" },
+        { SecretCombinationType.IlTempoMarcante, "WEAPON_IL_TEMPO" },
     };
 
     private readonly Dictionary<AchievementType, string> achievementNames = new()

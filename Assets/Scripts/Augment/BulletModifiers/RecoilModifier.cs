@@ -6,9 +6,6 @@ public class RecoilModifier : MonoBehaviour, ProjectileModifier
     [SerializeField]
     private float pushPower;
 
-    [SerializeField]
-    private float baseFireRateAdder = 2f;
-
     private float bulletAmount = 1f;
 
     private GunController gunController;
