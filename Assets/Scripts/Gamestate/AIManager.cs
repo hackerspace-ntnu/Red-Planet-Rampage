@@ -9,6 +9,7 @@ using VectorExtensions;
 public class AIManager : PlayerManager
 {
     private NavMeshAgent agent;
+    public Vector3 Velocity => agent.velocity;
     public Transform DestinationTarget;
     public Transform ShootingTarget;
 
