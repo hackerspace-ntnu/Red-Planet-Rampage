@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -9,6 +8,7 @@ public class ExplosionController : MonoBehaviour
 {
     // Might need modification or futher testing when added to a rocket/granade
     [SerializeField] private float damage;
+    public float Damage { get => damage; set => damage = value; }
 
     [SerializeField] private AnimationCurve damageCurve;
 

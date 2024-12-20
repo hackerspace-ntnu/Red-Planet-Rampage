@@ -65,7 +65,7 @@ public class BulletController : ProjectileController
     protected override void OnDestroy()
     {
         base.OnDestroy();
-        trailPositionBuffer.Dispose();
+        trailPositionBuffer?.Dispose();
     }
 
 

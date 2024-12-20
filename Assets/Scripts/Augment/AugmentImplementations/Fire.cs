@@ -141,7 +141,7 @@ public class Fire : GunExtension
                             damage.source = gunController.Player;
                             damage.Initialize();
                         }
-                            
+
                         StartCoroutine(WaitAndStopBurning(flame, hitbox.health));
                     }
             }
@@ -159,7 +159,7 @@ public class Fire : GunExtension
                 {
                     hitHealthControllers.Add(hitbox.health);
                     var flame = stuckFirePool.Get().gameObject;
-                    flame.transform.SetParent (hitbox.transform, true);
+                    flame.transform.SetParent(hitbox.transform, true);
                     flame.transform.position = hitbox.transform.position;
                     if (flame.TryGetComponent<ContinuousDamage>(out var damage))
                     {
@@ -209,7 +209,7 @@ public class Fire : GunExtension
     private void OnDestroy()
     {
         stuckFirePool.Flush();
-        positionActiveBuffer.Dispose();
+        positionActiveBuffer?.Dispose();
     }
 
 #if UNITY_EDITOR
