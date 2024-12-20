@@ -22,6 +22,12 @@ namespace VectorExtensions
             Mathf.Max(Mathf.Abs(vector.x), Mathf.Abs(vector.y));
 
         public static Vector2 xz(this Vector3 vector) =>
-            new Vector2(vector.x, vector.z);
+            new(vector.x, vector.z);
+
+        /// <summary>
+        /// Converts a normalized direction vector to euler angles (in degrees)
+        /// </summary>
+        public static Vector3 ToEulerAngles(this Vector3 direction) =>
+            Quaternion.FromToRotation(Vector3.forward, direction).eulerAngles;
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine.Serialization;
 using Mirror;
 using System.Runtime.InteropServices;
+using VectorExtensions;
 
 /// <summary>
 /// Class that processes and renders mesh projectiles
@@ -34,7 +35,7 @@ public class MeshProjectileController : ProjectileController
 
     private ProjectileState[] projectiles;
 
-    public Vector3[] ProjectilePositions => 
+    public Vector3[] ProjectilePositions =>
         projectiles.Where(p => p != null && p.active == true)
             .Select(p => p.position).ToArray();
 
@@ -43,9 +44,11 @@ public class MeshProjectileController : ProjectileController
     //index of last initialized state in array
     private int currentStateIndex = 0;
 
-    // texture used to update the vfx position and alive-state of particles, RGB is used for position A for alive/dead
-    [SerializeField]
+    // Texture used to update the vfx position and alive-state of particles, RGB is used for position A for alive/dead
     private VFXTextureFormatter positionActiveBuffer;
+
+    // Texture used to update the vfx rotation, RGB is used for eulerian direction
+    private VFXTextureFormatter rotationBuffer;
 
     [Header("VFX")]
 
@@ -68,13 +71,22 @@ public class MeshProjectileController : ProjectileController
         projectiles = new ProjectileState[maxProjectiles];
 
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
-        positionActiveBuffer.Initialize(maxProjectiles);
+        positionActiveBuffer = new(maxProjectiles);
+        rotationBuffer = new(maxProjectiles);
         vfx.SetGraphicsBuffer("Positions", positionActiveBuffer.Buffer);
+        vfx.SetGraphicsBuffer("Rotations", rotationBuffer.Buffer);
         vfx.SetInt("MaxParticleCount", maxProjectiles);
 
         if (!gunController || !gunController.Player)
             return;
         animator.OnShotFiredAnimation += FireProjectile;
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        positionActiveBuffer.Dispose();
+        rotationBuffer.Dispose();
     }
 
     protected override void OnInitialize(GunStats gunstats)
@@ -152,9 +164,11 @@ public class MeshProjectileController : ProjectileController
                 // Sets initial position of the projectile
                 positionActiveBuffer.setValue(i, loadedProjectile.position);
                 positionActiveBuffer.setAlpha(i, 1f);
+                rotationBuffer.setValue(i, loadedProjectile.direction.ToEulerAngles());
 
                 // Neccessary to update the actual texture, so the vfx gets the new info
                 positionActiveBuffer.ApplyChanges();
+                rotationBuffer.ApplyChanges();
 
                 currentStateIndex = (currentStateIndex + 1) % maxProjectiles;
                 loadedProjectile = null;
@@ -177,11 +191,12 @@ public class MeshProjectileController : ProjectileController
             {
                 UpdateProjectile(state);
                 positionActiveBuffer.setValue(i, state.position);
-
+                rotationBuffer.setValue(i, state.direction.ToEulerAngles());
             }
             positionActiveBuffer.setAlpha(i, state != null && state.active ? 1f : 0f);
         }
         positionActiveBuffer.ApplyChanges();
+        rotationBuffer.ApplyChanges();
     }
 
     private void UpdateProjectile(ProjectileState state)
