@@ -2,7 +2,6 @@
 using CollectionExtensions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "AudioGroup", menuName = "Audio/New Audio Group")]
 public class AudioGroup : ScriptableObject
@@ -33,16 +32,17 @@ public class AudioGroup : ScriptableObject
     [SerializeField]
     private bool shouldPlayInSplitscreen = true;
 
-    public AudioGroup To2D() =>
-        new()
-        {
-            is3D = false,
-            sounds = sounds,
-            semitoneRange = semitoneRange,
-            volumeRange = volumeRange,
-            continuousPitchBend = continuousPitchBend,
-            shouldPlayInSplitscreen = shouldPlayInSplitscreen,
-        };
+    public AudioGroup To2D()
+    {
+        var instance = CreateInstance<AudioGroup>();
+        instance.is3D = false;
+        instance.sounds = sounds;
+        instance.semitoneRange = semitoneRange;
+        instance.volumeRange = volumeRange;
+        instance.continuousPitchBend = continuousPitchBend;
+        instance.shouldPlayInSplitscreen = shouldPlayInSplitscreen;
+        return instance;
+    }
 
     private void Modulate(AudioSource source)
     {
