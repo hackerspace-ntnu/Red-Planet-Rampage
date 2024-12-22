@@ -24,9 +24,16 @@ public class TilingCowboys : MonoBehaviour
             cowboyVelocity = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad)) * speedMultiplier;
         }
         else {
+            // Create a random angle to move towards
             Vector2 angle = new Vector2(Random.Range(-1, 1), Random.Range(-1, 1));
+            
+            // If random returns zero, reset to 1
+            if (angle == Vector2.zero)
+                angle = Vector2.right;
+            
             angle.Normalize();
-            // Give a random tiling direction
+            
+            // Apply the random tiling direction
             cowboyVelocity = angle * speedMultiplier;
         }
     }
