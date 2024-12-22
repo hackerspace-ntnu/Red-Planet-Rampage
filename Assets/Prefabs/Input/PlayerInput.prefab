@@ -31,7 +31,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 828818560594758653}
+  - {fileID: 5405344709398707800}
   - {fileID: 5385955070489759476}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -96,13 +96,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fa6481de280fb5489fa0e0e0d7a7026, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  id: 0
   color: {r: 0, g: 0, b: 0, a: 0}
   playerName: 
   isAI: 0
   body: {fileID: 0}
   barrel: {fileID: 0}
   extension: {fileID: 0}
-  id: 0
 --- !u!1 &4578288573561392664
 GameObject:
   m_ObjectHideFlags: 0
@@ -112,7 +112,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 828818560594758653}
-  - component: {fileID: 115687810762533466}
+  - component: {fileID: 6338225141445118121}
+  - component: {fileID: 2134471062950441447}
   m_Layer: 0
   m_Name: FPSGun
   m_TagString: Untagged
@@ -127,21 +128,88 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4578288573561392664}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 3554710591539111230}
+  m_Father: {fileID: 5405344709398707800}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &115687810762533466
+--- !u!114 &6338225141445118121
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4578288573561392664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e91ff1846a4ab8448a1d1a7311f5a47d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 2134471062950441447}
+--- !u!95 &2134471062950441447
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4578288573561392664}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: a8b51befa4be5f547999b6afe2a5b473, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &7044093416323003437
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5405344709398707800}
+  - component: {fileID: 6401703379569411378}
+  m_Layer: 0
+  m_Name: BobberParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5405344709398707800
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7044093416323003437}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 828818560594758653}
+  m_Father: {fileID: 3554710591539111230}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6401703379569411378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7044093416323003437}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 84d69c7fde56e354080e082e1314d474, type: 3}
@@ -151,7 +219,7 @@ MonoBehaviour:
   velocityDamping: 150
   springStrength: 1
   measurementPoint: {fileID: 5385955070489759476}
-  offsetTarget: {fileID: 828818560594758653}
+  offsetTarget: {fileID: 5405344709398707800}
   body: {fileID: 0}
 --- !u!1 &8602880480366401748
 GameObject:

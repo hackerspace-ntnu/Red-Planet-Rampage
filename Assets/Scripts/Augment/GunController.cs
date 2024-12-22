@@ -67,7 +67,8 @@ public class GunController : NetworkBehaviour
         if (!Player.inputManager)
             return;
         SetPlayerInput(player.inputManager);
-        Player.inputManager.GetComponentInChildren<JiggleBone>().body = Player.GetComponent<PlayerMovement>().Body;
+        player.inputManager.GetComponentInChildren<JiggleBone>().body = Player.GetComponent<Rigidbody>();
+        player.inputManager.GetComponentInChildren<GunBobber>().SetPlayerMovement(Player.GetComponent<PlayerMovement>(), player.inputManager);
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += CancelZoom;
     }
