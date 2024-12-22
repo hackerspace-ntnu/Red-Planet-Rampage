@@ -114,8 +114,11 @@ public class MeshProjectileController : ProjectileController
 
     private void FireProjectile()
     {
-        if (authority)
-            CmdFireProjectile(projectileOutput.position, projectileRotation * projectileOutput.forward, projectileRotation * projectileOutput.rotation);
+        if (!authority)
+            return;
+        var data = new ProjectileFireData(this);
+        OnNetworkInit?.Invoke(ref data, stats);
+        CmdFireProjectile(data);
     }
 
     public void ClearProjectiles()
@@ -126,30 +129,31 @@ public class MeshProjectileController : ProjectileController
     }
 
     [Command]
-    private void CmdFireProjectile(Vector3 output, Vector3 direction, Quaternion rotation)
+    private void CmdFireProjectile(ProjectileFireData parameters)
     {
         // TODO verify that this input is reasonable!
-        RpcFireProjectile(output, direction, rotation);
+        RpcFireProjectile(parameters);
     }
 
     [ClientRpc]
-    private void RpcFireProjectile(Vector3 output, Vector3 direction, Quaternion rotation)
+    private void RpcFireProjectile(ProjectileFireData parameters)
     {
         if (loadedProjectile == null) return;
 
         loadedProjectile.active = true;
         loadedProjectile.speed = baseSpeed;
+        foreach (var pair in parameters.additionalProperties)
+            loadedProjectile.additionalProperties[pair.name] = pair.value;
 
         OnProjectileInit?.Invoke(ref loadedProjectile, stats);
         for (int i = 0; i < maxProjectiles; i++)
         {
-
             if (projectiles[currentStateIndex] == null || !projectiles[currentStateIndex].active)
             {
                 loadedProjectile.initializationTime = Time.fixedTime;
-                loadedProjectile.position = output;
-                loadedProjectile.direction = direction;
-                loadedProjectile.rotation = rotation;
+                loadedProjectile.position = parameters.output;
+                loadedProjectile.direction = parameters.direction;
+                loadedProjectile.rotation = parameters.rotation;
 
                 // Hat hitbox should be smaller when large :/
                 // Otherwise they bounce off weirdly

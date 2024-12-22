@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using Mirror;
+using System;
 
 [System.Serializable]
 public class ProjectileState
@@ -57,10 +58,10 @@ public class ProjectileState
     public float size = 0f;
 
     // Dictionary for storing properties that a projectile modifier might need, see SpiralPathModifier for an example
-    public Dictionary<string, object> additionalProperties = new Dictionary<string, object>();
+    public Dictionary<string, object> additionalProperties = new();
 
     // Used to keep track of the healthControllers currently damaged
-    public HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
+    public HashSet<HealthController> hitHealthControllers = new();
 
     public ProjectileState(GunStats stats, Transform output)
     {
@@ -92,6 +93,38 @@ public class ProjectileState
     }
 
     public ProjectileState() { }
+}
+
+[Serializable]
+public struct ProjectileDataPair
+{
+    public string name;
+    public float value;
+
+    public ProjectileDataPair(string name, float value)
+    {
+        this.name = name;
+        this.value = value;
+    }
+}
+
+[Serializable]
+public struct ProjectileFireData
+{
+    public Vector3 output;
+    public Vector3 direction;
+    public Quaternion rotation;
+    // Dictionaries are not serializable so I went with array here
+    public List<ProjectileDataPair> additionalProperties;
+
+    public ProjectileFireData(ProjectileController controller)
+    {
+        this.output = controller.projectileOutput.position;
+        this.direction = controller.projectileRotation * controller.projectileOutput.forward;
+        this.rotation = controller.projectileRotation * controller.projectileOutput.rotation;
+        this.additionalProperties = new();
+    }
+
 }
 
 public abstract class ProjectileController : NetworkBehaviour
@@ -127,11 +160,15 @@ public abstract class ProjectileController : NetworkBehaviour
     // This base class never actually TRIGGERES the events, subclasses have to trigger them, ( See BulletController )
 
     // Used for describing how a projectile moves when asked to move a specific distance 
-    [System.Serializable]
+    [Serializable]
     public delegate void PathUpdateEvent(float distance, ref ProjectileState state);
 
     [SerializeField]
     public PathUpdateEvent UpdateProjectileMovement;
+
+    // Used for modifications done to the projectile upon network request
+    public delegate void NetworkInitializationEvent(ref ProjectileFireData data, GunStats stats);
+    public NetworkInitializationEvent OnNetworkInit;
 
     // Used for modifications done to the projectile upon creation
     public delegate void ProjectileInitializationEvent(ref ProjectileState state, GunStats stats);
