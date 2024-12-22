@@ -833,7 +833,7 @@ public class RPRNetworkManager : NetworkManager
 
             // Update player's movement script with which playerInput it should attach listeners to
             playerManager.SetPlayerInput(input);
-            var gunHolder = input.transform.GetChild(0);
+            var gunHolder = input.transform.GetChild(0).GetChild(0);
             playerManager.SetGun(gunHolder);
 
             // Set unique layer for player
