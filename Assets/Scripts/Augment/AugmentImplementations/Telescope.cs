@@ -33,6 +33,10 @@ public class Telescope : GunExtension
         if (!gunController.Player || !gunController.Player.HUDController)
             return;
 
+        // No zooming allowed on the BOOM-bardier!
+        if (gunController.GetComponentInChildren<DynamiteBarrel>())
+            return;
+
         var playerMovement = gunController.Player.GetComponent<PlayerMovement>();
         originalZoomFov = playerMovement.ZoomFov;
         originalZoomSpeed = playerMovement.LookSpeedZoom;
