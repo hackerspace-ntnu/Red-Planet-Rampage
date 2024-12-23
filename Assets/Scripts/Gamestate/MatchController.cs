@@ -72,6 +72,9 @@ public class MatchController : NetworkBehaviour
     private bool isShowingScoreboards = false;
     public bool IsShowingScoreboards => isShowingScoreboards;
 
+    private Camera arenaCamera;
+    public Camera ArenaCamera => arenaCamera;
+
 
     private void Awake()
     {
@@ -104,6 +107,8 @@ public class MatchController : NetworkBehaviour
         }
 
         currentMapName ??= SceneManager.GetActiveScene().name;
+
+        arenaCamera = FindObjectsOfType<Camera>().FirstOrDefault(x => x.CompareTag("MainCamera"));
 
         var mainLight = GameObject.FindGameObjectsWithTag("MainLight")[0];
         RenderSettings.skybox.SetVector("_SunDirection", mainLight.transform.forward);
@@ -231,6 +236,12 @@ public class MatchController : NetworkBehaviour
     {
         // Delay first so we can see who killed who
         yield return new WaitForSeconds(delayBeforeRoundResults);
+
+        // Ensure arena camera is the only one that is enabled now!
+        foreach (var p in players.Where(p => p.inputManager != null))
+            p.inputManager.PlayerCamera.enabled = false;
+        arenaCamera.enabled = true;
+
         isShowingScoreboards = true;
         // Scoreboard subscribes here
         onRoundEnd?.Invoke();
@@ -313,7 +324,7 @@ public class MatchController : NetworkBehaviour
         foreach (var loser in loserModels.Zip(loserColors, (model, color) => (model, color)))
             loser.model.GetComponentInChildren<SkinnedMeshRenderer>().material.color = loser.color;
 
-        Camera.main.GetComponent<ArenaCamera>().PlayVictoryAnimation(winner);
+        arenaCamera.GetComponent<ArenaCamera>().PlayVictoryAnimation(winner);
     }
 
     public void WaitAndRestartAfterWinScreen()

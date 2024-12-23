@@ -258,6 +258,10 @@ public class PlayerManager : NetworkBehaviour
             canvas.worldCamera = inputManager.GetComponentInChildren<Camera>();
             canvas.planeDistance = 0.21f;
             identity.onChipChange += hudController.OnChipChange;
+
+            // Disable arena camera so we don't render the entire scene twice
+            if (Camera.main)
+                Camera.main.enabled = false;
         }
 
         if (playerIK.TryGetComponent<BiddingPlayer>(out var biddingPlayer))
