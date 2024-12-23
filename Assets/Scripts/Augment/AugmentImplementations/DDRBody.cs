@@ -85,7 +85,7 @@ public class DDRBody : GunBody
         if (!gunController)
             return;
 
-        if (gunController.Player)
+        if (gunController.Player && gunController.Player.inputManager)
         {
             inputManager = gunController.Player.inputManager;
             inputManager.onFirePerformed += Fire;
