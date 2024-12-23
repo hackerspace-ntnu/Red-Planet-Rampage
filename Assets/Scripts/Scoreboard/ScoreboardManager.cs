@@ -103,7 +103,8 @@ public class ScoreboardManager : MonoBehaviour
     public IEnumerator ShowMatchResults()
     {
         // Animate the after battle scene
-        Camera.main.GetComponent<ArenaCamera>().PlayScoreboardAnimation();
+        var arenaCamera = MatchController.Singleton.ArenaCamera;
+        arenaCamera.GetComponent<ArenaCamera>().PlayScoreboardAnimation();
 
         for (int i = 0; i < scoreboards.Count; i++)
         {
@@ -113,7 +114,7 @@ public class ScoreboardManager : MonoBehaviour
         }
 
         // Do not start adding crimes before the camera has finished the animation
-        int delay = Mathf.RoundToInt(Camera.main.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
+        int delay = Mathf.RoundToInt(arenaCamera.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
         yield return new WaitForSeconds(delay);
 
         maxSteps = MaxNumberOfCrimes();

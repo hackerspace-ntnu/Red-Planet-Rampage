@@ -95,8 +95,16 @@ public class OrbitCamera : MonoBehaviour
     {
         if (!cameraTransform || !input || MatchController.Singleton.IsShowingScoreboards)
             return;
-        isTracking = true;
+
         camera.enabled = true;
+        // Improves perf loss when playing splitscreen
+        var allPlayerCamerasAreDisabled = MatchController.Singleton.Players
+            .Where(p => p.inputManager != null)
+            .All(p => p.inputManager.PlayerCamera.enabled);
+        if (allPlayerCamerasAreDisabled)
+            MatchController.Singleton.ArenaCamera.enabled = false;
+
+        isTracking = true;
         target = nextTarget.AiAimSpot;
         if (nextTarget != player)
             player.HUDController.DisplaySpectatorScreen(nextTarget.identity);
@@ -106,6 +114,7 @@ public class OrbitCamera : MonoBehaviour
     {
         if (!camera)
             return;
+        MatchController.Singleton.ArenaCamera.enabled = true;
         isTracking = false;
         camera.enabled = false;
         ResetCamera();
