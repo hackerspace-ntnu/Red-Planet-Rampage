@@ -101,6 +101,9 @@ public class PlayerManager : NetworkBehaviour
     protected GameObject[] meshBase;
 
     [SerializeField]
+    private GameObject[] accessoryMeshes;
+
+    [SerializeField]
     protected PlayerIK playerIK;
     public PlayerIK PlayerIK => playerIK;
 
@@ -473,6 +476,7 @@ public class PlayerManager : NetworkBehaviour
         // Set correct layer on self, mesh and gun (TODO)
         gameObject.layer = playerLayer;
         meshBase.ToList().ForEach(mesh => SetLayerOnSubtree(mesh, playerLayer));
+        accessoryMeshes.ToList().ForEach(mesh => SetLayerOnSubtree(mesh, playerLayer));
         if (hudController)
             SetLayerOnSubtree(hudController.gameObject, LayerMask.NameToLayer("Gun " + playerIndex));
     }
