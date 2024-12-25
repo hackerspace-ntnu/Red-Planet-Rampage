@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 4961168887133630009}
   - component: {fileID: 1433872047507736054}
   - component: {fileID: 914296274534193614}
+  - component: {fileID: 8009469641660709934}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -89,8 +90,6 @@ MonoBehaviour:
   - {fileID: 4694945426238970737}
   - {fileID: 6630205048431922019}
   - {fileID: 5451690850857455061}
-  accessoryMeshes:
-  - {fileID: 205432122182318478}
   playerIK: {fileID: 142658303258642700}
   deathKnockbackForceMultiplier: 150
   jumpSounds: {fileID: 11400000, guid: 4dd848facbacd2a46a109bfbf8743e61, type: 2}
@@ -487,6 +486,23 @@ MonoBehaviour:
   delayBetweenShortLines: 2
   delayBetweenLongLines: 5
   audioSource: {fileID: 4443770110403789513}
+--- !u!114 &8009469641660709934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 71015680234268067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f996b9e6af11c2c38d6209319a9bb9c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  headwear:
+  - Name: Santa Hat
+    Type: 0
+    Mesh: {fileID: 205432122182318478}
+    Root: {fileID: 831044353193526494}
 --- !u!1 &345906872987025452
 GameObject:
   m_ObjectHideFlags: 0
@@ -4135,6 +4151,11 @@ PrefabInstance:
 --- !u!1 &205432122182318478 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6152509200883569633, guid: b3a6f3cc0897aa4c5943b6fa03b639f9, type: 3}
+  m_PrefabInstance: {fileID: 6321872900137511535}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &831044353193526494 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6643860067142381233, guid: b3a6f3cc0897aa4c5943b6fa03b639f9, type: 3}
   m_PrefabInstance: {fileID: 6321872900137511535}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &5144741382407369348 stripped
