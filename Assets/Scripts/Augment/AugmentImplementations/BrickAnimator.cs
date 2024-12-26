@@ -9,7 +9,13 @@ public class BrickAnimator : AugmentAnimator
 
     public override void OnFire(GunStats stats)
     {
+        // TODO perhaps make it vary based on ammo yeah
+        // prolly shouldn't be a transition w a trigger
+        // but just go directly to state
+        // if (stats.Ammo >= 4)
+        // animator.SetTrigger("ResetBricks");
         animator.SetTrigger("PistonPump");
+        animator.SetTrigger("PushBrick");
         OnShotFiredAnimation?.Invoke();
         OnAnimationEnd?.Invoke();
     }
@@ -20,5 +26,7 @@ public class BrickAnimator : AugmentAnimator
 
     public override void OnReload(GunStats stats)
     {
+        // animator.SetTrigger("ResetBricks");
+        // TODO go to state based on ammo count
     }
 }
