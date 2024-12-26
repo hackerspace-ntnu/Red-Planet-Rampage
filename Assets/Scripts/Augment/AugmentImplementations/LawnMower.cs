@@ -46,6 +46,8 @@ public class LawnMower : GunBody
     private AudioSource audioSource;
     [SerializeField]
     private AudioGroup plopSounds;
+    [SerializeField]
+    private AudioGroup overheatSounds;
 
     public override void Start()
     {
@@ -112,6 +114,7 @@ public class LawnMower : GunBody
         else
         {
             success = false;
+            overheatSounds.Play(audioSource);
             failedExhaustParticles.Play();
         }
 
