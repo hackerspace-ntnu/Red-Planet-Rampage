@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -36,5 +37,11 @@ public class PlayerCosmetics : MonoBehaviour
     {
         foreach (var cosmetic in headwear)
             cosmetic.Mesh.layer = layer;
+    }
+
+    public IEnumerable<Renderer> GetActiveRenderers()
+    {
+        return headwear.Where(cosmetic => cosmetic.Root.activeInHierarchy)
+            .Select(cosmetic => cosmetic.Mesh.GetComponent<Renderer>());
     }
 }
