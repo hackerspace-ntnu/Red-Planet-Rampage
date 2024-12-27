@@ -44,10 +44,18 @@ public class StickyDynamite : StuckObject
 
     public void Detonate(PlayerManager sourcePlayer)
     {
-        mesh.enabled = false;
-        explosiveBarrel.enabled = false;
-        smoke.enabled = false;
-        barrelSmoke.ToList().ForEach(smoke => smoke.enabled = false);
+        // Needs extra if-guards in case resetdynamite is called asynchronously by server
+        if (mesh)
+            mesh.enabled = false;
+        if (explosiveBarrel)
+            explosiveBarrel.enabled = false;
+        if(smoke)
+            smoke.enabled = false;
+        barrelSmoke.ToList().ForEach(smoke =>
+            {
+                if (smoke)
+                    smoke.enabled = false;
+            });
         // Double check that dynamite hasn't been taken by the pool before exploding
         if (explosion.gameObject.activeSelf)
         {

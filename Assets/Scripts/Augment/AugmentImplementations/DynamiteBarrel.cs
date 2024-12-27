@@ -1,4 +1,5 @@
 using Mirror;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -87,26 +88,34 @@ public class DynamiteBarrel : GunBarrel
     [ClientRpc]
     private void RpcDetonate()
     {
-        if (isDetonatableEarly)
+        try
         {
-            var explosivePositions = meshProjectiles.ProjectilePositions;
-            explosivePositions.ToList().ForEach(position =>
+            if (isDetonatableEarly)
+            {
+                var explosivePositions = meshProjectiles.ProjectilePositions;
+                explosivePositions.ToList().ForEach(position =>
                 {
                     var dynamite = (StickyDynamite)stickyModifer.InstantiateManual(position);
                     dynamite.Explosion.Init();
                     activeDynamites.Add(dynamite);
                 });
-            meshProjectiles.ClearProjectiles();
+                meshProjectiles.ClearProjectiles();
+            }
+            else if (sateliteUplink)
+                sateliteUplink.TargetManual(activeDynamites
+                    .Select(dynamite => dynamite.transform.position));
+
+            if (authority && activeDynamites.Count > 0 && gunController.Player.HUDController)
+                gunController.Player.HUDController.CrossHairDetonationAnimation();
+
+            activeDynamites.ForEach(dynamite => dynamite.Detonate(gunController.Player));
+            activeDynamites.Clear();
         }
-        else if (sateliteUplink)
-            sateliteUplink.TargetManual(activeDynamites
-                .Select(dynamite => dynamite.transform.position));
-
-        if (authority && activeDynamites.Count > 0 && gunController.Player.HUDController)
-            gunController.Player.HUDController.CrossHairDetonationAnimation();
-
-        activeDynamites.ForEach(dynamite => dynamite.Detonate(gunController.Player));
-        activeDynamites.Clear();
+        catch (Exception e)
+        {
+            Debug.LogError("Failed to detonate!");
+            Debug.LogError(e);
+        }
     }
 
     private void OnDeath(PlayerManager killer, PlayerManager victim, DamageInfo info)
