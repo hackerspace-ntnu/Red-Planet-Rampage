@@ -2,7 +2,6 @@ using Mirror;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -39,15 +38,16 @@ public class BiddingPlayer : NetworkBehaviour
 
     protected void InstantiateMaterials()
     {
-        playerRenderers.ToList()
-            .ForEach(mesh =>
-            {
-                for (int i = 0; i < mesh.materials.Length; i++)
+        playerRenderers.Union(playerManager.GetComponent<PlayerCosmetics>().GetActiveRenderers())
+            .ToList()
+                .ForEach(mesh =>
                 {
-                    mesh.materials[i] = Instantiate(mesh.materials[i]);
-                    instantiatedMaterials.Add(mesh.materials[i]);
-                }
-            });
+                    for (int i = 0; i < mesh.materials.Length; i++)
+                    {
+                        mesh.materials[i] = Instantiate(mesh.materials[i]);
+                        instantiatedMaterials.Add(mesh.materials[i]);
+                    }
+                });
     }
 
     public void SetIdentity()
