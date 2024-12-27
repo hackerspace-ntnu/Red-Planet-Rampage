@@ -178,7 +178,7 @@ public class PlayerManager : NetworkBehaviour
     private void OnDamageTaken(HealthController healthController, float damage, DamageInfo info)
     {
         if (hudController)
-            hudController.OnDamageTaken(healthController.CurrentHealth, healthController.MaxHealth);
+            hudController.OnDamageTaken(healthController.CurrentHealth, healthController.MaxHealth, damage);
 
         if (info.damageType == DamageType.Explosion)
             ScreenShake(info.damage * 0.005f);

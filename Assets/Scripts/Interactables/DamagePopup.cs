@@ -7,34 +7,27 @@ public class DamagePopup : MonoBehaviour
     private TMP_Text label;
 
     [SerializeField]
-    private float lowDamage = 20;
+    private float scaleMultiplier = 2f;
 
     [SerializeField]
-    private float highDamage = 80;
-
-    [SerializeField]
-    private Color normalLowColor;
-
-    [SerializeField]
-    private Color normalHighColor;
-
-    [SerializeField]
-    private Color criticalLowColor;
-
-    [SerializeField]
-    private Color criticalHighColor;
+    private bool isHUD = false;
 
     public Transform Camera { get; set; }
+
+    private float lastDamage;
 
     public float Damage
     {
         set
         {
-            label.text = Mathf.RoundToInt(value).ToString();
+            label.text = isHUD 
+                ? $"-{Mathf.RoundToInt(value)}%"
+                : Mathf.RoundToInt(value).ToString();
+            lastDamage = value;
         }
         get
         {
-            return int.Parse(label.text);
+            return lastDamage;
         }
     }
 
@@ -42,22 +35,30 @@ public class DamagePopup : MonoBehaviour
 
     private void Start()
     {
-        label.color = DetermineColor();
+        if (IsCritical && !isHUD)
+        {
+            LeanTween.value(gameObject, (Color value) => label.color = value, ColorPallete.Health(1), ColorPallete.Health(0.2f), 0.5f).setEasePunch();
+            GetComponent<CriticalTextAnimator>().IsAnimated = true;
+        }
+        else
+            LeanTween.value(gameObject, (Color value) => label.color = value, Color.white, ColorPallete.Health(0.2f), 1f).setEasePunch();
 
         var scale = transform.lossyScale;
-        LeanTween.sequence()
-            .append(LeanTween.moveY(gameObject, transform.position.y + 1f, .2f).setEaseInOutExpo())
-            .append(LeanTween.scale(gameObject, scale * 2f, .4f).setEasePunch())
-            .insert(LeanTween.moveY(gameObject, transform.position.y + 2f, 1).setEaseInOutExpo())
-            .append(LeanTween.scale(gameObject, Vector3.zero, .2f).setEaseOutQuad()
-            .setOnComplete(() => Destroy(gameObject)));
+        if (isHUD)
+            LeanTween.sequence()
+                .append(LeanTween.moveLocalY(gameObject, transform.localPosition.y + 1, .2f).setEaseInOutExpo())
+                .append(LeanTween.scale(gameObject, scale * scaleMultiplier, .4f).setEasePunch())
+                .insert(LeanTween.moveLocalY(gameObject, transform.localPosition.y + 2, 1).setEaseInOutExpo())
+                .append(LeanTween.scale(gameObject, Vector3.zero, .2f).setEaseOutQuad()
+                .setOnComplete(() => Destroy(gameObject)));
+        else
+            LeanTween.sequence()
+                .append(LeanTween.moveY(gameObject, transform.position.y + 1f, .2f).setEaseInOutExpo())
+                .append(LeanTween.scale(gameObject, scale * scaleMultiplier, .4f).setEasePunch())
+                .insert(LeanTween.moveY(gameObject, transform.position.y + 2f, 1).setEaseInOutExpo())
+                .append(LeanTween.scale(gameObject, Vector3.zero, .2f).setEaseOutQuad()
+                .setOnComplete(() => Destroy(gameObject)));
     }
-
-    private Color DetermineColor() =>
-        IsCritical
-            ? Color.Lerp(criticalLowColor, criticalHighColor, (Damage - lowDamage) / highDamage)
-            : Color.Lerp(normalLowColor, normalHighColor, (Damage - lowDamage) / highDamage);
-
 
     private void Update()
     {
