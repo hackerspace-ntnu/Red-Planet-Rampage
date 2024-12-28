@@ -30,4 +30,9 @@ public class Speedometer : MonoBehaviour
         var currentValue = speedometerMaterial.GetFloat("_Value");
         speedometerMaterial.SetFloat("_Value", Mathf.Lerp(currentValue, targetValue, .3f));
     }
+
+    public void SetDisplayedValue(float value)
+    {
+        speedometerMaterial.SetFloat("_Value", value);
+    }
 }
