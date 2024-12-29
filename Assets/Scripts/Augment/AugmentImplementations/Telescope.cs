@@ -46,11 +46,20 @@ public class Telescope : GunExtension
         gunController.Player.inputManager.onZoomPerformed += OnZoom;
         gunController.Player.inputManager.onZoomCanceled += OnZoomCanceled;
 
+        gunController.Player.onDeath += DesubscribeZoom;
+
         gunMeshes = gunController.GetComponentsInChildren<MeshRenderer>().ToList();
         gunSkinMeshes = gunController.GetComponentsInChildren<SkinnedMeshRenderer>().ToList();
 
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += CancelZoom;
+    }
+
+    private void DesubscribeZoom(PlayerManager killer, PlayerManager victim, DamageInfo info)
+    {
+        gunController.Player.inputManager.onZoomPerformed -= OnZoom;
+        gunController.Player.inputManager.onZoomCanceled -= OnZoomCanceled;
+        CancelZoom();
     }
 
     private void OnZoom(InputAction.CallbackContext ctx)
