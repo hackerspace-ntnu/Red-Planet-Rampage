@@ -82,15 +82,13 @@ public class BiddingAI : BiddingPlayer
         // AI should yield
         var spentChips = availableChips - identity.Chips;
         var isOverBudget = spentChips >= budget;
-        if (priorities[currentDestination] == -1 || isOverBudget)
+        var isAlreadyInTheLead = currentDestination.LeadingBidder == playerManager.id;
+
+        if (priorities[currentDestination] == -1 || isOverBudget || isAlreadyInTheLead)
         {
             agent.SetDestination(AuctionDriver.Singleton.YieldPosition);
             return;
         }
-
-        var isAlreadyInTheLead = currentDestination.LeadingBidder == playerManager.id;
-        if (isAlreadyInTheLead)
-            return;
 
         agent.SetDestination(currentDestination.transform.position + platformDestinationOffset);
 

@@ -33,7 +33,7 @@ public class BiddingPlayer : NetworkBehaviour
         playerManager.onSelectedBiddingPlatformChange += AnimateChipStatus;
         playerManager.onSelectedBiddingPlatformChange += ToggleDither;
         InstantiateMaterials();
-        AuctionDriver.Singleton.OnYieldChange += UpdateYieldStatus;
+        AuctionDriver.Singleton.OnYieldCountChange += UpdateYieldStatus;
     }
 
     protected void InstantiateMaterials()
@@ -151,7 +151,7 @@ public class BiddingPlayer : NetworkBehaviour
     {
         if (!playerManager)
             return;
-        AuctionDriver.Singleton.OnYieldChange -= UpdateYieldStatus;
+        AuctionDriver.Singleton.OnYieldCountChange -= UpdateYieldStatus;
         playerManager.onSelectedBiddingPlatformChange -= ToggleDither;
         if (playerManager.inputManager)
         {
