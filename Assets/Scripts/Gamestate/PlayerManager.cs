@@ -154,6 +154,11 @@ public class PlayerManager : NetworkBehaviour
             GunHolder.transform.forward = inputManager.transform.forward;
             UpdateAimAngleCmd(movement.AimAngle.y);
         }
+
+#if UNITY_EDITOR
+        if (Keyboard.current.iKey.isPressed)
+            healthController.GoInvincible();
+#endif
     }
 
     // Hijinks for syncing aim from server to players
