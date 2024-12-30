@@ -161,6 +161,7 @@ public class GunController : NetworkBehaviour
         }
         if (ShouldFire())
         {
+            isFiring = true;
             FireGun();
         }
     }
@@ -215,6 +216,7 @@ public class GunController : NetworkBehaviour
         }
         catch (Exception e)
         {
+            isFiring = false;
             Debug.LogError("Failed to fire gun!");
             Debug.LogError(e);
         }

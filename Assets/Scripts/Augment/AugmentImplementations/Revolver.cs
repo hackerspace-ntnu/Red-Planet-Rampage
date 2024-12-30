@@ -53,7 +53,7 @@ public class Revolver : GunBody
 
         isReloadInProgress = true;
         animator.SetTrigger("Reload");
-        gunController.onReload?.Invoke(stats);
+        // gunController.onReload?.Invoke(stats);
     }
 
     public void TriggerSteam()
