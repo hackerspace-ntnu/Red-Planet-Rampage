@@ -33,6 +33,7 @@ public class AuctionDriver : NetworkBehaviour
 
     public delegate void AuctionEvent();
     public AuctionEvent OnYieldChange;
+    public AuctionEvent OnYieldCountChange;
     private bool isYieldCountdownOn = false;
 
     [SerializeField]
@@ -144,6 +145,7 @@ public class AuctionDriver : NetworkBehaviour
             return;
 
         yieldingPlayers.Add(player);
+        OnYieldCountChange?.Invoke();
 
         if (isYieldCountdownOn)
             return;
@@ -196,7 +198,9 @@ public class AuctionDriver : NetworkBehaviour
     {
         if (!yieldingPlayers.Remove(player))
             return;
-
+        OnYieldCountChange?.Invoke();
+        if (IsAuctionYielded())
+            return;
         StopCoroutine(nameof(WaitAndTryAuctionEnd));
         isYieldCountdownOn = false;
         OnYieldChange?.Invoke();

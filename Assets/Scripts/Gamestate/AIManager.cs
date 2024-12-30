@@ -71,6 +71,9 @@ public class AIManager : PlayerManager
         aiTargetCollider = Instantiate(aiTarget).GetComponent<AITarget>();
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
+        // Only look for FPS targets in non-auction settings
+        if (AuctionDriver.Singleton != null)
+            return;
         StartCoroutine(LookForTargets());
     }
 
