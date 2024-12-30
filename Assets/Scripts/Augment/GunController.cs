@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -106,11 +105,31 @@ public class GunController : NetworkBehaviour
 
     private void OnDestroy()
     {
+        UnsubscribeDelegates();
+    }
+
+    public void UnsubscribeDelegates()
+    {
+        onInitializeGun = null;
+        onFire = null;
+        onFireEnd = null;
+        onFireNoAmmo = null;
+        onFireStart = null;
+        onInitializeBullet = null;
+        onReload = null;
+
+        projectile.OnColliderHit = null;
+        projectile.OnHitboxCollision = null;
+        projectile.OnNetworkInit = null;
+        projectile.OnProjectileInit = null;
+        projectile.OnProjectileTravel = null;
+        projectile.OnRicochet = null;
+
         if (!barrelAnimator)
             return;
 
-        if (HasRecoil)
-            barrelAnimator.OnShotFiredAnimation -= PlayRecoil;
+
+        barrelAnimator.OnShotFiredAnimation -= PlayRecoil;
         barrelAnimator.OnShotFiredAnimation -= ShotFired;
         barrelAnimator.OnAnimationEnd -= FireEnd;
 
@@ -217,6 +236,8 @@ public class GunController : NetworkBehaviour
 
     private void FireGun()
     {
+        if (stats == null)
+            return;
         if (stats.Ammo <= 0)
         {
             CmdFireWithNoAmmo();

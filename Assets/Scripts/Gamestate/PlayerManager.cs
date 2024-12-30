@@ -551,11 +551,13 @@ public class PlayerManager : NetworkBehaviour
 
     public void RemoveGun()
     {
+        gunController.UnsubscribeDelegates();
         for (int i = gunController.transform.childCount - 1; i >= 0; i--)
         {
             Destroy(gunController.transform.GetChild(i).gameObject);
         }
         Destroy(gunController.gameObject);
+        GunOrigin.GetComponent<GunController>().UnsubscribeDelegates();
         for (int i = GunOrigin.transform.childCount - 1; i >= 0; i--)
         {
             Destroy(GunOrigin.transform.GetChild(i).gameObject);
