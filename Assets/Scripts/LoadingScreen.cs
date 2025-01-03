@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using CollectionExtensions;
+using System.Linq;
 
 public class LoadingScreen : MonoBehaviour
 {
@@ -25,6 +26,8 @@ public class LoadingScreen : MonoBehaviour
     [TextArea][SerializeField] private List<string> tips;
 
     [SerializeField] private RawImage background;
+
+    [SerializeField] private Canvas transitionScreen;
 
     [Header("Timing")]
     [SerializeField] private float mandatoryDuration = 4;
@@ -68,7 +71,7 @@ public class LoadingScreen : MonoBehaviour
     private void Start()
     {
         radialTimer.material = Instantiate(radialTimer.material);
-        Hide();
+        Hide(Camera.main);
     }
 
     private IEnumerator UpdateTimer(float duration)
@@ -97,14 +100,45 @@ public class LoadingScreen : MonoBehaviour
         loadingCounter = 0;
     }
 
-    public void Show()
+    public void Show(Camera transitionCamera)
     {
         if (enabled)
             return;
-
         enabled = true;
-        gameObject.transform.GetChild(0).gameObject.SetActive(true);
 
+        SetTransition(transitionCamera, true);
+    }
+
+    private void SetTransition(Camera transitionCamera, bool isShow)
+    {
+        var transition = transform.GetChild(1).gameObject;
+        transition.SetActive(true);
+        if (!isShow)
+            transform.GetChild(0).gameObject.SetActive(false);
+
+        transitionScreen.worldCamera = transitionCamera;
+        transitionScreen.planeDistance = 1;
+
+        var slideMaterial = transition.GetComponent<Image>().material;
+        slideMaterial.SetFloat("_Direction", isShow ? 1f : 0f);
+
+        if (isShow)
+            LeanTween.value(gameObject, (value) => slideMaterial.SetFloat("_Coverage", value), -0.5f, 1.5f, 0.5f)
+                .setEaseInOutQuad()
+                .setOnComplete(ShowEntireScreen);
+        // Avoids animating transitions when not transitioning from a loading screen
+        else if (loadingCounter < 1)
+            transition.SetActive(false);
+        else
+            LeanTween.value(gameObject, (value) => slideMaterial.SetFloat("_Coverage", value), -0.5f, 1.5f, 0.5f)
+                .setEaseInOutQuad()
+                .setOnComplete(() => transition.SetActive(false));
+    }
+
+    private void ShowEntireScreen()
+    {
+        gameObject.transform.GetChild(0).gameObject.SetActive(true);
+        gameObject.transform.GetChild(1).gameObject.SetActive(false);
         // Random background funkiness
         var angle = Random.Range(-15f, 15f);
         background.transform.eulerAngles = angle * Vector3.forward;
@@ -140,12 +174,13 @@ public class LoadingScreen : MonoBehaviour
         }
     }
 
-    public void Hide()
+    public void Hide(Camera transitionCamera)
     {
         if (!enabled)
             return;
         enabled = false;
-        gameObject.transform.GetChild(0).gameObject.SetActive(false);
+
+        SetTransition(transitionCamera, false);
     }
 
     private void Update()

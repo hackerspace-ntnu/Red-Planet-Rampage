@@ -265,7 +265,7 @@ public class RPRNetworkManager : NetworkManager
     public override void OnClientDisconnect()
     {
         Debug.Log("Disconnected as client");
-        LoadingScreen.Singleton.Hide();
+        LoadingScreen.Singleton.Hide(PlayerInputManagerController.Singleton.LocalPlayerInputs.First().PlayerCamera);
         MusicTrackManager.Singleton.SwitchTo(MusicType.Menu);
         PlayerInputManagerController.Singleton.ChangeInputMaps("Menu");
         if (NetworkClient.active)
@@ -295,7 +295,7 @@ public class RPRNetworkManager : NetworkManager
     {
         if (NetworkServer.active)
             return;
-        LoadingScreen.Singleton.Show();
+        LoadingScreen.Singleton.Show(PlayerInputManagerController.Singleton.LocalPlayerInputs.First().PlayerCamera);
         // Only clients from here!
         PlayerInputManagerController.Singleton.RemoveJoinListener();
         SceneManager.LoadScene(Scenes.ClientLobby);
@@ -329,8 +329,8 @@ public class RPRNetworkManager : NetworkManager
 
     private static IEnumerator WaitAndSwitchToTrainingMode()
     {
-        LoadingScreen.Singleton.Show();
-
+        LoadingScreen.Singleton.Show(FindObjectsByType<Camera>(FindObjectsSortMode.None).Where(camera => camera.gameObject.activeInHierarchy && camera.enabled == true).First());
+        FindAnyObjectByType<MainMenuController>().gameObject.SetActive(false);
         // Wait for player details to be populated
         while (!NetworkClient.isConnected && !singleton.isNetworkActive && players.Count < PlayerInputManagerController.Singleton.LocalPlayerInputs.Count)
             yield return new WaitForEndOfFrame();
@@ -342,7 +342,7 @@ public class RPRNetworkManager : NetworkManager
         // TODO add a timeout for these wait-for-spawn spins
         while (FindObjectsByType<PlayerManager>(FindObjectsSortMode.None).Count() < players.Count)
             yield return new WaitForEndOfFrame();
-        LoadingScreen.Singleton.Hide();
+        LoadingScreen.Singleton.Hide(PlayerInputManagerController.Singleton.LocalPlayerInputs.First().PlayerCamera);
         MusicTrackManager.Singleton.SwitchTo(MusicType.Tutorial);
     }
 
@@ -366,7 +366,7 @@ public class RPRNetworkManager : NetworkManager
         var mainMenuController = FindAnyObjectByType<MainMenuController>();
         if (mainMenuController)
             mainMenuController.DisableSceneSwitching();
-        LoadingScreen.Singleton.Show();
+        LoadingScreen.Singleton.Show(FindObjectsByType<Camera>(FindObjectsSortMode.None).Where(camera => camera.gameObject.activeInHierarchy && camera.enabled == true).First());
     }
 
     private void RefuseConnection(NetworkConnectionToClient connection)

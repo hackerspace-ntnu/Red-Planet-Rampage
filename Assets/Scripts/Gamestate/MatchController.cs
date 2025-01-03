@@ -152,7 +152,7 @@ public class MatchController : NetworkBehaviour
     // TODO give players start amount worth of chips (on match start only)
     private void InitializeRound()
     {
-        LoadingScreen.Singleton.Hide();
+        LoadingScreen.Singleton.Hide(PlayerInputManagerController.Singleton.LocalPlayerInputs.First().PlayerCamera);
         InitializeAIPlayers();
         MusicTrackManager.Singleton.SwitchTo(MusicType.Battle);
         onRoundStart?.Invoke();
@@ -196,7 +196,7 @@ public class MatchController : NetworkBehaviour
 
     private IEnumerator ShowLoadingScreenBeforeBidding()
     {
-        LoadingScreen.Singleton.Show();
+        LoadingScreen.Singleton.Show(MatchController.Singleton.arenaCamera);
         yield return new WaitForSeconds(LoadingScreen.Singleton.MandatoryDuration);
 
         onBiddingStart?.Invoke();
@@ -249,7 +249,7 @@ public class MatchController : NetworkBehaviour
 
     public IEnumerator WaitAndStartNextRound()
     {
-        LoadingScreen.Singleton.Show();
+        LoadingScreen.Singleton.Show(PlayerInputManagerController.Singleton.LocalPlayerInputs.First().PlayerCamera);
         yield return new WaitForSeconds(LoadingScreen.Singleton.MandatoryDuration);
         NetworkManager.singleton.ServerChangeScene(currentMapName);
     }

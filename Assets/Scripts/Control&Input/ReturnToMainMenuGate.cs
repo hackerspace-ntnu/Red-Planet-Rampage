@@ -1,4 +1,5 @@
 using Mirror;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -18,6 +19,7 @@ public class ReturnToMainMenuGate : MonoBehaviour, Interactable
     private void ReturnToMainMenu()
     {
         // Mirror pulls us to the main menu automatically
+        RPRNetworkManager.LocalPlayerInstances.ToList().ForEach(player => player.inputManager.PlayerCamera.enabled = false);
         NetworkManager.singleton.StopHost();
     }
 }
