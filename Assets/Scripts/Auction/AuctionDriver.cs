@@ -111,7 +111,7 @@ public class AuctionDriver : NetworkBehaviour
 
         StartCoroutine(WaitAndStartCameraAnimation());
         StartCoroutine(PopulatePlatforms());
-        LoadingScreen.Singleton.Hide();
+        LoadingScreen.Singleton.Hide(Camera.GetComponent<Camera>());
     }
 
     private void OnDestroy()

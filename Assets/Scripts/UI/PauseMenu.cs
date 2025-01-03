@@ -1,4 +1,5 @@
 using Mirror;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -84,6 +85,7 @@ public class PauseMenu : MonoBehaviour
 
     public void Leave()
     {
+        RPRNetworkManager.LocalPlayerInstances.ToList().ForEach(player => player.inputManager.PlayerCamera.enabled = false);
         NetworkManager.singleton.StopHost();
     }
 }

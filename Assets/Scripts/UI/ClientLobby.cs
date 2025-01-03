@@ -1,4 +1,5 @@
 using Mirror;
+using System.Linq;
 using UnityEngine;
 
 public class ClientLobby : MonoBehaviour
@@ -30,7 +31,7 @@ public class ClientLobby : MonoBehaviour
         joinedPlayers++;
         if (joinedPlayers > PlayerInputManagerController.Singleton.LocalPlayerInputs.Count)
             // More than just the local players present, so the loading screen is no longer needed
-            LoadingScreen.Singleton.Hide();
+            LoadingScreen.Singleton.Hide(PlayerInputManagerController.Singleton.LocalPlayerInputs.First().PlayerCamera);
     }
 
     private void OnDestroy()
