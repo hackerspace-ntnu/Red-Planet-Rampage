@@ -23,6 +23,8 @@ public class BulletController : ProjectileController
 
     private const float baseSpeed = 50f;
 
+    private const int defaultProjectileCount = 512;
+
     private VFXTextureFormatter trailPositionBuffer;
 
     [SerializeField]
@@ -78,6 +80,7 @@ public class BulletController : ProjectileController
 
     public void SetTrail(VisualEffect newTrail)
     {
+        trailPositionBuffer ??= new(defaultProjectileCount);
         trailPositionBuffer.Buffer?.Release();
         trail = newTrail;
         if (trail && stats)

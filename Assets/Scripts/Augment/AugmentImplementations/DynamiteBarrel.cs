@@ -1,8 +1,10 @@
+using JetBrains.Annotations;
 using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -135,7 +137,7 @@ public class DynamiteBarrel : GunBarrel
     private void OnDestroy()
     {
         StopAllCoroutines();
-        if (!gunController || !gunController.Player)
+        if (!gunController || !gunController.Player || !gunController.Player.IsAlive)
             return;
 
         activeDynamites.ForEach(dynamite => dynamite.gameObject.SetActive(false));

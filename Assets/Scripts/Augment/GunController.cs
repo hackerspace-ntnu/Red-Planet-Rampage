@@ -118,20 +118,22 @@ public class GunController : NetworkBehaviour
         onInitializeBullet = null;
         onReload = null;
 
-        projectile.OnColliderHit = null;
-        projectile.OnHitboxCollision = null;
-        projectile.OnNetworkInit = null;
-        projectile.OnProjectileInit = null;
-        projectile.OnProjectileTravel = null;
-        projectile.OnRicochet = null;
+        if (projectile)
+        {
+            projectile.OnColliderHit = null;
+            projectile.OnHitboxCollision = null;
+            projectile.OnNetworkInit = null;
+            projectile.OnProjectileInit = null;
+            projectile.OnProjectileTravel = null;
+            projectile.OnRicochet = null;
+        }
 
-        if (!barrelAnimator)
-            return;
-
-
-        barrelAnimator.OnShotFiredAnimation -= PlayRecoil;
-        barrelAnimator.OnShotFiredAnimation -= ShotFired;
-        barrelAnimator.OnAnimationEnd -= FireEnd;
+        if (barrelAnimator)
+        {
+            barrelAnimator.OnShotFiredAnimation -= PlayRecoil;
+            barrelAnimator.OnShotFiredAnimation -= ShotFired;
+            barrelAnimator.OnAnimationEnd -= FireEnd;
+        }
 
         if (!Player || !Player.inputManager)
             return;
