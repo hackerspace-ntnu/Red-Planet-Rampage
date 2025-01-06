@@ -208,7 +208,7 @@ public class Fire : GunExtension
 
     private void OnDestroy()
     {
-        stuckFirePool.Flush();
+        stuckFirePool?.Flush();
         positionActiveBuffer?.Dispose();
     }
 

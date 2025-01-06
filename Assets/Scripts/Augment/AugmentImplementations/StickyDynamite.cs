@@ -23,6 +23,11 @@ public class StickyDynamite : StuckObject
         ResetDynamite();
     }
 
+    private void Awake()
+    {
+        ResetDynamite();
+    }
+
     public void ResetDynamite()
     {
         explosion.StopAllCoroutines();
