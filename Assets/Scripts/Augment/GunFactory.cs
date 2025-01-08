@@ -35,8 +35,7 @@ public class GunFactory : MonoBehaviour
         foreach (var animation in gunAnimations)
         {
             animation.OnInitialize(firstPersonGunController.stats);
-            firstPersonGunController.onFireStart += animation.OnFire;
-            firstPersonGunController.onReload += animation.OnReload;
+            animation.Subscribe(firstPersonGunController);
         }
 
         // Animator initializers may instantiate objects, so we should set layers *afterwards*.
@@ -64,6 +63,13 @@ public class GunFactory : MonoBehaviour
             ((LazurController)gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
 
         return gun;
+    }
+
+    public static void UnsubscribeAnimators(GameObject gun)
+    {
+        var firstPersonGunController = gun.GetComponent<GunFactory>().GunController;
+        firstPersonGunController.onFireStart = null;
+        firstPersonGunController.onReload = null;
     }
 
     public static GameObject InstantiateGunAI(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, Transform parent)

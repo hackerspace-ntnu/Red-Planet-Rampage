@@ -13,4 +13,14 @@ public abstract class AugmentAnimator : MonoBehaviour
     public abstract void OnInitialize(GunStats stats);
     public abstract void OnReload(GunStats stats);
     public abstract void OnFire(GunStats stats);
+    public void Subscribe(GunController gun)
+    {
+        gun.onFire += OnFire;
+        gun.onReload += OnReload;
+    }
+    public void Unsubscribe(GunController gun)
+    {
+        gun.onFire -= OnFire;
+        gun.onReload -= OnReload;
+    }
 }

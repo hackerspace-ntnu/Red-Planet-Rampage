@@ -507,6 +507,7 @@ public class PlayerManager : NetworkBehaviour
             gunController.onFireEnd -= UpdateHudFire;
             gunController.onReload -= UpdateHudReload;
             gunController.projectile.OnHitboxCollision -= hudController.HitAnimation;
+            GunFactory.UnsubscribeAnimators(gunController.gameObject);
         }
         overrideAimTarget = false;
         var gun = GunFactory.InstantiateGun(identity.Body, identity.Barrel, identity.Extension, this, offset);

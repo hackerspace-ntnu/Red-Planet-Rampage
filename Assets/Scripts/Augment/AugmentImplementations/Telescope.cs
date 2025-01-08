@@ -46,7 +46,7 @@ public class Telescope : GunExtension
         gunController.Player.inputManager.onZoomPerformed += OnZoom;
         gunController.Player.inputManager.onZoomCanceled += OnZoomCanceled;
 
-        gunController.Player.onDeath += DesubscribeZoom;
+        gunController.Player.onDeath += UnsubscribeZoom;
 
         gunMeshes = gunController.GetComponentsInChildren<MeshRenderer>().ToList();
         gunSkinMeshes = gunController.GetComponentsInChildren<SkinnedMeshRenderer>().ToList();
@@ -55,8 +55,11 @@ public class Telescope : GunExtension
             MatchController.Singleton.onRoundEnd += CancelZoom;
     }
 
-    private void DesubscribeZoom(PlayerManager killer, PlayerManager victim, DamageInfo info)
+    private void UnsubscribeZoom(PlayerManager killer, PlayerManager victim, DamageInfo info)
     {
+        var playerMovement = gunController.Player.GetComponent<PlayerMovement>();
+        playerMovement.ZoomFov = originalZoomFov;
+        playerMovement.LookSpeedZoom = originalZoomSpeed;
         gunController.Player.inputManager.onZoomPerformed -= OnZoom;
         gunController.Player.inputManager.onZoomCanceled -= OnZoomCanceled;
         CancelZoom();

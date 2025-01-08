@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using Mirror;
 using System;
 using System.Collections;
@@ -60,7 +59,6 @@ public class DynamiteBarrel : GunBarrel
         stuckDynamite.ResetDynamite();
         if (Projectile.stats.ProjectileScale >= 3)
             stuckDynamite.SetBarrel();
-        
     }
 
     // Letting the AIs also explode stuff every now and then
@@ -131,7 +129,10 @@ public class DynamiteBarrel : GunBarrel
         stickyModifer.OnStuckToTarget -= AddDynamite;
 
         if (gunController.Player is not AIManager && gunController.Player.inputManager)
+        {
             gunController.Player.inputManager.onZoomPerformed -= OnZoom;
+            gunController.Player.GetComponent<PlayerMovement>().ReEnableZoom();
+        }
     }
 
     private void OnDestroy()
@@ -145,6 +146,9 @@ public class DynamiteBarrel : GunBarrel
         stickyModifer.OnStuckToTarget -= AddDynamite;
 
         if (gunController.Player is not AIManager && gunController.Player.inputManager)
+        {
             gunController.Player.inputManager.onZoomPerformed -= OnZoom;
+            gunController.Player.GetComponent<PlayerMovement>().ReEnableZoom();
+        }
     }
 }
