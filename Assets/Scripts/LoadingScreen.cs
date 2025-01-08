@@ -112,6 +112,8 @@ public class LoadingScreen : MonoBehaviour
     private void SetTransition(Camera transitionCamera, bool isShow)
     {
         var transition = transform.GetChild(1).gameObject;
+        var slideMaterial = transition.GetComponent<Image>().material;
+        slideMaterial.SetFloat("_Coverage", -0.5f);
         transition.SetActive(true);
         if (!isShow)
             transform.GetChild(0).gameObject.SetActive(false);
@@ -119,7 +121,6 @@ public class LoadingScreen : MonoBehaviour
         transitionScreen.worldCamera = transitionCamera;
         transitionScreen.planeDistance = 1;
 
-        var slideMaterial = transition.GetComponent<Image>().material;
         slideMaterial.SetFloat("_Direction", isShow ? 1f : 0f);
 
         if (isShow)
