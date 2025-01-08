@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -134,6 +135,9 @@ public class GunController : NetworkBehaviour
             barrelAnimator.OnShotFiredAnimation -= ShotFired;
             barrelAnimator.OnAnimationEnd -= FireEnd;
         }
+
+        GetComponentsInChildren<AugmentAnimator>(includeInactive: true).ToList()
+            .ForEach(animation => animation.Unsubscribe(this));
 
         if (!Player || !Player.inputManager)
             return;

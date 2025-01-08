@@ -296,6 +296,14 @@ public class PlayerMovement : MonoBehaviour
         CancelZoom();
     }
 
+    public void ReEnableZoom()
+    {
+        inputManager.ZoomActive = true;
+        inputManager.onZoomPerformed += OnZoom;
+        inputManager.onZoomCanceled += OnZoomCanceled;
+        CancelZoom();
+    }
+
     private void OnCrouch(InputAction.CallbackContext ctx)
     {
         if (LeanTween.isTweening(cameraCrouchCanceledTween))

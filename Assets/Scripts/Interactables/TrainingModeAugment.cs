@@ -49,6 +49,6 @@ public class TrainingModeAugment : MonoBehaviour, Interactable
 
         player.identity.SetLoadout(body, barrel, extension);
         player.RemoveGun();
-        player.SetGun(player.identity.transform);
+        player.SetGun(player.inputManager.transform.GetChild(0).GetChild(0));
     }
 }
