@@ -33,6 +33,14 @@ public class HealthController : NetworkBehaviour
         Player = GetComponent<PlayerManager>();
     }
 
+#if UNITY_EDITOR
+    public void GoInvincible()
+    {
+        maxhHealth = 100000000;
+        currentHealth = maxhHealth;
+    }
+#endif
+
     public void DealDamage(DamageInfo info)
     {
         if (!isNetworked)

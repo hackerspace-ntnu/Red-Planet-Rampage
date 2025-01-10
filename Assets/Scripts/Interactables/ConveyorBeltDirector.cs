@@ -1,4 +1,7 @@
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEngine.InputSystem;
+#endif
 
 public class ConveyorBeltDirector : MonoBehaviour
 {
@@ -53,4 +56,12 @@ public class ConveyorBeltDirector : MonoBehaviour
         leftArrow.enabled = direction > 0;
         rightArrow.enabled = direction < 0;
     }
+
+#if UNITY_EDITOR
+    private void Update()
+    {
+        if (Keyboard.current.oKey.isPressed)
+            Flip(true);
+    }
+#endif
 }
