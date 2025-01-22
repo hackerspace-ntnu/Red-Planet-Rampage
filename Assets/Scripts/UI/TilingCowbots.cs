@@ -1,27 +1,22 @@
-using System.Diagnostics.Eventing.Reader;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TilingCowboys : MonoBehaviour
+public class TilingCowbots : MonoBehaviour
 {
     [SerializeField] private RawImage cowboys;
-    [SerializeField] private bool rotateCowboys = false;
+    [SerializeField] private bool rotateCowbots = false;
     [SerializeField, Range(0, 2)] private float speedMultiplier = 0.5f; 
-    private Vector2 cowboyVelocity;
+    private Vector2 cowbotVelocity;
 
-
-
-    // Start is called before the first frame update
     void Start()
     {
-        
-        if (rotateCowboys)
+        if (rotateCowbots)
         {
             // Create a random background angle
             var angle = Random.Range(-15f, 15f);
             cowboys.transform.eulerAngles = angle * Vector3.forward;
             // Background moves along same angle as it is tilted, but horizontally
-            cowboyVelocity = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad)) * speedMultiplier;
+            cowbotVelocity = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad)) * speedMultiplier;
         }
         else {
             // Create a random angle to move towards
@@ -34,15 +29,14 @@ public class TilingCowboys : MonoBehaviour
             angle.Normalize();
             
             // Apply the random tiling direction
-            cowboyVelocity = angle * speedMultiplier;
+            cowbotVelocity = angle * speedMultiplier;
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
         // Move the cowboys
         var uv = cowboys.uvRect;
-        cowboys.uvRect = new Rect(uv.x + cowboyVelocity.x * Time.deltaTime, uv.y + cowboyVelocity.y * Time.deltaTime, uv.width, uv.height);
+        cowboys.uvRect = new Rect(uv.x + cowbotVelocity.x * Time.deltaTime, uv.y + cowbotVelocity.y * Time.deltaTime, uv.width, uv.height);
     }
 }
