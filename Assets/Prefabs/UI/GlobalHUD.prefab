@@ -35,7 +35,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 399.99997, y: -104.8902}
+  m_AnchoredPosition: {x: 399.99997, y: -104.999985}
   m_SizeDelta: {x: 799.99994, y: 72.01}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9084795029680021814
@@ -171,8 +171,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 400, y: -270.8952}
-  m_SizeDelta: {x: 800, y: 220}
+  m_AnchoredPosition: {x: 399.99997, y: -271.00497}
+  m_SizeDelta: {x: 799.99994, y: 220}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5713136834157158178
 MonoBehaviour:
@@ -476,7 +476,7 @@ RectTransform:
   - {fileID: 5044030815279361102}
   - {fileID: 8861804796758893109}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -942,13 +942,25 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
+    - target: {fileID: 1817552501841607719, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
+      propertyPath: m_MinWidth
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1817552501841607719, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
+      propertyPath: m_MinHeight
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 3765489543879290160, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
       propertyPath: m_text
       value: Leave
       objectReference: {fileID: 0}
     - target: {fileID: 3765489543879290160, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
       propertyPath: m_fontSize
-      value: 70
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 3765489543879290160, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5877506774103653876, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
       propertyPath: m_Pivot.x
@@ -1016,7 +1028,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5877506774103653876, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 400
+      value: 399.99997
       objectReference: {fileID: 0}
     - target: {fileID: 5877506774103653876, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -1032,6 +1044,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5877506774103653876, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6362752730598723221, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6362752730598723221, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
+      propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7072107538278606930, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
@@ -1088,9 +1108,21 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
+    - target: {fileID: 1817552501841607719, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
+      propertyPath: m_MinWidth
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1817552501841607719, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
+      propertyPath: m_MinHeight
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 3765489543879290160, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
       propertyPath: m_text
       value: Continue
+      objectReference: {fileID: 0}
+    - target: {fileID: 3765489543879290160, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5877506774103653876, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
       propertyPath: m_Pivot.x
@@ -1158,7 +1190,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5877506774103653876, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 400
+      value: 399.99997
       objectReference: {fileID: 0}
     - target: {fileID: 5877506774103653876, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -1174,6 +1206,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5877506774103653876, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6362752730598723221, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6362752730598723221, guid: e472bbf090cca566cae93eec176f8dff, type: 3}
+      propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7072107538278606930, guid: e472bbf090cca566cae93eec176f8dff, type: 3}

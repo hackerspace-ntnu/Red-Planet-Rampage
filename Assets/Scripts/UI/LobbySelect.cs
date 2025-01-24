@@ -28,7 +28,13 @@ public class LobbySelect : DescriptionMenu
     private void SetOnlineButtonStates(bool enabled)
     {
         queueButton.enabled = enabled;
+        queueButton.GetComponent<Image>().color = enabled
+            ? Color.white
+            : queueButton.colors.disabledColor;
         friendsButton.enabled = enabled;
+        friendsButton.GetComponent<Image>().color = enabled
+            ? Color.white
+            : friendsButton.colors.disabledColor;
     }
 
     private IEnumerator WaitAndSelectButton()

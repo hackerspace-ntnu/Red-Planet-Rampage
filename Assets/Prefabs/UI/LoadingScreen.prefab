@@ -180,7 +180,6 @@ MonoBehaviour:
   - The enemy of artifical intelligence is natural stupidity.
   - Some special weapon combinations have unique names, they usually have some kind
     of synergy!
-  background: {fileID: 8814292908430132048}
   transitionScreen: {fileID: 3396547481487014123}
   mandatoryDuration: 4
   normalRotationSpeed: 60
@@ -395,6 +394,7 @@ GameObject:
   - component: {fileID: 2781291323566171173}
   - component: {fileID: 4603235002760152902}
   - component: {fileID: 8814292908430132048}
+  - component: {fileID: 5342754728055352128}
   m_Layer: 5
   m_Name: Background
   m_TagString: Untagged
@@ -457,6 +457,21 @@ MonoBehaviour:
     y: 0
     width: 30
     height: 13
+--- !u!114 &5342754728055352128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1419845241489036089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45789553e88e53845980e7a155365135, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cowboys: {fileID: 8814292908430132048}
+  rotateCowbots: 1
+  speedMultiplier: 1
 --- !u!1 &2861130451342191357
 GameObject:
   m_ObjectHideFlags: 0

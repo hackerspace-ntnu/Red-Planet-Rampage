@@ -20,7 +20,7 @@ public class TilingCowbots : MonoBehaviour
         }
         else {
             // Create a random angle to move towards
-            Vector2 angle = new Vector2(Random.Range(-1, 1), Random.Range(-1, 1));
+            Vector2 angle = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
             
             // If random returns zero, reset to 1
             if (angle == Vector2.zero)
