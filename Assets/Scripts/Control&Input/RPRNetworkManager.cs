@@ -955,6 +955,7 @@ public class RPRNetworkManager : NetworkManager
         }
 
         playerInstances[player.id] = player;
+        Debug.Log("finish init player!", player.gameObject);
     }
 
     #endregion
