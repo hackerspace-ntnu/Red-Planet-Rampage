@@ -720,6 +720,7 @@ public class RPRNetworkManager : NetworkManager
 
     private void OnAllClientsReady(AllClientsReadyMessage _)
     {
+        Debug.Log("yea we all ready");
         allClientsAreReady = true;
     }
 
@@ -730,6 +731,8 @@ public class RPRNetworkManager : NetworkManager
 
         while (SceneManager.GetActiveScene().name == originalSceneName)
             yield return null;
+
+        Debug.Log("yeah I sent msg");
 
         NetworkClient.Send(new ClientReadyMessage());
 
