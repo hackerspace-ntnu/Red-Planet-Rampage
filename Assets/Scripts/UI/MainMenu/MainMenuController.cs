@@ -93,6 +93,7 @@ public class MainMenuController : MonoBehaviour
     private void Start()
     {
         aiButtonOriginalPosition = aIButton.transform.localPosition;
+        Debug.Log(aiButtonOriginalPosition);
         PlayerInputManagerController.Singleton.MatchHasAI = false;
         audioSource = GetComponent<AudioSource>();
         versionText.text = $"Early Access {Application.version}";
@@ -359,11 +360,8 @@ public class MainMenuController : MonoBehaviour
         }
         SelectControl(startButton);
         if (LeanTween.isTweening(aiButtonTween))
-        {
-            LeanTween.cancel(aiButtonTween);
-            aIButton.transform.localPosition = aiButtonOriginalPosition;
-        }
-        aiButtonTween = aIButton.gameObject.LeanMoveLocal(aiButtonOriginalPosition * 1.05f, 0.3f).setEasePunch().id;
+            return;
+        aiButtonTween = aIButton.gameObject.LeanMoveLocal(new Vector3(aiButtonOriginalPosition.x + 20f,0f,0f), 0.25f).setEasePunch().id;
     }
 
     public void ToggleAI()
@@ -383,7 +381,11 @@ public class MainMenuController : MonoBehaviour
     {
         bool canPlay = playerInputManagerController.MatchHasAI || RPRNetworkManager.NumPlayers > 1;
         var colors = startButton.colors;
-        colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
+        var normalColorTransparent = new Color(
+            colors.highlightedColor.r,
+            colors.highlightedColor.g,
+            colors.highlightedColor.b, 0f);
+        colors.normalColor = canPlay ? normalColorTransparent : colors.disabledColor;
         startButton.colors = colors;
     }
 

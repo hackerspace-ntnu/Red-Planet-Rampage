@@ -12,9 +12,11 @@ public class MainMenuMoveCamera : MonoBehaviour
     private GameObject directionalLight;
 
     [SerializeField]
-    private Transform initialPosition;
+    private Transform playerOverviewPosition;
     [SerializeField]
-    private Transform secondPosition;
+    private Transform sceneOverviewPosition;
+    [SerializeField]
+    private Transform optionsPosition;
     [SerializeField]
     private Transform cachePosition;
 
@@ -52,7 +54,7 @@ public class MainMenuMoveCamera : MonoBehaviour
         if (inLevelSelect)
         {
             inLevelSelect = false;
-            LeanTween.sequence().append(LeanTween.moveLocal(playerSelectCamera.gameObject, initialPosition.localPosition, 1).setEaseInOutExpo());
+            LeanTween.sequence().append(LeanTween.moveLocal(playerSelectCamera.gameObject, playerOverviewPosition.localPosition, 1).setEaseInOutExpo());
             LeanTween.sequence().append(LeanTween.rotateX(playerSelectCamera.gameObject, 9f, 1).setEaseInOutExpo());
         }
     }
@@ -62,7 +64,7 @@ public class MainMenuMoveCamera : MonoBehaviour
         if (!(PlayerInputManagerController.Singleton.MatchHasAI || PlayerInputManagerController.Singleton.PlayerCount > 1))
             return;
         inLevelSelect = true;
-        LeanTween.sequence().append(LeanTween.moveLocal(playerSelectCamera.gameObject, secondPosition.localPosition, 1).setEaseInOutExpo());
+        LeanTween.sequence().append(LeanTween.moveLocal(playerSelectCamera.gameObject, sceneOverviewPosition.localPosition, 1).setEaseInOutExpo());
         LeanTween.sequence().append(LeanTween.rotateX(playerSelectCamera.gameObject, 90f, 1).setEaseInOutExpo());
     }
 

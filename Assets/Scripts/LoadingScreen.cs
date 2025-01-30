@@ -25,8 +25,6 @@ public class LoadingScreen : MonoBehaviour
 
     [TextArea][SerializeField] private List<string> tips;
 
-    [SerializeField] private RawImage background;
-
     [SerializeField] private Canvas transitionScreen;
 
     [Header("Timing")]
@@ -39,8 +37,6 @@ public class LoadingScreen : MonoBehaviour
     private float rotationSpeed = 60;
 
     private static int loadingCounter = 0;
-
-    private Vector2 backgroundVelocity;
 
     private void Awake()
     {
@@ -140,11 +136,6 @@ public class LoadingScreen : MonoBehaviour
     {
         gameObject.transform.GetChild(0).gameObject.SetActive(true);
         gameObject.transform.GetChild(1).gameObject.SetActive(false);
-        // Random background funkiness
-        var angle = Random.Range(-15f, 15f);
-        background.transform.eulerAngles = angle * Vector3.forward;
-        // Background moves along same angle as it is tilted, but horizontally
-        backgroundVelocity = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
 
         PlayerInputManagerController.Singleton.RemoveListeners();
         loadingCounter += 1;
@@ -187,8 +178,5 @@ public class LoadingScreen : MonoBehaviour
     private void Update()
     {
         loadingBar.transform.Rotate(Vector3.forward, Time.deltaTime * rotationSpeed);
-
-        var uv = background.uvRect;
-        background.uvRect = new Rect(uv.x + backgroundVelocity.x * Time.deltaTime, uv.y + backgroundVelocity.y * Time.deltaTime, uv.width, uv.height);
     }
 }
