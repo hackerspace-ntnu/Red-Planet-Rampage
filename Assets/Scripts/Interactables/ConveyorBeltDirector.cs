@@ -7,6 +7,9 @@ public class ConveyorBeltDirector : MonoBehaviour
     public static float DirectionMultiplier => directionMultiplier;
 
     [SerializeField]
+    private ConveyorBeltDirector otherDirector;
+
+    [SerializeField]
     private FlippableSwitch flippableSwitch;
 
     [SerializeField]
@@ -18,7 +21,7 @@ public class ConveyorBeltDirector : MonoBehaviour
     [SerializeField]
     private Speedometer speedometer;
 
-    private int flipTween;
+    private static int flipTween;
 
     private void Start()
     {
@@ -33,6 +36,14 @@ public class ConveyorBeltDirector : MonoBehaviour
         direction = -direction;
         FlipDirectionMultiplier();
         FlipArrows();
+        if (otherDirector)
+            otherDirector.FlipVisually();
+    }
+
+    private void FlipVisually()
+    {
+        FlipArrows();
+        flippableSwitch.FlipManually();
     }
 
     private void FlipDirectionMultiplier()
@@ -45,7 +56,10 @@ public class ConveyorBeltDirector : MonoBehaviour
     private void SetDirectionMultiplier(float value)
     {
         directionMultiplier = value;
-        speedometer.SetDisplayedValue((1 - value) / 2f);
+        var normalized = (1 - value) / 2f;
+        speedometer.SetDisplayedValue(normalized);
+        if (otherDirector)
+            otherDirector.speedometer.SetDisplayedValue(normalized);
     }
 
     private void FlipArrows()

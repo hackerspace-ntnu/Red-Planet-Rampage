@@ -13,6 +13,9 @@ public class Speedometer : MonoBehaviour
     [SerializeField]
     private int materialIndex = 0;
 
+    [SerializeField]
+    private bool invert = false;
+
     private Material speedometerMaterial;
 
     private void Start()
@@ -33,6 +36,6 @@ public class Speedometer : MonoBehaviour
 
     public void SetDisplayedValue(float value)
     {
-        speedometerMaterial.SetFloat("_Value", value);
+        speedometerMaterial.SetFloat("_Value", invert ? 1 - value : value);
     }
 }
