@@ -30,4 +30,10 @@ public class FlippableSwitch : MonoBehaviour
         isOn = !isOn;
         OnFlip?.Invoke(isOn);
     }
+
+    public void FlipManually()
+    {
+        animator.SetTrigger("Flip");
+        isOn = !isOn;
+    }
 }
