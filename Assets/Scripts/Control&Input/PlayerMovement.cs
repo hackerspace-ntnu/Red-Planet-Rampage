@@ -464,7 +464,7 @@ public class PlayerMovement : MonoBehaviour
             : inputManager.lookInput * Time.deltaTime;
         lookInput *= new Vector2(invertX ? -1 : 1, invertY ? -1 : 1);
         aimAngle += lookInput * lookSpeedFactor * sensitivity;
-        aimAngle = aimAngle.ClampedLookAngles();
+        aimAngle = aimAngle.ClampedAimAngles();
         // Rotate rigidbody.
         body.MoveRotation(Quaternion.AngleAxis(aimAngle.x * Mathf.Rad2Deg, Vector3.up));
         // Rotate look separately. Camera is attached to FPSInputManager.

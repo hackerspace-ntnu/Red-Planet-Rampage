@@ -226,12 +226,12 @@ public class PlayerManager : NetworkBehaviour
         if (inputManager)
         {
             var orbitCamera = GetComponent<OrbitCamera>();
-            orbitCamera.Activate(inputManager);
+            orbitCamera.Activate(inputManager, info.force.normalized);
         }
 
         // TODO: Make accurate hitbox forces for the different limbs of the player
         var ragdollController = GetComponent<RagdollController>();
-        var force = info.force.normalized * Mathf.Log(info.damage) * deathKnockbackForceMultiplier;
+        var force = deathKnockbackForceMultiplier * Mathf.Log(info.damage) * info.force.normalized;
         ragdollController.EnableRagdoll(force);
     }
 
