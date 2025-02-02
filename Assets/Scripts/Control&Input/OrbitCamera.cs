@@ -46,7 +46,7 @@ public class OrbitCamera : MonoBehaviour
     }
 
 
-    public void Activate(InputManager input)
+    public void Activate(InputManager input, Vector3 forceDirection)
     {
         if (MatchController.Singleton.IsShowingScoreboards)
             return;
@@ -55,6 +55,7 @@ public class OrbitCamera : MonoBehaviour
         camera = input.PlayerCamera;
         camera.cullingMask = cullingMask | (1 << (12 + player.LayerIndex));
         cameraTransform = camera.transform;
+        aimAngle = forceDirection.ToAimAngles();
 
         StartTracking(player);
         otherPlayers = MatchController.Singleton.Players.Where(p => p != GetComponent<PlayerManager>()).ToArray();
@@ -134,7 +135,7 @@ public class OrbitCamera : MonoBehaviour
             ? input.lookInput
             : input.lookInput * Time.deltaTime;
         aimAngle += lookInput * lookSensitivity; // TODO idk set this properly
-        aimAngle = aimAngle.ClampedLookAngles();
+        aimAngle = aimAngle.ClampedAimAngles();
     }
 
     private void UpdateOrbit()

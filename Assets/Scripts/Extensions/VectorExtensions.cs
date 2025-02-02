@@ -11,7 +11,7 @@ namespace VectorExtensions
         /// This is way more computationally efficient than creating edgecase checks in IK with practically no gameplay impact
         /// </summary>
         /// <param name="angles"></param>
-        public static Vector2 ClampedLookAngles(this Vector2 angles)
+        public static Vector2 ClampedAimAngles(this Vector2 angles)
         {
             var y = Mathf.Clamp(angles.y, -Mathf.PI / 2 + Mathf.Deg2Rad, Mathf.PI / 2 - Mathf.Deg2Rad);
             var x = (angles.x + Mathf.PI) % (2 * Mathf.PI) - Mathf.PI;
@@ -29,5 +29,15 @@ namespace VectorExtensions
         /// </summary>
         public static Vector3 ToEulerAngles(this Vector3 direction) =>
             Quaternion.FromToRotation(Vector3.forward, direction).eulerAngles;
+
+        /// <summary>
+        /// Converts a normalized direction vector to aim angles
+        /// = vec2(horizontal view angle, vertical view angle) in radians
+        /// </summary>
+        public static Vector2 ToAimAngles(this Vector3 direction) =>
+            new Vector2(
+                Mathf.Atan2(direction.x, direction.z),
+                Mathf.Atan2(direction.y, direction.xz().magnitude)
+            );
     }
 }
