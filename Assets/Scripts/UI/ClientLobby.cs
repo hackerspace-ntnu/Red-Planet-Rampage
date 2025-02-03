@@ -31,7 +31,7 @@ public class ClientLobby : MonoBehaviour
         joinedPlayers++;
         if (joinedPlayers > PlayerInputManagerController.Singleton.LocalPlayerInputs.Count)
             // More than just the local players present, so the loading screen is no longer needed
-            LoadingScreen.Singleton.Hide(PlayerInputManagerController.Singleton.LocalPlayerInputs.First().PlayerCamera);
+            LoadingScreen.Singleton.Hide(environmentCamera.GetComponent<Camera>());
     }
 
     private void OnDestroy()

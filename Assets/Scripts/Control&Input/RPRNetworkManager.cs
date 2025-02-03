@@ -295,8 +295,14 @@ public class RPRNetworkManager : NetworkManager
     {
         if (NetworkServer.active)
             return;
-        LoadingScreen.Singleton.Show(PlayerInputManagerController.Singleton.LocalPlayerInputs.First().PlayerCamera);
+
         // Only clients from here!
+
+        // TODO this *could* work in the future
+        // var isAlreadyInLobbyScene = SceneManager.GetActiveScene().name == Scenes.ClientLobby;
+        // if (isAlreadyInLobbyScene)
+        //     return;
+
         PlayerInputManagerController.Singleton.RemoveJoinListener();
         SceneManager.LoadScene(Scenes.ClientLobby);
         networkAddress = address;

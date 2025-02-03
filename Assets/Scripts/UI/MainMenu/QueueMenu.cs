@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -22,12 +20,17 @@ public class QueueMenu : MonoBehaviour
             .Where(lobby => lobby.gameMode == MatchRules.Singleton.Rules.GameMode)
             .OrderBy(lobby => lobby.availableSlots);
 
-            var enumerator = viableLobbies.GetEnumerator();
-            while (enumerator.MoveNext())
-                if (SteamManager.Singleton.RequestLobbyJoin(enumerator.Current.id))
-                    return;
+        var enumerator = viableLobbies.GetEnumerator();
+        while (enumerator.MoveNext())
+            if (SteamManager.Singleton.RequestLobbyJoin(enumerator.Current.id))
+            {
+                // Avoid going here multiple times, we found a lobby!
+                SteamManager.Singleton.LobbyListUpdate -= SetUpQueue;
+                return;
+            }
 
         Debug.Log("No matching lobbies found, creating new");
+        LoadingScreen.Singleton.Hide(mainMenuController.MainMenuCamera);
         mainMenuController.StartLobby();
     }
 }
