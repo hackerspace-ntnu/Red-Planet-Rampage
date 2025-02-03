@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using CollectionExtensions;
-using System.Linq;
 
 public class LoadingScreen : MonoBehaviour
 {
@@ -96,9 +95,9 @@ public class LoadingScreen : MonoBehaviour
         loadingCounter = 0;
     }
 
-    public void Show(Camera transitionCamera)
+    public void Show(Camera transitionCamera, bool forceShow = false)
     {
-        if (enabled)
+        if (enabled && !forceShow)
             return;
         enabled = true;
 
@@ -119,10 +118,12 @@ public class LoadingScreen : MonoBehaviour
 
         slideMaterial.SetFloat("_Direction", isShow ? 1f : 0f);
 
-        if (isShow)
+        if (isShow && transitionCamera)
             LeanTween.value(gameObject, (value) => slideMaterial.SetFloat("_Coverage", value), -0.5f, 1.5f, 0.5f)
                 .setEaseInOutQuad()
                 .setOnComplete(ShowEntireScreen);
+        else if (isShow)
+            ShowEntireScreen();
         // Avoids animating transitions when not transitioning from a loading screen
         else if (loadingCounter < 1)
             transition.SetActive(false);

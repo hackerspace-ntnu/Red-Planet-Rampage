@@ -75,6 +75,7 @@ public class MainMenuController : MonoBehaviour
 
     [SerializeField]
     private GameObject mainMenuCamera;
+    public Camera MainMenuCamera => mainMenuCamera.GetComponent<Camera>();
 
     [SerializeField]
     private GameObject videoPlayerCamera;
@@ -361,7 +362,7 @@ public class MainMenuController : MonoBehaviour
         SelectControl(startButton);
         if (LeanTween.isTweening(aiButtonTween))
             return;
-        aiButtonTween = aIButton.gameObject.LeanMoveLocal(new Vector3(aiButtonOriginalPosition.x + 20f,0f,0f), 0.25f).setEasePunch().id;
+        aiButtonTween = aIButton.gameObject.LeanMoveLocal(new Vector3(aiButtonOriginalPosition.x + 20f, 0f, 0f), 0.25f).setEasePunch().id;
     }
 
     public void ToggleAI()
@@ -419,6 +420,14 @@ public class MainMenuController : MonoBehaviour
 
     public void FetchQueueLobbyInfo()
     {
+        LoadingScreen.Singleton.Show(null);
+        StartCoroutine(WaitAndFetchQueueLobbyInfo());
+    }
+
+    public IEnumerator WaitAndFetchQueueLobbyInfo()
+    {
+        // Let's just wait a few milliseconds just to be sure
+        yield return new WaitForSeconds(.2f);
         SteamManager.Singleton.FetchQueueLobbyInfo();
     }
 
