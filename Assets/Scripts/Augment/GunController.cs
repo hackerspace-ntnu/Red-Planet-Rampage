@@ -164,6 +164,8 @@ public class GunController : NetworkBehaviour
             isFiring = true;
             FireGun();
         }
+        // TODO REMOVE
+        else if (isFiring && triggerPressed) Debug.Log("GCGC OH NO FIRED WHILE FIRING!!!!");
     }
 
     /// <summary>
@@ -173,8 +175,11 @@ public class GunController : NetworkBehaviour
     /// <param name="fractionNormalized">Percentage of ammunition to be reloaded.</param>
     public void Reload(float fractionNormalized)
     {
+        Debug.Log("GCGC RELOAD CALLED");
         int amount = Mathf.Max(1, Mathf.FloorToInt(stats.MagazineSize * fractionNormalized));
         stats.Ammo = Mathf.Min(stats.Ammo + amount, stats.MagazineSize);
+        if (Player.identity.Body.id == "Stock")
+            isFiring = false;
         onReload?.Invoke(stats);
     }
 
@@ -256,6 +261,7 @@ public class GunController : NetworkBehaviour
 
         try
         {
+            Debug.Log("GCGC FIRING!");
             onFireStart?.Invoke(stats);
             AimAtTarget();
             // Tell server to fire
@@ -326,6 +332,7 @@ public class GunController : NetworkBehaviour
     {
         stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.MagazineSize);
         isFiring = false;
+        Debug.Log("GCGC FIRE END");
         onFireEnd?.Invoke(stats);
     }
 }
