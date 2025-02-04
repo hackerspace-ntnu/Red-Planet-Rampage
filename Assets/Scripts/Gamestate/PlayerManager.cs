@@ -99,6 +99,8 @@ public class PlayerManager : NetworkBehaviour
 
     [SerializeField]
     protected GameObject[] meshBase;
+    [SerializeField]
+    protected int[] meshIndices;
 
     [SerializeField]
     protected PlayerIK playerIK;
@@ -294,7 +296,9 @@ public class PlayerManager : NetworkBehaviour
     public void ApplyIdentity()
     {
         // Set player color
-        meshBase.ToList().ForEach(mesh => mesh.GetComponentInChildren<SkinnedMeshRenderer>().material.color = identity.color);
+        if (meshBase.Length == meshIndices.Length)
+            for (int i = 0; i < meshBase.Length; i++)
+                meshBase[i].GetComponentInChildren<SkinnedMeshRenderer>().materials[meshIndices[i]].color = identity.color;
 
         var voicePlayer = GetComponent<VoicePlayer>();
         voicePlayer.Voice = PlayerInputManagerController.Singleton.VoiceForColor(identity.color);
