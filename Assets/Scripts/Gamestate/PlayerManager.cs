@@ -1,6 +1,7 @@
 using Mirror;
 using System.Collections;
 using System.Linq;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
@@ -184,7 +185,7 @@ public class PlayerManager : NetworkBehaviour
             hudController.OnDamageTaken(healthController.CurrentHealth, healthController.MaxHealth, damage);
 
         if (info.damageType == DamageType.Explosion)
-            ScreenShake(info.damage * 0.005f);
+            ScreenShake(info.damage * 0.0075f);
 
         if (info.sourcePlayer != this)
         {
@@ -470,9 +471,15 @@ public class PlayerManager : NetworkBehaviour
             LeanTween.cancel(screenShakeTween);
             inputManager.PlayerCamera.gameObject.transform.localPosition = Vector3.zero;
         }
+        /*
         var viewDirection = inputManager.PlayerCamera.transform.up;
         screenShakeTween = inputManager.PlayerCamera.gameObject
             .LeanMoveLocal(viewDirection * amount, 0.2f).setEaseShake().id;
+        */
+        screenShakeTween = inputManager.PlayerCamera.gameObject.LeanMoveLocal(inputManager.PlayerCamera.transform.up * amount, 0.25f)
+            .setOnStart(() => inputManager.PlayerCamera.gameObject.LeanMoveLocal(inputManager.PlayerCamera.transform.right * amount, 0.25f).setEaseShake())
+            .setEaseShake()
+            .setOnComplete(() => inputManager.PlayerCamera.gameObject.transform.localPosition = Vector3.zero).id;
     }
 
     public virtual void SetLayer(int playerIndex)
