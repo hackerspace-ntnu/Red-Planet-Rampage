@@ -18,7 +18,9 @@ public class DynamiteBarrel : GunBarrel
     [SerializeField]
     private MeshProjectileController meshProjectiles;
     private SateliteUplink sateliteUplink;
-
+    // Avoids crashing game with too many particle spawners in the case of sticky + in air
+    // TODO: allow for even more by instantiating particles with a positionbuffer instead
+    private const int maxDetonatableInTotal = 10;
 
     void Start()
     {
@@ -93,12 +95,13 @@ public class DynamiteBarrel : GunBarrel
             if (isDetonatableEarly)
             {
                 var explosivePositions = meshProjectiles.ProjectilePositions;
-                explosivePositions.ToList().ForEach(position =>
-                {
-                    var dynamite = (StickyDynamite)stickyModifer.InstantiateManual(position);
-                    dynamite.Explosion.Init();
-                    activeDynamites.Add(dynamite);
-                });
+                explosivePositions.Take(Mathf.Max(maxDetonatableInTotal - activeDynamites.Count, 0))
+                    .ToList().ForEach(position =>
+                    {
+                        var dynamite = (StickyDynamite)stickyModifer.InstantiateManual(position);
+                        dynamite.Explosion.Init();
+                        activeDynamites.Add(dynamite);
+                    });
                 meshProjectiles.ClearProjectiles();
             }
             else if (sateliteUplink)
