@@ -1,12 +1,14 @@
 Shader "PostProcess/JumpFloodOutline"
 {
+    // Implementation heavily based on this article:
+    // https://bgolus.medium.com/the-quest-for-very-wide-outlines-ba82ed442cd9
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
     }
     SubShader
     {
-        Tags { "PreviewType" = "Plane" }
+        Tags { "PreviewType" = "Plane" "Queue"="Transparent" "RenderType"="Transparent" }
         Cull Off ZWrite Off ZTest Always
 
         CGINCLUDE

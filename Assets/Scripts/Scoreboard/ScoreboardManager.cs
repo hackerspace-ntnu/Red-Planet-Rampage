@@ -111,6 +111,7 @@ public class ScoreboardManager : MonoBehaviour
             // Disable player camera
             if (players[i].inputManager)
                 players[i].inputManager.PlayerCamera.enabled = false;
+            scoreboards[i].SetUIMask(true);
         }
 
         // Do not start adding crimes before the camera has finished the animation
@@ -155,6 +156,7 @@ public class ScoreboardManager : MonoBehaviour
 
             // Start next round
             yield return new WaitForSeconds(matchProgressDelay);
+            scoreboards.ForEach(scoreboard => scoreboard.SetUIMask(false));
             matchController.StartNextBidding();
         }
     }

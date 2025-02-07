@@ -42,6 +42,27 @@ MonoBehaviour:
       restoreCamera: 1
       offset: {x: 0, y: 0, z: 0, w: 0}
       cameraFieldOfView: 60
+--- !u!114 &-6152051969210058926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b91d8841bc34804478075fdd9595a3bd, type: 3}
+  m_Name: RFO
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    outlineMaterial: {fileID: 2100000, guid: 38ecff923e2883343b0e32be06b60a8d, type: 2}
+    targetLayerMask:
+      serializedVersion: 2
+      m_Bits: 3880
+    outlineColor: {r: 0, g: 0, b: 0, a: 0}
+    outlineWidth: 4
+    useSeparableAxisMethod: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -62,7 +83,8 @@ MonoBehaviour:
   - {fileID: 3994693275162390452}
   - {fileID: 7095047516156872019}
   - {fileID: -8486650985388516426}
-  m_RendererFeatureMap: 60044a010b09a766b42fb2745e00703753450cf11fac7662b6db329be45b398a
+  - {fileID: -6152051969210058926}
+  m_RendererFeatureMap: 60044a010b09a766b42fb2745e00703753450cf11fac7662b6db329be45b398a52f77d3754859faa
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}

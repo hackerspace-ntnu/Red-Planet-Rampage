@@ -144,7 +144,8 @@ public class PlayerManager : NetworkBehaviour
         aiTargetCollider.Owner = this;
         aiTargetCollider.transform.position = transform.position;
         movement = GetComponent<PlayerMovement>();
-
+        if (MatchController.Singleton)
+            MatchController.Singleton.onRoundEnd += DisableOutline;
         // TODO call other stuff that sets up player object!
     }
 
@@ -235,6 +236,8 @@ public class PlayerManager : NetworkBehaviour
         var ragdollController = GetComponent<RagdollController>();
         var force = info.force.normalized * Mathf.Log(info.damage) * deathKnockbackForceMultiplier;
         ragdollController.EnableRagdoll(force);
+        // Set ragdolls to default layer
+        SetLayerOnSubtree(gameObject, 0);
     }
 
     /// <summary>
@@ -576,6 +579,13 @@ public class PlayerManager : NetworkBehaviour
         {
             SetLayerOnSubtree(child.gameObject, layer);
         }
+    }
+
+    private void DisableOutline()
+    {
+        meshBase.ToList().ForEach(mesh => mesh.layer = 0);
+        if (gunController)
+            SetLayerOnSubtree(GunOrigin.gameObject, 0);
     }
 
     public new string ToString() => identity.ToString();

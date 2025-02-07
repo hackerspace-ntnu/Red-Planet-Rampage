@@ -229,4 +229,15 @@ public class Scoreboard : MonoBehaviour
             return $"{score}/{MatchRules.Current.MatchWinCondition.AmountForStopCondition}";
         return $"{score}";
     }
+
+    public void SetUIMask(bool isMasking)
+    {
+        // UI or default
+        var layer = isMasking ? 5 : 0;
+        gameObject.layer = layer;
+        foreach (Transform child in transform)
+        {
+            child.gameObject.layer = layer;
+        }
+    }
 }
