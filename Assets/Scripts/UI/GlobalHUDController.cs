@@ -46,8 +46,11 @@ public class GlobalHUDController : MonoBehaviour
 
     public void DisplayWinScreen(PlayerIdentity winner)
     {
-        winText.text = winner.playerName;
+        winText.text = "";
+        
         winText.color = winner.color;
         winScreen.SetActive(true);
+        LeanTween.value(winText.gameObject, (value) => winText.fontSize = value, 0f, 70f, 1.5f).setEaseInOutBounce()
+            .setOnStart(() => winText.text = winner.playerName);
     }
 }

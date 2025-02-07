@@ -320,6 +320,10 @@ public class MatchController : NetworkBehaviour
         victoryScenery.SetActive(true);
 
         victorModel.GetComponentInChildren<SkinnedMeshRenderer>().material.color = winner!.color;
+        // Set victor mesh to arbitrary jump filled outline compatible layer
+        foreach (Transform child in victorModel.transform.parent)
+            child.gameObject.layer = 8;
+
         var loserColors = PlayerInputManagerController.Singleton.PlayerColors.Where(c => c != winner!.color).ToArray().ShuffledCopy();
         foreach (var loser in loserModels.Zip(loserColors, (model, color) => (model, color)))
             loser.model.GetComponentInChildren<SkinnedMeshRenderer>().material.color = loser.color;

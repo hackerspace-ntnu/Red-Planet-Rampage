@@ -1,8 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
+// Implementation heavily based on this article:
+// https://bgolus.medium.com/the-quest-for-very-wide-outlines-ba82ed442cd9
 public class RFO : ScriptableRendererFeature
 {
     class RFOPass : ScriptableRenderPass
@@ -89,6 +92,7 @@ public class RFO : ScriptableRendererFeature
             cb.Clear();
 
             // PHASE 2: OUTLINE PROCESS INITIALIZE
+            outlineWidth = Mathf.Max(0, outlineMat.GetFloat("_OutlineWidth"), 0f);
             Color adjustedOutlineColor = outlineColor;
             adjustedOutlineColor.a *= Mathf.Clamp01(outlineWidth);
             cb.SetGlobalColor(outlineColorID, adjustedOutlineColor.linear);
@@ -109,12 +113,14 @@ public class RFO : ScriptableRendererFeature
             int numMips = Mathf.CeilToInt(Mathf.Log(outlineWidth + 1.0f, 2f));
             int jfaIter = numMips - 1;
 
-            DrawingSettings drawingSettings = CreateDrawingSettings(
-                // maybe you want to change this if you're not using forward
+            var shaderTags = new List<ShaderTagId>
+            {
+                new ShaderTagId("UniversalForward"),
                 new ShaderTagId("SRPDefaultUnlit"),
-                ref renderingData,
-                SortingCriteria.CommonOpaque
-            );
+                new ShaderTagId("TransparentForward")
+            };
+
+            DrawingSettings drawingSettings = CreateDrawingSettings(shaderTags, ref renderingData, SortingCriteria.CommonTransparent);
 
             drawingSettings.overrideMaterial = outlineMat;
             drawingSettings.overrideMaterialPassIndex = 1;
