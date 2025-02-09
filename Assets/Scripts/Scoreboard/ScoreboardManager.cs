@@ -33,7 +33,8 @@ public class ScoreboardManager : MonoBehaviour
 
     [SerializeField]
     private AudioGroup nextCrimeSound;
-
+    [SerializeField]
+    private AudioGroup victoryProgressSound;
     private AudioSource audioSource;
 
     [SerializeField]
@@ -240,5 +241,10 @@ public class ScoreboardManager : MonoBehaviour
         }
 
         StartCoroutine(ShowMatchResults());
+    }
+
+    public void PlayWinProgressNoise()
+    {
+        victoryProgressSound.Play(audioSource);
     }
 }
