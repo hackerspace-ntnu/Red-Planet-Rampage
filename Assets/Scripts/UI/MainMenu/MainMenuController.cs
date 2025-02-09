@@ -420,7 +420,9 @@ public class MainMenuController : MonoBehaviour
 
     public void FetchQueueLobbyInfo()
     {
-        LoadingScreen.Singleton.Show(null);
+        // TODO should be put back here (not in QueueMenu)
+        // after fixing whatever causes us not to be able to select map cards afterwards :/
+        // LoadingScreen.Singleton.Show(null);
         StartCoroutine(WaitAndFetchQueueLobbyInfo());
     }
 
