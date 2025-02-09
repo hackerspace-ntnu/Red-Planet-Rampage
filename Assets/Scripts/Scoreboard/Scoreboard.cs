@@ -150,6 +150,9 @@ public class Scoreboard : MonoBehaviour
         {
             progressCrosses[i].SetActive(true);
             progressCrosses[i].LeanScale(new Vector3(2f, 2f, 2f), 0.5f).setEasePunch();
+            var text = progressCrosses[i].GetComponent<TMP_Text>();
+            LeanTween.value(gameObject, (Color value) => text.color = value, Color.white, ColorPallete.Health(0.2f), 0.2f).setEasePunch();
+            ScoreboardManager.Singleton.PlayWinProgressNoise();
             yield return new WaitForSeconds(delayTime);
         }
         yield return new WaitForSeconds(scoreboardManager.matchProgressDelay - delayTime * 3);
@@ -204,6 +207,8 @@ public class Scoreboard : MonoBehaviour
             yield return new WaitForSeconds(delayTime);
             scoreText.text = FormatScore(previousScore + i);
             scoreText.gameObject.LeanScale(1.5f * Vector3.one, delayTime).setEasePunch();
+            LeanTween.value(gameObject, (Color value) => scoreText.color = value, Color.white, ColorPallete.Health(0.2f), 0.2f).setEasePunch();
+            ScoreboardManager.Singleton.PlayWinProgressNoise();
         }
 
         // Show hint below current score
