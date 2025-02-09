@@ -106,6 +106,12 @@ public class LoadingScreen : MonoBehaviour
 
     private void SetTransition(Camera transitionCamera, bool isShow)
     {
+        if (isShow && transitionCamera == null)
+        {
+            ShowEntireScreen();
+            return;
+        }
+
         var transition = transform.GetChild(1).gameObject;
         var slideMaterial = transition.GetComponent<Image>().material;
         slideMaterial.SetFloat("_Coverage", -0.5f);
