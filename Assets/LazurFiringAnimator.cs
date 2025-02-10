@@ -7,6 +7,8 @@ public class LazurFiringAnimator : AugmentAnimator
 
     public AnimationEvent OnChargeStart;
 
+    public bool IsDisabledInReload = false;
+
     public override void OnInitialize(GunStats stats) { }
 
     public override void OnReload(GunStats stats) { }
@@ -28,6 +30,8 @@ public class LazurFiringAnimator : AugmentAnimator
 
     public override void OnFire(GunStats stats)
     {
+        if (IsDisabledInReload && stats.Ammo <= 1)
+            return;
         animator.SetTrigger("Fire");
     }
 }

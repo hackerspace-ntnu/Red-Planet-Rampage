@@ -50,6 +50,8 @@ public class LazurController : ProjectileController
     private void Start()
     {
         Vfx.SetGraphicsBuffer("StartEndPositions", encoder.StartEndPositionsBuffer);
+        if (gunController && gunController.GetComponentInChildren<Revolver>())
+            animator.IsDisabledInReload = true;
     }
 
     private void FireLazur()
