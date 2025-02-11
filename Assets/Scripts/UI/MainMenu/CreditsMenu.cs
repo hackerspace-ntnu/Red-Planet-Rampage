@@ -1,26 +1,34 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 public class CreditsMenu : MonoBehaviour
 {
     [SerializeField] private MainMenuController mainMenuController;
 
-    [SerializeField] private VerticalLayoutGroup content;
+    [SerializeField] private RectTransform content;
 
-    [SerializeField] private float speed = 10;
+    [SerializeField] private RectTransform textContent;
 
     [SerializeField] private RectTransform lastElement;
 
-    private float height = 5000;
+    [SerializeField] private float speed = 10;
+
     private int tween;
-    private int initialTopPadding;
+    private float height;
+    private float initialInset;
 
     private InputManager inputManager;
 
     private void OnEnable()
     {
+        if (inputManager)
+        {
+            inputManager.onCancel += Back;
+            inputManager.onSelect += Back;
+            inputManager.onClick += Back;
+        }
+
         StartCoroutine(StartAnimation());
     }
 
@@ -28,8 +36,9 @@ public class CreditsMenu : MonoBehaviour
     {
         // Wait until position of last element can be determined.
         yield return new WaitForEndOfFrame();
-        initialTopPadding = content.padding.top;
-        height = Mathf.Abs(lastElement.anchoredPosition.y + lastElement.sizeDelta.y * .5f);
+        initialInset = content.anchorMin.y;
+        var diffBetweenContentAndText = Mathf.Abs(content.anchoredPosition.y - textContent.anchoredPosition.y);
+        height = diffBetweenContentAndText + Mathf.Abs(lastElement.anchoredPosition.y + lastElement.sizeDelta.y * .5f);
 
         tween = LeanTween.sequence()
             .append(1)
@@ -45,23 +54,18 @@ public class CreditsMenu : MonoBehaviour
             LeanTween.cancel(tween);
         // Doubly cancel since the first doesn't seem to work (?)
         LeanTween.cancel(content.gameObject);
-        content.padding.Remove(new Rect());
-        content.padding.top = initialTopPadding;
+        content.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, initialInset, content.rect.height);
     }
 
     private void SetPosition(float t)
     {
-        var topPadding = Mathf.RoundToInt(initialTopPadding - height * t);
-        content.padding = new RectOffset(content.padding.left, content.padding.right, topPadding,
-            content.padding.bottom);
+        var inset = Mathf.RoundToInt(initialInset - height * t);
+        content.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, inset, content.rect.height);
     }
 
     public void SetPlayerInput(InputManager inputManager)
     {
         this.inputManager = inputManager;
-        inputManager.onCancel += Back;
-        inputManager.onSelect += Back;
-        inputManager.onClick += Back;
     }
 
     private void Back(InputAction.CallbackContext ctx)
