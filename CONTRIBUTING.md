@@ -40,8 +40,8 @@ Add `-force-vulkan` to command line arguments to avoid glitched scene view due t
 ## Building the game
 
 There is a bug in this Unity version that gives build errors for missing
-"System.Diagnostics.Tracing". This is resolved by manually downgrading
-the version in "bcl.exe.config". The dependency should be replaced with
+`System.Diagnostics.Tracing`. This is resolved by manually downgrading
+the version in `Library/PackageCache/com.unity.burst@1.8.4/.Runtime/bcl.exe.config`. The dependency should be replaced with
 the following:
 
 ```
