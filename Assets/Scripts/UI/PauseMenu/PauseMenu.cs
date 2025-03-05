@@ -14,6 +14,9 @@ public class PauseMenu : MonoBehaviour
     [SerializeField]
     private Button buttonToFocus;
 
+    [SerializeField]
+    private GunInfo gunInfo;
+
     /// <summary>
     /// Set in Start so not quite a singleton.
     /// </summary>
@@ -43,6 +46,18 @@ public class PauseMenu : MonoBehaviour
     {
         panel.gameObject.SetActive(true);
         EventSystem.current.SetSelectedGameObject(buttonToFocus.gameObject);
+
+        var players = RPRNetworkManager.LocalPlayerInstances.ToList();
+
+        if (players.Count == 1)
+        {
+            gunInfo.gameObject.SetActive(true);
+            gunInfo.UpdateInfo(players.First().identity);
+        }
+        else
+        {
+            gunInfo.gameObject.SetActive(false);
+        }
 
         // TODO: Make mouse visible and interact with buttons.
         // To achieve this the globalHUD needs to assign it's canvas to the player's camera.
