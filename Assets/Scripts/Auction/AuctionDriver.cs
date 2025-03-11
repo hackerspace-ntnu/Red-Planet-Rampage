@@ -167,7 +167,10 @@ public class AuctionDriver : NetworkBehaviour
         if (hasAuctionStarted && IsAuctionYielded())
             StartCoroutine(nameof(WaitAndTryAuctionEnd));
         else
+        {
             StopCoroutine(nameof(WaitAndTryAuctionEnd));
+            isYieldCountdownOn = false;
+        }
     }
 
     private bool IsAuctionYielded()
