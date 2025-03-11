@@ -2,6 +2,7 @@ using CollectionExtensions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
 using VectorExtensions;
@@ -280,7 +281,7 @@ public class AIManager : PlayerManager
             // TODO do not default to shooting target??? what's this for?
             aiMovement.Target = ShootingTarget;
             var isStrafeDistance = closestDistance < 10f;
-            aiMovement.enabled = isStrafeDistance;
+            aiMovement.enabled = isStrafeDistance && !agent.currentOffMeshLinkData.activated;
 
             if (ShootingTarget != null)
             {
@@ -371,9 +372,19 @@ public class AIManager : PlayerManager
 
     private void AnimateJump()
     {
-        animator.SetBool("Crouching", true);
-        animator.SetTrigger("Leap");
-        StartCoroutine(AnimateJumpCurve(0.6f));
+        if (agent.isOnOffMeshLink)
+        {
+            OffMeshLinkData offMeshLinkData = agent.currentOffMeshLinkData;
+
+            if (offMeshLinkData.activated)
+            {
+                animator.SetBool("Crouching", true);
+                animator.SetTrigger("Leap");
+                var distance = Vector3.Distance(offMeshLinkData.startPos, offMeshLinkData.endPos);
+                StartCoroutine(AnimateJumpCurve(distance * 0.1f));
+            }
+            
+        }
     }
 
     private void AnimateStopCrouch()
@@ -401,6 +412,8 @@ public class AIManager : PlayerManager
         if (agent.enabled)
             agent.CompleteOffMeshLink();
         onLinkEnd?.Invoke();
+        // Must look manually due to lookfortargets cooldown and ignoring other players while in a jump!
+        FindPlayers();
     }
 
     private void Update()
