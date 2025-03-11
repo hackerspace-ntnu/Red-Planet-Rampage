@@ -16,7 +16,7 @@ public class AuctionDriver : NetworkBehaviour
 {
     [SerializeField]
     private float biddingBeginDelay = 2f;
-    private bool isAuctionStart = false;
+    private bool hasAuctionStarted = false;
 
     [SerializeField]
     private BiddingPlatform[] biddingPlatforms;
@@ -42,7 +42,6 @@ public class AuctionDriver : NetworkBehaviour
     private BiddingPlatform lastExtendedAuction;
 
     private HashSet<PlayerManager> playersInAuction;
-    private Dictionary<PlayerManager, int> chipsInPlay = new Dictionary<PlayerManager, int>();
 
     [SerializeField]
     private PlayerFactory playerFactory;
@@ -83,8 +82,6 @@ public class AuctionDriver : NetworkBehaviour
         yieldingPlayers = new();
     }
 
-    // Stages
-    // BiddingStage contains a list of items (scriptableobjects)
     private void Start()
     {
         StartCoroutine(WaitAndStartAuction());
@@ -130,7 +127,7 @@ public class AuctionDriver : NetworkBehaviour
     {
         yield return new WaitForSeconds(biddingBeginDelay);
         cameraAnimator.SetTrigger("start");
-        isAuctionStart = true;
+        hasAuctionStarted = true;
     }
 
     [Server]
@@ -139,8 +136,23 @@ public class AuctionDriver : NetworkBehaviour
         biddingPlatforms.ToList().ForEach(platform => platform.ForceEndAuction());
     }
 
+    #region Yielding
+
+    [Server]
     public void AddYieldingPlayer(PlayerManager player)
     {
+        if (yieldingPlayers.Contains(player))
+            return;
+
+        AddYieldingPlayerRpc(player.id);
+    }
+
+    [ClientRpc]
+    private void AddYieldingPlayerRpc(uint id)
+    {
+        if (!RPRNetworkManager.PlayerInstanceByID.TryGetValue(id, out var player))
+            return;
+
         if (yieldingPlayers.Contains(player))
             return;
 
@@ -152,7 +164,7 @@ public class AuctionDriver : NetworkBehaviour
 
         OnYieldChange?.Invoke();
 
-        if (isAuctionStart && IsAuctionYielded())
+        if (hasAuctionStarted && IsAuctionYielded())
             StartCoroutine(nameof(WaitAndTryAuctionEnd));
         else
             StopCoroutine(nameof(WaitAndTryAuctionEnd));
@@ -194,17 +206,35 @@ public class AuctionDriver : NetworkBehaviour
             StopAuctionEarly();
     }
 
+    [Server]
     public void RemoveYieldingPlayer(PlayerManager player)
     {
+        if (!yieldingPlayers.Contains(player))
+            return;
+        RemoveYieldingPlayerRpc(player.id);
+    }
+
+    [ClientRpc]
+    private void RemoveYieldingPlayerRpc(uint id)
+    {
+        if (!RPRNetworkManager.PlayerInstanceByID.TryGetValue(id, out var player))
+            return;
+
         if (!yieldingPlayers.Remove(player))
             return;
+
         OnYieldCountChange?.Invoke();
+
         if (IsAuctionYielded())
             return;
+
+        // Abort if not yielded
         StopCoroutine(nameof(WaitAndTryAuctionEnd));
         isYieldCountdownOn = false;
         OnYieldChange?.Invoke();
     }
+
+    #endregion Yielding
 
     public void ScreenShake()
     {
