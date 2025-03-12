@@ -40,6 +40,8 @@ public class AIManager : PlayerManager
     [SerializeField]
     private AnimationCurve jumpYoffset;
     [SerializeField]
+    private AnimationCurve jumpYoffsetDropdown;
+    [SerializeField]
     private float itemStoppingDistance = 0.5f;
     [SerializeField]
     private float shootingStoppingDistance = 5f;
@@ -52,6 +54,7 @@ public class AIManager : PlayerManager
     private NavMeshEvent onLinkEnd;
     private AmmoBoxCollector ammoBoxCollector;
     private Coroutine airDisablingRoutine;
+    private bool isJumpCooldown = false;
 
     private void Start()
     {
@@ -281,7 +284,7 @@ public class AIManager : PlayerManager
             // TODO do not default to shooting target??? what's this for?
             aiMovement.Target = ShootingTarget;
             var isStrafeDistance = closestDistance < 10f;
-            aiMovement.enabled = isStrafeDistance && !agent.currentOffMeshLinkData.activated;
+            aiMovement.enabled = isStrafeDistance && !agent.currentOffMeshLinkData.activated && !isJumpCooldown;
 
             if (ShootingTarget != null)
             {
@@ -376,15 +379,24 @@ public class AIManager : PlayerManager
         {
             OffMeshLinkData offMeshLinkData = agent.currentOffMeshLinkData;
 
-            if (offMeshLinkData.activated)
+            if (offMeshLinkData.activated && !isJumpCooldown)
             {
-                animator.SetBool("Crouching", true);
-                animator.SetTrigger("Leap");
                 var distance = Vector3.Distance(offMeshLinkData.startPos, offMeshLinkData.endPos);
-                StartCoroutine(AnimateJumpCurve(distance * 0.1f));
+                if (offMeshLinkData.linkType != OffMeshLinkType.LinkTypeDropDown)
+                {
+                    animator.SetBool("Crouching", true);
+                    animator.SetTrigger("Leap");
+                }
+                StartCoroutine(AnimateJumpCurve(distance * 0.1f, offMeshLinkData.linkType));
             }
-            
         }
+    }
+
+    private IEnumerator JumpCoolDown()
+    {
+        isJumpCooldown = true;
+        yield return new WaitForSeconds(1f);
+        isJumpCooldown = false;
     }
 
     private void AnimateStopCrouch()
@@ -392,7 +404,7 @@ public class AIManager : PlayerManager
         animator.SetBool("Crouching", false);
     }
 
-    IEnumerator AnimateJumpCurve(float duration)
+    IEnumerator AnimateJumpCurve(float duration, OffMeshLinkType jumpType)
     {
         if (!agent.enabled)
             yield return null;
@@ -401,9 +413,11 @@ public class AIManager : PlayerManager
         Vector3 endPos = data.endPos + Vector3.up * agent.baseOffset;
         transform.LookAt(new Vector3(endPos.x, transform.position.y, endPos.z), transform.up);
         float normalizedTime = 0.0f;
-        while (normalizedTime < 1.0f)
+        while (normalizedTime < 1.0f && Vector3.Distance(transform.position,data.endPos) > 0.25f)
         {
-            float yOffset = jumpYoffset.Evaluate(normalizedTime);
+            float yOffset = jumpType == OffMeshLinkType.LinkTypeDropDown 
+                ? jumpYoffsetDropdown.Evaluate(normalizedTime)
+                : jumpYoffset.Evaluate(normalizedTime);
             agent.transform.position = Vector3.Lerp(startPos, endPos, normalizedTime) + yOffset * Vector3.up;
             normalizedTime += Time.deltaTime / duration;
             yield return null;
