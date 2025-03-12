@@ -54,7 +54,7 @@ public class AIManager : PlayerManager
     private NavMeshEvent onLinkEnd;
     private AmmoBoxCollector ammoBoxCollector;
     private Coroutine airDisablingRoutine;
-    private bool isJumpCooldown = false;
+    private bool hasInaccurateAugment = false;
 
     private void Start()
     {
@@ -150,6 +150,9 @@ public class AIManager : PlayerManager
         var barrel = ChoosePart(identity.Barrel, identity.Barrels, StaticInfo.Singleton.StartingBarrel);
         var extension = ChoosePart(identity.Extension, identity.Extensions, StaticInfo.Singleton.StartingExtension);
 
+        if (extension != null)
+            hasInaccurateAugment = extension.id == "Rubber";
+
         var gun = GunFactory.InstantiateGunAI(body, barrel, extension, this, offset);
         gunController = gun.GetComponent<GunController>();
         gunController.Initialize();
@@ -220,8 +223,10 @@ public class AIManager : PlayerManager
     {
         if (!ShootingTarget)
             return;
+
+        var badAimMultiplier = hasInaccurateAugment ? 4f : 1f;
         gunController.target = ShootingTarget.position
-            + new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f))
+            + new Vector3(Random.Range(-1f, 1f) * badAimMultiplier, 0, Random.Range(-1f, 1f) * badAimMultiplier)
                 * (transform.position - ShootingTarget.position).magnitude * 0.1f;
     }
 
@@ -284,7 +289,7 @@ public class AIManager : PlayerManager
             // TODO do not default to shooting target??? what's this for?
             aiMovement.Target = ShootingTarget;
             var isStrafeDistance = closestDistance < 10f;
-            aiMovement.enabled = isStrafeDistance && !agent.currentOffMeshLinkData.activated && !isJumpCooldown;
+            aiMovement.enabled = isStrafeDistance && !agent.currentOffMeshLinkData.activated;
 
             if (ShootingTarget != null)
             {
@@ -379,7 +384,7 @@ public class AIManager : PlayerManager
         {
             OffMeshLinkData offMeshLinkData = agent.currentOffMeshLinkData;
 
-            if (offMeshLinkData.activated && !isJumpCooldown)
+            if (offMeshLinkData.activated)
             {
                 var distance = Vector3.Distance(offMeshLinkData.startPos, offMeshLinkData.endPos);
                 if (offMeshLinkData.linkType != OffMeshLinkType.LinkTypeDropDown)
@@ -390,13 +395,6 @@ public class AIManager : PlayerManager
                 StartCoroutine(AnimateJumpCurve(distance * 0.1f, offMeshLinkData.linkType));
             }
         }
-    }
-
-    private IEnumerator JumpCoolDown()
-    {
-        isJumpCooldown = true;
-        yield return new WaitForSeconds(1f);
-        isJumpCooldown = false;
     }
 
     private void AnimateStopCrouch()
