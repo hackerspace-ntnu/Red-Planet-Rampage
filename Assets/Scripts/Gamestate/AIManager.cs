@@ -55,6 +55,7 @@ public class AIManager : PlayerManager
     private AmmoBoxCollector ammoBoxCollector;
     private Coroutine airDisablingRoutine;
     private bool isJumpCooldown = false;
+    private bool hasInaccurateAugment = false;
 
     private void Start()
     {
@@ -150,6 +151,9 @@ public class AIManager : PlayerManager
         var barrel = ChoosePart(identity.Barrel, identity.Barrels, StaticInfo.Singleton.StartingBarrel);
         var extension = ChoosePart(identity.Extension, identity.Extensions, StaticInfo.Singleton.StartingExtension);
 
+        if (extension != null)
+            hasInaccurateAugment = extension.id == "Rubber";
+
         var gun = GunFactory.InstantiateGunAI(body, barrel, extension, this, offset);
         gunController = gun.GetComponent<GunController>();
         gunController.Initialize();
@@ -220,8 +224,10 @@ public class AIManager : PlayerManager
     {
         if (!ShootingTarget)
             return;
+
+        var badAimMultiplier = hasInaccurateAugment ? 4f : 1f;
         gunController.target = ShootingTarget.position
-            + new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f))
+            + new Vector3(Random.Range(-1f, 1f) * badAimMultiplier, 0, Random.Range(-1f, 1f) * badAimMultiplier)
                 * (transform.position - ShootingTarget.position).magnitude * 0.1f;
     }
 
