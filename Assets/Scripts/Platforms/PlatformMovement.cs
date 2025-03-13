@@ -7,6 +7,9 @@ public class PlatformMovement : NetworkBehaviour
     public List<Transform> routepoints;
 
     [SerializeField]
+    private float forcePerSpeed = 10;
+
+    [SerializeField]
     private float maxSpeed = 5;
 
     [SerializeField]
@@ -20,6 +23,9 @@ public class PlatformMovement : NetworkBehaviour
 
     private int nextRoutepointIndex;
     private float travelDistance;
+
+    private Vector3 currentDirection;
+    private float currentSpeed;
 
     private void Start()
     {
@@ -46,13 +52,14 @@ public class PlatformMovement : NetworkBehaviour
     private void MovePlatform()
     {
         float currentDistance = Vector3.Distance(routepoints[nextRoutepointIndex].transform.position, transform.position);
+        currentDirection = (routepoints[nextRoutepointIndex].transform.position - transform.position).normalized;
 
         // Smoothly decelerate/accelerate at endpoints
         var distanceFromClosesEndpoint = Mathf.Min(currentDistance, Mathf.Abs(travelDistance - currentDistance));
-        var moveSpeed = Mathf.Lerp(minSpeed, maxSpeed, distanceFromClosesEndpoint / accelerationDistance);
+        currentSpeed = Mathf.Lerp(minSpeed, maxSpeed, distanceFromClosesEndpoint / accelerationDistance);
 
         transform.position = Vector3.MoveTowards(transform.position, routepoints[nextRoutepointIndex].transform.position,
-            moveSpeed * Time.deltaTime);
+            currentSpeed * Time.deltaTime);
 
         if (currentDistance <= 0)
         {
@@ -65,20 +72,17 @@ public class PlatformMovement : NetworkBehaviour
         nextRoutepointIndex = 0;
     }
 
-    private void OnTriggerEnter(Collider other)
+
+    private void OnTriggerStay(Collider other)
     {
-        if (!other.gameObject.TryGetComponent(out PlayerManager playerManager))
+        // Only local human players should get the effect...
+        if (!other.gameObject.TryGetComponent(out PlayerManager playerManager) || !playerManager.inputManager)
             return;
 
-        // Only set transform locally
-        if (playerManager.inputManager)
-            other.transform.SetParent(transform);
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (!other.gameObject.TryGetComponent(out PlayerManager playerManager))
+        if (!other.gameObject.TryGetComponent<Rigidbody>(out var rigidbody))
             return;
-        other.transform.SetParent(null);
+
+        var force = currentSpeed * forcePerSpeed * currentDirection;
+        rigidbody.AddForce(force, ForceMode.Acceleration);
     }
 }
