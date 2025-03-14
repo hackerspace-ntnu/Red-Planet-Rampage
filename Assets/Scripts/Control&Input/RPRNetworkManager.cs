@@ -888,6 +888,8 @@ public class RPRNetworkManager : NetworkManager
 
         playerManager.ApplyIdentity();
 
+        Debug.Log($"Finished initializing player {playerDetails.id}");
+
         // This ensures that behaviours on the gun have identities.
         // SHOULD be safe to initialize them here as this is at roughly the same point on all clients
         player.GetComponent<NetworkIdentity>().InitializeNetworkBehaviours();
@@ -898,6 +900,8 @@ public class RPRNetworkManager : NetworkManager
         }
 
         playerInstances[player.id] = player;
+
+        Debug.Log($"Finished registering player {playerDetails.id}");
     }
 
     #endregion
