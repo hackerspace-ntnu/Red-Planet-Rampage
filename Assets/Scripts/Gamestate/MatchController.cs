@@ -214,6 +214,7 @@ public class MatchController : NetworkBehaviour
     [Server]
     private void EndActiveRound()
     {
+        Debug.Log("omg nei fredrik stopp (end active round fra server)");
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
         EndActiveRoundRpc(LastRound.SummarizeRound());
     }
@@ -221,6 +222,7 @@ public class MatchController : NetworkBehaviour
     [ClientRpc]
     private void EndActiveRoundRpc(NetworkRound serverRound)
     {
+        Debug.Log("end active round client");
         rounds[^1].UpdateFromSummary(serverRound);
 
         isRoundInProgress = false;
