@@ -39,10 +39,14 @@ public class SolarBody : GunBody
     [SerializeField]
     private AudioGroup chargeDown;
 
-    public override void Start()
+    public void Start()
     {
         meshRenderer.materials[solarPanelMaterialIndex] = Instantiate(meshRenderer.materials[solarPanelMaterialIndex]);
         solarPanelMaterial = meshRenderer.materials[solarPanelMaterialIndex];
+    }
+
+    public override void Attach(GunController gunController)
+    {
         GameObject mainLight = GameObject.FindGameObjectsWithTag("MainLight")[0];
         globalLightDirection = mainLight ? mainLight.transform : FindAnyObjectByType<Light>().transform;
 
@@ -52,13 +56,20 @@ public class SolarBody : GunBody
 
         if (!gunController.Player)
             return;
-        playerHandRight.SetPlayer(gunController.Player);
+        playerHandRight.Subscribe(gunController.Player);
         playerHandRight.gameObject.SetActive(true);
-        playerHandLeft.SetPlayer(gunController.Player);
+        playerHandLeft.Subscribe(gunController.Player);
         playerHandLeft.gameObject.SetActive(true);
         audioSource = GetComponent<AudioSource>();
     }
 
+    public override void Detach(GunController gunController)
+    {
+        if (!gunController.Player)
+            return;
+        playerHandRight.Unsubscribe(gunController.Player);
+        playerHandLeft.Unsubscribe(gunController.Player);
+    }
 
     protected override void Reload(GunStats gunStats)
     {

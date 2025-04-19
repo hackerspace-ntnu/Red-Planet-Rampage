@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -22,9 +21,8 @@ public class DynamiteBarrel : GunBarrel
     // TODO: allow for even more by instantiating particles with a positionbuffer instead
     private const int maxDetonatableInTotal = 10;
 
-    void Start()
+    public override void Attach(GunController gunController)
     {
-        gunController = transform.parent.GetComponent<GunController>();
         if (!gunController || !gunController.Player)
             return;
 
@@ -123,22 +121,10 @@ public class DynamiteBarrel : GunBarrel
 
     private void OnDeath(PlayerManager killer, PlayerManager victim, DamageInfo info)
     {
-        StopAllCoroutines();
-        if (!gunController || !gunController.Player)
-            return;
-
-        activeDynamites.ForEach(dynamite => dynamite.gameObject.SetActive(false));
-
-        stickyModifer.OnStuckToTarget -= AddDynamite;
-
-        if (gunController.Player is not AIManager && gunController.Player.inputManager)
-        {
-            gunController.Player.inputManager.onZoomPerformed -= OnZoom;
-            gunController.Player.GetComponent<PlayerMovement>().ReEnableZoom();
-        }
+        Detach(gunController);
     }
 
-    private void OnDestroy()
+    public override void Detach(GunController gunController)
     {
         StopAllCoroutines();
         if (!gunController || !gunController.Player || !gunController.Player.IsAlive)

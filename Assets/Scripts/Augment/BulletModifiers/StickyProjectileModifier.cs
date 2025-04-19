@@ -55,8 +55,7 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
     {
         projectile.OnColliderHit -= StickToTarget;
         OnStuckToTarget = null;
-        stuckObjects.Flush();
-        stuckObjects = null;
+        OnDestroy();
     }
 
     public void StickToTarget(RaycastHit hit, ref ProjectileState state)
@@ -64,8 +63,8 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
         if (!(affectedLayers == (affectedLayers | (1 << hit.collider.gameObject.layer))))
             return;
 
-        var stuck = isDespawnedAfterTime ? 
-            stuckObjects.GetAndReturnLater(stuckLifeTime) 
+        var stuck = isDespawnedAfterTime ?
+            stuckObjects.GetAndReturnLater(stuckLifeTime)
                 : stuckObjects.Get();
 
         stuck.transform.position = hit.ClosestPoint(state.oldPosition);
@@ -91,10 +90,7 @@ public class StickyProjectileModifier : MonoBehaviour, ProjectileModifier
 
     private void OnDestroy()
     {
-        if (stuckObjects == null)
-            return;
-
-        stuckObjects.Flush();
+        stuckObjects?.Flush();
         stuckObjects = null;
     }
 }

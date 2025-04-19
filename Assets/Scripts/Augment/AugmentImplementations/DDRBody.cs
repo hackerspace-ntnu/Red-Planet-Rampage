@@ -71,52 +71,64 @@ public class DDRBody : GunBody
     private AudioSource audioSource;
     private InputManager inputManager;
 
-    public override void Start()
+    private void Start()
     {
         meshRenderer.materials[screenMaterialIndex] = Instantiate(meshRenderer.materials[screenMaterialIndex]);
         ddrMaterial = meshRenderer.materials[screenMaterialIndex];
         precisionText.enabled = false;
+    }
 
+    public override void Attach(GunController gunController)
+    {
         musicPace = 60f / MusicTrackManager.Singleton.BeatsPerMinute;
         var secondsPerArrow = MusicTrackManager.Singleton.BeatsPerBar * musicPace;
         secondsPerUnitHeight = secondsPerArrow / (targetHeight - startHeight);
 
-        gunController = transform.parent.GetComponent<GunController>();
-        if (!gunController)
+        if (!(gunController.Player && gunController.Player.inputManager))
             return;
+        inputManager = gunController.Player.inputManager;
+        inputManager.onFirePerformed += Fire;
+        inputManager.onMovePerformed += ArrowSelect;
 
-        if (gunController.Player && gunController.Player.inputManager)
-        {
-            inputManager = gunController.Player.inputManager;
-            inputManager.onFirePerformed += Fire;
-            inputManager.onMovePerformed += ArrowSelect;
+        var delay = (float)(MusicTrackManager.Singleton.IsfadingOutPreviousTrack
+            ? MusicTrackManager.Singleton.TrackOffset
+            : secondsPerArrow - (MusicTrackManager.Singleton.TimeSinceTrackStart % secondsPerArrow));
 
-            var delay = (float)(MusicTrackManager.Singleton.IsfadingOutPreviousTrack
-                ? MusicTrackManager.Singleton.TrackOffset
-                : secondsPerArrow - (MusicTrackManager.Singleton.TimeSinceTrackStart % secondsPerArrow));
+        PickNewTargetDirection();
 
-            PickNewTargetDirection();
+        arrowMoverTween = LeanTween.value(gameObject, SetArrowHeigth, startHeight, screenHeight, secondsPerUnitHeight * (screenHeight - startHeight))
+            .setDelay(delay)
+            .setRepeat(-1).id;
 
-            arrowMoverTween = LeanTween.value(gameObject, SetArrowHeigth, startHeight, screenHeight, secondsPerUnitHeight * (screenHeight - startHeight))
-                .setDelay(delay)
-                .setRepeat(-1).id;
+        screenPulseAnimatorTween = LeanTween.value(gameObject, SetBackgroundZoom, 0.5f, 1.5f, musicPace)
+            .setDelay(delay)
+            .setLoopPingPong()
+            .setOnComplete(
+            () => animator.OnFire(gunController.stats)).id;
 
-            screenPulseAnimatorTween = LeanTween.value(gameObject, SetBackgroundZoom, 0.5f, 1.5f, musicPace)
-                .setDelay(delay)
-                .setLoopPingPong()
-                .setOnComplete(
-                () => animator.OnFire(gunController.stats)).id;
+        animator.OnInitialize(gunController.stats);
 
-            animator.OnInitialize(gunController.stats);
+        playerHandLeft.Subscribe(gunController.Player);
+        playerHandLeft.gameObject.SetActive(true);
+        playerHandRight.Subscribe(gunController.Player);
+        playerHandRight.gameObject.SetActive(true);
 
-            playerHandLeft.SetPlayer(gunController.Player);
-            playerHandLeft.gameObject.SetActive(true);
-            playerHandRight.SetPlayer(gunController.Player);
-            playerHandRight.gameObject.SetActive(true);
-
-            audioSource = GetComponent<AudioSource>();
-        }
+        audioSource = GetComponent<AudioSource>();
     }
+
+    public override void Detach(GunController gunController)
+    {
+        if (!gunController.Player)
+            return;
+        playerHandRight.Unsubscribe(gunController.Player);
+        playerHandLeft.Unsubscribe(gunController.Player);
+
+        if (!inputManager)
+            return;
+        inputManager.onFirePerformed -= Fire;
+        inputManager.onMovePerformed -= ArrowSelect;
+    }
+
 
     private void Update()
     {
@@ -325,14 +337,5 @@ public class DDRBody : GunBody
         var oldDirection = arrowDirection;
         arrowDirection = (ArrowDirection)Random.Range(0, 4);
         AnimateTargetArrowRotation(oldDirection, arrowDirection);
-    }
-
-    private void OnDestroy()
-    {
-        if (!inputManager)
-            return;
-
-        inputManager.onFirePerformed -= Fire;
-        inputManager.onMovePerformed -= ArrowSelect;
     }
 }

@@ -12,41 +12,35 @@ public class PortalExtensionController : GunExtension
 
     private Transform portalMover;
 
-    private GunController gunController;
-
     private Transform playerView;
     private InputManager inputManager;
 
     [SerializeField]
     private LayerMask validPortalSurfaceColliders, validAimColliders;
 
-    private void Start()
+    public override void Attach(GunController gunController)
     {
-        if (!gunController)
-            gunController = GetComponentInParent<GunController>();
-
-        if (gunController != null)
-        {
-            gunController.AimCorrectionEnabled = false;
-            inputManager = GetComponentInParent<PlayerManager>().inputManager;
-            if (inputManager)
-                playerView = inputManager.transform;
-        }
+        gunController.AimCorrectionEnabled = false;
+        inputManager = gunController.Player ? gunController.Player.inputManager : null;
+        if (inputManager)
+            playerView = inputManager.transform;
     }
 
-    private void OnDestroy()
+    public override void Detach(GunController gunController)
     {
-        if (gunController)
-            gunController.AimCorrectionEnabled = true;
+        gunController.AimCorrectionEnabled = true;
+    }
+
+    private new void OnDestroy()
+    {
+        base.OnDestroy();
         if (portalMover)
             Destroy(portalMover.gameObject);
     }
 
-
     private void MovePortal()
     {
-        RaycastHit hit;
-        if (Physics.Raycast(playerView.position, playerView.forward, out hit, 200, this.validPortalSurfaceColliders))
+        if (Physics.Raycast(playerView.position, playerView.forward, out RaycastHit hit, 200, this.validPortalSurfaceColliders))
         {
             portalMover.rotation = Quaternion.LookRotation(-hit.normal, Vector3.up);
             portalMover.position = hit.point + 0.9f * hit.normal;

@@ -15,25 +15,25 @@ public class AmmoBoxBody : GunBody
     [SerializeField]
     private PlayerHand playerHandRight;
 
-    public override void Start()
+    public override void Attach(GunController gunController)
     {
-        gunController = transform.parent.GetComponent<GunController>();
-        if (!gunController)
-            return;
         gunController.onFireStart += Reload;
         StartCoroutine(SetClosestAmmoBox());
         if (!gunController.Player)
             return;
-        playerHandRight.SetPlayer(gunController.Player);
+        playerHandRight.Subscribe(gunController.Player);
         playerHandRight.gameObject.SetActive(true);
-        playerHandLeft.SetPlayer(gunController.Player);
+        playerHandLeft.Subscribe(gunController.Player);
         playerHandLeft.gameObject.SetActive(true);
     }
 
-    private void OnDestroy()
+    public override void Detach(GunController gunController)
     {
-        if (gunController)
-            gunController.onFireStart -= Reload;
+        gunController.onFireStart -= Reload;
+        if (!gunController.Player)
+            return;
+        playerHandRight.Unsubscribe(gunController.Player);
+        playerHandLeft.Unsubscribe(gunController.Player);
     }
 
     private IEnumerator SetClosestAmmoBox()

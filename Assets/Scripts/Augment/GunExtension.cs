@@ -6,6 +6,23 @@ public class GunExtension : Augment
     [SerializeField]
     private GameObject model;
 
+    protected GunController gunController;
+
+    protected void Awake()
+    {
+        gunController = transform.parent.GetComponent<GunController>();
+    }
+
+    public override void Attach(GunController gunController) { }
+
+    public override void Detach(GunController gunController) { }
+
+    protected void OnDestroy()
+    {
+        if (gunController)
+            Detach(gunController);
+    }
+
     /// <summary>
     /// Attaches the extension model(s) to each of the attachment points of the barrel.
     /// Required since a barrel can have multiple outputs (minigun).

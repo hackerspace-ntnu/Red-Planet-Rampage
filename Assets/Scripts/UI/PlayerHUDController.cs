@@ -342,7 +342,17 @@ public class PlayerHUDController : MonoBehaviour
         crosshair.rectTransform.anchoredPosition = (new Vector2(halfWidth * x, halfHeight * y));
     }
 
-    public void HitAnimation(HitboxController other, ref ProjectileState state)
+    public void Attach(GunController gunController)
+    {
+        gunController.projectile.OnHitboxCollision += HitAnimation;
+    }
+
+    public void Detach(GunController gunController)
+    {
+        gunController.projectile.OnHitboxCollision -= HitAnimation;
+    }
+
+    private void HitAnimation(HitboxController other, ref ProjectileState state)
     {
         if (LeanTween.isTweening(hitTween))
         {

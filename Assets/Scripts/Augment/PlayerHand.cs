@@ -1,7 +1,6 @@
-using System;
 using UnityEngine;
 
-public class PlayerHand : MonoBehaviour
+public class PlayerHand : MonoBehaviour, PlayerSubscriber
 {
     [SerializeField]
     private SkinnedMeshRenderer handMaterial;
@@ -10,9 +9,8 @@ public class PlayerHand : MonoBehaviour
     [SerializeField]
     private Transform holdingPoint;
     public Transform HoldingPoint => holdingPoint;
-    private Action unsubscribePlayer;
 
-    public void SetPlayer(PlayerManager player)
+    public void Subscribe(PlayerManager player)
     {
         handMaterial.material.color = player.identity.color;
         if (player.inputManager)
@@ -28,14 +26,13 @@ public class PlayerHand : MonoBehaviour
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd += DisableHand;
         player.onDeath += DisableHand;
-        unsubscribePlayer = () => player.onDeath -= DisableHand;
     }
 
-    private void OnDestroy()
+    public void Unsubscribe(PlayerManager player)
     {
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd -= DisableHand;
-        unsubscribePlayer?.Invoke();
+        player.onDeath -= DisableHand;
     }
 
     private void DisableHand(PlayerManager killer, PlayerManager victim, DamageInfo info)

@@ -51,6 +51,7 @@ public class GunFactory : MonoBehaviour
         firstPersonGunController.RightHandTarget = displayGun.GunController.RightHandTarget;
 
         if (displayGun.GunController.HasRecoil)
+            // TODO pivot this to GunController...
             firstPersonGunController.onFire += displayGun.GunController.PlayRecoil;
 
         if (displayGun.GunController.projectile is BulletController)
@@ -65,6 +66,7 @@ public class GunFactory : MonoBehaviour
         return gun;
     }
 
+    // TODO does this one really do anything???
     public static void UnsubscribeAnimators(GameObject gun)
     {
         var firstPersonGunController = gun.GetComponent<GunFactory>().GunController;
