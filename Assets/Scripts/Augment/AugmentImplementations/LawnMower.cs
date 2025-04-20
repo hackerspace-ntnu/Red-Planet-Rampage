@@ -75,6 +75,7 @@ public class LawnMower : GunBody
         handString.gameObject.SetActive(true);
 
         if (gunController.Player.GunOrigin.TryGetComponent(out GunController gunControllerDisplay))
+            // TODO nullref at this point
             gunControllerDisplay.GetComponentInChildren<LawnMower>().LineHoldingPoint = gunController.Player.PlayerIK.LeftHandIKTransform;
     }
 

@@ -26,7 +26,8 @@ public class ObjectPool<T> where T : MonoBehaviour
     /// </summary>
     public void Flush()
     {
-        pool.ForEach(gameObject => GameObject.Destroy(gameObject));
+        pool?.ForEach(gameObject => GameObject.Destroy(gameObject));
+        // TODO setting it to null is kinda troublesome, had to add a ?. above...
         pool = null;
         if (parent != null)
             GameObject.Destroy(parent.gameObject);

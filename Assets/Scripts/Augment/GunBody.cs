@@ -45,7 +45,6 @@ public class GunBody : NetworkBehaviour
 
     public virtual void Detach(GunController gunController)
     {
-        if (!gunController) return;
         gunController.onFireEnd -= Reload;
     }
 

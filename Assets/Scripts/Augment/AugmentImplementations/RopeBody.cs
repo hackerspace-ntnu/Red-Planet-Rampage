@@ -1,6 +1,5 @@
 using System.Linq;
 using Mirror;
-using Org.BouncyCastle.Asn1.Misc;
 using UnityEngine;
 
 public class RopeBody : GunBody
@@ -56,10 +55,12 @@ public class RopeBody : GunBody
         }
     }
 
+    // TODO somehow you're able to shoot once before requiring the plug???
     public override void Attach(GunController gunController)
     {
         if (!gunController.Player)
             return;
+        base.Attach(gunController);
         rope.Line.gameObject.layer = 0;
         rope.Target = ropeTarget;
         plugAnchor = Instantiate(plugAnchorPrefab);
@@ -81,6 +82,7 @@ public class RopeBody : GunBody
 
     public override void Detach(GunController gunController)
     {
+        base.Detach(gunController);
         if (!plugAnchor)
             return;
         plugAnchor.Health.onDeath -= RemoveRope;
@@ -95,6 +97,7 @@ public class RopeBody : GunBody
     protected override void OnDestroy()
     {
         base.OnDestroy();
+        // TODO this destruction does not work?
         Destroy(plugAnchor);
     }
 

@@ -327,9 +327,7 @@ public class PlayerManager : NetworkBehaviour
         }
         if (gunController)
         {
-            UnsubscribeGun();
-            //Remove the gun
-            Destroy(gunController.gameObject);
+            RemoveGun();
         }
         if (TryGetComponent(out PlayerMovement playerMovement))
         {
@@ -407,26 +405,6 @@ public class PlayerManager : NetworkBehaviour
     private void PlayLeapAudio(Rigidbody body)
     {
         leapSounds.Play(audioSource);
-    }
-
-    private void UpdateHudFire(GunStats stats)
-    {
-        // stats variables must be dereferenced
-        float ammo = stats.Ammo < 1 ? 0 : stats.Ammo;
-        float magazine = stats.MagazineSize;
-        hudController.UpdateOnFire(ammo / magazine);
-    }
-
-    private void UpdateHudReload(GunStats stats)
-    {
-        float ammo = stats.Ammo;
-        float magazine = stats.MagazineSize;
-        hudController.UpdateOnReload(ammo / magazine);
-    }
-
-    private void UpdateHudCrosshair(GunStats stats)
-    {
-        HUDController.UpdateOnInitialize(stats);
     }
 
     private void TryPlaceBid(InputAction.CallbackContext ctx)
@@ -527,9 +505,6 @@ public class PlayerManager : NetworkBehaviour
             gunController.onFireStart += UpdateAimTarget;
             gunController.onFire += UpdateAimTarget;
             gunController.onFire += ScreenShake;
-            gunController.onFireEnd += UpdateHudFire;
-            gunController.onReload += UpdateHudReload;
-            UpdateHudCrosshair(gunController.stats);
             hudController.Attach(gunController);
         }
         playerIK.LeftHandIKTarget = gunController.LeftHandTarget;
@@ -546,10 +521,9 @@ public class PlayerManager : NetworkBehaviour
         gunController.onFireStart -= UpdateAimTarget;
         gunController.onFire -= UpdateAimTarget;
         gunController.onFire -= ScreenShake;
-        gunController.onFireEnd -= UpdateHudFire;
-        gunController.onReload -= UpdateHudReload;
         hudController.Detach(gunController);
-        GunFactory.UnsubscribeAnimators(gunController.gameObject);
+        gunController.Detach();
+        GunOrigin.GetComponent<GunController>().Detach();
     }
 
     public void SetGunNetwork(Transform offset)
@@ -569,17 +543,17 @@ public class PlayerManager : NetworkBehaviour
 
     public void RemoveGun()
     {
-        gunController.UnsubscribeDelegates();
+        UnsubscribeGun();
         for (int i = gunController.transform.childCount - 1; i >= 0; i--)
         {
             Destroy(gunController.transform.GetChild(i).gameObject);
         }
         Destroy(gunController.gameObject);
-        GunOrigin.GetComponent<GunController>().UnsubscribeDelegates();
         for (int i = GunOrigin.transform.childCount - 1; i >= 0; i--)
         {
             Destroy(GunOrigin.transform.GetChild(i).gameObject);
         }
+        // TODO ok and why don't we destroy the guncontroller for the display gun
     }
 
     private void SetLayerOnSubtree(GameObject node, int layer)

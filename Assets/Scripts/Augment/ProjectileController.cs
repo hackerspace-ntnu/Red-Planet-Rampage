@@ -215,7 +215,10 @@ public abstract class ProjectileController : NetworkBehaviour
         gunController.onReload -= OnReload;
     }
 
+    // TODO go through all projectile controllers...
 
+
+    // TODO add a detach as well... or does ondestroy work fine here? 🤔
     protected abstract void OnInitialize(GunStats stats);
 
     protected abstract void OnReload(GunStats stats);

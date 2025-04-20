@@ -32,6 +32,9 @@ public class Telescope : GunExtension
         if (gunController.GetComponentInChildren<DynamiteBarrel>())
             return;
 
+        // TODO somehow the FOV manipulation goes haywire when picking telescope multiple times
+        // - that is, attaching and detaching multiple times seems to increase FOV every time...
+        // makes me think we should not keep track of original FOV here, but rather inside playermovement
         var playerMovement = gunController.Player.GetComponent<PlayerMovement>();
         originalZoomFov = playerMovement.ZoomFov;
         originalZoomSpeed = playerMovement.LookSpeedZoom;

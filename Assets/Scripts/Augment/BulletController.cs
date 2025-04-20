@@ -45,6 +45,7 @@ public class BulletController : ProjectileController
         base.Awake();
         if (!gunController || !gunController.Player)
             return;
+        // TODO these must be unsubbed?
         UpdateProjectileMovement += ProjectileMotions.MoveWithGravity;
         animator.OnShotFiredAnimation += FireProjectile;
     }
@@ -68,6 +69,9 @@ public class BulletController : ProjectileController
     {
         base.OnDestroy();
         trailPositionBuffer?.Dispose();
+        UpdateProjectileMovement -= ProjectileMotions.MoveWithGravity;
+        if (animator)
+            animator.OnShotFiredAnimation -= FireProjectile;
     }
 
 

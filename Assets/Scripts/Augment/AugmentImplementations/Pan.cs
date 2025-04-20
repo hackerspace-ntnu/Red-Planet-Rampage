@@ -56,16 +56,21 @@ public class Pan : GunExtension
 
     public override void Detach(GunController gunController)
     {
+        if (playerMovement)
+            playerMovement.OnMove -= TryPanSkateBoost;
+
         if (!gunController.Player)
             return;
         if (gunController.Player.inputManager)
             gunController.Player.inputManager.onSelect -= TryTrickJump;
-        if (playerMovement)
-            playerMovement.OnMove -= TryPanSkateBoost;
     }
 
+    // TODO for some reason this one might not be unsubbed properly???
     private void TryTrickJump(InputAction.CallbackContext ctx)
     {
+        // Avoid issue here...
+        if (!gunController)
+            return;
         bool isCorrectMovement = playerMovement && playerMovement.StateIsAir && playerMovement.IsCrouching;
         var isNotFlying = Mathf.Abs(playerMovement.Body.velocity.y) < 0.01f;
         if (isCorrectMovement && isNotFlying && playerMovement.Body.velocity.magnitude > 1f)
@@ -76,6 +81,9 @@ public class Pan : GunExtension
 
     private void TryPanSkateBoost(Rigidbody body)
     {
+        // Avoid issue here...
+        if (!gunController)
+            return;
         bool isSkating = playerMovement.StateIsAir && playerMovement.IsCrouching && Mathf.Abs(body.velocity.y) < 0.01f;
         bool isMoving = gunController.Player.inputManager.moveInput.magnitude > 0.5f;
         if (!isMoving || !isSkating)

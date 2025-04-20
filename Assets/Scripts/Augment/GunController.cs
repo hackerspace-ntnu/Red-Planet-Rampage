@@ -106,11 +106,32 @@ public class GunController : NetworkBehaviour
 
     private void OnDestroy()
     {
-        UnsubscribeDelegates();
+        Detach();
     }
 
-    public void UnsubscribeDelegates()
+    // TODO perhaps avoid too many duplacte detach calls?
+    public void Detach()
     {
+        // TODO remember these after init?
+        var body = GetComponentInChildren<GunBody>();
+        var barrel = GetComponentInChildren<GunBarrel>();
+        var extension = GetComponentInChildren<GunExtension>();
+
+        if (barrel == null)
+            Debug.LogWarning("Gun already detached!");
+
+        // TODO nullref here...
+        var modifiers = barrel.GetModifiers();
+        if (extension)
+            modifiers.AddRange(extension.GetModifiers());
+        modifiers.ForEach(m => m.Detach(projectile));
+
+        body.Detach(this);
+        barrel.Detach(this);
+        if (extension)
+            extension.Detach(this);
+
+        // TODO the null-ing is hopefully not necessary?
         onInitializeGun = null;
         onFire = null;
         onFireEnd = null;
@@ -144,6 +165,11 @@ public class GunController : NetworkBehaviour
 
         Player.inputManager.onZoomPerformed -= OnZoom;
         Player.inputManager.onZoomCanceled -= OnZoomCanceled;
+
+        // Unset player field so we don't reapply resets multiple times
+        // (happened with the telescope body)
+        // TODO this doesn't fix the issue entirely of course...
+        Player = null;
 
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd -= CancelZoom;
