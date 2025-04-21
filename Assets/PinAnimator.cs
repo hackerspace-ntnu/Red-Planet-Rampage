@@ -1,4 +1,4 @@
-using CollectionExtensions;
+using System;
 using UnityEngine;
 
 public class PinAnimator : AugmentAnimator
@@ -31,6 +31,18 @@ public class PinAnimator : AugmentAnimator
 
     public override void OnFire(GunStats stats)
     {
+        #region Fix for specific bug after weaponswitching
+        try
+        {
+            var test = transform.localPosition;
+        }
+        catch (NullReferenceException)
+        {
+            Debug.LogWarning($"Ignoring nullref in {nameof(PinAnimator)}:OnFire");
+            return;
+        }
+        #endregion
+
         if (playAudio)
             PlayCockingSound();
         transform.localPosition = Vector3.zero;
