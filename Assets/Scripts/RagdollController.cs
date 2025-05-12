@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class RagdollController : MonoBehaviour
 {
@@ -21,9 +22,13 @@ public class RagdollController : MonoBehaviour
     [SerializeField]
     private Rigidbody rigidbodyToPush;
 
+    [SerializeField]
+    private DecalProjector shadowDecal; 
+
     public void EnableRagdoll(Vector3 knockbackForce)
     {
         animatorToDisable.enabled = false;
+        shadowDecal.enabled = false;
 
         foreach (var collider in collidersToDisable)
         {
