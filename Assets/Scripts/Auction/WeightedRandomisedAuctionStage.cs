@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using CollectionExtensions;
 using UnityEngine;
 
@@ -24,23 +27,38 @@ public class WeightedRandomisedAuctionStage : RandomisedAuctionStage
     private Item[] RandomSelectionWithReplacement()
     {
         Item[] selection = new Item[numItems];
+        Item[] pool = AvailableSelection();
+
         for (int i = 0; i < numItems; i++)
         {
-            selection[i] = items.RandomElement();
+            selection[i] = pool.RandomElement();
         }
         return selection;
     }
     private Item[] RandomSelectionWithoutReplacement()
     {
-        int[] idx = items.RandomIndicesOf();
+        Item[] pool = AvailableSelection();
+        int[] idx = pool.RandomIndicesOf();
         Item[] selection = new Item[numItems];
+
+        if (pool.Length < numItems)
+            return RandomSelectionWithReplacement();
+
         for (int i = 0; i < numItems; i++)
         {
-            selection[i] = items[idx[i]];
+            selection[i] = pool[idx[i]];
         }
         return selection;
     }
-
+    private Item[] AvailableSelection()
+    {
+        List<Item> newSelection = items.ToList();
+        foreach (Item item in ownedItems)
+        {
+            newSelection.Remove(item);
+        }
+        return newSelection.ToArray();
+    }
     public override bool Promote(out BiddingRound round)
     {
         if (numItems == 0 || items.Length == 0)

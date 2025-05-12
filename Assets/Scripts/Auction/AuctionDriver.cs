@@ -260,8 +260,16 @@ public class AuctionDriver : NetworkBehaviour
         lastExtendedAuction.onBiddingEnd += EndAuction;
 
         List<BiddingRound> biddingRounds = new List<BiddingRound>();
+
+        List<Item> ownedItems = new List<Item>();
+        foreach(PlayerManager pm in FindObjectsOfType<PlayerManager>())
+        {
+            ownedItems = ownedItems.Union(pm.identity.AllItems()).ToList();
+        }
+
         for (int i = 0; i < availableAuctionStages.Length; i++)
         {
+            availableAuctionStages[i].SetOwnedItems(ownedItems.ToArray());
             availableAuctionStages[i].Promote(out BiddingRound biddingRound);
             biddingRounds.Add(biddingRound);
         }

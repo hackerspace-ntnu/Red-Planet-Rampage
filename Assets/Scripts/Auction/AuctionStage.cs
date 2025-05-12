@@ -7,6 +7,7 @@ public class AuctionStage : ScriptableObject
     protected float stageDuration = 15;
     [SerializeField]
     protected Item[] items;
+    protected Item[] ownedItems;
 
     /// <summary>
     /// This method should ONLY be called by staticInfo.
@@ -17,6 +18,10 @@ public class AuctionStage : ScriptableObject
         this.items = items;
     }
 
+    public void SetOwnedItems(Item[] Items)
+    {
+        ownedItems = Items;
+    }
     public virtual bool Promote(out BiddingRound round)
     {
         if (items.Length == 0)
