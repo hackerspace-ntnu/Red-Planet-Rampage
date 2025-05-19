@@ -125,8 +125,11 @@ public class AuctionDriver : NetworkBehaviour
 
     private IEnumerator WaitAndStartCameraAnimation()
     {
-        yield return new WaitForSeconds(biddingBeginDelay);
-        cameraAnimator.SetTrigger("start");
+        if (MatchController.Singleton.RoundCount == 1)
+        {
+            cameraAnimator.SetTrigger("start");
+            yield return new WaitForSeconds(biddingBeginDelay);
+        }
         hasAuctionStarted = true;
     }
 
@@ -254,7 +257,8 @@ public class AuctionDriver : NetworkBehaviour
 
     private IEnumerator PopulatePlatforms()
     {
-        yield return new WaitForSeconds(biddingBeginDelay);
+        if (MatchController.Singleton.RoundCount == 1)
+            yield return new WaitForSeconds(biddingBeginDelay);
 
         lastExtendedAuction = biddingPlatforms[0];
         lastExtendedAuction.onBiddingEnd += EndAuction;
