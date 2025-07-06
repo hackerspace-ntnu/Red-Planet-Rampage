@@ -22,7 +22,7 @@ public class AuctionDriver : NetworkBehaviour
     private BiddingPlatform[] biddingPlatforms;
     [HideInInspector]
     public BiddingPlatform[] BiddingPlatforms => biddingPlatforms;
-    private RandomisedAuctionStage[] availableAuctionStages;
+    private WeightedRandomisedAuctionStage[] availableAuctionStages;
     [SerializeField]
     private YieldZone[] yieldZones;
     [SerializeField]
@@ -101,6 +101,8 @@ public class AuctionDriver : NetworkBehaviour
             AuctionType.Random => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.EverythingAuction },
             _ => new WeightedRandomisedAuctionStage[] { StaticInfo.Singleton.BodyAuction, StaticInfo.Singleton.BarrelAuction, StaticInfo.Singleton.ExtensionAuction }
         };
+
+        foreach (var stage in availableAuctionStages) { stage.PrepareWeights(); }
 
         playerFactory = GetComponent<PlayerFactory>();
         playersInAuction = new HashSet<PlayerManager>(FindObjectsOfType<PlayerManager>());

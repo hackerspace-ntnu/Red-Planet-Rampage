@@ -31,6 +31,7 @@ public class PlayerIdentity : MonoBehaviour
     public List<Item> Bodies { get; private set; } = new List<Item>();
     public List<Item> Barrels { get; private set; } = new List<Item>();
     public List<Item> Extensions { get; private set; } = new List<Item>();
+    public IEnumerable<Item> AllItems => Bodies.Concat(Barrels).Concat(Extensions);
 
     public int Chips { get; private set; } = 0;
     public bool HasMaxChips => Chips >= MatchRules.Current.MaxChips;
