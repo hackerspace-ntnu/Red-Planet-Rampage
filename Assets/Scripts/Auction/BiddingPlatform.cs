@@ -252,6 +252,12 @@ public class BiddingPlatform : NetworkBehaviour
             RpcPerformTransaction(leadingBidder, item.id);
         }
 
+        // Track items for stats and weighting
+        if (leadingBidder != InvalidID)
+            AuctionDriver.CurrentRound.boughtItems.Add(new ItemAtPrice { id = item.id, price = chips });
+        else
+            AuctionDriver.CurrentRound.notBoughtItems.Add(item.id);
+
         Destroy(augmentModel, 0.5f);
         isActive = false;
         onBiddingEnd?.Invoke(this);

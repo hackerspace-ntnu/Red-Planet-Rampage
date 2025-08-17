@@ -5,6 +5,19 @@ using Mirror;
 using TMPro;
 using UnityEngine;
 
+public record ItemAtPrice
+{
+    public string id;
+    public int price;
+}
+
+public record AuctionRound
+{
+    public List<string> offeredItems = new();
+    public List<ItemAtPrice> boughtItems = new();
+    public List<string> notBoughtItems = new();
+}
+
 // TODO
 // Topic for discussion:
 // Using RequireComponent + GetComponent in Awake,
@@ -14,6 +27,9 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerFactory))]
 public class AuctionDriver : NetworkBehaviour
 {
+    public static List<AuctionRound> Rounds = new();
+    public static AuctionRound CurrentRound => Rounds.Last();
+
     [SerializeField]
     private float biddingBeginDelay = 2f;
     private bool hasAuctionStarted = false;
@@ -92,6 +108,8 @@ public class AuctionDriver : NetworkBehaviour
         // TODO add a timeout to this kinda thing
         while (FindObjectsOfType<PlayerManager>().Count() < RPRNetworkManager.NumPlayers)
             yield return null;
+
+        Rounds.Add(new AuctionRound());
 
         availableAuctionStages = MatchRules.Current.AuctionForRound(MatchController.Singleton.RoundCount) switch
         {
@@ -270,6 +288,7 @@ public class AuctionDriver : NetworkBehaviour
         {
             availableAuctionStages[i].Promote(out BiddingRound biddingRound);
             biddingRounds.Add(biddingRound);
+            CurrentRound.offeredItems.AddRange(biddingRound.items.Select(i => i.id));
         }
         bool isMultiple = availableAuctionStages.Length >= biddingPlatforms.Length;
 
