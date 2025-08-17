@@ -369,7 +369,8 @@ public class MatchController : NetworkBehaviour
 
     public static void ResetMatch()
     {
-        rounds = new List<Round>();
+        AuctionDriver.Rounds = new();
+        rounds = new();
         winner = null;
     }
 

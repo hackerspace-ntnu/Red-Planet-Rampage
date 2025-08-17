@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using CollectionExtensions;
 using UnityEngine;
 
-// TODO: Implement weighted selection with and without replacement
 [CreateAssetMenu(menuName = "Auction/Stage/Weighted Randomised")]
 public class WeightedRandomisedAuctionStage : RandomisedAuctionStage
 {
@@ -12,6 +10,7 @@ public class WeightedRandomisedAuctionStage : RandomisedAuctionStage
     protected int totalWeight;
 
     private Dictionary<Item, int> ownedByXPlayers;
+    private Dictionary<string, int> notBoughtForXRounds;
 
 
 #if UNITY_EDITOR
@@ -39,6 +38,22 @@ public class WeightedRandomisedAuctionStage : RandomisedAuctionStage
             })
             .ToDictionary(pair => pair.item, pair => pair.owners);
 
+        notBoughtForXRounds = AuctionDriver.Rounds
+            .Select(r => r.notBoughtItems.Select(item => (item, rounds: 1)))
+            .Aggregate((acc, val) =>
+            {
+                // Basically same as above :/
+                // TODO refactor if you really wanna bother
+                var accSet = acc.Select(pair => pair.item).ToHashSet();
+                var valSet = val.Select(pair => pair.item).ToHashSet();
+                return acc
+                    // Increment count if present in more inventories
+                    .Select(pair => (pair.item, owners: pair.rounds + (valSet.Contains(pair.item) ? 1 : 0)))
+                    // and include the new ones
+                    .Concat(val.Where(pair => !accSet.Contains(pair.item)));
+            })
+            .ToDictionary(pair => pair.item, pair => pair.rounds);
+
         weightedItems = items
             .Select(i => (item: i, weight: DetermineWeight(i)))
             .ToList();
@@ -63,7 +78,17 @@ public class WeightedRandomisedAuctionStage : RandomisedAuctionStage
             };
         }
 
-        // TODO check if it has been in previous auction (TODO fix that stuff???)
+        if (notBoughtForXRounds.TryGetValue(item.id, out var roundsNotBought))
+        {
+            score -= roundsNotBought switch
+            {
+                0 => 0,
+                1 => 900,
+                2 => 950,
+                _ => 999,
+            };
+            Debug.Log($"{item.displayName} not bought last round, scored {score}");
+        }
 
         // TODO more criteria? winning weapon etc?
 
