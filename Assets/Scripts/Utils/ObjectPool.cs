@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class ObjectPool<T> where T : MonoBehaviour
@@ -27,7 +26,8 @@ public class ObjectPool<T> where T : MonoBehaviour
     /// </summary>
     public void Flush()
     {
-        pool.ForEach(gameObject => GameObject.Destroy(gameObject));
+        pool?.ForEach(gameObject => GameObject.Destroy(gameObject));
+        // TODO setting it to null is kinda troublesome, had to add a ?. above...
         pool = null;
         if (parent != null)
             GameObject.Destroy(parent.gameObject);
@@ -138,7 +138,7 @@ public class ObjectPool<T> where T : MonoBehaviour
         if (!instance)
             return;
         instance.gameObject.SetActive(false);
-        instance.transform.SetParent(parent.transform,true);
+        instance.transform.SetParent(parent.transform, true);
         instance.transform.position = parent.transform.position;
         instance.transform.rotation = parent.transform.rotation;
     }
@@ -148,7 +148,7 @@ public class ObjectPool<T> where T : MonoBehaviour
     /// </summary>
     public void ReturnAll()
     {
-        foreach(var instance in pool)
+        foreach (var instance in pool)
             Return(instance);
     }
 }

@@ -47,6 +47,14 @@ public class InheritMomentumModifier : MonoBehaviour, ProjectileModifier
         projectile.OnProjectileInit += OnProjectileInit;
     }
 
+    public void Detach(ProjectileController projectile)
+    {
+        if (!projectile.GunController.Player)
+            return;
+        projectile.OnNetworkInit -= OnNetworkInit;
+        projectile.OnProjectileInit -= OnProjectileInit;
+    }
+
     private void OnNetworkInit(ref ProjectileFireData data, GunStats _)
     {
         var speed = playerBody.velocity.magnitude;
@@ -66,13 +74,5 @@ public class InheritMomentumModifier : MonoBehaviour, ProjectileModifier
         state.damage = damage * projectileToAreaDamageRatio;
         state.additionalProperties[ExplosionModifier.AreaDamagePropertyName] = damage * (1 - projectileToAreaDamageRatio);
         state.speed = Mathf.Max(1f, speed * speedMultiplier);
-    }
-
-    public void Detach(ProjectileController projectile)
-    {
-        if (!projectile.GunController.Player)
-            return;
-        projectile.OnNetworkInit -= OnNetworkInit;
-        projectile.OnProjectileInit -= OnProjectileInit;
     }
 }

@@ -8,6 +8,7 @@ public enum Priority
     EXTENSION,
     ARBITRARY
 }
+
 /// <summary>
 /// An interface that can be implemented in order to give additional functional property to any projectile created by any set of parts.
 /// Why? Because putting a copy of every needed bullet script on every single bullet that is created is very inefficient.
@@ -16,12 +17,12 @@ public enum Priority
 /// 
 /// Note: Behaviour tied to updating the projectile every frame (Update), should be done with ProjectileController delegates instead!
 /// </summary>
-public interface ProjectileModifier 
+public interface ProjectileModifier
 {
 
     public abstract void Attach(ProjectileController projectile);
     public abstract void Detach(ProjectileController projectile);
-    public Priority GetPriority() 
+    public Priority GetPriority()
     {
         return Priority.ARBITRARY;
     }
