@@ -25,13 +25,9 @@ public class GunBody : NetworkBehaviour
     //TODO: Modifier refactor
     protected GunController gunController;
 
-    public virtual void Start()
+    protected virtual void Awake()
     {
         gunController = transform.parent.GetComponent<GunController>();
-        if (!gunController)
-            return;
-        // TODO: refactor this, which additionaly only exists to support placeholder weapons with no reload implementation
-        gunController.onFireEnd += Reload;
     }
 
     protected virtual void Reload(GunStats stats)
@@ -40,9 +36,21 @@ public class GunBody : NetworkBehaviour
             gunController.Reload(reloadEfficiencyPercentage);
     }
 
-    private void OnDestroy()
+    // TODO override this everywhere...
+    public virtual void Attach(GunController gunController)
     {
-        if (!gunController) return;
+        // TODO: refactor this, which additionaly only exists to support placeholder weapons with no reload implementation
+        gunController.onFireEnd += Reload;
+    }
+
+    public virtual void Detach(GunController gunController)
+    {
         gunController.onFireEnd -= Reload;
+    }
+
+    protected virtual void OnDestroy()
+    {
+        if (gunController)
+            Detach(gunController);
     }
 }

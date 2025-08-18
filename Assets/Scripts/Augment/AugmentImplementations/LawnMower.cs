@@ -49,13 +49,14 @@ public class LawnMower : GunBody
     [SerializeField]
     private AudioGroup overheatSounds;
 
-    public override void Start()
+    private void Start()
     {
         meshRenderer.materials[mowerScreenMaterialIndex] = Instantiate(meshRenderer.materials[mowerScreenMaterialIndex]);
         mowerScreen = meshRenderer.materials[mowerScreenMaterialIndex];
-        gunController = transform.parent.GetComponent<GunController>();
-        if (!gunController)
-            return;
+    }
+
+    public override void Attach(GunController gunController)
+    {
         gunController.onFireStart += Fire;
         gunController.onFireEnd += FireEnd;
 
@@ -66,25 +67,30 @@ public class LawnMower : GunBody
             return;
         audioSource = GetComponent<AudioSource>();
         playerHandLeft.gameObject.SetActive(true);
-        playerHandLeft.SetPlayer(gunController.Player);
+        playerHandLeft.Subscribe(gunController.Player);
         playerHandRight.gameObject.SetActive(true);
-        playerHandRight.SetPlayer(gunController.Player);
+        playerHandRight.Subscribe(gunController.Player);
         handAnimator = GetComponent<Animator>();
         LineHoldingPoint = playerHandLeft.HoldingPoint;
         handString.gameObject.SetActive(true);
 
         if (gunController.Player.GunOrigin.TryGetComponent(out GunController gunControllerDisplay))
+            // TODO nullref at this point
             gunControllerDisplay.GetComponentInChildren<LawnMower>().LineHoldingPoint = gunController.Player.PlayerIK.LeftHandIKTransform;
     }
 
-    private void OnDestroy()
+    public override void Detach(GunController gunController)
     {
         if (MatchController.Singleton)
             MatchController.Singleton.onRoundEnd -= DisableLine;
-        if (!gunController)
-            return;
+
         gunController.onFireStart -= Fire;
         gunController.onFireEnd -= FireEnd;
+
+        if (!gunController.Player)
+            return;
+        playerHandRight.Unsubscribe(gunController.Player);
+        playerHandLeft.Unsubscribe(gunController.Player);
     }
 
     private void LateUpdate()

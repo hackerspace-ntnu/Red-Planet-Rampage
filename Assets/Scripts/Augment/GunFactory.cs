@@ -10,6 +10,13 @@ public class GunFactory : MonoBehaviour
 {
     public static GameObject InstantiateGun(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, Transform parent)
     {
+        // Create display gun first (some components assume its existence)
+        GunFactory displayGun = owner.GunOrigin.GetComponent<GunFactory>();
+        displayGun.Body = bodyPrefab;
+        displayGun.Barrel = barrelPrefab;
+        displayGun.Extension = extensionPrefab;
+        displayGun.InitializeGun();
+
         GameObject gun = Instantiate(new GameObject(), parent);
         GunFactory controller = gun.AddComponent<GunFactory>();
         controller.Body = bodyPrefab;
@@ -21,12 +28,6 @@ public class GunFactory : MonoBehaviour
 
         var playerIndex = owner.inputManager && owner.inputManager.playerInput ? owner.inputManager.playerInput.playerIndex : 3;
         var cullingLayer = LayerMask.NameToLayer("Gun " + playerIndex);
-
-        GunFactory displayGun = owner.GunOrigin.GetComponent<GunFactory>();
-        displayGun.Body = bodyPrefab;
-        displayGun.Barrel = barrelPrefab;
-        displayGun.Extension = extensionPrefab;
-        displayGun.InitializeGun();
 
         var cullingLayerDisplay = LayerMask.NameToLayer("Player " + playerIndex);
 
@@ -51,6 +52,7 @@ public class GunFactory : MonoBehaviour
         firstPersonGunController.RightHandTarget = displayGun.GunController.RightHandTarget;
 
         if (displayGun.GunController.HasRecoil)
+            // TODO pivot this to GunController...
             firstPersonGunController.onFire += displayGun.GunController.PlayRecoil;
 
         if (displayGun.GunController.projectile is BulletController)
@@ -63,13 +65,6 @@ public class GunFactory : MonoBehaviour
             ((LazurController)gun.GetComponent<GunFactory>().GunController.projectile).Vfx.gameObject.layer = 0;
 
         return gun;
-    }
-
-    public static void UnsubscribeAnimators(GameObject gun)
-    {
-        var firstPersonGunController = gun.GetComponent<GunFactory>().GunController;
-        firstPersonGunController.onFireStart = null;
-        firstPersonGunController.onReload = null;
     }
 
     public static GameObject InstantiateGunAI(Item bodyPrefab, Item barrelPrefab, Item extensionPrefab, PlayerManager owner, Transform parent)
@@ -242,14 +237,16 @@ public class GunFactory : MonoBehaviour
         modifiers.AddRange(gunBarrel.GetModifiers());
         gunBarrel.BuildStats(gunController.stats);
 
+        GunExtension gunExtension = null;
+
         if (Extension != null)
         {
             // Instantiate extension itself *once*
 #if UNITY_EDITOR
-            GunExtension gunExtension = ((GameObject)PrefabUtility.InstantiatePrefab(Extension.augment, transform))
+            gunExtension = ((GameObject)PrefabUtility.InstantiatePrefab(Extension.augment, transform))
                 .GetComponent<GunExtension>();
 #else
-            GunExtension gunExtension = Instantiate(Extension.augment, transform)
+            gunExtension = Instantiate(Extension.augment, transform)
                 .GetComponent<GunExtension>();
 #endif
             gunExtension.transform.position = gunBarrel.attachmentPoints[0].position;
@@ -263,6 +260,7 @@ public class GunFactory : MonoBehaviour
 
             modifiers.AddRange(gunExtension.GetModifiers());
             gunExtension.BuildStats(gunController.stats);
+            gunExtension.Attach(gunController);
         }
         else
         {
@@ -274,27 +272,24 @@ public class GunFactory : MonoBehaviour
 
         gunController.projectile.stats = gunController.stats;
 
+        gunBody.Attach(gunController);
+        gunBarrel.Attach(gunController);
+        if (gunExtension)
+            gunExtension.Attach(gunController);
+
         modifiers.OrderByDescending(modifier => (int)modifier.GetPriority()).ToList();
         modifiers.ForEach(modifier => modifier.Attach(gunController.projectile));
         gunController.onInitializeGun?.Invoke(gunController.stats);
 
         // Moved it below the stat changes so the stats actually, yknow, affect the firerate.
         // Will be removed anyways when the firemode system is updated to accomodate a wider variety of guns
-        switch (gunController.stats.fireMode)
+        gunController.fireRateController = gunController.stats.fireMode switch
         {
-            case GunStats.FireModes.SemiAuto:
-                gunController.fireRateController = new SemiAutoFirerateController(gunController.stats.Firerate);
-                break;
-            case GunStats.FireModes.Burst:
-                gunController.fireRateController = new BurstFirerateController(gunController.stats.Firerate, gunController.stats.burstNum);
-                break;
-            case GunStats.FireModes.FullAuto:
-                gunController.fireRateController = new FullAutoFirerateController(gunController.stats.Firerate);
-                break;
-            default:
-                gunController.fireRateController = new FullAutoFirerateController(gunController.stats.Firerate);
-                break;
-        }
+            GunStats.FireModes.SemiAuto => new SemiAutoFirerateController(gunController.stats.Firerate),
+            GunStats.FireModes.Burst => new BurstFirerateController(gunController.stats.Firerate, gunController.stats.burstNum),
+            GunStats.FireModes.FullAuto => new FullAutoFirerateController(gunController.stats.Firerate),
+            _ => new FullAutoFirerateController(gunController.stats.Firerate),
+        };
         // Ensure ammo == magazineSize after all modifiers are applied
         gunController.Reload(1);
     }

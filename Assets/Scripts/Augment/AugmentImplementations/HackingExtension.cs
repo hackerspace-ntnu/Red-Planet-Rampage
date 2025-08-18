@@ -10,16 +10,20 @@ public class HackingExtension : GunExtension
     private float scrollAmount = 0.10f;
     private const int hackingScreenMaterialIndex = 1;
 
-    private GunController gunController;
-
     private void Start()
     {
         meshRenderer.materials[hackingScreenMaterialIndex] = Instantiate(meshRenderer.materials[hackingScreenMaterialIndex]);
         hackingScreen = meshRenderer.materials[hackingScreenMaterialIndex];
-        gunController = transform.parent.GetComponent<GunController>();
-        if (!gunController)
-            return;
+    }
+
+    public override void Attach(GunController gunController)
+    {
         gunController.onFireStart += Fire;
+    }
+
+    public override void Detach(GunController gunController)
+    {
+        gunController.onFireStart -= Fire;
     }
 
     private void Fire(GunStats stats)

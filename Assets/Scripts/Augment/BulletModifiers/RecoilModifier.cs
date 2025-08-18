@@ -12,14 +12,9 @@ public class RecoilModifier : MonoBehaviour, ProjectileModifier
 
     private float calculatedPushPower;
 
-    private void Awake()
-    {
-        gunController = transform.parent.GetComponent<GunController>();
-        if (!gunController)
-            return;
-    }
     public void Attach(ProjectileController projectile)
     {
+        gunController = projectile.GunController;
         projectile.OnProjectileInit += KnockAwayOnShot;
         bulletAmount = projectile.stats.ProjectilesPerShot;
         calculatedPushPower = (pushPower / bulletAmount) * (1f + (float)Math.Log10(bulletAmount));

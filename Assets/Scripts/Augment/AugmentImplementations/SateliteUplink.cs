@@ -56,18 +56,8 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
 
     private void Start()
     {
-        gunController = transform.parent.GetComponent<GunController>();
-        if (!gunController)
-            return;
-
-        gunController.onFireStart += StartTracking;
-
-        garbageParent = new GameObject().transform;
-        garbageParent.gameObject.name = "TrashUplinkGarbageHolder";
-
-        timer = GetComponent<Timer>();
-        timer.OnTimerRunCompleted += OnCooldownEnd;
-        timer.StartTimer(cooldown);
+        // TODO should this one get destroyed???
+        garbageParent = new GameObject("TrashUplinkGarbageHolder").transform;
 
         if (isServer)
         {
@@ -79,7 +69,6 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
     private void SeedRandom(int seed)
     {
         random = new System.Random(seed);
-
     }
 
     private FallingHazard PickTemplate()
@@ -113,6 +102,13 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
 
     public void Attach(ProjectileController projectile)
     {
+        gunController = projectile.GunController;
+        gunController.onFireStart += StartTracking;
+
+        timer = GetComponent<Timer>();
+        timer.OnTimerRunCompleted += OnCooldownEnd;
+        timer.StartTimer(cooldown);
+
         garbagePool = new ObjectPool<FallingHazard>(PickTemplate, maxGarbagePresent);
         targetingReticlePool = new ObjectPool<TargetingReticle>(targetingReticle, maxLaunchesPerShot);
         projectile.OnProjectileInit += Track;
@@ -122,13 +118,11 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
 
     public void Detach(ProjectileController projectile)
     {
+        gunController.onFireStart -= StartTracking;
         projectile.OnProjectileInit -= Track;
         projectile.OnColliderHit -= Target;
         projectile.OnRicochet -= Target;
-        garbagePool.Flush();
-        garbagePool = null;
-        targetingReticlePool.Flush();
-        targetingReticlePool = null;
+        OnDestroy();
     }
 
     private void Track(ref ProjectileState state, GunStats stats)
@@ -203,12 +197,9 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
 
     private void OnDestroy()
     {
-        if (!gunController)
-            return;
-        gunController.onFireStart -= StartTracking;
-        garbagePool.Flush();
+        garbagePool?.Flush();
         garbagePool = null;
-        targetingReticlePool.Flush();
+        targetingReticlePool?.Flush();
         targetingReticlePool = null;
     }
 }

@@ -52,6 +52,7 @@ public class GunStats : ScriptableObject
     /// </summary>
     [HideInInspector]
     public int Ammo = 0;
+    public float AmmoPercent => (Ammo < 1 ? 0 : Ammo) / (float)MagazineSize;
 
     [SerializeField]
     [Tooltip("Damage of each projectile")]

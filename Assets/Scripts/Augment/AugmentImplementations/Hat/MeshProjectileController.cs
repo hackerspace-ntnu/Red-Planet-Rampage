@@ -102,6 +102,9 @@ public class MeshProjectileController : ProjectileController
         base.OnDestroy();
         positionActiveBuffer?.Dispose();
         rotationBuffer?.Dispose();
+        UpdateProjectileMovement -= ProjectileMotions.MoveWithGravity;
+        if (animator)
+            animator.OnShotFiredAnimation -= FireProjectile;
     }
 
     protected override void OnInitialize(GunStats gunstats)

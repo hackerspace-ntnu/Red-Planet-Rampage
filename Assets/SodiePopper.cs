@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SodiePopper : GunBody
@@ -54,22 +52,27 @@ public class SodiePopper : GunBody
     [SerializeField]
     private AudioGroup slosh;
 
-    public override void Start()
+    private void Start()
     {
-        gunController = transform.parent?.GetComponent<GunController>();
-
         lastPos = lastLastPos = meassurementPoint.position;
+    }
 
-        if (!gunController)
-            return;
+    public override void Attach(GunController gunController)
+    {
         gunController.HasRecoil = false;
 
         if (!gunController.Player)
             return;
         audioSource = GetComponent<AudioSource>();
         playerBody = gunController.Player.GetComponent<PlayerMovement>().Body;
-        playerHandRight.SetPlayer(gunController.Player);
+        playerHandRight.Subscribe(gunController.Player);
         playerHandRight.gameObject.SetActive(true);
+    }
+
+    public override void Detach(GunController gunController)
+    {
+        if (gunController.Player)
+            playerHandRight.Unsubscribe(gunController.Player);
     }
 
     private void Update()

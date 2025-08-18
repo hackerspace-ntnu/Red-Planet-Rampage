@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class BoomBardierAnimator : AugmentAnimator
@@ -25,16 +23,26 @@ public class BoomBardierAnimator : AugmentAnimator
 
     public override void OnFire(GunStats stats)
     {
-        animator.SetTrigger("Fire");
-        ammo = stats.Ammo;
-        OnShotFiredAnimation?.Invoke();
-        OnAnimationEnd?.Invoke();
+        try
+        {
+            animator.SetTrigger("Fire");
+            ammo = stats.Ammo;
+            OnShotFiredAnimation?.Invoke();
+            OnAnimationEnd?.Invoke();
+        }
+        catch (System.NullReferenceException)
+        {
+            // Avoids specific issue that only appears in build.
+            Debug.LogWarning($"Ignoring nullref in {nameof(BoomBardierAnimator)}:OnFire");
+            return;
+        }
     }
-    
+
     // Also called by animator
     public void VisualizeAmmoCount()
     {
         for (int i = 0; i < dynamites.Length; i++)
+            // TODO nullref here
             dynamites[i].enabled = ammo - 1 > i;
     }
 }

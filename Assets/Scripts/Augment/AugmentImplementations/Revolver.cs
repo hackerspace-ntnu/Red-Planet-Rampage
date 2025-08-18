@@ -23,19 +23,26 @@ public class Revolver : GunBody
 
     private bool isReloadInProgress = false;
 
-    public override void Start()
+    public override void Attach(GunController gunController)
     {
         audioSource = GetComponent<AudioSource>();
-        gunController = transform.parent.GetComponent<GunController>();
-        if (!gunController)
-            return;
         gunController.onFireEnd += Reload;
 
         if (!gunController.Player)
             return;
-        playerHandLeft.SetPlayer(gunController.Player);
-        playerHandRight.SetPlayer(gunController.Player);
+        playerHandLeft.Subscribe(gunController.Player);
+        playerHandRight.Subscribe(gunController.Player);
         playerHandRight.gameObject.SetActive(true);
+    }
+
+    public override void Detach(GunController gunController)
+    {
+        gunController.onFireEnd -= Reload;
+
+        if (!gunController.Player)
+            return;
+        playerHandRight.Unsubscribe(gunController.Player);
+        playerHandLeft.Unsubscribe(gunController.Player);
     }
 
     protected override void Reload(GunStats stats)
@@ -96,11 +103,4 @@ public class Revolver : GunBody
         gunController.Reload(reloadEfficiencyPercentage);
         isReloadInProgress = false;
     }
-
-    private void OnDestroy()
-    {
-        if (gunController)
-            gunController.onFireEnd -= Reload;
-    }
-
 }

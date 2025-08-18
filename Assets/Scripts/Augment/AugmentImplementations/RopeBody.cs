@@ -1,6 +1,5 @@
 using System.Linq;
 using Mirror;
-using Org.BouncyCastle.Asn1.Misc;
 using UnityEngine;
 
 public class RopeBody : GunBody
@@ -48,15 +47,20 @@ public class RopeBody : GunBody
 
     private int throwTween;
 
-    public override void Start()
+    private void Start()
     {
-        base.Start();
-        gunController = transform.parent.GetComponent<GunController>();
         if (!gunController || !gunController.Player)
         {
             rope.enabled = false;
-            return;
         }
+    }
+
+    // TODO somehow you're able to shoot once before requiring the plug???
+    public override void Attach(GunController gunController)
+    {
+        if (!gunController.Player)
+            return;
+        base.Attach(gunController);
         rope.Line.gameObject.layer = 0;
         rope.Target = ropeTarget;
         plugAnchor = Instantiate(plugAnchorPrefab);
@@ -65,9 +69,9 @@ public class RopeBody : GunBody
         rope.ResetRope(plugAnchor.WireOrigin);
         plugAnchor.Health.onDeath += RemoveRope;
         playerBody = gunController.Player.GetComponent<Rigidbody>();
-        playerHandRight.SetPlayer(gunController.Player);
+        playerHandRight.Subscribe(gunController.Player);
         playerHandRight.gameObject.SetActive(true);
-        playerHandLeft.SetPlayer(gunController.Player);
+        playerHandLeft.Subscribe(gunController.Player);
         playerHandLeft.gameObject.SetActive(true);
         gunController.onFireNoAmmo += TryThrowPlug;
         movement = gunController.Player.GetComponent<PlayerMovement>();
@@ -75,6 +79,28 @@ public class RopeBody : GunBody
         plugAnchor.gameObject.SetActive(false);
         gunController.stats.Ammo = 0;
     }
+
+    public override void Detach(GunController gunController)
+    {
+        base.Detach(gunController);
+        if (!plugAnchor)
+            return;
+        plugAnchor.Health.onDeath -= RemoveRope;
+        gunController.onFireNoAmmo -= TryThrowPlug;
+
+        if (!gunController.Player)
+            return;
+        playerHandRight.Unsubscribe(gunController.Player);
+        playerHandLeft.Unsubscribe(gunController.Player);
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        // TODO this destruction does not work?
+        Destroy(plugAnchor);
+    }
+
 
     private void PullingWire()
     {
@@ -348,16 +374,4 @@ public class RopeBody : GunBody
         for (int i = 0; i < coils.Length; i++)
             coils[i].SetActive(i > cutOffIndex);
     }
-
-    private void OnDestroy()
-    {
-        if (!plugAnchor)
-            return;
-        plugAnchor.Health.onDeath -= RemoveRope;
-        Destroy(plugAnchor);
-        if (!gunController)
-            return;
-        gunController.onFireNoAmmo -= TryThrowPlug;
-    }
-
 }

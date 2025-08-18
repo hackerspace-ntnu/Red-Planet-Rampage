@@ -7,7 +7,8 @@ public class GunBarrel : Augment
 {
     [SerializeField]
     private CrossHairModes crossHairMode;
-    // Where to attach extensions
+
+    [Tooltip("Where to attach extensions")]
     public Transform[] attachmentPoints;
 
     public ProjectileController Projectile { get => GetComponent<ProjectileController>(); }
@@ -37,6 +38,10 @@ public class GunBarrel : Augment
         }
     }
 
+    public override void Attach(GunController gunController) { }
+
+    public override void Detach(GunController gunController) { }
+
     private void OnDestroy()
     {
         if (!gunController)
@@ -44,6 +49,8 @@ public class GunBarrel : Augment
 
         if (muzzleFlash)
             gunController.onFire -= PlayMuzzleFlash;
+
+        Detach(gunController);
     }
 
     public void PlayMuzzleFlash(GunStats stats)

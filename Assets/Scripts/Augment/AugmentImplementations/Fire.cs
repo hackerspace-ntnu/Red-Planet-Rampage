@@ -19,7 +19,6 @@ public class Fire : GunExtension
     private StuckObject stuckFirePrefab;
     [SerializeField]
     private LayerMask trailLayers;
-    private GunController gunController;
     private AudioSource audioSource;
     [SerializeField]
     private AudioGroup lighterSound;
@@ -39,14 +38,13 @@ public class Fire : GunExtension
     [SerializeField]
     private StickyProjectileModifier stickyModifier;
 
-    private HashSet<ProjectileState> trackedProjectiles = new HashSet<ProjectileState>();
+    private HashSet<ProjectileState> trackedProjectiles = new();
     // Used to keep track of the healthControllers currently burning
-    public HashSet<HealthController> hitHealthControllers = new HashSet<HealthController>();
+    public HashSet<HealthController> hitHealthControllers = new();
 
-    void Awake()
+    public override void Attach(GunController gunController)
     {
         audioSource = GetComponent<AudioSource>();
-        gunController = transform.parent.GetComponent<GunController>();
         if (!gunController)
             return;
 
@@ -64,17 +62,34 @@ public class Fire : GunExtension
             stickyModifier.OnStuckToTarget += InitializeFlame;
             projectileType = ProjectileType.Mesh;
         }
-        else if (gunController.projectile is BulletController)
+        else if (gunController.projectile is BulletController controller)
         {
-            ((BulletController)gunController.projectile).SetTrail(fireTrail);
+            controller.SetTrail(fireTrail);
             projectileType = ProjectileType.Hitscan;
         }
         else if (gunController.projectile is LazurController)
         {
             projectileType = ProjectileType.Laser;
         }
-
     }
+
+    public override void Detach(GunController gunController)
+    {
+        stuckFirePool?.Flush();
+        positionActiveBuffer?.Dispose();
+
+        if (!gunController)
+            return;
+
+        gunController.onInitializeGun -= AddFireToProjectile;
+        gunController.onFireEnd -= PlayShotAudio;
+        gunController.projectile.OnProjectileInit -= TrackProjectile;
+        gunController.projectile.UpdateProjectileMovement -= ApplyTrails;
+
+        if (gunController.projectile is MeshProjectileController)
+            stickyModifier.OnStuckToTarget -= InitializeFlame;
+    }
+
 
     private void TrackProjectile(ref ProjectileState state, GunStats stats)
     {
@@ -204,12 +219,6 @@ public class Fire : GunExtension
         if (!gunController || !audioSource)
             return;
         lighterSound.Play(audioSource);
-    }
-
-    private void OnDestroy()
-    {
-        stuckFirePool?.Flush();
-        positionActiveBuffer?.Dispose();
     }
 
 #if UNITY_EDITOR

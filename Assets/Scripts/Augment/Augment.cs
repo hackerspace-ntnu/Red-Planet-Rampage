@@ -23,6 +23,10 @@ public abstract class Augment : NetworkBehaviour
     // For displaying items with correct alignment
     public Transform midpoint;
 
+    public abstract void Attach(GunController gunController);
+
+    public abstract void Detach(GunController gunController);
+
     public virtual void BuildStats(GunStats gunStats)
     {
         foreach (var modifier in statModifiers)

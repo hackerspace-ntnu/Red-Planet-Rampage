@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 using TMPro;
-using UnityEngine.Serialization;
 using static GunStats;
 using System;
 
@@ -122,13 +121,11 @@ public class PlayerHUDController : MonoBehaviour
     {
         crosshairMaterial = Instantiate(crosshair.material);
         crosshair.material = crosshairMaterial;
-    }
 
-    void Start()
-    {
         speedLines.material = Instantiate(speedLines.material);
         speedLinesMaterial = speedLines.material;
         speedLines.gameObject.SetActive(true);
+
         var image = GetComponent<RawImage>();
         // Prevent material properties from being handled globally
         damageBorder = Instantiate(image.material);
@@ -138,7 +135,10 @@ public class PlayerHUDController : MonoBehaviour
         ammoCapacityMaterial = Instantiate(ammoBar.material);
         ammoBar.material = ammoCapacityMaterial;
         ammoCapacityMaterial.SetFloat("_Arc2", 0);
+    }
 
+    private void Start()
+    {
         originalChipY = chipBox.anchoredPosition.y;
         if (!MatchController.Singleton || PlayerInputManagerController.Singleton.LocalPlayerInputs.Count() == 1)
         {
@@ -237,7 +237,7 @@ public class PlayerHUDController : MonoBehaviour
         chipBox.anchoredPosition = new Vector2(originalChipX, originalChipY - height * 2 * originalChipY);
     }
 
-    public void UpdateOnFire(float ammoPercent)
+    public void UpdateOnFire(GunStats stats)
     {
         if (LeanTween.isTweening(ammoTween))
         {
@@ -245,15 +245,15 @@ public class PlayerHUDController : MonoBehaviour
             ammoBar.gameObject.transform.eulerAngles = new Vector3(ammoBar.gameObject.transform.eulerAngles.x, ammoBar.gameObject.transform.eulerAngles.y, 0);
         }
 
-        ammoCapacityMaterial.SetFloat("_Arc2", (1 - ammoPercent) * availableDegrees);
+        UpdateAmmoBar(stats);
         ammoTween = ammoHud.gameObject.LeanRotateAroundLocal(Vector3.forward, ammoSpinDegrees, 0.5f).setEaseSpring()
             .setOnStart(
             () => ammoBar.gameObject.transform.Rotate(new Vector3(0, 0, -ammoSpinDegrees))).id;
     }
 
-    public void UpdateOnReload(float ammoPercent)
+    private void UpdateAmmoBar(GunStats stats)
     {
-        ammoCapacityMaterial.SetFloat("_Arc2", (1 - ammoPercent) * availableDegrees);
+        ammoCapacityMaterial.SetFloat("_Arc2", (1 - stats.AmmoPercent) * availableDegrees);
     }
 
     private void UpdateHealthBar(float currentHealth, float maxHealth)
@@ -298,7 +298,7 @@ public class PlayerHUDController : MonoBehaviour
         {
             // Start of curve, reach the top quickly
             // Always start at 0 so we get proper damage indication each time we get hit
-            intensity = intensity * (1 / damageBorderTop);
+            intensity *= 1 / damageBorderTop;
         }
         else
         {
@@ -342,7 +342,26 @@ public class PlayerHUDController : MonoBehaviour
         crosshair.rectTransform.anchoredPosition = (new Vector2(halfWidth * x, halfHeight * y));
     }
 
-    public void HitAnimation(HitboxController other, ref ProjectileState state)
+    public void Attach(GunController gunController)
+    {
+        gunController.projectile.OnHitboxCollision += HitAnimation;
+        gunController.onFireEnd += UpdateOnFire;
+        gunController.onReload += UpdateAmmoBar;
+
+        // Ensure ammo correctness at attach time
+        UpdateAmmoBar(gunController.stats);
+
+        InitializeCrosshair(gunController.stats);
+    }
+
+    public void Detach(GunController gunController)
+    {
+        gunController.projectile.OnHitboxCollision -= HitAnimation;
+        gunController.onFireEnd -= UpdateOnFire;
+        gunController.onReload -= UpdateAmmoBar;
+    }
+
+    private void HitAnimation(HitboxController other, ref ProjectileState state)
     {
         if (LeanTween.isTweening(hitTween))
         {
@@ -400,7 +419,7 @@ public class PlayerHUDController : MonoBehaviour
             .setOnComplete(() => SetCrosshairRadius(initialCrosshairRadius)).id;
     }
 
-    public void UpdateOnInitialize(GunStats stats)
+    public void InitializeCrosshair(GunStats stats)
     {
         initialCrosshairRadius = stats.CrosshairRadius.Value() == 0f ? 0f : 1f / stats.CrosshairRadius.Value();
         crosshairMaterial.SetFloat("_Radius", initialCrosshairRadius);

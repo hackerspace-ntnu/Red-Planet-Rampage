@@ -9,12 +9,8 @@ public class RubberSniper : GunExtension
     [SerializeField]
     private float maxHitDistance = 100f;
 
-    private GunController gunController;
-    private void Awake()
+    public override void Attach(GunController gunController)
     {
-        gunController = transform.parent.GetComponent<GunController>();
-        if (!gunController)
-            return;
         gunController.onFire += Fire;
         if (!gunController.Player)
             return;
@@ -24,10 +20,8 @@ public class RubberSniper : GunExtension
         gunController.onFire += Aim;
     }
 
-    private void OnDestroy()
+    public override void Detach(GunController gunController)
     {
-        if (!gunController)
-            return;
         gunController.onFire -= Fire;
         if (!gunController.Player)
             return;

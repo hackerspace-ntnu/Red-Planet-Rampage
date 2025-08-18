@@ -10,19 +10,14 @@ public class Telescope : GunExtension
     [SerializeField]
     private float overrideZoomSpeed = 0.1f;
 
-    private GunController gunController;
     private List<MeshRenderer> gunMeshes;
     private List<SkinnedMeshRenderer> gunSkinMeshes;
 
     private float originalZoomFov;
     private float originalZoomSpeed;
 
-    void Start()
+    public override void Attach(GunController gunController)
     {
-        gunController = transform.parent.GetComponent<GunController>();
-        if (!gunController)
-            return;
-
         // Remove path altering modifiers so bullets always travel straight!
         gunController.GetComponentInChildren<GunBarrel>()?
             .GetModifiers()
@@ -37,6 +32,9 @@ public class Telescope : GunExtension
         if (gunController.GetComponentInChildren<DynamiteBarrel>())
             return;
 
+        // TODO somehow the FOV manipulation goes haywire when picking telescope multiple times
+        // - that is, attaching and detaching multiple times seems to increase FOV every time...
+        // makes me think we should not keep track of original FOV here, but rather inside playermovement
         var playerMovement = gunController.Player.GetComponent<PlayerMovement>();
         originalZoomFov = playerMovement.ZoomFov;
         originalZoomSpeed = playerMovement.LookSpeedZoom;
@@ -57,12 +55,21 @@ public class Telescope : GunExtension
 
     private void UnsubscribeZoom(PlayerManager killer, PlayerManager victim, DamageInfo info)
     {
+        Detach(gunController);
+        CancelZoom();
+    }
+
+    public override void Detach(GunController gunController)
+    {
+        if (!gunController.Player || !gunController.Player.HUDController)
+            return;
+
         var playerMovement = gunController.Player.GetComponent<PlayerMovement>();
         playerMovement.ZoomFov = originalZoomFov;
         playerMovement.LookSpeedZoom = originalZoomSpeed;
+        gunController.Player.HUDController?.TweenScope(0, 0);
         gunController.Player.inputManager.onZoomPerformed -= OnZoom;
         gunController.Player.inputManager.onZoomCanceled -= OnZoomCanceled;
-        CancelZoom();
     }
 
     private void OnZoom(InputAction.CallbackContext ctx)
@@ -82,17 +89,5 @@ public class Telescope : GunExtension
         gunMeshes.ForEach((mesh) => mesh.enabled = true);
         gunSkinMeshes.ForEach((mesh) => mesh.enabled = true);
         gunController.Player.HUDController.TweenScope(0f, 0.2f);
-    }
-
-    private void OnDestroy()
-    {
-        if (!gunController || !gunController.Player || !gunController.Player.HUDController)
-            return;
-        var playerMovement = gunController.Player.GetComponent<PlayerMovement>();
-        playerMovement.ZoomFov = originalZoomFov;
-        playerMovement.LookSpeedZoom = originalZoomSpeed;
-        gunController.Player.HUDController?.TweenScope(0, 0);
-        gunController.Player.inputManager.onZoomPerformed -= OnZoom;
-        gunController.Player.inputManager.onZoomCanceled -= OnZoomCanceled;
     }
 }
