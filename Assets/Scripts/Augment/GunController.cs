@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Mirror;
 using UnityEngine;
@@ -106,11 +107,31 @@ public class GunController : NetworkBehaviour
 
     private void OnDestroy()
     {
-        UnsubscribeDelegates();
+        Detach();
     }
 
-    public void UnsubscribeDelegates()
+    // TODO perhaps avoid too many duplacte detach calls?
+    public void Detach()
     {
+        // TODO remember these after init?
+        var body = GetComponentInChildren<GunBody>();
+        var barrel = GetComponentInChildren<GunBarrel>();
+        var extension = GetComponentInChildren<GunExtension>();
+
+        if (barrel == null)
+        {
+            Debug.LogWarning("Gun already detached!");
+            return;
+        }
+
+        var modifiers = new List<ProjectileModifier>();
+        if (barrel)
+            modifiers.AddRange(barrel.GetModifiers());
+        if (extension)
+            modifiers.AddRange(extension.GetModifiers());
+        modifiers.ForEach(m => m.Detach(projectile));
+
+        // TODO the null-ing is hopefully not necessary?
         onInitializeGun = null;
         onFire = null;
         onFireEnd = null;

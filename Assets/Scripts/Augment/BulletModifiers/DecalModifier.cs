@@ -48,8 +48,7 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
         {
             projectile.OnRicochet -= OnHit;
         }
-        decalPool.Flush();
-        decalPool = null;
+        OnDestroy();
     }
 
     private void OnHit(RaycastHit target, ref ProjectileState state)
@@ -94,9 +93,7 @@ public class DecalModifier : MonoBehaviour, ProjectileModifier
 
     private void OnDestroy()
     {
-        if (decalPool == null)
-            return;
-        decalPool.Flush();
+        decalPool?.Flush();
         decalPool = null;
     }
 }
