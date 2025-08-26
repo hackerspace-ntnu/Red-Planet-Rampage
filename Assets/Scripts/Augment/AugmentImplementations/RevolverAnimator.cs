@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -12,7 +10,7 @@ public class RevolverAnimator : AugmentAnimator
     private GunBarrel barrel;
     private GunExtension extension;
 
-    public override void OnFire(GunStats stats){}
+    public override void OnFire(GunStats stats) { }
 
     public override void OnInitialize(GunStats stats)
     {
@@ -36,7 +34,5 @@ public class RevolverAnimator : AugmentAnimator
 
         if (extension)
             extension.transform.SetParent(attachmentSite, true);
-
-        animator.SetTrigger("Reload");
     }
 }
