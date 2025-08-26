@@ -94,7 +94,6 @@ public class MainMenuController : MonoBehaviour
     private void Start()
     {
         aiButtonOriginalPosition = aIButton.transform.localPosition;
-        Debug.Log(aiButtonOriginalPosition);
         PlayerInputManagerController.Singleton.MatchHasAI = false;
         audioSource = GetComponent<AudioSource>();
         versionText.text = $"Early Access {Application.version}";
