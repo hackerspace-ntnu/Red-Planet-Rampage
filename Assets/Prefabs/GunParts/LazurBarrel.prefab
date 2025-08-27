@@ -153,6 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 595157571004970460}
+  IsFiringDisabled: 0
 --- !u!1 &337387025910078786
 GameObject:
   m_ObjectHideFlags: 0
@@ -584,6 +585,10 @@ MonoBehaviour:
     addition: 0.2
     multiplier: 0
     exponential: 1
+  - name: Firerate
+    addition: 0
+    multiplier: 0
+    exponential: 0.4
   outputs:
   - {fileID: 2021858193588301184}
   midpoint: {fileID: 4423458652456300157}
@@ -620,8 +625,6 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   projectileOutput: {fileID: 0}
-  actualPosition: {x: 0, y: 0, z: 0}
-  actualDirection: {x: 0, y: 0, z: 0}
   projectileRotation: {x: 0, y: 0, z: 0, w: 1}
   stats: {fileID: 0}
   player: {fileID: 0}
@@ -658,7 +661,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pushPower: 20
-  baseFireRateAdder: 2
 --- !u!114 &3946977540612511835
 MonoBehaviour:
   m_ObjectHideFlags: 0

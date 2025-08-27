@@ -7,9 +7,14 @@ public class LazurFiringAnimator : AugmentAnimator
 
     public AnimationEvent OnChargeStart;
 
-    public bool IsDisabledInReload = false;
-
-    public override void OnInitialize(GunStats stats) { }
+    public override void OnInitialize(GunStats stats)
+    {
+        // Determining animation speed by its duration
+        // firerate = 1 / fire duration, animation speed = animation duration / fire duration, ergo this
+        // Using a lil more than reality for animation duration to be certain we don't mess up
+        const float animationDuration = 1.4f;
+        animator.speed = stats.Firerate * animationDuration;
+    }
 
     public override void OnReload(GunStats stats) { }
 
@@ -30,8 +35,6 @@ public class LazurFiringAnimator : AugmentAnimator
 
     public override void OnFire(GunStats stats)
     {
-        if (IsDisabledInReload && stats.Ammo <= 1)
-            return;
         animator.SetTrigger("Fire");
     }
 }

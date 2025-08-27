@@ -4,13 +4,15 @@ public class CoilFiringAnimator : AugmentAnimator
 {
     [SerializeField]
     private Animator animator;
-    private bool isDisabledInReload = false;
+
     public override void OnInitialize(GunStats stats)
     {
-        animator.speed = Mathf.Clamp(stats.Firerate * 1.5f, 1f, 6f);
-        // TODO: Refactor to generalize check instead of this mess
-        if (stats.name.Contains("Revolver"))
-            isDisabledInReload = true;
+        // Determining animation speed by its duration
+        // firerate = 1 / fire duration, animation speed = animation duration / fire duration, ergo this
+        // Using a lil more than reality for animation duration to be certain we don't mess up
+        // Note that firerate accounts for the entire animation here, not each individual shot
+        const float animationDuration = 2.1f;
+        animator.speed = stats.Firerate * animationDuration;
     }
 
     public override void OnReload(GunStats stats)
@@ -19,8 +21,6 @@ public class CoilFiringAnimator : AugmentAnimator
 
     public override void OnFire(GunStats stats)
     {
-        if (isDisabledInReload && stats.Ammo <= 1)
-            return;
         animator.SetTrigger("Fire");
     }
 
