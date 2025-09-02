@@ -125,9 +125,9 @@ public class SateliteUplink : NetworkBehaviour, ProjectileModifier
         projectile.OnProjectileInit -= Track;
         projectile.OnColliderHit -= Target;
         projectile.OnRicochet -= Target;
-        garbagePool.Flush();
+        garbagePool?.Flush();
         garbagePool = null;
-        targetingReticlePool.Flush();
+        targetingReticlePool?.Flush();
         targetingReticlePool = null;
     }
 
