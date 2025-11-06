@@ -82,11 +82,6 @@ public class GunController : NetworkBehaviour
 
     private AugmentAnimator barrelAnimator;
 
-    // TODO denne er faktisk ikke i bruk nå siden den ikke blir satt til true lengre.
-    //      -> men hvis du setter den når vi skyter så brekker du spillet
-    //      Fjern denne når/hvis vi har en god erstatning, eller bruk den hvis den funker.
-    private bool isFiring = false;
-
     private int recoilTween;
 
     private void Start()
@@ -173,7 +168,7 @@ public class GunController : NetworkBehaviour
             MatchController.Singleton.onRoundEnd -= CancelZoom;
     }
 
-    private bool ShouldFire() => !isFiring && fireRateController.shouldFire(triggerPressed, triggerHeld);
+    private bool ShouldFire() => fireRateController.shouldFire(triggerPressed, triggerHeld);
 
     [Client]
     private void FixedUpdate()
@@ -291,7 +286,6 @@ public class GunController : NetworkBehaviour
             // hopefully we avoid displaying them in their gruesome nature to the user this way.
             Debug.LogError("Failed to fire gun on owner's client!");
             Debug.LogError(e);
-            isFiring = false;
         }
     }
 
@@ -348,7 +342,6 @@ public class GunController : NetworkBehaviour
     private void FireEnd()
     {
         stats.Ammo = Mathf.Clamp(stats.Ammo - 1, 0, stats.MagazineSize);
-        isFiring = false;
         onFireEnd?.Invoke(stats);
     }
 }
