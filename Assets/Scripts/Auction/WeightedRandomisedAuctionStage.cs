@@ -83,11 +83,11 @@ public class WeightedRandomisedAuctionStage : RandomisedAuctionStage
             score -= roundsNotBought switch
             {
                 0 => 0,
-                1 => 900,
-                2 => 950,
+                1 => 200,
+                2 => 900,
+                3 => 950,
                 _ => 999,
             };
-            Debug.Log($"{item.displayName} not bought last round, scored {score}");
         }
 
         // TODO more criteria? winning weapon etc?
