@@ -42,8 +42,8 @@ public class AuctionDriver : NetworkBehaviour
     [SerializeField]
     private YieldZone[] yieldZones;
     [SerializeField]
-    private Transform yieldPosition;
-    public Vector3 YieldPosition => yieldPosition.position;
+    private Transform[] yieldPositions;
+    public IEnumerable<Vector3> YieldPositions => yieldPositions.Select(t => t.position);
     private List<PlayerManager> yieldingPlayers = new();
     public int YieldingPlayerCount => yieldingPlayers.Count;
 
