@@ -32,6 +32,7 @@ public enum SecretCombinationType
     TacticalStrike,
     CarCrash,
     IlTempoMarcante,
+    GigaDrillBuster,
 }
 
 public enum AchievementType
@@ -206,6 +207,7 @@ public class SteamManager : MonoBehaviour
         { SecretCombinationType.TacticalStrike, "WEAPON_TACTICAL_STRIKE" },
         { SecretCombinationType.CarCrash, "WEAPON_CAR_CRASH" },
         { SecretCombinationType.IlTempoMarcante, "WEAPON_IL_TEMPO" },
+        { SecretCombinationType.GigaDrillBuster, "WEAPON_GIGA_DRILL" },
     };
 
     private readonly Dictionary<AchievementType, string> achievementNames = new()

@@ -21,7 +21,7 @@ public class MeshProjectileController : ProjectileController
 
     [FormerlySerializedAs("hatMaxDistance")]
     [SerializeField]
-    private float maxDistance = 20;
+    protected float maxDistance = 20;
 
     private const float baseSpeed = 20;
 
@@ -74,7 +74,7 @@ public class MeshProjectileController : ProjectileController
     private bool shouldRicochet = true;
 
     [SerializeField]
-    private float maxDistanceBeforeStuck = 100;
+    protected float maxDistanceBeforeStuck = 100;
 
     protected override void Awake()
     {
@@ -211,24 +211,24 @@ public class MeshProjectileController : ProjectileController
         if (!gunController)
             return;
 
-        for (int i = 0; i < maxProjectiles; i++)
+        for (var i = 0; i < maxProjectiles; i++)
         {
             var state = projectiles[i];
-            if (state != null && state.active)
+            if (state is { active: true })
             {
                 UpdateProjectile(state);
                 positionActiveBuffer.setValue(i, state.position);
                 if (!useOnlyInitialRotation && !disableRotation)
                     rotationBuffer.setValue(i, (visualRotation * state.direction).ToEulerAngles());
             }
-            positionActiveBuffer.setAlpha(i, state != null && state.active ? 1f : 0f);
+            positionActiveBuffer.setAlpha(i, state is { active: true } ? 1f : 0f);
         }
         positionActiveBuffer.ApplyChanges();
         if (!useOnlyInitialRotation && !disableRotation)
             rotationBuffer.ApplyChanges();
     }
 
-    private void UpdateProjectile(ProjectileState state)
+    protected virtual void UpdateProjectile(ProjectileState state)
     {
         state.oldPosition = state.position;
         UpdateProjectileMovement?.Invoke(state.speed * state.speedFactor * Time.fixedDeltaTime, ref state);
@@ -240,20 +240,20 @@ public class MeshProjectileController : ProjectileController
             state.active = false;
         }
 
-        var collisions = ProjectileMotions.GetPathCollisions(state, collisionLayers).Where(p => p.collider != lastCollider).OrderBy(p => p.distance).ToArray();
+        var hits = ProjectileMotions.GetPathCollisions(state, collisionLayers).Where(p => p.collider != lastCollider).OrderBy(p => p.distance).ToArray();
 
-        state.additionalProperties["lastCollider"] = collisions.Length > 0 ? collisions[0].collider : null;
+        state.additionalProperties["lastCollider"] = hits.Length > 0 ? hits[0].collider : null;
 
-        if (collisions.Length <= 0) return;
+        if (hits.Length <= 0) return;
 
 
-        if (collisions[0].collider.TryGetComponent<HitboxController>(out var hitbox))
+        if (hits[0].collider.TryGetComponent<HitboxController>(out var hitbox))
         {
             var hasHitYourselfTooEarly = hitbox.health.Player == player && state.distanceTraveled < GunController.InvulnerabilityDistance;
             if (hasHitYourselfTooEarly)
                 return;
 
-            OnColliderHit?.Invoke(collisions[0], ref state);
+            OnColliderHit?.Invoke(hits[0], ref state);
             OnHitboxCollision?.Invoke(hitbox, ref state);
             state.active = false;
             return;
@@ -261,13 +261,13 @@ public class MeshProjectileController : ProjectileController
 
         if (shouldRicochet && state.distanceTraveled < maxDistanceBeforeStuck)
         {
-            OnRicochet?.Invoke(collisions[0], ref state);
+            OnRicochet?.Invoke(hits[0], ref state);
             state.position = state.oldPosition;
-            state.direction = Vector3.Reflect(state.direction, collisions[0].normal);
+            state.direction = Vector3.Reflect(state.direction, hits[0].normal);
         }
         else
         {
-            OnColliderHit?.Invoke(collisions[0], ref state);
+            OnColliderHit?.Invoke(hits[0], ref state);
             state.active = false;
         }
     }

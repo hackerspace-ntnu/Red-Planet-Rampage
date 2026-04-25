@@ -10,19 +10,26 @@ public class ExplosionModifier : MonoBehaviour, ProjectileModifier
     [SerializeField]
     private ExplosionController explosion;
 
+    [SerializeField]
+    private bool alsoOnRicochet = false;
+
     private PlayerManager player;
     private ProjectileController projectile;
 
     public void Attach(ProjectileController projectile)
     {
         this.projectile = projectile;
-        projectile.OnColliderHit += Explode;
         player = projectile.player;
+        projectile.OnColliderHit += Explode;
+        if (alsoOnRicochet)
+            projectile.OnRicochet += Explode;
     }
 
     public void Detach(ProjectileController projectile)
     {
         projectile.OnColliderHit -= Explode;
+        if (alsoOnRicochet)
+            projectile.OnRicochet -= Explode;
     }
 
     private void Explode(RaycastHit other, ref ProjectileState state)
