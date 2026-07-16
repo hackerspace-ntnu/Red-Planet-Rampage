@@ -49,6 +49,17 @@ public enum AchievementType
     CogAndBoltTinkering,
 }
 
+public enum StatType
+{
+    None,
+    PlayedRounds,
+    PlayedMatches,
+    Played30Chips,
+    PlayedSixRounds,
+    PlayedThreeStrikes,
+    PlayedCustom,
+}
+
 public class Lobby
 {
     public Lobby(CSteamID id)
@@ -261,6 +272,39 @@ public class SteamManager : MonoBehaviour
     }
 
     #endregion Achievements
+    
+    #region Stats
+    
+    
+    private readonly Dictionary<StatType, string> statNames = new()
+    {
+        { StatType.PlayedRounds, "PLAYED_ROUNDS" },
+        { StatType.PlayedMatches, "PLAYED_MATCHES" },
+        { StatType.Played30Chips, "PLAYED_30_CHIPS" },
+        { StatType.PlayedSixRounds, "PLAYED_SIX_ROUNDS" },
+        { StatType.PlayedThreeStrikes, "PLAYED_THREE_STRIKES" },
+        { StatType.PlayedCustom, "PLAYED_CUSTOM" },
+    };
+
+    public void RegisterMatch() =>
+        IncrementStat(MatchRules.Current.GameMode switch
+        {
+            GameModeVariant.FirstTo30Chips => StatType.Played30Chips,
+            GameModeVariant.SixRounds => StatType.PlayedSixRounds,
+            GameModeVariant.ThreeStrikes => StatType.PlayedThreeStrikes,
+            _ => StatType.PlayedCustom,
+        });
+
+    public void IncrementStat(StatType type)
+    {
+        if (type is StatType.None || !statNames.TryGetValue(type, out var name))
+            return;
+        if (!SteamUserStats.GetStat(name, out int value))
+            return;
+        SteamUserStats.SetStat(name, value + 1);
+    }
+
+    #endregion Stats
 
     #region Lobby
 
