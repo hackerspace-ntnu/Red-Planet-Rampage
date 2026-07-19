@@ -136,6 +136,7 @@ public class MainMenuController : MonoBehaviour
             defaultMenu.SetActive(false);
             introRoutine = StartCoroutine(WaitForIntroVideoToEnd());
         }
+        SteamManager.Singleton.SetRichPresenceInMenu();
     }
 
     private void StopFirstFrame(VideoPlayer source)
@@ -265,8 +266,15 @@ public class MainMenuController : MonoBehaviour
         //Change camera angle to level select. Must be done here to not bypass AI-check in playerselect
         if (menu == mapSelectMenu)
         {
-            mainMenuCamera.GetComponentInChildren<MainMenuMoveCamera>().MoveToLevelSelect();
+           mainMenuCamera.GetComponentInChildren<MainMenuMoveCamera>().MoveToLevelSelect();
         }
+
+        if (menu == optionsMenu.gameObject)
+            SteamManager.Singleton.SetRichPresenceInSettings();
+        else if (menu == creditsMenu.gameObject)
+            SteamManager.Singleton.SetRichPresenceInCredits();
+        else
+            SteamManager.Singleton.SetRichPresenceInMenu();
     }
 
     /// <summary>
@@ -303,7 +311,7 @@ public class MainMenuController : MonoBehaviour
             if (firstInputJoined.IsMouseAndKeyboard && !introVideo.isActiveAndEnabled) ShowMouse();
         }
 
-        bool canPlay = playerInputs.Count > 1;
+        var canPlay = playerInputs.Count > 1;
         var colors = startButton.colors;
         colors.normalColor = canPlay ? colors.highlightedColor : colors.disabledColor;
         startButton.colors = colors;

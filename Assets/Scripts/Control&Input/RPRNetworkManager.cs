@@ -148,6 +148,7 @@ public class RPRNetworkManager : NetworkManager
 
     private static Dictionary<uint, PlayerDetails> players = new();
     public static int NumPlayers => players.Count;
+    public static int NumHumanPlayers => players.Values.Count(p => p.steamID > 0);
     public static int NumAvailableSlots => Mathf.Max(0, MaxPlayers - players.Count);
     public const int MaxPlayers = 4;
     public static IEnumerable<PlayerDetails> PlayerDetails => players.Values;

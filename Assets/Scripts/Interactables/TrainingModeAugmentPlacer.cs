@@ -16,6 +16,7 @@ public class TrainingModeAugmentPlacer : MonoBehaviour
 
     private void Start()
     {
+        SteamManager.Singleton.SetRichPresenceInTrainingMode();
         SpawnAugments();
     }
 

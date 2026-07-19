@@ -118,6 +118,7 @@ public class MatchController : NetworkBehaviour
 
         GlobalHUD.RoundTimer.enabled = false;
         StartNextRound();
+        SteamManager.Singleton.SetRichPresenceInMatch(currentMapName);
     }
 
     private void StartNextRound()

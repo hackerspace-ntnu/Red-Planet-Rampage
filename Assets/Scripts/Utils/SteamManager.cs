@@ -471,12 +471,11 @@ public class SteamManager : MonoBehaviour
 
     private void FetchFriendLobbyInfo()
     {
-        int availableFriends = SteamFriends.GetFriendCount(EFriendFlags.k_EFriendFlagImmediate);
-        for (int i = 0; i < availableFriends; i++)
+        var availableFriends = SteamFriends.GetFriendCount(EFriendFlags.k_EFriendFlagImmediate);
+        for (var i = 0; i < availableFriends; i++)
         {
-            FriendGameInfo_t friendGameInfo = new FriendGameInfo_t();
-            CSteamID steamIDFriend = SteamFriends.GetFriendByIndex(i, EFriendFlags.k_EFriendFlagImmediate);
-            if (SteamFriends.GetFriendGamePlayed(steamIDFriend, out friendGameInfo) && friendGameInfo.m_steamIDLobby.IsValid())
+            var steamIDFriend = SteamFriends.GetFriendByIndex(i, EFriendFlags.k_EFriendFlagImmediate);
+            if (SteamFriends.GetFriendGamePlayed(steamIDFriend, out var friendGameInfo) && friendGameInfo.m_steamIDLobby.IsValid())
             {
                 lobbies.Add(new Lobby(friendGameInfo.m_steamIDLobby));
                 SteamMatchmaking.RequestLobbyData(friendGameInfo.m_steamIDLobby);
@@ -490,9 +489,9 @@ public class SteamManager : MonoBehaviour
         Lobbies = new(lobbies);
         lobbiesById = new();
 
-        for (int i = 0; i < lobbyList.m_nLobbiesMatching; i++)
+        for (var i = 0; i < lobbyList.m_nLobbiesMatching; i++)
         {
-            CSteamID lobbyID = SteamMatchmaking.GetLobbyByIndex(i);
+            var lobbyID = SteamMatchmaking.GetLobbyByIndex(i);
             var lobby = new Lobby(lobbyID);
             lobbies.Add(lobby);
             lobbiesById.Add(lobby.id.m_SteamID, lobby);
@@ -524,6 +523,57 @@ public class SteamManager : MonoBehaviour
 
     #endregion Lobby
 
+    #region Rich presence
+
+    public bool SetRichPresenceInMenu() =>
+        TrySetRichPresenceStatus("InMenu");
+
+    public bool SetRichPresenceInTrainingMode() =>
+        TrySetRichPresenceStatus("Training");
+
+    public bool SetRichPresenceInCredits() =>
+        TrySetRichPresenceStatus("Credits");
+
+    public bool SetRichPresenceInSettings() =>
+        TrySetRichPresenceStatus("Settings");
+
+    private bool TrySetRichPresenceStatus(string status)
+    {
+        if (!isSteamInitialized)
+            return false;
+
+        return SteamFriends.SetRichPresence("steam_display", $"#Status_{status}");
+    }
+
+    public void SetRichPresenceInLobby()
+    {
+        if (!TrySetRichPresenceStatus("InLobby"))
+            return;
+
+        SetRichPresencePlayerGroup();
+    }
+
+    public void SetRichPresenceInMatch(string mapName)
+    {
+        if (!TrySetRichPresenceStatus("InMatch"))
+            return;
+
+        SteamFriends.SetRichPresence("map", Scenes.SceneToStatusString(mapName)); // TODO translate map name
+        SteamFriends.SetRichPresence("gamemode", MatchRules.Current.GameMode.ToStatusString());
+        SetRichPresencePlayerGroup();
+    }
+
+    private void SetRichPresencePlayerGroup()
+    {
+        if (!NetworkClient.active)
+            return;
+
+        SteamFriends.SetRichPresence("steam_player_group", lobbyID.ToString());
+        SteamFriends.SetRichPresence("steam_player_group_size", RPRNetworkManager.NumHumanPlayers.ToString());
+    }
+
+    #endregion Rich presence
+
     private void Update()
     {
         if (!isSteamInitialized)
@@ -541,7 +591,10 @@ public class SteamManager : MonoBehaviour
     private void OnApplicationQuit()
     {
         if (isSteamInitialized)
+        {
+            SteamFriends.ClearRichPresence();
             SteamAPI.Shutdown();
+        }
     }
 
 }
