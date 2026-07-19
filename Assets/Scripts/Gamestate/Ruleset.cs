@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using CollectionExtensions;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -97,7 +95,7 @@ public struct NetworkStartingWeapon
     public string Extension;
 
     public StartingWeapon ToStartingWeapon() =>
-        new StartingWeapon
+        new()
         {
             Type = Type,
             Body = StaticInfo.Singleton.ItemsById[Body],
@@ -152,7 +150,7 @@ public struct NetworkRuleset
     public Auction[] AuctionProgress;
 
     public Ruleset ToRuleset() =>
-        new Ruleset
+        new()
         {
             GameMode = GameMode,
             MatchWinCondition = MatchWinCondition,
@@ -172,6 +170,19 @@ public enum GameModeVariant
     FirstTo30Chips,
     SixRounds,
     ThreeStrikes,
+}
+
+public static class GameModeVariantExtensions
+{
+    public static string ToStatusString(this GameModeVariant mode) =>
+        mode switch
+        {
+            GameModeVariant.Custom => "custom match",
+            GameModeVariant.FirstTo30Chips => "First to 30",
+            GameModeVariant.SixRounds => "Six rounds",
+            GameModeVariant.ThreeStrikes => "Three strikes",
+            _ => mode.ToString()
+        };
 }
 
 [CreateAssetMenu(menuName = "Ruleset")]
