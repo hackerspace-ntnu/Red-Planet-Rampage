@@ -40,9 +40,11 @@ public class HitSounds : MonoBehaviour
         }
         else
         {
-            if (extraHitSounds && Random.Range(0, 10000) <= 5)
+            if (extraHitSounds && Random.Range(0, 10001) <= 5)
             {
                 extraHitSounds.Play(audioSource);
+                // Ugh, kernel
+                SteamManager.Singleton.UnlockAchievement(AchievementType.Colonel);
             }
             else
             {

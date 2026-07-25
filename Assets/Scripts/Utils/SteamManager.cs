@@ -47,6 +47,7 @@ public enum AchievementType
     Clutch,
     MatchPoint,
     CogAndBoltTinkering,
+    Colonel,
 }
 
 public enum StatType
@@ -232,6 +233,7 @@ public class SteamManager : MonoBehaviour
         { AchievementType.Clutch, "ACHIEVEMENT_CLUTCH" },
         { AchievementType.MatchPoint, "ACHIEVEMENT_MATCH_POINT" },
         { AchievementType.CogAndBoltTinkering, "ACHIEVEMENT_CBT" },
+        { AchievementType.Colonel, "ACHIEVEMENT_COLONEL" },
     };
 
     public void UnlockAchievement(SecretCombinationType type)
