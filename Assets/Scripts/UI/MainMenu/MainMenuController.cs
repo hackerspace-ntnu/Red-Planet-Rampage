@@ -188,8 +188,8 @@ public class MainMenuController : MonoBehaviour
     private void EndIntro()
     {
         sun.Restart();
-        if (firstInputJoined != null)
-            if (firstInputJoined.IsMouseAndKeyboard) ShowMouse();
+        if (firstInputJoined != null && firstInputJoined.IsMouseAndKeyboard)
+            ShowMouse();
         playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
         skipIntroText.gameObject.SetActive(false);
         introVideo.gameObject.SetActive(false);
@@ -199,12 +199,24 @@ public class MainMenuController : MonoBehaviour
         SelectControl(defaultButton);
     }
 
+    private void TryShooting(InputAction.CallbackContext ctx)
+    {
+        if (!mainMenuCamera.activeSelf || currentMenu == creditsMenu.gameObject)
+            return;
+        var ray = MainMenuCamera.ScreenPointToRay(Input.mousePosition);
+        if (!Physics.Raycast(ray, out var hit, 500f)) return;
+        if (!hit.collider.TryGetComponent<HitboxController>(out var hitbox)) return;
+        hitbox.DamageCollider(new DamageInfo(null, 100f, hit.point, ray.direction, DamageType.Weapon));
+    }
+
     private void OnDestroy()
     {
         playerInputManagerController.onPlayerInputJoined -= AddPlayer;
         playerInputManagerController.onPlayerInputJoined -= ShowSkipText;
         if (SceneManager.GetActiveScene().name == "Menu" && NetworkManager.singleton)
             ((RPRNetworkManager)NetworkManager.singleton).OnPlayerReceived -= UpdateStartButton;
+        if (playerInputs.Count > 0 && playerInputs[0].IsMouseAndKeyboard)
+            playerInputs[0].onClick -= TryShooting;
     }
 
     /// <summary>
@@ -333,6 +345,7 @@ public class MainMenuController : MonoBehaviour
     {
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+        playerInputs[0].onClick += TryShooting;
     }
 
     private void HideMouse()
