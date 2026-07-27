@@ -21,6 +21,7 @@ public class ArenaCamera : MonoBehaviour
 
     public void PlayScoreboardAnimation()
     {
+        SetArenaCameraOutline(0f);
         outlineMaterial.SetColor("_OutlineColor", Color.black);
         animator.SetTrigger("ScoreboardZoom");
     }
