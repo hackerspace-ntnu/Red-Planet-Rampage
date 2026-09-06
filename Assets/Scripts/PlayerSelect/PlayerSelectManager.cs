@@ -76,6 +76,7 @@ public class PlayerSelectManager : MonoBehaviour
         {
             DisablePlayerModel(i);
         }
+        SteamManager.Singleton.SetRichPresenceInLobby();
     }
 
     private void UpdateLobby(PlayerDetails details)

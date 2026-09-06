@@ -50,7 +50,8 @@ public class RFO : ScriptableRendererFeature
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            if (renderingData.cameraData.camera != ArenaCamera.CurrentCamera)
+            if (!(renderingData.cameraData.camera == ArenaCamera.CurrentCamera
+                || renderingData.cameraData.camera.CompareTag("XrayCamera")))
                 return;
 
             // SETUP

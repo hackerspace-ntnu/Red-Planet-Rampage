@@ -32,6 +32,8 @@ public enum SecretCombinationType
     TacticalStrike,
     CarCrash,
     IlTempoMarcante,
+    GigaDrillBuster,
+    WallHack,
 }
 
 public enum AchievementType
@@ -46,6 +48,18 @@ public enum AchievementType
     Clutch,
     MatchPoint,
     CogAndBoltTinkering,
+    Colonel,
+}
+
+public enum StatType
+{
+    None,
+    PlayedRounds,
+    PlayedMatches,
+    Played30Chips,
+    PlayedSixRounds,
+    PlayedThreeStrikes,
+    PlayedCustom,
 }
 
 public class Lobby
@@ -206,6 +220,8 @@ public class SteamManager : MonoBehaviour
         { SecretCombinationType.TacticalStrike, "WEAPON_TACTICAL_STRIKE" },
         { SecretCombinationType.CarCrash, "WEAPON_CAR_CRASH" },
         { SecretCombinationType.IlTempoMarcante, "WEAPON_IL_TEMPO" },
+        { SecretCombinationType.GigaDrillBuster, "WEAPON_GIGA_DRILL" },
+        { SecretCombinationType.WallHack, "WEAPON_WALL_HACK" },
     };
 
     private readonly Dictionary<AchievementType, string> achievementNames = new()
@@ -219,6 +235,7 @@ public class SteamManager : MonoBehaviour
         { AchievementType.Clutch, "ACHIEVEMENT_CLUTCH" },
         { AchievementType.MatchPoint, "ACHIEVEMENT_MATCH_POINT" },
         { AchievementType.CogAndBoltTinkering, "ACHIEVEMENT_CBT" },
+        { AchievementType.Colonel, "ACHIEVEMENT_COLONEL" },
     };
 
     public void UnlockAchievement(SecretCombinationType type)
@@ -259,6 +276,39 @@ public class SteamManager : MonoBehaviour
     }
 
     #endregion Achievements
+    
+    #region Stats
+    
+    
+    private readonly Dictionary<StatType, string> statNames = new()
+    {
+        { StatType.PlayedRounds, "PLAYED_ROUNDS" },
+        { StatType.PlayedMatches, "PLAYED_MATCHES" },
+        { StatType.Played30Chips, "PLAYED_30_CHIPS" },
+        { StatType.PlayedSixRounds, "PLAYED_SIX_ROUNDS" },
+        { StatType.PlayedThreeStrikes, "PLAYED_THREE_STRIKES" },
+        { StatType.PlayedCustom, "PLAYED_CUSTOM" },
+    };
+
+    public void RegisterMatch() =>
+        IncrementStat(MatchRules.Current.GameMode switch
+        {
+            GameModeVariant.FirstTo30Chips => StatType.Played30Chips,
+            GameModeVariant.SixRounds => StatType.PlayedSixRounds,
+            GameModeVariant.ThreeStrikes => StatType.PlayedThreeStrikes,
+            _ => StatType.PlayedCustom,
+        });
+
+    public void IncrementStat(StatType type)
+    {
+        if (type is StatType.None || !statNames.TryGetValue(type, out var name))
+            return;
+        if (!SteamUserStats.GetStat(name, out int value))
+            return;
+        SteamUserStats.SetStat(name, value + 1);
+    }
+
+    #endregion Stats
 
     #region Lobby
 
@@ -425,12 +475,11 @@ public class SteamManager : MonoBehaviour
 
     private void FetchFriendLobbyInfo()
     {
-        int availableFriends = SteamFriends.GetFriendCount(EFriendFlags.k_EFriendFlagImmediate);
-        for (int i = 0; i < availableFriends; i++)
+        var availableFriends = SteamFriends.GetFriendCount(EFriendFlags.k_EFriendFlagImmediate);
+        for (var i = 0; i < availableFriends; i++)
         {
-            FriendGameInfo_t friendGameInfo = new FriendGameInfo_t();
-            CSteamID steamIDFriend = SteamFriends.GetFriendByIndex(i, EFriendFlags.k_EFriendFlagImmediate);
-            if (SteamFriends.GetFriendGamePlayed(steamIDFriend, out friendGameInfo) && friendGameInfo.m_steamIDLobby.IsValid())
+            var steamIDFriend = SteamFriends.GetFriendByIndex(i, EFriendFlags.k_EFriendFlagImmediate);
+            if (SteamFriends.GetFriendGamePlayed(steamIDFriend, out var friendGameInfo) && friendGameInfo.m_steamIDLobby.IsValid())
             {
                 lobbies.Add(new Lobby(friendGameInfo.m_steamIDLobby));
                 SteamMatchmaking.RequestLobbyData(friendGameInfo.m_steamIDLobby);
@@ -444,9 +493,9 @@ public class SteamManager : MonoBehaviour
         Lobbies = new(lobbies);
         lobbiesById = new();
 
-        for (int i = 0; i < lobbyList.m_nLobbiesMatching; i++)
+        for (var i = 0; i < lobbyList.m_nLobbiesMatching; i++)
         {
-            CSteamID lobbyID = SteamMatchmaking.GetLobbyByIndex(i);
+            var lobbyID = SteamMatchmaking.GetLobbyByIndex(i);
             var lobby = new Lobby(lobbyID);
             lobbies.Add(lobby);
             lobbiesById.Add(lobby.id.m_SteamID, lobby);
@@ -478,6 +527,57 @@ public class SteamManager : MonoBehaviour
 
     #endregion Lobby
 
+    #region Rich presence
+
+    public bool SetRichPresenceInMenu() =>
+        TrySetRichPresenceStatus("InMenu");
+
+    public bool SetRichPresenceInTrainingMode() =>
+        TrySetRichPresenceStatus("Training");
+
+    public bool SetRichPresenceInCredits() =>
+        TrySetRichPresenceStatus("Credits");
+
+    public bool SetRichPresenceInSettings() =>
+        TrySetRichPresenceStatus("Settings");
+
+    private bool TrySetRichPresenceStatus(string status)
+    {
+        if (!isSteamInitialized)
+            return false;
+
+        return SteamFriends.SetRichPresence("steam_display", $"#Status_{status}");
+    }
+
+    public void SetRichPresenceInLobby()
+    {
+        if (!TrySetRichPresenceStatus("InLobby"))
+            return;
+
+        SetRichPresencePlayerGroup();
+    }
+
+    public void SetRichPresenceInMatch(string mapName)
+    {
+        if (!TrySetRichPresenceStatus("InMatch"))
+            return;
+
+        SteamFriends.SetRichPresence("map", Scenes.SceneToStatusString(mapName)); // TODO translate map name
+        SteamFriends.SetRichPresence("gamemode", MatchRules.Current.GameMode.ToStatusString());
+        SetRichPresencePlayerGroup();
+    }
+
+    private void SetRichPresencePlayerGroup()
+    {
+        if (!NetworkClient.active)
+            return;
+
+        SteamFriends.SetRichPresence("steam_player_group", lobbyID.ToString());
+        SteamFriends.SetRichPresence("steam_player_group_size", RPRNetworkManager.NumHumanPlayers.ToString());
+    }
+
+    #endregion Rich presence
+
     private void Update()
     {
         if (!isSteamInitialized)
@@ -495,7 +595,10 @@ public class SteamManager : MonoBehaviour
     private void OnApplicationQuit()
     {
         if (isSteamInitialized)
+        {
+            SteamFriends.ClearRichPresence();
             SteamAPI.Shutdown();
+        }
     }
 
 }

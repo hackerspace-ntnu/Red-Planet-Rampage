@@ -118,6 +118,7 @@ public class MatchController : NetworkBehaviour
 
         GlobalHUD.RoundTimer.enabled = false;
         StartNextRound();
+        SteamManager.Singleton.SetRichPresenceInMatch(currentMapName);
     }
 
     private void StartNextRound()
@@ -216,6 +217,8 @@ public class MatchController : NetworkBehaviour
     {
         roundTimer.OnTimerRunCompleted -= EndActiveRound;
         EndActiveRoundRpc(LastRound.SummarizeRound());
+        // Register Steam stats
+        SteamManager.Singleton.IncrementStat(StatType.PlayedRounds);
     }
 
     [ClientRpc]
@@ -289,6 +292,9 @@ public class MatchController : NetworkBehaviour
         DisplayWinScreen();
         // Remember stats from this match.
         PersistentInfo.SavePersistentData();
+        // Register Steam stats
+        if (isServer)
+            SteamManager.Singleton.RegisterMatch();
         return true;
     }
 

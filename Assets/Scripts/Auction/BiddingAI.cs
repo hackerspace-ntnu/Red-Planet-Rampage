@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using CollectionExtensions;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -11,11 +12,11 @@ public class BiddingAI : BiddingPlayer
     private NavMeshAgent agent;
     [SerializeField]
     private Animator animator;
-    private Dictionary<BiddingPlatform, int> priorities = new Dictionary<BiddingPlatform, int>();
+    private readonly Dictionary<BiddingPlatform, int> priorities = new();
     [SerializeField]
     private BiddingPlatform currentDestination;
     [SerializeField]
-    private Vector3 platformDestinationOffset = Vector3.back * 2;
+    private Vector2 platformDestinationOffset = new(2, 4);
 
     private int platformsEvaluated = 0;
     private bool shouldEvaluate = true;
@@ -84,13 +85,18 @@ public class BiddingAI : BiddingPlayer
         var isOverBudget = spentChips >= budget;
         var isAlreadyInTheLead = currentDestination.LeadingBidder == playerManager.id;
 
+        var offsetX = platformDestinationOffset.x;
+        var offsetZ = platformDestinationOffset.y;
+        var offset = new Vector3(Random.Range(-offsetX, offsetX), 0, Random.Range(-offsetZ, offsetZ));
+
         if (priorities[currentDestination] == -1 || isOverBudget || isAlreadyInTheLead)
         {
-            agent.SetDestination(AuctionDriver.Singleton.YieldPosition);
+            var yieldTarget = AuctionDriver.Singleton.YieldPositions.OrderBy(p => Vector3.Distance(p, transform.position)).First();
+            agent.SetDestination(yieldTarget + offset);
             return;
         }
 
-        agent.SetDestination(currentDestination.transform.position + platformDestinationOffset);
+        agent.SetDestination(currentDestination.transform.position + offset);
 
         var isAlreadyAtThisPlatform = currentDestination == playerManager.SelectedBiddingPlatform;
         if (isAlreadyAtThisPlatform)
